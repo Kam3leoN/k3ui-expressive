@@ -1,0 +1,3 @@
+/* Full set — UI + code (library / consumers that want both). Playground uses fonts-ui + lazy fonts-code. */
+@import './fonts-ui.css';
+@import './fonts-code.css';

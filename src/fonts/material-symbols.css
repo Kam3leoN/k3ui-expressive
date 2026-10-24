@@ -1,0 +1,10 @@
+/*
+ * Optional self-host fallback — playground loads a Google Fonts *subset* from
+ * playground/index.html (`icon_names=…`).
+ *
+ * When adding a demo that uses a new ligature (tabs icons, drag_indicator, …),
+ * append that name to the `icon_names=` list or the glyph renders as raw text.
+ *
+ * Do not import this file while the CDN link is active (duplicate @font-face
+ * can break ligature rendering).
+ */

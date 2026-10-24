@@ -1,0 +1,79 @@
+{
+  "name": "k3ui",
+  "version": "0.0.1",
+  "description": "K3ui — Material 3 Expressive web components (Lit + TypeScript + SCSS + Tailwind)",
+  "author": "Kam3leoN",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/k3ui.js",
+  "module": "./dist/k3ui.js",
+  "types": "./dist/k3ui.d.ts",
+  "style": "./dist/k3ui.css",
+  "exports": {
+    ".": {
+      "types": "./dist/k3ui.d.ts",
+      "import": "./dist/k3ui.js",
+      "default": "./dist/k3ui.js"
+    },
+    "./k3ui.css": "./dist/k3ui.css",
+    "./fonts.css": "./dist/fonts/fonts.css",
+    "./fonts-ui.css": "./dist/fonts/fonts-ui.css",
+    "./fonts-code.css": "./dist/fonts/fonts-code.css",
+    "./tokens.json": "./dist/tokens.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "dev": "vite --config playground/vite.config.ts",
+    "build": "npm run build:lib && npm run build:fonts && npm run build:tokens && npm run budget:bundle",
+    "build:lib": "vite build",
+    "build:fonts": "node scripts/copy-fonts.mjs",
+    "build:playground": "vite build --config playground/vite.config.ts",
+    "build:tokens": "node scripts/export-tokens.mjs",
+    "budget:bundle": "node scripts/budget-bundle.mjs",
+    "version:bump": "node scripts/bump-version.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lint": "tsc --noEmit",
+    "preview": "vite preview --config playground/vite.config.ts"
+  },
+  "keywords": [
+    "material-design",
+    "material-3",
+    "expressive",
+    "web-components",
+    "lit",
+    "k3ui",
+    "tailwind"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kam3leoN/K3ui.git"
+  },
+  "dependencies": {
+    "@fontsource/google-sans": "^5.3.2",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@material/material-color-utilities": "^0.2.7",
+    "lit": "^3.2.1",
+    "material-shapes-ts": "^0.3.0"
+  },
+  "devDependencies": {
+    "@open-wc/testing": "^4.0.0",
+    "@playwright/test": "^1.51.0",
+    "@tailwindcss/vite": "^4.0.14",
+    "@types/node": "^22.13.10",
+    "flag-icons": "^7.6.0",
+    "jsdom": "^26.0.0",
+    "sass": "^1.85.1",
+    "tailwindcss": "^4.0.14",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.2",
+    "vite-plugin-dts": "^4.5.3",
+    "vitest": "^3.0.9"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "K3ui",
+  "short_name": "K3ui",
+  "description": "Material 3 Expressive web components — Lit + TypeScript",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FEF7FF",
+  "theme_color": "#6750A4",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    }
+  ]
+}

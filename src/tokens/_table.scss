@@ -1,0 +1,117 @@
+/* Light-DOM pierce — slotted <table> inside k3-table (material.io Resources style) */
+k3-table {
+  --k3-table-row-h: 3.5rem; /* 56 */
+  --k3-table-pad-inline: 1rem; /* 16 */
+  --k3-table-pad-block: 0.75rem; /* 12 */
+}
+k3-table[density='compact'] {
+  --k3-table-row-h: 2.5rem; /* 40 */
+  --k3-table-pad-inline: 0.75rem;
+  --k3-table-pad-block: 0.5rem;
+}
+
+k3-table table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-family: var(--k3-ref-typeface-plain);
+  font-size: var(--k3-sys-typescale-body-medium-size);
+  color: var(--k3-sys-color-on-surface);
+}
+
+k3-table th,
+k3-table td {
+  min-height: var(--k3-table-row-h);
+  padding: var(--k3-table-pad-block) var(--k3-table-pad-inline);
+  text-align: start;
+  vertical-align: middle;
+  border-block-end: 1px solid var(--k3-sys-color-outline-variant);
+  border-inline: 0;
+}
+
+k3-table thead th {
+  font-size: var(--k3-sys-typescale-title-small-size);
+  font-weight: 500;
+  color: var(--k3-sys-color-on-surface-variant);
+  background: var(--k3-sys-color-surface-container);
+  border-block-end: 1px solid var(--k3-sys-color-outline-variant);
+}
+
+k3-table tbody tr:hover {
+  background: color-mix(in srgb, var(--k3-sys-color-on-surface) 4%, transparent);
+}
+
+k3-table tbody tr:last-child td {
+  border-block-end: 0;
+}
+
+/* Doc Specs / Properties — first column monospace */
+k3-table td > code {
+  font-family: var(--k3-ref-typeface-code, ui-monospace, monospace);
+  font-size: 0.875em;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+
+k3-table td[rowspan] {
+  vertical-align: top;
+}
+
+k3-table th.end,
+k3-table td.end,
+k3-table th[align='end'],
+k3-table td[align='end'] {
+  text-align: end;
+}
+
+k3-table a {
+  color: var(--k3-sys-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+k3-table a:hover {
+  text-decoration-thickness: 2px;
+}
+
+k3-table .resource {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+k3-table .resource .ms {
+  font-family: 'Material Symbols Rounded', sans-serif;
+  font-size: 1.25rem;
+  color: var(--k3-sys-color-on-surface-variant);
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+k3-table .k3-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 2rem;
+  padding: 0 1rem; /* 16 — match k3-chip */
+  border-radius: var(--k3-sys-shape-corner-small); /* 8 — match k3-chip */
+  font-size: var(--k3-sys-typescale-label-large-size);
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+k3-table .k3-status--available {
+  background: var(--k3-sys-color-tertiary-container);
+  color: var(--k3-sys-color-on-tertiary-container);
+}
+
+k3-table .k3-status--unavailable {
+  background: var(--k3-sys-color-surface-container-highest);
+  color: var(--k3-sys-color-on-surface-variant);
+}

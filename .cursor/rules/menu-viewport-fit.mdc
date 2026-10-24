@@ -1,0 +1,54 @@
+---
+description: Menus — fit viewport edges, flip LTR/RTL, never clip
+globs: src/components/containment/menu*.ts
+alwaysApply: false
+---
+
+# Menus — bords d’écran + LTR/RTL
+
+## Règle dure
+
+Tout `k3-menu` ouvert doit **rester dans le viewport**. Prefer `position` demandé, puis **flip** si overflow.
+
+| Axe | Flip |
+|---|---|
+| Vertical (`top-*` / `bottom-*`) | above ↔ below selon l’espace |
+| Inline (`*-start` / `*-end`) | start ↔ end (logique, pas left/right hardcodé) |
+| Côté (`end-*` / `start-*`) | ouvrir de l’autre côté du trigger |
+
+- Mesurer avec `getBoundingClientRect` + `offset/scrollWidth` + `direction` (`rtl` / `ltr`)
+- Appliquer via `menu-fit.ts` → `position: fixed` + `data-fitted` (échappe `overflow` des ancêtres, ex. nav-rail)
+- **End-align** (`*-end`, app-bar trailing) : ancrer via `right` (LTR) / `left` (RTL) sur le bord du trigger — le panneau grandit vers le contenu même si la largeur était sous-estimée au 1er paint
+- Marge bord : **8dp** · gap trigger : **4dp**
+- Recalculer sur `resize` / `scroll` / `ResizeObserver` tant que le menu est ouvert ; clear au `hide`
+
+## LTR / RTL
+
+```
+// ❌ BAD — left/right figés
+left = trigger.right + 8;
+
+// ✅ GOOD — start/end logiques
+// LTR end = droite du trigger · RTL end = gauche du trigger
+fitMenuPanel(panel, trigger, position, rtl);
+```
+
+## Interdits
+
+- Panel `absolute` seul dans un ancêtre `overflow: hidden` (rail, sheet…)
+- Aligner `top-end` près du bord **start** de l’écran sans fit (menu coupé)
+- Ignorer RTL (miroirs left/right à la main)
+
+## Sous-menus
+
+- Ouvrir via `openSubmenu()` (jamais `submenu-open = true` seul)
+- `show()` **await** le fit panneau avant d’ouvrir un flyout shell
+- Flyout invisible tant que `data-placed` n’est pas posé (évite le flash décalé)
+- Icônes : `hasNamedSlot` (light DOM) — pas seulement `hasSlot` shadow
+
+## Checklist
+
+- [ ] Ouverture près d’un coin → flip, rien de coupé
+- [ ] `dir=rtl` vérifié (rail à droite → menu vers le contenu)
+- [ ] Sous-menus (`menu-item` flyout) gardent leur propre fit fixed
+- [ ] Premier open rail → aligné sans besoin de survol

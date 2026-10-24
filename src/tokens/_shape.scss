@@ -1,0 +1,20 @@
+:root {
+  --k3-sys-shape-corner-none: 0;
+  --k3-sys-shape-corner-extra-small: 0.25rem;
+  --k3-sys-shape-corner-small: 0.5rem;
+  --k3-sys-shape-corner-medium: 0.75rem;
+  --k3-sys-shape-corner-large: 1rem; /* 16 */
+  --k3-sys-shape-corner-large-increased: 1.25rem; /* 20 */
+  --k3-sys-shape-corner-extra-large: 1.75rem; /* 28 */
+  --k3-sys-shape-corner-extra-large-increased: 2rem; /* 32 */
+  --k3-sys-shape-corner-extra-extra-large: 3rem; /* 48 */
+  --k3-sys-shape-corner-full: 9999px;
+
+  /* Tab / bar indicators — M3 shape “3, 3, 0, 0” */
+  --k3-sys-shape-corner-indicator-top: 0.1875rem; /* 3dp */
+  --k3-sys-shape-corner-indicator: var(--k3-sys-shape-corner-indicator-top)
+    var(--k3-sys-shape-corner-indicator-top) 0 0;
+
+  /* Prefer spacing token when available */
+  --k3-sys-touch-target: var(--k3-sys-spacing-minimum-interactive-size, 3rem);
+}

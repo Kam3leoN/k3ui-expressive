@@ -1,0 +1,150 @@
+:root {
+  /* Expressive spatial — spring-like cubic approximations (M3 web conversion) */
+  /* fast = stronger overshoot (menus / flyouts); default / slow = milder */
+  --k3-sys-motion-easing-expressive-spatial-fast: cubic-bezier(0.42, 1.67, 0.21, 0.9);
+  --k3-sys-motion-easing-expressive-spatial: cubic-bezier(0.38, 1.21, 0.22, 1);
+  --k3-sys-motion-easing-expressive-spatial-slow: cubic-bezier(0.39, 1.29, 0.35, 0.98);
+  --k3-sys-motion-easing-expressive-effects: cubic-bezier(0.2, 0, 0, 1);
+  --k3-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --k3-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --k3-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+
+  --k3-sys-motion-duration-short1: 50ms;
+  --k3-sys-motion-duration-short2: 100ms;
+  --k3-sys-motion-duration-short3: 150ms;
+  --k3-sys-motion-duration-short4: 200ms;
+  --k3-sys-motion-duration-medium1: 250ms;
+  --k3-sys-motion-duration-medium2: 300ms;
+  --k3-sys-motion-duration-medium3: 350ms;
+  --k3-sys-motion-duration-medium4: 400ms;
+  --k3-sys-motion-duration-long1: 450ms;
+  --k3-sys-motion-duration-long2: 500ms;
+  --k3-sys-motion-duration-long3: 550ms;
+  --k3-sys-motion-duration-long4: 600ms;
+  --k3-sys-motion-duration-extra-long1: 700ms;
+  --k3-sys-motion-duration-extra-long2: 800ms;
+  --k3-sys-motion-duration-extra-long3: 900ms;
+  --k3-sys-motion-duration-extra-long4: 1000ms;
+
+  /* Spatial expressive presets (bounce) — remapped under [data-k3-motion=standard] */
+  --k3-sys-motion-duration-spatial-fast: 350ms;
+  --k3-sys-motion-duration-spatial-default: 500ms;
+  --k3-sys-motion-duration-spatial-slow: 650ms;
+
+  /* Effects expressive presets (opacity / color — no overshoot) */
+  --k3-sys-motion-duration-effects-fast: 150ms;
+  --k3-sys-motion-duration-effects-default: 200ms;
+  --k3-sys-motion-duration-effects-slow: 300ms;
+
+  /* Emphasized easing (M3 emphasized decelerate / accelerate) */
+  --k3-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --k3-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --k3-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  /*
+   * Scheme-aware aliases — prefer these in components.
+   * Default = Expressive (M3E recommended). theme.apply sets data-k3-motion.
+   * @see https://m3.material.io/blog/m3-expressive-motion-theming
+   */
+  --k3-sys-motion-easing-spatial-fast: var(--k3-sys-motion-easing-expressive-spatial-fast);
+  --k3-sys-motion-easing-spatial: var(--k3-sys-motion-easing-expressive-spatial);
+  --k3-sys-motion-easing-spatial-slow: var(--k3-sys-motion-easing-expressive-spatial-slow);
+  --k3-sys-motion-easing-effects: var(--k3-sys-motion-easing-expressive-effects);
+  --k3-sys-motion-easing-effects-fast: var(--k3-sys-motion-easing-expressive-effects);
+  --k3-sys-motion-easing-active: var(--k3-sys-motion-easing-spatial);
+}
+
+/* Standard scheme — functional, little / no overshoot (springs.ts standard.*) */
+:root[data-k3-motion='standard'] {
+  --k3-sys-motion-easing-spatial-fast: var(--k3-sys-motion-easing-standard);
+  --k3-sys-motion-easing-spatial: var(--k3-sys-motion-easing-standard);
+  --k3-sys-motion-easing-spatial-slow: var(--k3-sys-motion-easing-standard);
+  --k3-sys-motion-easing-effects: var(--k3-sys-motion-easing-standard);
+  --k3-sys-motion-easing-effects-fast: var(--k3-sys-motion-easing-standard);
+  --k3-sys-motion-easing-active: var(--k3-sys-motion-easing-standard);
+  --k3-sys-motion-duration-spatial-fast: 200ms;
+  --k3-sys-motion-duration-spatial-default: 300ms;
+  --k3-sys-motion-duration-spatial-slow: 400ms;
+  --k3-sys-motion-duration-effects-fast: 100ms;
+  --k3-sys-motion-duration-effects-default: 150ms;
+  --k3-sys-motion-duration-effects-slow: 200ms;
+}
+
+/* OS preference OR explicit opt-out via data-k3-reduce-motion (docs toggle) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --k3-sys-motion-duration-short1: 0ms;
+    --k3-sys-motion-duration-short2: 0ms;
+    --k3-sys-motion-duration-short3: 0ms;
+    --k3-sys-motion-duration-short4: 0ms;
+    --k3-sys-motion-duration-medium1: 0ms;
+    --k3-sys-motion-duration-medium2: 0ms;
+    --k3-sys-motion-duration-medium3: 0ms;
+    --k3-sys-motion-duration-medium4: 0ms;
+    --k3-sys-motion-duration-long1: 0ms;
+    --k3-sys-motion-duration-long2: 0ms;
+    --k3-sys-motion-duration-long3: 0ms;
+    --k3-sys-motion-duration-long4: 0ms;
+    --k3-sys-motion-duration-extra-long1: 0ms;
+    --k3-sys-motion-duration-extra-long2: 0ms;
+    --k3-sys-motion-duration-extra-long3: 0ms;
+    --k3-sys-motion-duration-extra-long4: 0ms;
+    --k3-sys-motion-duration-spatial-fast: 0ms;
+    --k3-sys-motion-duration-spatial-default: 0ms;
+    --k3-sys-motion-duration-spatial-slow: 0ms;
+    --k3-sys-motion-duration-effects-fast: 0ms;
+    --k3-sys-motion-duration-effects-default: 0ms;
+    --k3-sys-motion-duration-effects-slow: 0ms;
+  }
+}
+
+:root[data-k3-reduce-motion] {
+  --k3-sys-motion-duration-short1: 0ms;
+  --k3-sys-motion-duration-short2: 0ms;
+  --k3-sys-motion-duration-short3: 0ms;
+  --k3-sys-motion-duration-short4: 0ms;
+  --k3-sys-motion-duration-medium1: 0ms;
+  --k3-sys-motion-duration-medium2: 0ms;
+  --k3-sys-motion-duration-medium3: 0ms;
+  --k3-sys-motion-duration-medium4: 0ms;
+  --k3-sys-motion-duration-long1: 0ms;
+  --k3-sys-motion-duration-long2: 0ms;
+  --k3-sys-motion-duration-long3: 0ms;
+  --k3-sys-motion-duration-long4: 0ms;
+  --k3-sys-motion-duration-extra-long1: 0ms;
+  --k3-sys-motion-duration-extra-long2: 0ms;
+  --k3-sys-motion-duration-extra-long3: 0ms;
+  --k3-sys-motion-duration-extra-long4: 0ms;
+  --k3-sys-motion-duration-spatial-fast: 0ms;
+  --k3-sys-motion-duration-spatial-default: 0ms;
+  --k3-sys-motion-duration-spatial-slow: 0ms;
+  --k3-sys-motion-duration-effects-fast: 0ms;
+  --k3-sys-motion-duration-effects-default: 0ms;
+  --k3-sys-motion-duration-effects-slow: 0ms;
+}
+
+/**
+ * Component SCSS — zero transitions / transforms under OS reduce-motion
+ * or explicit `data-k3-reduce-motion` on `:root`.
+ *
+ * ```scss
+ * .panel {
+ *   transition: opacity 200ms;
+ *   @include k3-reduce-motion {
+ *     transition: none;
+ *     transform: none;
+ *   }
+ * }
+ * ```
+ *
+ * Lit `css` templates cannot import this mixin — keep a matching
+ * `@media (prefers-reduced-motion: reduce)` block in those files.
+ */
+@mixin k3-reduce-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+  :root[data-k3-reduce-motion] & {
+    @content;
+  }
+}

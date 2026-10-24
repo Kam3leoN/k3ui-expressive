@@ -1,0 +1,224 @@
+@use '../tokens/color';
+@use '../tokens/m2-palette';
+@use '../tokens/type';
+@use '../tokens/shape';
+@use '../tokens/spacing';
+@use '../tokens/elevation';
+@use '../tokens/motion';
+@use '../tokens/icons';
+@use '../tokens/layout';
+@use '../tokens/table';
+@use '../tokens/scrollbar';
+
+/* Fonts are shipped separately (dist/fonts) — import k3ui/fonts-ui.css or
+   k3ui/fonts.css so woff2 stay external and k3ui.css stays lean. */
+@import 'tailwindcss';
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-body-medium-size);
+    line-height: var(--k3-sys-typescale-body-medium-line-height);
+    letter-spacing: var(--k3-sys-typescale-body-medium-tracking);
+    background: var(--k3-sys-color-background);
+    color: var(--k3-sys-color-on-background);
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--k3-ref-typeface-code);
+  }
+
+  [density='compact'] {
+    --k3-sys-touch-target: 2.5rem;
+  }
+}
+
+/* Type-scale utilities — full M3 set */
+@layer utilities {
+  .k3-display-large {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-display-large-size);
+    line-height: var(--k3-sys-typescale-display-large-line-height);
+    font-weight: var(--k3-sys-typescale-display-large-weight);
+    letter-spacing: var(--k3-sys-typescale-display-large-tracking);
+  }
+  .k3-display-medium {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-display-medium-size);
+    line-height: var(--k3-sys-typescale-display-medium-line-height);
+    font-weight: var(--k3-sys-typescale-display-medium-weight);
+    letter-spacing: var(--k3-sys-typescale-display-medium-tracking);
+  }
+  .k3-display-small {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-display-small-size);
+    line-height: var(--k3-sys-typescale-display-small-line-height);
+    font-weight: var(--k3-sys-typescale-display-small-weight);
+    letter-spacing: var(--k3-sys-typescale-display-small-tracking);
+  }
+
+  .k3-headline-large {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-headline-large-size);
+    line-height: var(--k3-sys-typescale-headline-large-line-height);
+    font-weight: var(--k3-sys-typescale-headline-large-weight);
+    letter-spacing: var(--k3-sys-typescale-headline-large-tracking);
+  }
+  .k3-headline-medium {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-headline-medium-size);
+    line-height: var(--k3-sys-typescale-headline-medium-line-height);
+    font-weight: var(--k3-sys-typescale-headline-medium-weight);
+    letter-spacing: var(--k3-sys-typescale-headline-medium-tracking);
+  }
+  .k3-headline-medium-emphasized {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-headline-medium-size);
+    line-height: var(--k3-sys-typescale-headline-medium-line-height);
+    font-weight: var(--k3-sys-typescale-headline-medium-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-headline-medium-tracking);
+  }
+  .k3-headline-small {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-headline-small-size);
+    line-height: var(--k3-sys-typescale-headline-small-line-height);
+    font-weight: var(--k3-sys-typescale-headline-small-weight);
+    letter-spacing: var(--k3-sys-typescale-headline-small-tracking);
+  }
+
+  .k3-title-large {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-title-large-size);
+    line-height: var(--k3-sys-typescale-title-large-line-height);
+    font-weight: var(--k3-sys-typescale-title-large-weight);
+    letter-spacing: var(--k3-sys-typescale-title-large-tracking);
+  }
+  .k3-title-medium {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-title-medium-size);
+    line-height: var(--k3-sys-typescale-title-medium-line-height);
+    font-weight: var(--k3-sys-typescale-title-medium-weight);
+    letter-spacing: var(--k3-sys-typescale-title-medium-tracking);
+  }
+  .k3-title-small {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-title-small-size);
+    line-height: var(--k3-sys-typescale-title-small-line-height);
+    font-weight: var(--k3-sys-typescale-title-small-weight);
+    letter-spacing: var(--k3-sys-typescale-title-small-tracking);
+  }
+
+  .k3-body-large {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-body-large-size);
+    line-height: var(--k3-sys-typescale-body-large-line-height);
+    font-weight: var(--k3-sys-typescale-body-large-weight);
+    letter-spacing: var(--k3-sys-typescale-body-large-tracking);
+  }
+  .k3-body-medium {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-body-medium-size);
+    line-height: var(--k3-sys-typescale-body-medium-line-height);
+    font-weight: var(--k3-sys-typescale-body-medium-weight);
+    letter-spacing: var(--k3-sys-typescale-body-medium-tracking);
+  }
+  .k3-body-small {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-body-small-size);
+    line-height: var(--k3-sys-typescale-body-small-line-height);
+    font-weight: var(--k3-sys-typescale-body-small-weight);
+    letter-spacing: var(--k3-sys-typescale-body-small-tracking);
+  }
+
+  .k3-label-large {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-label-large-size);
+    line-height: var(--k3-sys-typescale-label-large-line-height);
+    font-weight: var(--k3-sys-typescale-label-large-weight);
+    letter-spacing: var(--k3-sys-typescale-label-large-tracking);
+  }
+  .k3-label-medium {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-label-medium-size);
+    line-height: var(--k3-sys-typescale-label-medium-line-height);
+    font-weight: var(--k3-sys-typescale-label-medium-weight);
+    letter-spacing: var(--k3-sys-typescale-label-medium-tracking);
+  }
+  .k3-label-small {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-label-small-size);
+    line-height: var(--k3-sys-typescale-label-small-line-height);
+    font-weight: var(--k3-sys-typescale-label-small-weight);
+    letter-spacing: var(--k3-sys-typescale-label-small-tracking);
+  }
+
+  /* Drag affordance — ⋮⋮ grip (Material Symbols: drag_indicator) */
+  .k3-drag-handle {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    overflow: hidden;
+    margin-inline-end: 0.5rem;
+    color: var(--k3-sys-color-on-surface-variant);
+    opacity: 0.72;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    line-height: 1;
+    font-size: 1.125rem;
+    text-transform: none !important;
+  }
+  [dragging] .k3-drag-handle,
+  [dragged] .k3-drag-handle {
+    cursor: grabbing;
+  }
+
+  /*
+   * Sortable landing slot — light DOM only (`data-k3-dnd-surface="light"`).
+   * Custom elements: paint in shadow via `dropSlotStyles` + part="container".
+   * Always use border (not outline) so border-radius is honored.
+   */
+  [data-k3-dnd-surface='light'] {
+    box-sizing: border-box !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    color: transparent !important;
+    border: 2px dashed var(--k3-sys-color-outline, #79747e) !important;
+    outline: none !important;
+    cursor: grabbing !important;
+  }
+  [data-k3-dnd-surface='light'] > * {
+    visibility: hidden !important;
+  }
+  /* CE host — never draw the dashed rect on the host itself */
+  [data-k3-dnd-slot]:not([data-k3-dnd-surface='light']) {
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --k3-sys-color-outline: CanvasText;
+    --k3-sys-color-primary: Highlight;
+  }
+
+  :focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}

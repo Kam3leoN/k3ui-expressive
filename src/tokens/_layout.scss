@@ -1,0 +1,111 @@
+/* M3 responsive layout grid — columns / gutters / margins / body container
+ *
+ * Column gutters follow m3.material.io content grids + Spacing space100 (8dp),
+ * measured on docs `mio-card-set` (gap: 8px) — not the 24dp *pane spacer*
+ * used between multi-pane layouts (expanded/large breakpoints).
+ *
+ * @see https://m3.material.io/styles/spacing/overview  (space100 = 8dp)
+ * @see https://m3.material.io/foundations/layout/grids-spacing/overview
+ *
+ * Container ON  → body max-width centered (--k3-layout-body-max)
+ *                 + 20dp inline gap (compact has no body-max — never flush)
+ * Container OFF → full width of the content pane + 20dp edge gap all around
+ */
+
+:root {
+  /* Gutter = space100 (defined in _spacing.scss — load spacing before layout) */
+  --k3-layout-gutter: var(--k3-sys-spacing-space100, 0.5rem);
+  --k3-layout-columns: 4;
+  --k3-layout-body-max: none;
+  /* Full-bleed edge gap — 20dp all around (never body-max side margins) */
+  --k3-layout-full-gap: var(--k3-sys-spacing-space250, 1.25rem); /* 20dp */
+  --k3-layout-grid-color: color-mix(in srgb, var(--k3-sys-color-primary) 18%, transparent);
+}
+
+/* ≥600 — tablet: 8 columns (gutter stays 8dp — same as m3.material.io) */
+@media (min-width: 600px) {
+  :root {
+    --k3-layout-columns: 8;
+  }
+}
+
+/* ≥905 — 12 columns; container body 840 */
+@media (min-width: 905px) {
+  :root {
+    --k3-layout-columns: 12;
+    --k3-layout-body-max: 52.5rem; /* 840 */
+  }
+}
+
+/* ≥1240 — container fluid ≈ viewport − 400dp (M3 large margins) */
+@media (min-width: 1240px) {
+  :root {
+    --k3-layout-body-max: calc(100vw - 25rem);
+  }
+}
+
+/* ≥1440 — container capped at 1280 */
+@media (min-width: 1440px) {
+  :root {
+    --k3-layout-body-max: 80rem; /* 1280 */
+  }
+}
+
+/* Constrained content body (material.io “container”) */
+.k3-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--k3-layout-body-max);
+  margin-inline: auto;
+  /* Same edge inset as full-bleed — readable on phone when body-max is none */
+  padding-inline: var(--k3-layout-full-gap);
+}
+
+/* Full-bleed — fills parent; 20dp edge gap all around */
+.k3-container-none {
+  max-width: none !important;
+  margin-inline: 0 !important;
+  width: 100%;
+  padding: var(--k3-layout-full-gap);
+  box-sizing: border-box;
+}
+
+/*
+ * Reusable layout grid — use everywhere content must sit on columns
+ * (playground demos, doc-nav, catalog, cards…). Same tracks + gutter as
+ * `.k3-layout-grid-overlay` so container ON/OFF stay aligned.
+ */
+.k3-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--k3-layout-columns), minmax(0, 1fr));
+  gap: var(--k3-layout-gutter);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Gap-only utility when the parent already defines columns */
+.k3-layout-gap {
+  gap: var(--k3-layout-gutter);
+}
+
+/* Overlay visualization */
+.k3-layout-grid-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--k3-layout-columns), minmax(0, 1fr));
+  gap: var(--k3-layout-gutter);
+  max-width: none;
+  width: 100%;
+  margin-inline: 0;
+  z-index: 50;
+  box-sizing: border-box;
+}
+
+.k3-layout-grid-overlay > span {
+  background: var(--k3-layout-grid-color);
+  border-radius: 0.125rem;
+  min-height: 100%;
+}

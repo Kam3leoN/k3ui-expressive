@@ -1,0 +1,64 @@
+---
+description: Playground demo frames — tonal dots, equal cases, pills (m3.material.io)
+globs: playground/**/*.{html,css,ts}
+alwaysApply: true
+---
+
+# Demo cases — m3.material.io (ne pas régresser)
+
+## Anatomie
+
+```
+.demo-block
+  └─ .demo-frame.demo-frame--cases   ← tonal surface-container + dots serrés
+       └─ .demo-case × N             ← colonne égale (flex 1)
+            ├─ .demo-case-stage      ← contrôle(s)
+            └─ .demo-case-num        ← pill horizontale 1…N (sous la colonne)
+       └─ (--stack) .demo-case       ← rangée : pill horizontale À GAUCHE du stage
+  └─ .variant-guide                  ← pills verticales + labels
+  └─ (.variant-guides--split)        ← numbers + alpha côte à côte (matrices)
+```
+
+## Règles dures
+
+1. **Pas** d’outline sur `.demo-frame` — fond `surface-container` (comme app bar), **pas** `primary-container` / `surface`
+2. Dots serrés (~7dp) · `on-surface` ~10 % opacité
+3. Grille **égale** centrée — pas left-packed · **`min-width: max-content`** (jamais de chevauchement)
+4. **Stack** (`.demo-frame--stack`) : pill horizontale **toujours à gauche** du stage (`flex-direction: row` + `order: -1`) — jamais centrée sous une case pleine largeur
+5. **`overflow: visible`** + **`z-index: 0`** — ne jamais clipper menus / popovers (k3-menu ≥ 50)
+6. Wrap équilibré (ex. split sizes) → `.demo-case-row` (ligne 1 : xs+sm+md · ligne 2 : lg+xl)
+7. Matrices multi-axes :
+   - **Chiffres toujours en haut** (colonnes) → pill horizontale
+   - **Alpha toujours sur le côté** (lignes) → pill verticale `.demo-case-num--vert`
+8. Légende sous le frame — `.pill-num` verticale
+9. Dual légendes → `.variant-guides--split` seulement
+10. **Skip** enhance : `--width-matrix`, `--fab-menu`, `.demo-case-row`, `[data-demo-enhance="off"]`
+11. **Breakout frame** : seul le chrome `.demo-frame--cases|--demo|--icon-button|--fab|--width-matrix` peut sortir de la grille (`margin-inline: calc(-1 * var(--k3-layout-full-gap))` + `width: calc(100% + 2 * full-gap)`), puis `padding-inline: full-gap` pour que les cases restent sur les colonnes. **Pas** de breakout sur `--fab-menu`.
+
+## Enhance auto
+
+`playground/demo-enhance.ts` → `enhanceAllDemos()` au boot :
+
+- wrappe les enfants bruts des frames `--cases|--demo|--icon-button|--fab`
+- promeut les `.surface.row` / `.row.wrap` / `.avatar-demo-row` / `.badge-demo-*` de contrôles k3-\* en demo-block
+- promeut `.grid-2` / `.grid-3` (cartes ou colonnes fields) → 1 case / colonne
+- wrappe les runs k3-\* dans `.surface.stack` (+ `.variant-guide` page → sous le frame)
+- composants larges → `.demo-frame--stack` (list, app-bar, table, button-group, …)
+
+Ne pas re-wrapper à la main ce que l’enhance couvre. Markup manuel = `.demo-case` déjà présent (Buttons Icon, matrices).
+
+## Usage (obligatoire — toutes les pages composant)
+
+- Section `.doc-usage` **avant** Specs (`.doc-tables`)
+- Onglets HTML / CSS / JS + Copy (`code-sample`)
+- Auto : `mountUsageIfNeeded` + `USAGE_BY_PAGE` (`usage-snippets.ts`)
+- Markup manuel OK (ex. Buttons Icon) — l’auto skip si `.doc-usage` existe
+
+## Checklist nouvelle démo composant
+
+- [ ] Description (blurb) sous le titre
+- [ ] `.demo-block` > `.demo-frame.demo-frame--cases` (+ `.items-end` / `.demo-case-row` si besoin)
+- [ ] Légende `.variant-guide` **sous** le frame
+- [ ] Matrice : **chiffres en haut**, **alpha sur le côté**
+- [ ] Pas de chevauchement (`min-width: max-content`) · `overflow: visible`
+- [ ] Usage HTML/CSS/JS (manuel ou entrée dans `USAGE_BY_PAGE`)

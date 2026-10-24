@@ -1,0 +1,17 @@
+# Playground — infos furtives via snackbar
+
+Pour tout message **éphémère** (copie presse-papiers, confirmation légère, tip non bloquant) :
+
+1. Utiliser `showFlash(message)` / `#app-snackbar` (`k3-snackbar`)
+2. **Pas** de toast maison, `alert()`, ni `div` custom type `.color-copy-toast`
+
+```ts
+// ❌ BAD
+toastEl.textContent = 'Copied';
+alert('Saved');
+
+// ✅ GOOD
+void showFlash(t('doc.color-lab.copied', { value }));
+```
+
+Exception uniquement si l’utilisateur demande explicitement autre chose (dialog, inline error, etc.).

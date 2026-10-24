@@ -1,0 +1,85 @@
+:root {
+  --k3-ref-typeface-brand: 'Google Sans', system-ui, sans-serif;
+  --k3-ref-typeface-plain: 'Google Sans', system-ui, sans-serif;
+  --k3-ref-typeface-code: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+
+  --k3-sys-typescale-display-large-size: 3.5625rem;
+  --k3-sys-typescale-display-large-line-height: 4rem;
+  --k3-sys-typescale-display-large-weight: 400;
+  --k3-sys-typescale-display-large-tracking: -0.015625rem;
+  --k3-sys-typescale-display-medium-size: 2.8125rem;
+  --k3-sys-typescale-display-medium-line-height: 3.25rem;
+  --k3-sys-typescale-display-medium-weight: 400;
+  --k3-sys-typescale-display-medium-tracking: 0;
+  --k3-sys-typescale-display-small-size: 2.25rem;
+  --k3-sys-typescale-display-small-line-height: 2.75rem;
+  --k3-sys-typescale-display-small-weight: 400;
+  --k3-sys-typescale-display-small-tracking: 0;
+
+  --k3-sys-typescale-headline-large-size: 2rem;
+  --k3-sys-typescale-headline-large-line-height: 2.5rem;
+  --k3-sys-typescale-headline-large-weight: 400;
+  --k3-sys-typescale-headline-large-tracking: 0;
+  --k3-sys-typescale-headline-medium-size: 1.75rem;
+  --k3-sys-typescale-headline-medium-line-height: 2.25rem;
+  --k3-sys-typescale-headline-medium-weight: 400;
+  --k3-sys-typescale-headline-medium-tracking: 0;
+  --k3-sys-typescale-headline-small-size: 1.5rem;
+  --k3-sys-typescale-headline-small-line-height: 2rem;
+  --k3-sys-typescale-headline-small-weight: 400;
+  --k3-sys-typescale-headline-small-tracking: 0;
+
+  --k3-sys-typescale-title-large-size: 1.375rem;
+  --k3-sys-typescale-title-large-line-height: 1.75rem;
+  --k3-sys-typescale-title-large-weight: 400;
+  --k3-sys-typescale-title-large-tracking: 0;
+  --k3-sys-typescale-title-medium-size: 1rem;
+  --k3-sys-typescale-title-medium-line-height: 1.5rem;
+  --k3-sys-typescale-title-medium-weight: 500;
+  --k3-sys-typescale-title-medium-tracking: 0.009375rem;
+  --k3-sys-typescale-title-small-size: 0.875rem;
+  --k3-sys-typescale-title-small-line-height: 1.25rem;
+  --k3-sys-typescale-title-small-weight: 500;
+  --k3-sys-typescale-title-small-tracking: 0.00625rem;
+
+  --k3-sys-typescale-body-large-size: 1rem;
+  --k3-sys-typescale-body-large-line-height: 1.5rem;
+  --k3-sys-typescale-body-large-weight: 400;
+  --k3-sys-typescale-body-large-tracking: 0.03125rem;
+  --k3-sys-typescale-body-medium-size: 0.875rem;
+  --k3-sys-typescale-body-medium-line-height: 1.25rem;
+  --k3-sys-typescale-body-medium-weight: 400;
+  --k3-sys-typescale-body-medium-tracking: 0.015625rem;
+  --k3-sys-typescale-body-small-size: 0.75rem;
+  --k3-sys-typescale-body-small-line-height: 1rem;
+  --k3-sys-typescale-body-small-weight: 400;
+  --k3-sys-typescale-body-small-tracking: 0.025rem;
+
+  --k3-sys-typescale-label-large-size: 0.875rem;
+  --k3-sys-typescale-label-large-line-height: 1.25rem;
+  --k3-sys-typescale-label-large-weight: 500;
+  --k3-sys-typescale-label-large-tracking: 0.00625rem;
+  --k3-sys-typescale-label-medium-size: 0.75rem;
+  --k3-sys-typescale-label-medium-line-height: 1rem;
+  --k3-sys-typescale-label-medium-weight: 500;
+  --k3-sys-typescale-label-medium-tracking: 0.03125rem;
+  --k3-sys-typescale-label-small-size: 0.6875rem;
+  --k3-sys-typescale-label-small-line-height: 1rem;
+  --k3-sys-typescale-label-small-weight: 500;
+  --k3-sys-typescale-label-small-tracking: 0.03125rem;
+
+  /* Emphasized (Expressive) */
+  --k3-sys-typescale-display-large-emphasized-weight: 500;
+  --k3-sys-typescale-headline-large-emphasized-weight: 500;
+  --k3-sys-typescale-headline-medium-emphasized-weight: 500;
+  --k3-sys-typescale-headline-small-emphasized-weight: 500;
+  --k3-sys-typescale-title-large-emphasized-weight: 500;
+  --k3-sys-typescale-title-medium-emphasized-weight: 700;
+  --k3-sys-typescale-title-small-emphasized-weight: 700;
+  --k3-sys-typescale-body-large-emphasized-weight: 500;
+  --k3-sys-typescale-body-medium-emphasized-weight: 500;
+  --k3-sys-typescale-label-large-emphasized-weight: 600;
+  --k3-sys-typescale-label-medium-emphasized-weight: 600;
+  --k3-sys-typescale-label-small-emphasized-weight: 600;
+}

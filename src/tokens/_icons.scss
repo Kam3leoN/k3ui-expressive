@@ -1,0 +1,101 @@
+/* M3 Icons — Material Symbols size + axis defaults
+ *
+ * @see https://m3.material.io/styles/icons/overview
+ *
+ * Optical sizes (opsz): 20 · 24 · 40 · 48
+ * Axes: FILL 0|1 · wght 100–700 · GRAD −50–200 · opsz 20–48
+ */
+
+:root {
+  --k3-sys-icon-size-small: 1.25rem; /* 20dp */
+  --k3-sys-icon-size-medium: 1.5rem; /* 24dp — default */
+  --k3-sys-icon-size-large: 2.5rem; /* 40dp */
+  --k3-sys-icon-size-extra-large: 3rem; /* 48dp */
+
+  --k3-sys-icon-font-family: 'Material Symbols Rounded', 'Material Symbols Outlined',
+    sans-serif;
+  --k3-sys-icon-weight: 400;
+  --k3-sys-icon-fill: 0;
+  --k3-sys-icon-grade: 0;
+  --k3-sys-icon-optical-size: 24;
+
+  --k3-sys-icon-weight-emphasized: 600;
+  --k3-sys-icon-fill-active: 1;
+}
+
+/* Ligature / slotted Material Symbol helper
+ *
+ * Chrome / Google Translate rewrites text ligatures (`home` → junk) and breaks
+ * glyphs. Prefer `data-k3-icon` + empty text (rendered via ::before) and always
+ * set translate="no" class="notranslate" (see icons/ligature.ts).
+ */
+.k3-icon,
+.ms {
+  font-family: var(--k3-sys-icon-font-family);
+  font-weight: var(--k3-sys-icon-weight);
+  font-style: normal;
+  font-size: var(--k3-sys-icon-size-medium);
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none !important;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  speak: never;
+  font-feature-settings: 'liga';
+  font-variation-settings:
+    'FILL' var(--k3-sys-icon-fill),
+    'wght' var(--k3-sys-icon-weight),
+    'GRAD' var(--k3-sys-icon-grade),
+    'opsz' var(--k3-sys-icon-optical-size);
+}
+
+/*
+ * Glyph from attribute — no text node for page translators to rewrite.
+ * Host must keep the Material Symbols font (this file or component styles).
+ */
+[data-k3-icon]::before {
+  content: attr(data-k3-icon);
+  font-family: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: normal;
+  text-transform: none !important;
+  font-feature-settings: 'liga';
+  font-variation-settings: inherit;
+  speak: never;
+}
+
+.k3-icon--small,
+.ms-sm {
+  font-size: var(--k3-sys-icon-size-small);
+  --k3-sys-icon-optical-size: 20;
+}
+.k3-icon--large,
+.ms-lg {
+  font-size: var(--k3-sys-icon-size-large);
+  --k3-sys-icon-optical-size: 40;
+}
+.k3-icon--xl,
+.ms-xl {
+  font-size: var(--k3-sys-icon-size-extra-large);
+  --k3-sys-icon-optical-size: 48;
+}
+.k3-icon--filled,
+.ms-fill {
+  --k3-sys-icon-fill: var(--k3-sys-icon-fill-active);
+  font-variation-settings:
+    'FILL' var(--k3-sys-icon-fill-active),
+    'wght' var(--k3-sys-icon-weight),
+    'GRAD' var(--k3-sys-icon-grade),
+    'opsz' var(--k3-sys-icon-optical-size);
+}

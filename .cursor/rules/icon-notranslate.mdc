@@ -1,0 +1,65 @@
+---
+description: Material Symbols — ligatures intactes (subset + notranslate + data-k3-icon)
+globs: src/**/*.{ts,scss,css,html},playground/**/*.{ts,css,html},tests/**/*.ts
+alwaysApply: true
+---
+
+# Icons — ligatures Material Symbols (ne jamais casser)
+
+## Incidents (ne jamais reproduire)
+
+1. **Subset Google Fonts** — une ligature absente de `icon_names=` dans `playground/index.html` s’affiche en **lettres brutes** (souvent tronquées / superposées dans le bouton : `favorite` → « FE », `volume_off` → fragments).
+2. **Chrome Translate** — réécrit le nœud texte (`home` → junk) → glyphe cassé.
+
+## Règles dures
+
+### A. Toute nouvelle icône dans la doc / demos
+
+1. Ajouter le **nom exact** (snake_case Material) à `icon_names=` du `<link>` Google Fonts dans `playground/index.html` (liste **triée alpha**, séparée par des virgules).
+2. Markup Translate-safe :
+
+```html
+<!-- ❌ BAD — hors subset → lettres ; texte Translate-able -->
+<span class="ms">volume_off</span>
+
+<!-- ✅ GOOD -->
+<span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="volume_off" aria-hidden="true"></span>
+```
+
+3. **Jamais** d’espace / retour ligne **dans** le nom de ligature.
+4. Snippets Usage (HTML à copier) : même forme `data-k3-icon` — pas de CDN collé dans l’onglet HTML.
+
+### B. Composants / JS
+
+```ts
+// ❌ BAD
+el.textContent = 'dark_mode';
+
+// ✅ GOOD — playground: setMsIcon() · lib: data-k3-icon + texte vide
+el.setAttribute('data-k3-icon', 'dark_mode');
+el.textContent = '';
+el.classList.add('notranslate');
+el.setAttribute('translate', 'no');
+```
+
+### C. CSS
+
+- `font-feature-settings: 'liga'` sur `.ms` / `[data-k3-icon]::before` / `::slotted(.ms)`
+- Glyphe via `::before { content: attr(data-k3-icon); }` (light DOM ou shadow host — **pas** `::slotted(*)::before`, invalide)
+
+## Où c’est câblé
+
+| Couche | Fichier |
+|---|---|
+| Subset playground | `playground/index.html` → `icon_names=` |
+| Light DOM auto | `src/icons/ligature.ts` → `watchIconLigatures` |
+| Shadow CSS | `src/components/_shared.ts` (`[data-k3-icon]::before`) |
+| Tokens | `src/tokens/_icons.scss` |
+| Tests | `tests/unit/icon-ligature.test.ts`, `tests/unit/icon-subset.test.ts` |
+
+## Checklist avant merge doc / demo
+
+- [ ] Nouvelle ligature → présente dans `icon_names=`
+- [ ] `data-k3-icon` + `translate="no"` / `notranslate` (ou `setMsIcon`)
+- [ ] Smoke : icônes = glyphes, **pas** le nom en lettres
+- [ ] Smoke Translate Chrome → rail / demos intacts

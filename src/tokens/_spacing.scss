@@ -1,0 +1,43 @@
+/* M3 Spacing — 8dp baseline (space100 = 8dp)
+ *
+ * @see https://m3.material.io/styles/spacing/overview
+ * @see https://m3.material.io/styles/spacing/tokens
+ *
+ * Token value = 8dp × (N / 100). Nested units (25/50/75/125…) cover
+ * component gaps Material actually uses (2 / 4 / 6 / 10dp…).
+ */
+
+:root {
+  --k3-sys-spacing-space0: 0;
+  --k3-sys-spacing-space25: 0.125rem; /* 2dp */
+  --k3-sys-spacing-space50: 0.25rem; /* 4dp */
+  --k3-sys-spacing-space75: 0.375rem; /* 6dp */
+  --k3-sys-spacing-space100: 0.5rem; /* 8dp — baseline */
+  --k3-sys-spacing-space125: 0.625rem; /* 10dp */
+  --k3-sys-spacing-space150: 0.75rem; /* 12dp */
+  --k3-sys-spacing-space175: 0.875rem; /* 14dp */
+  --k3-sys-spacing-space200: 1rem; /* 16dp */
+  --k3-sys-spacing-space225: 1.125rem; /* 18dp — button-group xs gap */
+  --k3-sys-spacing-space250: 1.25rem; /* 20dp */
+  --k3-sys-spacing-space300: 1.5rem; /* 24dp */
+  --k3-sys-spacing-space400: 2rem; /* 32dp */
+  --k3-sys-spacing-space450: 2.25rem; /* 36dp */
+  --k3-sys-spacing-space500: 2.5rem; /* 40dp */
+  --k3-sys-spacing-space600: 3rem; /* 48dp */
+  --k3-sys-spacing-space700: 3.5rem; /* 56dp */
+  --k3-sys-spacing-space800: 4rem; /* 64dp */
+  --k3-sys-spacing-space900: 4.5rem; /* 72dp */
+
+  /* Minimum interactive size (touch target) */
+  --k3-sys-spacing-minimum-interactive-size: 3rem; /* 48dp */
+
+  /* Aliases — padding / gap / margin roles (map to system units) */
+  --k3-sys-spacing-gap-small: var(--k3-sys-spacing-space100); /* 8 */
+  --k3-sys-spacing-gap-medium: var(--k3-sys-spacing-space200); /* 16 */
+  --k3-sys-spacing-gap-large: var(--k3-sys-spacing-space300); /* 24 */
+  --k3-sys-spacing-pad-small: var(--k3-sys-spacing-space100);
+  --k3-sys-spacing-pad-medium: var(--k3-sys-spacing-space200);
+  --k3-sys-spacing-pad-large: var(--k3-sys-spacing-space300);
+  --k3-sys-spacing-margin-compact: var(--k3-sys-spacing-space200); /* 16 */
+  --k3-sys-spacing-margin-expanded: var(--k3-sys-spacing-space300); /* 24 */
+}

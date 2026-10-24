@@ -1,0 +1,39 @@
+---
+description: Gérer parfaitement les 7 Styles M3 (Color → Typography)
+alwaysApply: true
+---
+
+# M3 Styles — gestion complète
+
+Les 7 styles [m3.material.io/styles](https://m3.material.io/styles) ont chacun des tokens CSS + page playground sous **Styles** :
+
+| Style | Tokens | Fichier |
+|---|---|---|
+| Color | `--k3-sys-color-*` (+ fixed, surface-tint, state) | `_color.scss` + `theme/apply.ts` |
+| Elevation | `--k3-sys-elevation-level0…5` · `.k3-elevation-*` | `_elevation.scss` |
+| Icons | `--k3-sys-icon-*` · `.k3-icon` / `.ms` | `_icons.scss` |
+| Motion | durations · easings · effects · reduced-motion | `_motion.scss` + `motion/springs.ts` |
+| Shape | corners none→full · 35 SVG | `_shape.scss` + `shapes/` |
+| Spacing | `space0…900` (space100 = 8dp) | `_spacing.scss` |
+| Typography | type scale + tracking + emphasized · `.k3-*` | `_type.scss` |
+
+Catalogue TS : `src/tokens/meta.ts` (exporté via `src/index.ts`).
+
+## Règles
+
+1. **Ne pas hardcoder** 8/16/24dp — utiliser `--k3-sys-spacing-space*` / `--k3-layout-gutter`.
+2. Toute nouvelle surface interactive → elevation + state layers existants.
+3. Icônes → Material Symbols + tokens taille/axes (pas de PNG ad hoc).
+4. Motion → tokens duration/easing ; honorer `prefers-reduced-motion` / `data-k3-reduce-motion`.
+5. Couleurs dynamiques → passer par `theme.apply` (MCU) ; ajouter les rôles dans `COLOR_ROLES`.
+6. Playground Styles : pages `colors|elevation|icons|motion|shapes|spacing|typography`.
+
+```css
+/* ❌ BAD */
+gap: 24px; padding: 16px; box-shadow: 0 2px 4px #0003;
+
+/* ✅ GOOD */
+gap: var(--k3-sys-spacing-space300);
+padding: var(--k3-sys-spacing-space200);
+box-shadow: var(--k3-sys-elevation-level1);
+```

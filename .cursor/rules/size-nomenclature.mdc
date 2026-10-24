@@ -1,0 +1,51 @@
+---
+description: Nomenclature tailles M3 Expressive — badges XS·SM·MD·LG·XL (convention A)
+globs: src/**/*.{ts,json},playground/**/*.{ts,html},.cursor/rules/**
+alwaysApply: true
+---
+
+# Tailles — nomenclature (convention A)
+
+Échelle **5 tailles** Material 3 Expressive. Pas de XXS / XXL.
+
+## Couches
+
+| Couche | Valeurs |
+|---|---|
+| API / attribut / type | `xs` · `sm` · `md` · `lg` · `xl` |
+| Badge (affichage) | `XS` · `SM` · `MD` · `LG` · `XL` |
+| Label EN | Extra small · Small · Medium · Large · Extra large |
+| Label FR | Très Petit · Petit · Normal · Large · Très Large |
+
+## Mapping
+
+| API | Badge | EN | FR |
+|---|---|---|---|
+| `xs` | XS | Extra small | Très Petit |
+| `sm` | SM | Small | Petit |
+| `md` | MD | Medium | Normal |
+| `lg` | LG | Large | Large |
+| `xl` | XL | Extra large | Très Large |
+
+## Règles dures
+
+1. **Ne jamais renommer** les attributs HTML / tokens TS (`size="sm"` reste `sm`).
+2. Guides / puces playground → **badges** convention A, pas `S` / `M` / `L` seuls.
+3. Avec dp : `SM · 40` (clés `playground.size.dp.*`) — jamais `Small · 40` ni `S · 40`.
+4. Libellés longs → i18n `playground.demo.size.*` (pas de prose hardcodée EN/FR).
+5. Descriptifs d’échelle → `XS 32 · SM 40 · MD 56 · LG 96 · XL 136`.
+6. Composants M3 à **3 tailles** (FAB, app bar) : hors de cette ladder — **ne pas forcer** SM/MD/LG.
+   - FAB icon-only / menu trigger : API `default` · `medium` · `large` → EN **Default · 56** · **Medium · 80** · **Large · 96** ; FR **Par défaut · 56** · **Moyen · 80** · **Grand · 96** (`playground.fab.size.*`).
+   - Extended FAB : API `small` · `medium` · `large` → EN **Small · 40** · **Medium · 56** · **Large · 96** ; FR **Petit · 40** · **Moyen · 56** · **Grand · 96**.
+   - `size="small"` sur FAB icon-only = deprecated (40 dp).
+   - Libellés guides / blurbs FAB : **toujours** via i18n (pas de Medium hardcodé en FR).
+
+```html
+<!-- ❌ BAD -->
+<span class="variant-label">Small · 40</span>
+<span class="variant-label">S · 40</span>
+
+<!-- ✅ GOOD -->
+<span class="variant-label" data-i18n="playground.size.dp.sm">SM · 40</span>
+<span class="variant-label" data-i18n="playground.demo.size.md">Medium</span>
+```

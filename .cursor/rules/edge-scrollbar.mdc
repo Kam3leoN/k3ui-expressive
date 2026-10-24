@@ -1,0 +1,58 @@
+---
+description: Scrollbar discrète au bord (.k3-scroll / edgeScrollbarStyles) — obligatoire pour surfaces scrollables
+globs: src/components/**/*.{ts,scss,css}
+alwaysApply: false
+---
+
+# Edge scrollbar — obligatoire sur surfaces scrollables
+
+## Source de vérité
+
+| Couche | Fichier |
+|---|---|
+| Shadow (Lit CE) | `edgeScrollbarStyles` ← `src/core/scrollbar.ts` |
+| Light DOM / docs | `src/tokens/_scrollbar.scss` (via `k3ui.scss`) |
+
+Les deux doivent rester **alignés** (mêmes tokens / mêmes règles WebKit).
+
+## Règles dures
+
+1. Tout **overflow-y: auto** sur un panel (dialog, sheet, menu, list, rail destinations…) → classe **`k3-scroll`** + importer `edgeScrollbarStyles` dans `static styles` si shadow.
+2. Scrollbar **collée au bord** du scrollport (pas inset dans le padding) :
+   - padding sur un **inner** (`.body-inner`) ; overflow sur le parent `.k3-scroll`
+3. **Interdit** sur WebKit : `scrollbar-width` / `scrollbar-color` sur le même élément que `::-webkit-scrollbar-*` — Chromium 121+ garde alors les flèches Windows.
+4. Tokens :
+   - `--k3-scroll-size` — défaut **6dp** (`0.375rem`) ; side sheet = `0.5rem`
+   - `--k3-scroll-track-inset` — marges track (coins arrondis, ex. dialog basic `0.5rem`)
+
+```ts
+// ✅ GOOD — shadow CE
+import { edgeScrollbarStyles } from '../../core/index.js';
+static styles = [hostReset, edgeScrollbarStyles, css`
+  .body { /* flex child */ }
+  .body-inner { padding-inline: 1.5rem; }
+`];
+// render: <div class="body k3-scroll"><div class="body-inner">…
+
+// ✅ GOOD — light DOM
+<div class="k3-scroll" style="max-height: 12rem">…</div>
+
+// ❌ BAD — flèches Windows + double API
+.k3-scroll {
+  scrollbar-width: thin; /* casse ::-webkit-scrollbar-* */
+  overflow-y: auto;
+}
+```
+
+## Déjà branché
+
+- `k3-dialog` — `.body.k3-scroll`
+- `k3-sheet` side — `.content.k3-scroll`
+
+## Checklist nouveau composant scrollable
+
+- [ ] `edgeScrollbarStyles` dans `static styles` (shadow)
+- [ ] Classe `k3-scroll` sur le nœud qui overflow
+- [ ] Padding sur un enfant, pas sur le scrollport (bord flush)
+- [ ] Pas de `scrollbar-width` / `scrollbar-color` sur WebKit
+- [ ] Doc playground Utilitaires → Scrollbar à jour si API / tokens changent

@@ -1,0 +1,73 @@
+---
+description: Toujours respecter la grille layout M3 et le container ON/OFF
+alwaysApply: true
+---
+
+# Layout grid & container — obligatoire
+
+Toute UI playground / démo / composant de mise en page doit **s’aligner sur la grille layout** et **réagir correctement au container ON ou OFF**. Pas d’exception « pour faire joli ».
+
+## Tokens (source de vérité)
+
+| Token                       | Rôle                                                                                            |
+| --------------------------- | ----------------------------------------------------------------------------------------------- |
+| `--k3-sys-spacing-space100` | 8dp — unité de base ([Spacing](https://m3.material.io/styles/spacing/overview))                 |
+| `--k3-layout-gutter`        | gap inter-colonnes = **8dp** (`space100`) — aligné sur m3.material.io (`mio-card-set` gap: 8px) |
+| `--k3-layout-columns`       | 4 (&lt;600) · 8 (≥600) · 12 (≥905)                                                              |
+| `--k3-layout-body-max`      | largeur max body quand container ON                                                             |
+| `--k3-layout-full-gap`      | gap bord **20dp** tout autour quand container OFF                                               |
+
+**Note :** le spacer **24dp** des breakpoints multi-pane (entre panes) ≠ gutter de colonnes contenu. Ne pas remettre 24dp dans `--k3-layout-gutter`.
+
+Helpers CSS : `.k3-container` / `.k3-container-none` · **`.k3-layout-grid`** · `.k3-layout-gap` · overlay `.k3-layout-grid-overlay`  
+(voir `src/tokens/_layout.scss`).
+
+## Règles dures
+
+1. **Préférer `.k3-layout-grid`** (ou la même recette) :
+   `grid-template-columns: repeat(var(--k3-layout-columns), minmax(0, 1fr))`
+   `gap: var(--k3-layout-gutter)` — **pas** `max(10px, …)` (sinon 8dp devient 10px)
+2. **Pas** de `1fr 1fr`, `auto-fill` / `minmax(14rem)`, ni gutters inventés (`0.75rem`, `1.25rem`, `1.5rem`) pour une rangée sur la grille.
+3. Les enfants **span** des colonnes (`grid-column: span N`) — pas de `max-width` magique qui casse les bords.
+4. **Container** : toggle **uniquement ≥905** (`--k3-layout-body-max`). En dessous → toujours full + `--k3-layout-full-gap` (pas de menu Container).
+5. ≥905 : **ON** → body max + inset gap ; **OFF** → full + gap.
+6. Pad `.surface` qui décale → `surface-flush` / grille hors pad.
+7. Vérifier toggle **Grid** partout ; **Container** seulement desktop large.
+
+## Playground — helpers
+
+- `.k3-layout-grid` → classe canonique (tokens)
+- `.grid-2` / `.grid-3` → 2-up / 3-up (mêmes tracks + gutter)
+- `.catalog-cards` · `k3-doc-nav` → même gutter
+
+```css
+/* ❌ BAD */
+gap: 1.5rem;
+gap: max(10px, var(--k3-layout-gutter));
+
+/* ✅ GOOD */
+.k3-layout-grid {
+  /* tokens */
+}
+/* ou */
+gap: var(--k3-layout-gutter);
+```
+
+## Descriptions doc (playground)
+
+Blurb / `.doc-intro` / `.section-head p` → **full width**, **1 colonne** dans le container (`max-width: none`), sauf contre-indication explicite (ex. hero marketing).
+
+## Demo frames
+
+Voir **`demo-cases-m3.mdc`** (tonal + dots, equal cases, pills vert/horiz, enhance auto).
+
+**Exception grille** — breakout autorisé uniquement pour le chrome `.demo-frame--cases` (et aliases / `--width-matrix`) : `margin-inline: -full-gap` + `padding-inline: full-gap`. Les cases restent sur les colonnes. Pas de breakout sur `--fab-menu`.
+
+## Checklist avant merge UI
+
+- [ ] Tracks = `--k3-layout-columns` + `gap: var(--k3-layout-gutter)` (8dp)
+- [ ] Spans colonnes (pas max-width arbitraire)
+- [ ] Container ON et OFF vérifiés (overlay aligné)
+- [ ] Pas de pad surface qui décale sans `surface-flush`
+- [ ] Descriptions doc full-width 1-col (pas de `max-width: 40rem` inventé)
+- [ ] Demo frames : breakout + `padding-inline: full-gap` (pas de cas collés au bord du frame)
