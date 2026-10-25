@@ -423,6 +423,7 @@
   "doc.index-list.title": "Index list",
   "doc.index-list.blurb": "Grouped directory — sticky headers · A–Z rail · scroll spy.",
   "doc.index-list.intro": "Index lists group long directories by letter with sticky section headers and an optional scrub rail. Provide items as JSON or slotted rows; scrollToKey jumps to a section and k3-section-change tracks the visible group.",
+  "doc.scroll-to-top.hint.shell": "Live control is docked bottom-end (left of the GitHub FAB) — scroll this pane to reveal the circular progress ring.",
   "doc.scroll-to-top.title": "Scroll to top",
   "doc.scroll-to-top.blurb": "Floating control — threshold · progress ring · smooth scroll.",
   "doc.scroll-to-top.intro": "Scroll to top appears after the user scrolls past a threshold and returns the viewport to the top on click. Optional progress ring reflects scroll depth; tune size, offsets, and animation duration to match your FAB stack.",

@@ -18,9 +18,10 @@ describe('k3-scroll-to-top', () => {
     window.scrollTo(0, 0);
   });
 
-  it('renders fixed control with progress ring by default', () => {
-    const btn = el.shadowRoot!.querySelector('.btn') as HTMLButtonElement;
-    expect(btn).toBeTruthy();
+  it('renders circular own container with progress ring by default', () => {
+    const control = el.shadowRoot!.querySelector('.control') as HTMLButtonElement;
+    expect(control).toBeTruthy();
+    expect(control.getAttribute('part')).toBe('container');
     expect(el.shadowRoot!.querySelector('.ring-progress')).toBeTruthy();
     expect(el.shadowRoot!.querySelector('[data-k3-icon]')?.getAttribute('data-k3-icon')).toBe(
       'keyboard_arrow_up',

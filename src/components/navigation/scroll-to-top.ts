@@ -216,8 +216,8 @@ export class K3ScrollToTop extends K3Element {
     return html`
       <button
         type="button"
-        class=${classMap({ btn: true, 'is-pressed': this.pressed })}
-        part="button"
+        class=${classMap({ control: true, 'is-pressed': this.pressed })}
+        part="container"
         aria-label=${i18n.t(
           'scrollToTop.ariaLabel',
           ScrollToTopSpecs.accessibility.ariaLabel,

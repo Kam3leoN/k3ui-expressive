@@ -423,6 +423,7 @@
   "doc.index-list.title": "Index list",
   "doc.index-list.blurb": "Annuaire groupé — en-têtes sticky · rail A–Z · scroll spy.",
   "doc.index-list.intro": "L’index list groupe de longues listes par lettre avec en-têtes sticky et rail optionnel. Items JSON ou slot ; scrollToKey et k3-section-change.",
+  "doc.scroll-to-top.hint.shell": "Le contrôle live est en bas à droite (à gauche du FAB GitHub) — scrollez ce panneau pour voir l’anneau de progression circulaire.",
   "doc.scroll-to-top.title": "Scroll to top",
   "doc.scroll-to-top.blurb": "Contrôle flottant — seuil · anneau de progression · scroll fluide.",
   "doc.scroll-to-top.intro": "Scroll to top apparaît après un seuil de scroll et remonte la page. Anneau de progression optionnel ; réglez taille, offsets et durée d’animation.",
