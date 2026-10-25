@@ -40,6 +40,8 @@ export const PAGE_ID_ALIASES: Record<string, string> = {
   'button-pill': 'buttons-pill',
   'button-smart': 'buttons-smart',
   'split-button': 'buttons-split',
+  'button-segmented': 'buttons-segmented',
+  index: 'index-list',
   'extended-fab': 'fab-extended',
   'doc-nav': 'prev-next',
   'nav-bar': 'navigation-bar',
@@ -113,6 +115,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Buttons Pill',
     titleKey: 'doc.button-pill.title',
     blurbKey: 'doc.button-pill.blurb',
+  },
+  {
+    id: 'buttons-segmented',
+    category: 'Buttons',
+    title: 'Buttons Segmented',
+    titleKey: 'doc.button-segmented.title',
+    blurbKey: 'doc.button-segmented.blurb',
   },
   {
     id: 'buttons-smart',
@@ -243,6 +252,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.chip.blurb',
   },
   {
+    id: 'autocomplete',
+    category: 'Inputs',
+    title: 'Autocomplete',
+    titleKey: 'doc.autocomplete.title',
+    blurbKey: 'doc.autocomplete.blurb',
+  },
+  {
     id: 'counter',
     category: 'Inputs',
     title: 'Counter',
@@ -276,6 +292,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Time picker',
     titleKey: 'doc.time-picker.title',
     blurbKey: 'doc.time-picker.blurb',
+  },
+  {
+    id: 'wheel-picker',
+    category: 'Inputs',
+    title: 'Wheel picker',
+    titleKey: 'doc.wheel-picker.title',
+    blurbKey: 'doc.wheel-picker.blurb',
   },
   // Feedback
   {
@@ -327,6 +350,20 @@ export const DOC_COMPONENTS: DocComponent[] = [
     titleKey: 'doc.badge.title',
     blurbKey: 'doc.badge.blurb',
   },
+  {
+    id: 'countdown',
+    category: 'Feedback',
+    title: 'Countdown',
+    titleKey: 'doc.countdown.title',
+    blurbKey: 'doc.countdown.blurb',
+  },
+  {
+    id: 'marquee',
+    category: 'Feedback',
+    title: 'Marquee',
+    titleKey: 'doc.marquee.title',
+    blurbKey: 'doc.marquee.blurb',
+  },
   // Containment
   {
     id: 'avatar',
@@ -334,6 +371,20 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Avatars',
     titleKey: 'doc.avatar.title',
     blurbKey: 'doc.avatar.blurb',
+  },
+  {
+    id: 'bubble',
+    category: 'Containment',
+    title: 'Bubble',
+    titleKey: 'doc.bubble.title',
+    blurbKey: 'doc.bubble.blurb',
+  },
+  {
+    id: 'codeblock',
+    category: 'Containment',
+    title: 'Code block',
+    titleKey: 'doc.codeblock.title',
+    blurbKey: 'doc.codeblock.blurb',
   },
   {
     id: 'card',
@@ -372,6 +423,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
   },
   // Navigation
   {
+    id: 'breadcrumb',
+    category: 'Navigation',
+    title: 'Breadcrumb',
+    titleKey: 'doc.breadcrumb.title',
+    blurbKey: 'doc.breadcrumb.blurb',
+  },
+  {
     id: 'app-bar',
     category: 'Navigation',
     title: 'App bars',
@@ -407,11 +465,39 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.nav-rail.blurb',
   },
   {
+    id: 'index-list',
+    category: 'Navigation',
+    title: 'Index list',
+    titleKey: 'doc.index-list.title',
+    blurbKey: 'doc.index-list.blurb',
+  },
+  {
+    id: 'pagination',
+    category: 'Navigation',
+    title: 'Pagination',
+    titleKey: 'doc.pagination.title',
+    blurbKey: 'doc.pagination.blurb',
+  },
+  {
+    id: 'pagination-alpha',
+    category: 'Navigation',
+    title: 'Pagination Alpha',
+    titleKey: 'doc.pagination-alpha.title',
+    blurbKey: 'doc.pagination-alpha.blurb',
+  },
+  {
     id: 'prev-next',
     category: 'Navigation',
     title: 'Prev Next',
     titleKey: 'doc.doc-nav.title',
     blurbKey: 'doc.doc-nav.blurb',
+  },
+  {
+    id: 'scroll-to-top',
+    category: 'Navigation',
+    title: 'Scroll to top',
+    titleKey: 'doc.scroll-to-top.title',
+    blurbKey: 'doc.scroll-to-top.blurb',
   },
   {
     id: 'toolbar',

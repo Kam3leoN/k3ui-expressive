@@ -589,6 +589,76 @@ document.getElementById("dlg")?.show?.();`,
   --k3-fab-fg: var(--k3-sys-color-on-error);
 }`,
   },
+  autocomplete: {
+    components: ['k3-autocomplete'],
+    html: `<k3-autocomplete
+  label="Country"
+  options='[{"value":"fr","label":"France"},{"value":"de","label":"Germany"}]'
+></k3-autocomplete>`,
+  },
+  'wheel-picker': {
+    components: ['k3-wheel-picker'],
+    html: `<k3-wheel-picker length="3" value="K3U" show-preview show-submit-button></k3-wheel-picker>`,
+  },
+  'buttons-segmented': {
+    components: ['k3-button-segmented'],
+    html: `<k3-button-segmented
+  segments='[{"label":"Day"},{"label":"Week"},{"label":"Month"}]'
+></k3-button-segmented>`,
+  },
+  bubble: {
+    components: ['k3-bubble', 'k3-avatar'],
+    html: `<k3-bubble placement="start" color="neutral">
+  <k3-avatar slot="image" initials="AL"></k3-avatar>
+  <span slot="header">Alex · <time datetime="12:45">12:45</time></span>
+  Hello from K3ui
+</k3-bubble>`,
+  },
+  codeblock: {
+    components: ['k3-codeblock'],
+    html: `<k3-codeblock label="Usage" language="html">
+<pre><code>&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
+</k3-codeblock>`,
+  },
+  countdown: {
+    components: ['k3-countdown'],
+    html: `<k3-countdown time="3600000" format="HH : mm : ss" segments with-labels></k3-countdown>`,
+  },
+  marquee: {
+    components: ['k3-marquee'],
+    html: `<k3-marquee pause-on-hover>
+  <span>K3ui · Material 3 Expressive · Playground demo · </span>
+</k3-marquee>`,
+  },
+  breadcrumb: {
+    components: ['k3-breadcrumb'],
+    html: `<k3-breadcrumb
+  variant="tonal"
+  items='[{"text":"Home","href":"/","icon":"home"},{"text":"Components","href":"/components"},{"text":"Bubble","current":true}]'
+></k3-breadcrumb>`,
+  },
+  pagination: {
+    components: ['k3-pagination'],
+    html: `<k3-pagination page="5" count="12"></k3-pagination>`,
+  },
+  'pagination-alpha': {
+    components: ['k3-pagination-alpha'],
+    html: `<k3-pagination-alpha
+  active-letter="M"
+  items='["Alice","Bob","Marta","Mike","Zoe"]'
+></k3-pagination-alpha>`,
+  },
+  'index-list': {
+    components: ['k3-index-list'],
+    html: `<k3-index-list
+  style="max-height:16rem"
+  items='[{"label":"Alice"},{"label":"Bob"},{"label":"Zoe"}]'
+></k3-index-list>`,
+  },
+  'scroll-to-top': {
+    components: ['k3-scroll-to-top'],
+    html: `<k3-scroll-to-top threshold="200" show-progress></k3-scroll-to-top>`,
+  },
   gestures: {
     components: [],
     html: `<!-- See Gestures utility demos — attach via K3UI.gestures -->`,

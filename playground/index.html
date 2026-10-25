@@ -47,7 +47,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Material Symbols subset (~22 KB) — full variable font is ~5 MB -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility,account_circle,add,airplanemode_active,alarm,anchor,android,animation,apps,archive,arrow_back,arrow_drop_down,arrow_forward,article,back_hand,beach_access,bedtime,bluetooth,bluetooth_disabled,bolt,bookmark,brightness_auto,calendar_today,call_end,camera,celebration,change_history,check,checkroom,chevron_left,chevron_right,clear,close,closed_caption,cloud_download,cloud_off,code,computer,content_copy,content_cut,content_paste,create_new_folder,dark_mode,dashboard,delete,design_services,desktop_windows,devices,directions_car,directions_walk,do_not_disturb_on,download,drafts,drag_handle,drag_indicator,drive_file_move,drive_file_rename_outline,east,edit,error,expand_less,expand_more,explore,favorite,filter_alt,flare,flashlight_on,flight,flight_takeoff,folder,format_align_center,format_align_left,format_align_right,format_bold,format_italic,format_textdirection_l_to_r,format_textdirection_r_to_l,format_underlined,forward,gesture,grid_on,hearing_disabled,help,home,image,inbox,info,input,inventory_2,keyboard,language,laptop_mac,layers,library_music,light_mode,link,list,local_cafe,local_fire_department,location_off,logout,luggage,mail,map,match_case,menu,menu_book,menu_open,mic,mic_off,monitor,mood,more_horiz,more_vert,music_note,navigation,north,north_east,north_west,notifications,notifications_off,palette,pause,person,pets,play_arrow,present_to_all,question_mark,radio,rainy,redo,remove,repeat,reply,reply_all,restaurant,rocket_launch,route,schedule,search,select_all,send,sensors_off,sentiment_satisfied,settings,shapes,share,signal_cellular_off,south,south_east,south_west,spa,space_bar,sports_esports,star,steps,stop,straighten,sunny,swap_horiz,swap_vert,timer,title,touch_app,train,tune,two_wheeler,undo,videocam,videocam_off,view_column,view_list,visibility,visibility_off,volume_off,volume_up,watch,water_drop,west,widgets,wifi,wifi_off&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility,account_circle,add,airplanemode_active,alarm,anchor,android,animation,apps,archive,arrow_back,arrow_drop_down,arrow_forward,arrow_upward,article,back_hand,beach_access,bedtime,bluetooth,bluetooth_disabled,bolt,bookmark,brightness_auto,calendar_today,call_end,camera,celebration,change_history,check,checkroom,chevron_left,chevron_right,clear,close,closed_caption,cloud_download,cloud_off,code,computer,content_copy,content_cut,content_paste,create_new_folder,dark_mode,dashboard,delete,design_services,desktop_windows,devices,directions_car,directions_walk,do_not_disturb_on,download,drafts,drag_handle,drag_indicator,drive_file_move,drive_file_rename_outline,east,edit,error,expand_less,expand_more,explore,favorite,filter_alt,flare,flashlight_on,flight,flight_takeoff,first_page,folder,format_align_center,format_align_left,format_align_right,format_bold,format_italic,format_textdirection_l_to_r,format_textdirection_r_to_l,format_underlined,forward,gesture,grid_on,hearing_disabled,help,home,image,inbox,info,input,inventory_2,keyboard,keyboard_arrow_up,language,laptop_mac,layers,last_page,library_music,light_mode,link,list,local_cafe,local_fire_department,location_off,logout,luggage,mail,map,match_case,menu,menu_book,menu_open,mic,mic_off,monitor,mood,more_horiz,more_vert,music_note,navigation,north,north_east,north_west,notifications,notifications_off,palette,pause,person,pets,play_arrow,present_to_all,question_mark,radio,rainy,redo,remove,repeat,reply,reply_all,restaurant,rocket_launch,route,schedule,search,select_all,send,sensors_off,sentiment_satisfied,settings,shapes,share,signal_cellular_off,south,south_east,south_west,spa,space_bar,sports_esports,star,steps,stop,straighten,sunny,swap_horiz,swap_vert,timer,title,touch_app,train,tune,two_wheeler,undo,videocam,videocam_off,view_column,view_list,visibility,visibility_off,volume_off,volume_up,watch,water_drop,west,widgets,wifi,wifi_off&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./playground.css" />
@@ -7798,6 +7798,497 @@ fav?.addEventListener("k3-change", (e) => {
           </div>
         </article>
 
+
+        <!-- CONTAINMENT: BUBBLE -->
+        <article class="comp-page" data-page="bubble" id="page-bubble" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.bubble.title">Bubble</h1>
+            <p data-i18n="doc.bubble.blurb">
+              Chat row — start/end placement · body colors · image, header, footer slots.
+            </p>
+            <p class="doc-intro" data-i18n="doc.bubble.intro">
+              Bubbles layout conversation messages with optional avatar, header metadata, body text,
+              and footer status. Align incoming messages to the start and outgoing to the end; pick a
+              body color for emphasis or semantic tone.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-bubble placement="start">
+                    <k3-avatar slot="image" initials="AL"></k3-avatar>
+                    <span slot="header">Alex · 12:45</span>
+                    Incoming message on the start side.
+                    <span slot="footer">Delivered</span>
+                  </k3-bubble>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-bubble placement="end" color="primary">
+                    Outgoing reply with primary body color.
+                    <span slot="footer">Read</span>
+                  </k3-bubble>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-bubble placement="start" color="success">System notice — success tone.</k3-bubble>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Start · slots</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">End · primary</span></li>
+              <li><span class="pill-num">3</span><span class="variant-label">Semantic color</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- CONTAINMENT: CODE BLOCK -->
+        <article class="comp-page" data-page="codeblock" id="page-codeblock" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.codeblock.title">Code block</h1>
+            <p data-i18n="doc.codeblock.blurb">
+              Syntax-highlighted sample — copy · download · collapsible toolbar.
+            </p>
+            <p class="doc-intro" data-i18n="doc.codeblock.intro">
+              Code blocks present highlighted snippets with an optional toolbar for copy and
+              download. Pass source via the default slot or the code property, set language for
+              highlighting, and collapse long samples automatically or with collapsible.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; max-width: 28rem">
+                  <k3-codeblock label="HTML" language="html">
+                    <pre><code>&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
+                  </k3-codeblock>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; max-width: 28rem">
+                  <k3-codeblock label="TypeScript" language="typescript" collapsible>
+                    <pre><code>import { K3UI } from "k3ui";
+await K3UI.init({ components: ["k3-button"] });</code></pre>
+                  </k3-codeblock>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Toolbar · copy</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">Collapsible</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- BUTTONS: SEGMENTED -->
+        <article class="comp-page" data-page="buttons-segmented" id="page-buttons-segmented" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.buttons">Buttons</p>
+            <h1 data-i18n="doc.button-segmented.title">Buttons Segmented</h1>
+            <p data-i18n="doc.button-segmented.blurb">
+              M3E segmented control — single or multi-select · check mark · rounded or square.
+            </p>
+            <p class="doc-intro" data-i18n="doc.button-segmented.intro">
+              Segmented buttons switch between a small set of related views or filters. Define
+              segments as JSON, choose single or multi-select, and optionally show a check on the
+              active segment. Use rounded for pill chrome or square for denser toolbars.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-button-segmented
+                    segments='[{"label":"Day"},{"label":"Week"},{"label":"Month"}]'
+                  ></k3-button-segmented>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-button-segmented
+                    shape="square"
+                    show-check
+                    multi-select
+                    segments='[{"label":"List","icon":"view_list"},{"label":"Grid","icon":"grid_on"}]'
+                    default-selected="[0,1]"
+                  ></k3-button-segmented>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Single · rounded</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">Multi · square · check</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- INPUTS: AUTOCOMPLETE -->
+        <article class="comp-page" data-page="autocomplete" id="page-autocomplete" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.inputs">Inputs</p>
+            <h1 data-i18n="doc.autocomplete.title">Autocomplete</h1>
+            <p data-i18n="doc.autocomplete.blurb">
+              Editable combobox — filterable listbox · lazy k3-query · outlined field.
+            </p>
+            <p class="doc-intro" data-i18n="doc.autocomplete.intro">
+              Autocomplete pairs a text field with a filterable option list. Users type to narrow
+              choices or pick from the panel; use k3-query to load options asynchronously. Match
+              variant and supporting text to neighboring fields, and commit selection with k3-change.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; max-width: 18rem">
+                  <k3-autocomplete
+                    label="Country"
+                    supporting-text="Type to filter"
+                    options='[{"value":"fr","label":"France"},{"value":"de","label":"Germany"},{"value":"es","label":"Spain"},{"value":"it","label":"Italy"}]'
+                  ></k3-autocomplete>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; max-width: 18rem">
+                  <k3-autocomplete
+                    label="City"
+                    variant="filled"
+                    filter="starts-with"
+                    options='[{"value":"par","label":"Paris"},{"value":"ber","label":"Berlin"},{"value":"mad","label":"Madrid"}]'
+                  ></k3-autocomplete>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Outlined · contains</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">Filled · starts-with</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- INPUTS: WHEEL PICKER -->
+        <article class="comp-page" data-page="wheel-picker" id="page-wheel-picker" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.inputs">Inputs</p>
+            <h1 data-i18n="doc.wheel-picker.title">Wheel picker</h1>
+            <p data-i18n="doc.wheel-picker.blurb">
+              Arcade-style rotating columns — initials · submit · preview.
+            </p>
+            <p class="doc-intro" data-i18n="doc.wheel-picker.intro">
+              Wheel picker spins independent character columns for arcade-style entry. Set length and
+              allowed characters, optionally show a live preview and submit button. Listen for
+              k3-change while spinning and k3-submit when the user confirms.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-wheel-picker length="3" value="K3U" show-preview show-submit-button></k3-wheel-picker>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-wheel-picker
+                    length="4"
+                    value="PLAY"
+                    allowed-chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    show-preview
+                  ></k3-wheel-picker>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Submit · preview</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">4 columns · A–Z</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- FEEDBACK: COUNTDOWN -->
+        <article class="comp-page" data-page="countdown" id="page-countdown" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
+            <h1 data-i18n="doc.countdown.title">Countdown</h1>
+            <p data-i18n="doc.countdown.blurb">
+              Timer — duration or end date · segment cells · auto-start.
+            </p>
+            <p class="doc-intro" data-i18n="doc.countdown.intro">
+              Countdown displays remaining time until zero, either from an initial duration or a
+              fixed end timestamp. Format the output string or use segments for separate HH/mm/ss
+              cells with optional unit labels. Control playback with start, pause, and reset methods.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases items-end" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-countdown time="90061000" format="HH : mm : ss"></k3-countdown>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-countdown
+                    time="3661000"
+                    format="HH : mm : ss"
+                    segments
+                    with-labels
+                  ></k3-countdown>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Inline format</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">Segments · labels</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- FEEDBACK: MARQUEE -->
+        <article class="comp-page" data-page="marquee" id="page-marquee" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
+            <h1 data-i18n="doc.marquee.title">Marquee</h1>
+            <p data-i18n="doc.marquee.blurb">
+              Horizontal ticker — infinite loop or classic pass · speed · pause on hover.
+            </p>
+            <p class="doc-intro" data-i18n="doc.marquee.intro">
+              Marquees scroll slotted content horizontally for tickers and credits. Choose infinite
+              duplication or a classic one-pass animation, tune duration or speed, and pause on hover
+              when users need to read the text.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; max-width: 32rem">
+                  <k3-marquee pause-on-hover>
+                    <span>K3ui · Material 3 Expressive · Playground · </span>
+                  </k3-marquee>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; max-width: 32rem">
+                  <k3-marquee mode="classic" direction="right" duration="12">
+                    <span>Classic pass · right · </span>
+                  </k3-marquee>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Infinite · pause hover</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">Classic · right</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- NAVIGATION: BREADCRUMB -->
+        <article class="comp-page" data-page="breadcrumb" id="page-breadcrumb" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
+            <h1 data-i18n="doc.breadcrumb.title">Breadcrumb</h1>
+            <p data-i18n="doc.breadcrumb.blurb">
+              Trail — plain · tonal · filled · chevron/slash/dot separators · collapse.
+            </p>
+            <p class="doc-intro" data-i18n="doc.breadcrumb.intro">
+              Breadcrumbs show hierarchy and the current page within a trail. Supply items as JSON
+              with optional icons and links, pick variant and separator style, and collapse long paths
+              after N visible crumbs. Non-current items emit k3-select for SPA routing.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-breadcrumb
+                    items='[{"text":"Home","href":"/","icon":"home"},{"text":"Components","href":"/components"},{"text":"Breadcrumb","current":true}]'
+                  ></k3-breadcrumb>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-breadcrumb
+                    variant="filled"
+                    separator="slash"
+                    size="lg"
+                    items='[{"text":"Docs","href":"/docs"},{"text":"Navigation","href":"/nav"},{"text":"Pagination","current":true}]'
+                  ></k3-breadcrumb>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Plain · icons</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">Filled · slash · lg</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- NAVIGATION: PAGINATION -->
+        <article class="comp-page" data-page="pagination" id="page-pagination" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
+            <h1 data-i18n="doc.pagination.title">Pagination</h1>
+            <p data-i18n="doc.pagination.blurb">
+              Numeric pages — ellipsis · first/prev/next/last · sibling window.
+            </p>
+            <p class="doc-intro" data-i18n="doc.pagination.intro">
+              Pagination navigates paged content with numbered buttons and optional first, previous,
+              next, and last controls. Set total page count and current page; ellipsis compresses long
+              ranges. Each change emits k3-change with the new 1-based page.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-pagination page="3" count="7"></k3-pagination>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-pagination page="8" count="20" sibling-count="1"></k3-pagination>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Short range</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">Ellipsis · 20 pages</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- NAVIGATION: PAGINATION ALPHA -->
+        <article class="comp-page" data-page="pagination-alpha" id="page-pagination-alpha" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
+            <h1 data-i18n="doc.pagination-alpha.title">Pagination Alpha</h1>
+            <p data-i18n="doc.pagination-alpha.blurb">
+              A–Z index strip — counts · horizontal or vertical · disabled letters.
+            </p>
+            <p class="doc-intro" data-i18n="doc.pagination-alpha.intro">
+              Alphabetical pagination jumps lists by first letter. Pass item labels to derive counts
+              per letter, highlight the active letter, and hide or disable empty letters. Selection
+              emits k3-select with the chosen letter.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-pagination-alpha
+                    active-letter="M"
+                    items='["Alice","Bob","Marta","Mike","Zoe"]'
+                  ></k3-pagination-alpha>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-pagination-alpha
+                    size="sm"
+                    orientation="vertical"
+                    active-letter="B"
+                    items='["Alice","Bob","Bill"]'
+                  ></k3-pagination-alpha>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Horizontal · counts</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">Vertical · sm</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- NAVIGATION: INDEX LIST -->
+        <article class="comp-page" data-page="index-list" id="page-index-list" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
+            <h1 data-i18n="doc.index-list.title">Index list</h1>
+            <p data-i18n="doc.index-list.blurb">
+              Grouped directory — sticky headers · A–Z rail · scroll spy.
+            </p>
+            <p class="doc-intro" data-i18n="doc.index-list.intro">
+              Index lists group long directories by letter with sticky section headers and an optional
+              scrub rail. Provide items as JSON or slotted rows; scrollToKey jumps to a section and
+              k3-section-change tracks the visible group.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; max-width: 22rem">
+                  <k3-index-list
+                    style="max-height: 14rem; display: block"
+                    items='[{"label":"Alice Dupont"},{"label":"Bob Martin"},{"label":"Marta Vega"},{"label":"Zoe Zen"}]'
+                  ></k3-index-list>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Rail · sticky headers</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- NAVIGATION: SCROLL TO TOP -->
+        <article class="comp-page" data-page="scroll-to-top" id="page-scroll-to-top" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
+            <h1 data-i18n="doc.scroll-to-top.title">Scroll to top</h1>
+            <p data-i18n="doc.scroll-to-top.blurb">
+              Floating control — threshold · progress ring · smooth scroll.
+            </p>
+            <p class="doc-intro" data-i18n="doc.scroll-to-top.intro">
+              Scroll to top appears after the user scrolls past a threshold and returns the viewport
+              to the top on click. Optional progress ring reflects scroll depth; tune size, offsets,
+              and animation duration to match your FAB stack.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <p class="text-secondary" style="margin: 0">
+                    Scroll the playground main pane — the control uses window scroll with default
+                    threshold (80px).
+                  </p>
+                  <k3-scroll-to-top threshold="120" show-progress icon="keyboard_arrow_up"></k3-scroll-to-top>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">Progress ring</span></li>
+            </ol>
+          </div>
+        </article>
         <!-- UTILITIES: GESTURES -->
         <article class="comp-page" data-page="gestures" id="page-gestures" hidden>
           <header class="section-head">

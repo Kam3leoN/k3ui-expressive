@@ -416,6 +416,168 @@ const COMPONENT_API: Record<
       ['setValue', '(next) => void', 'Clamp + emit'],
     ],
   },
+  autocomplete: {
+    properties: [
+      ['label', 'string', "''", 'Field label'],
+      ['value', 'string', "''", 'Committed value'],
+      ['options / options attr', 'AutocompleteOption[]', '[]', 'Choices'],
+      ['variant', "'filled'|'outlined'|'standard'", 'outlined', 'Field chrome'],
+      ['filter', "'contains'|'starts-with'", 'contains', 'Match mode'],
+      ['open', 'boolean', 'false', 'Panel open'],
+      ['loading', 'boolean', 'false', 'Shows loading row'],
+      ['disabled', 'boolean', 'false', 'Disables field + panel'],
+    ],
+    events: [
+      ['k3-input', '{ value }', 'Typing'],
+      ['k3-query', '{ term }', 'Lazy-load hook'],
+      ['k3-change', '{ value, label }', 'Selection committed'],
+      ['k3-toggle', '{ open }', 'Panel visibility'],
+    ],
+  },
+  'wheel-picker': {
+    properties: [
+      ['length', 'number', '3', 'Column count'],
+      ['value', 'string', 'AAA', 'Initial string'],
+      ['allowed-chars', 'string', 'A–Z', 'Per-column charset'],
+      ['show-preview', 'boolean', 'true', 'Live preview label'],
+      ['show-submit-button', 'boolean', 'true', 'Confirm button'],
+    ],
+    events: [
+      ['k3-change', '{ value }', 'Value updated'],
+      ['k3-submit', '{ value }', 'Submit pressed'],
+    ],
+    methods: [
+      ['getValue', '() => string', 'Current string'],
+      ['setValue', '(next) => void', 'Set + emit k3-change'],
+    ],
+  },
+  'buttons-segmented': {
+    properties: [
+      ['segments', 'ButtonSegmentedSegment[]', '[]', 'JSON segments'],
+      ['shape', "'rounded'|'square'", 'rounded', 'Outer / segment radius'],
+      ['multi-select', 'boolean', 'false', 'Multiple active segments'],
+      ['show-check', 'boolean', 'false', 'Check on selected'],
+      ['selected-indices', 'number[]', '[0]', 'Controlled selection'],
+    ],
+    events: [['k3-change', '{ indices, values }', 'User changed selection']],
+    methods: [
+      ['getSelectedIndices', '() => number[]', 'Current indices'],
+      ['setSelectedIndices', '(indices) => void', 'Programmatic (no emit)'],
+    ],
+  },
+  bubble: {
+    properties: [
+      ['placement', "'start'|'end'", 'start', 'Incoming vs outgoing'],
+      ['color', 'BubbleColor', 'default', 'Body tone'],
+    ],
+    slots: [
+      ['image', 'Avatar or thumbnail'],
+      ['header', 'Name · timestamp'],
+      ['(default)', 'Message body'],
+      ['footer', 'Status · meta'],
+    ],
+    'css-parts': [
+      ['root', 'Row wrapper'],
+      ['body', 'Bubble surface'],
+    ],
+  },
+  codeblock: {
+    properties: [
+      ['label', 'string', 'Code', 'Toolbar title'],
+      ['language', 'string', 'plain', 'Highlight grammar'],
+      ['collapsible', 'boolean', 'false', 'Expand/collapse long blocks'],
+      ['show-copy / show-download', 'boolean', 'true', 'Toolbar actions'],
+      ['code', 'string', "''", 'Source when no slot'],
+    ],
+    events: [['k3-copy', '{ text }', 'Copy succeeded']],
+    slots: [['(default)', '<pre><code>…</code></pre>']],
+  },
+  countdown: {
+    properties: [
+      ['time', 'number', '0', 'Duration ms (if no end-date)'],
+      ['end-date', 'string', 'null', 'ISO end timestamp'],
+      ['format', 'string', 'HH : mm : ss', 'Display format'],
+      ['segments', 'boolean', 'false', 'Separate cells'],
+      ['with-labels', 'boolean', 'false', 'Unit labels under segments'],
+      ['auto-start', 'boolean', 'true', 'Start on connect'],
+    ],
+    events: [
+      ['k3-change', '{ remaining }', 'Tick (ms left)'],
+      ['k3-end', '—', 'Reached zero'],
+    ],
+    methods: [
+      ['start / pause / reset', '() => void', 'Playback control'],
+    ],
+  },
+  marquee: {
+    properties: [
+      ['mode', "'infinite'|'classic'", 'infinite', 'Loop style'],
+      ['direction', "'left'|'right'", 'left', 'Scroll direction'],
+      ['duration', 'number', '20', 'Seconds per cycle'],
+      ['speed', 'number', 'null', 'Px/s (overrides duration)'],
+      ['pause-on-hover', 'boolean', 'false', 'Pause while hovered'],
+      ['autoplay', 'boolean', 'true', 'Start on connect'],
+    ],
+    methods: [
+      ['play / stop', '() => void', 'Animation control'],
+    ],
+    slots: [['(default)', 'Ticker content']],
+  },
+  breadcrumb: {
+    properties: [
+      ['items', 'BreadcrumbItem[]', '[]', 'Trail JSON'],
+      ['variant', "'plain'|'tonal'|'filled'", 'plain', 'Crumb chrome'],
+      ['separator', "'chevron'|'slash'|'dot'|'arrow'", 'chevron', 'Divider style'],
+      ['size', "'sm'|'md'|'lg'", 'md', 'Type scale'],
+      ['show-icons', 'boolean', 'true', 'Leading icons'],
+      ['collapse-after', 'number', 'null', 'Collapse middle crumbs'],
+    ],
+    events: [['k3-select', '{ item, index }', 'Crumb activated']],
+  },
+  pagination: {
+    properties: [
+      ['page', 'number', '1', 'Current page (1-based)'],
+      ['count', 'number', '10', 'Total pages'],
+      ['sibling-count', 'number', '1', 'Neighbors around current'],
+      ['show-first / show-last / show-prev / show-next', 'boolean', 'true', 'Nav buttons'],
+      ['disabled', 'boolean', 'false', 'Non-interactive'],
+    ],
+    events: [['k3-change', '{ page }', 'Page changed']],
+    methods: [['goTo', '(page) => void', 'Navigate if in range']],
+  },
+  'pagination-alpha': {
+    properties: [
+      ['items', 'string[]', '[]', 'Labels for counts'],
+      ['active-letter', 'string', 'A', 'Highlighted letter'],
+      ['size', "'sm'|'md'|'lg'", 'md', 'Hit target scale'],
+      ['orientation', "'horizontal'|'vertical'", 'horizontal', 'Layout'],
+      ['show-count', 'boolean', 'true', 'Per-letter counts'],
+      ['show-disabled', 'boolean', 'true', 'Show zero-count letters'],
+    ],
+    events: [['k3-select', '{ letter }', 'Letter chosen']],
+  },
+  'index-list': {
+    properties: [
+      ['items', 'IndexListItem[]', '[]', 'Directory rows'],
+      ['show-rail', 'boolean', 'true', 'A–Z scrub rail'],
+      ['sticky-headers', 'boolean', 'true', 'Pin section titles'],
+      ['rail-scrub', 'boolean', 'true', 'Drag on rail'],
+      ['hide-empty-keys', 'boolean', 'false', 'Omit empty sections'],
+    ],
+    events: [['k3-section-change', '{ key }', 'Active section']],
+    methods: [['scrollToKey', '(key, fromUser?) => void', 'Scroll to section']],
+  },
+  'scroll-to-top': {
+    properties: [
+      ['threshold', 'number', '80', 'Show after scrollY > threshold'],
+      ['size', 'number', '56', 'FAB diameter'],
+      ['show-progress', 'boolean', 'true', 'SVG progress ring'],
+      ['icon', 'string', 'keyboard_arrow_up', 'Inner glyph'],
+      ['scroll-duration', 'number', '450', 'Smooth scroll ms'],
+    ],
+    events: [['k3-scroll-top', '—', 'Scroll animation finished']],
+    methods: [['scrollToTop', '() => void', 'Scroll window to top']],
+  },
   'buttons-menu': {
     properties: [
       ['label', 'string', 'Menu', 'Trigger label'],
