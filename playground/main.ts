@@ -2284,6 +2284,7 @@ function wireDemoPages(): void {
   wireColorLab();
   wireButtonPillDemos();
   wireMeetToolbarDemo();
+  wireArrowPadGridDemos();
 
   const wireToggle = (id: string): void => {
     const el = document.getElementById(id) as (HTMLElement & { selected: boolean }) | null;
@@ -2295,6 +2296,33 @@ function wireDemoPages(): void {
   wireToggle('btn-toggle-square');
   wireSliderLab();
   wireProgressLab();
+}
+
+/** Buttons Arrow / Pad / Grid — live value labels on demo pages. */
+function wireArrowPadGridDemos(): void {
+  const arrowVal = document.getElementById('arrow-val');
+  document.querySelectorAll('k3-button-arrow').forEach((el) => {
+    el.addEventListener('k3-change', ((e: CustomEvent<{ value?: string }>) => {
+      if (arrowVal && e.detail?.value != null) arrowVal.textContent = e.detail.value;
+    }) as EventListener);
+  });
+
+  const padVal = document.getElementById('pad-val');
+  document.querySelectorAll('k3-button-pad').forEach((el) => {
+    el.addEventListener('k3-navigate', ((e: CustomEvent<{ direction?: string }>) => {
+      if (padVal && e.detail?.direction != null) padVal.textContent = e.detail.direction;
+    }) as EventListener);
+  });
+
+  const gridVal = document.getElementById('grid-val');
+  document.querySelectorAll('k3-button-grid').forEach((el) => {
+    el.addEventListener('k3-select', ((e: CustomEvent<{ index?: number; label?: string }>) => {
+      if (!gridVal) return;
+      const { index, label } = e.detail ?? {};
+      gridVal.textContent =
+        label != null ? `${label}${index != null ? ` (#${index})` : ''}` : '—';
+    }) as EventListener);
+  });
 }
 
 function wireProgressLab(): void {

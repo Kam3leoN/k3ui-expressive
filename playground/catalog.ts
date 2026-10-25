@@ -32,9 +32,13 @@ export const DOC_CATEGORIES = [
 export const PAGE_ID_ALIASES: Record<string, string> = {
   button: 'buttons',
   'icon-button': 'buttons-icon',
+  'button-arrow': 'buttons-arrow',
+  'button-grid': 'buttons-grid',
   'button-group': 'buttons-group',
   'button-menu': 'buttons-menu',
+  'button-pad': 'buttons-pad',
   'button-pill': 'buttons-pill',
+  'button-smart': 'buttons-smart',
   'split-button': 'buttons-split',
   'extended-fab': 'fab-extended',
   'doc-nav': 'prev-next',
@@ -53,13 +57,27 @@ export function resolvePageId(id: string): string {
 }
 
 export const DOC_COMPONENTS: DocComponent[] = [
-  // Buttons — Family Type · alpha: Buttons · Group · Icon · Menu · Split
+  // Buttons — Family Type · alpha: Arrow · Grid · Group · Icon · Menu · Pad · Pill · Smart · Split
   {
     id: 'buttons',
     category: 'Buttons',
     title: 'Buttons',
     titleKey: 'doc.button.title',
     blurbKey: 'doc.button.blurb',
+  },
+  {
+    id: 'buttons-arrow',
+    category: 'Buttons',
+    title: 'Buttons Arrow',
+    titleKey: 'doc.button-arrow.title',
+    blurbKey: 'doc.button-arrow.blurb',
+  },
+  {
+    id: 'buttons-grid',
+    category: 'Buttons',
+    title: 'Buttons Grid',
+    titleKey: 'doc.button-grid.title',
+    blurbKey: 'doc.button-grid.blurb',
   },
   {
     id: 'buttons-group',
@@ -83,11 +101,25 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.button-menu.blurb',
   },
   {
+    id: 'buttons-pad',
+    category: 'Buttons',
+    title: 'Buttons Pad',
+    titleKey: 'doc.button-pad.title',
+    blurbKey: 'doc.button-pad.blurb',
+  },
+  {
     id: 'buttons-pill',
     category: 'Buttons',
     title: 'Buttons Pill',
     titleKey: 'doc.button-pill.title',
     blurbKey: 'doc.button-pill.blurb',
+  },
+  {
+    id: 'buttons-smart',
+    category: 'Buttons',
+    title: 'Buttons Smart',
+    titleKey: 'doc.button-smart.title',
+    blurbKey: 'doc.button-smart.blurb',
   },
   {
     id: 'buttons-split',
@@ -96,13 +128,20 @@ export const DOC_COMPONENTS: DocComponent[] = [
     titleKey: 'doc.split-button.title',
     blurbKey: 'doc.split-button.blurb',
   },
-  // Actions — FAB family · alpha: FAB · Extended · Menu · then Ripple
+  // Actions — FAB family · alpha: FAB · Dial · Extended · Menu · Rail · then Ripple
   {
     id: 'fab',
     category: 'Actions',
     title: 'FAB',
     titleKey: 'doc.fab.title',
     blurbKey: 'doc.fab.blurb',
+  },
+  {
+    id: 'fab-dial',
+    category: 'Actions',
+    title: 'FAB Dial',
+    titleKey: 'doc.fab-dial.title',
+    blurbKey: 'doc.fab-dial.blurb',
   },
   {
     id: 'fab-extended',
@@ -117,6 +156,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'FAB Menu',
     titleKey: 'doc.fab-menu.title',
     blurbKey: 'doc.fab-menu.blurb',
+  },
+  {
+    id: 'fab-rail',
+    category: 'Actions',
+    title: 'FAB Rail',
+    titleKey: 'doc.fab-rail.title',
+    blurbKey: 'doc.fab-rail.blurb',
   },
   {
     id: 'ripple',
@@ -195,6 +241,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Chips',
     titleKey: 'doc.chip.title',
     blurbKey: 'doc.chip.blurb',
+  },
+  {
+    id: 'counter',
+    category: 'Inputs',
+    title: 'Counter',
+    titleKey: 'doc.counter.title',
+    blurbKey: 'doc.counter.blurb',
   },
   {
     id: 'slider',

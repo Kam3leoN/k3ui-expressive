@@ -50,10 +50,20 @@ interface SegDesc {
   end: number;
   lead: boolean;
   trail: boolean;
-  /** Inset 6dp+half-handle from the start edge (toward handle). */
+  /** Inset gap+half-handle from the start edge (toward handle). */
   padStart: boolean;
-  /** Inset 6dp+half-handle from the end edge (toward handle). */
+  /** Inset gap+half-handle from the end edge (toward handle). */
   padEnd: boolean;
+  /**
+   * Centered origin only — inset `thumbTrackGap` (no half-handle) at start.
+   * Mutually exclusive with {@link padStart}.
+   */
+  originGapStart?: boolean;
+  /**
+   * Centered origin only — inset `thumbTrackGap` (no half-handle) at end.
+   * Mutually exclusive with {@link padEnd}.
+   */
+  originGapEnd?: boolean;
 }
 
 /**
@@ -734,7 +744,10 @@ export class K3Slider extends K3Element {
     if (this.centered) {
       const c = this.axisPct(this.centerFraction());
       if (Math.abs(f - c) < 0.5) {
-        /* At center — gaps on both sides of the handle (central gap). */
+        /*
+         * Handle rests on the midpoint — one M3 handle-pad each side
+         * (same as standard). No active segment.
+         */
         inactive.push({
           start: 0,
           end: c,
@@ -753,8 +766,15 @@ export class K3Slider extends K3Element {
         });
         return { active, inactive };
       }
+      /*
+       * Active grows from the midpoint toward the handle.
+       * M3 thumbTrackGap at the handle (full pad = gap + half-handle) AND a
+       * single origin gap at center (gap only — no half-handle, no 2×).
+       * Never flush the center join (gap is required by the specs).
+       */
       const lo = Math.min(c, f);
       const hi = Math.max(c, f);
+      const handleAtHi = f >= c; /* active fills center→handle (or handle→center) */
       if (lo > 0.5) {
         inactive.push({
           start: 0,
@@ -762,17 +782,18 @@ export class K3Slider extends K3Element {
           lead: true,
           trail: false,
           padStart: false,
-          padEnd: true, /* gap at center (or handle when below) */
+          padEnd: !handleAtHi, /* handle on lo */
+          originGapEnd: handleAtHi, /* center on lo */
         });
       }
       active.push({
         start: lo,
         end: hi,
-        /* Both ends face a gap (center or handle) — inner 2dp + pad always. */
         lead: false,
         trail: false,
-        padStart: true,
-        padEnd: true,
+        /* Handle side only — center gap lives on the inactive neighbour. */
+        padStart: !handleAtHi,
+        padEnd: handleAtHi,
       });
       if (hi < 99.5) {
         inactive.push({
@@ -780,7 +801,8 @@ export class K3Slider extends K3Element {
           end: 100,
           lead: false,
           trail: true,
-          padStart: true,
+          padStart: handleAtHi, /* handle on hi */
+          originGapStart: !handleAtHi, /* center on hi */
           padEnd: false,
         });
       }
@@ -867,6 +889,9 @@ export class K3Slider extends K3Element {
       '--k3-slider-hw-press': `${SLIDER_HANDLE_WIDTH_PRESSED}px`,
       '--k3-slider-pad-rest': `${padRest}px`,
       '--k3-slider-pad-press': `${padPress}px`,
+      /* thumbTrackGap alone — centered origin (no half-handle). */
+      '--k3-slider-gap-rest': `${SLIDER_HANDLE_GAP}px`,
+      '--k3-slider-gap-press': `${SLIDER_HANDLE_GAP_PRESSED}px`,
       '--k3-slider-vertical-len': `${t.verticalLen}px`,
       '--k3-slider-corner': `${t.corner}px`,
       '--k3-slider-inner-corner': `${SLIDER_INNER_CORNER}px`,
@@ -880,38 +905,55 @@ export class K3Slider extends K3Element {
     };
   }
 
+  /** CSS length inset on a segment edge (handle pad or centered origin gap). */
+  private edgeInset(handlePad: boolean, originGap: boolean): string {
+    if (handlePad) return 'var(--k3-slider-pad)';
+    if (originGap) return 'var(--k3-slider-gap)';
+    return '0px';
+  }
+
   /**
-   * Segment box — pad is `var(--k3-slider-pad)`, animated in lockstep with
-   * `--k3-slider-hw` (same duration + easing on `.area`).
+   * Segment box — insets use `--k3-slider-pad` (handle) and/or
+   * `--k3-slider-gap` (centered origin), animated with `--k3-slider-hw`.
    */
   private segStyle(s: SegDesc): Record<string, string> {
-    const pad = 'var(--k3-slider-pad)';
+    const startInset = this.edgeInset(s.padStart, !!s.originGapStart);
+    const endInset = this.edgeInset(s.padEnd, !!s.originGapEnd);
     const span = Math.max(0, s.end - s.start);
     const padSum =
-      s.padStart && s.padEnd
-        ? `calc(2 * ${pad})`
-        : s.padStart || s.padEnd
-          ? pad
-          : '0px';
+      startInset === '0px' && endInset === '0px'
+        ? '0px'
+        : startInset === '0px'
+          ? endInset
+          : endInset === '0px'
+            ? startInset
+            : `calc(${startInset} + ${endInset})`;
     const len = `max(0px, calc(${span}% - ${padSum}))`;
     if (this.vertical) {
       if (this.minAtTop) {
         return {
           bottom: 'auto',
-          top: s.padStart ? `calc(${s.start}% + ${pad})` : `${s.start}%`,
+          top:
+            startInset === '0px'
+              ? `${s.start}%`
+              : `calc(${s.start}% + ${startInset})`,
           height: len,
         };
       }
       return {
         top: 'auto',
-        bottom: s.padStart ? `calc(${s.start}% + ${pad})` : `${s.start}%`,
+        bottom:
+          startInset === '0px'
+            ? `${s.start}%`
+            : `calc(${s.start}% + ${startInset})`,
         height: len,
       };
     }
     return {
-      insetInlineStart: s.padStart
-        ? `calc(${s.start}% + ${pad})`
-        : `${s.start}%`,
+      insetInlineStart:
+        startInset === '0px'
+          ? `${s.start}%`
+          : `calc(${s.start}% + ${startInset})`,
       width: len,
     };
   }

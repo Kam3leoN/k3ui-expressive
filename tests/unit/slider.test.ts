@@ -270,6 +270,29 @@ describe('k3-slider', () => {
     expect(input.value).toBe('100');
   });
 
+  it('centered keeps one M3 origin gap + handle pad (not 2×, not 0)', async () => {
+    host.innerHTML = `<k3-slider variant="centered" min="-50" max="50" value="25"></k3-slider>`;
+    const el = host.querySelector('k3-slider') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+    };
+    await el.updateComplete;
+    const active = el.shadowRoot!.querySelector('.seg.active') as HTMLElement;
+    const inactive = [
+      ...el.shadowRoot!.querySelectorAll('.seg.inactive'),
+    ] as HTMLElement[];
+    expect(active).toBeTruthy();
+    /* Handle above center → active pads only on trail (handle). */
+    expect(active.style.width).toContain('var(--k3-slider-pad)');
+    expect(active.style.insetInlineStart).not.toContain('var(--k3-slider-pad)');
+    expect(active.style.insetInlineStart).not.toContain('var(--k3-slider-gap)');
+    const lead = inactive.find((s) => s.classList.contains('lead-cap'));
+    expect(lead).toBeTruthy();
+    /* Single origin gap = thumbTrackGap only (not handle pad). */
+    expect(lead!.style.width).toContain('var(--k3-slider-gap)');
+    expect(lead!.style.width).not.toContain('var(--k3-slider-pad)');
+    expect(el.style.getPropertyValue('--k3-slider-gap-rest').trim()).toBe('4px');
+  });
+
   it('swaps inset icon-min at value min', async () => {
     host.innerHTML = `<k3-slider size="md" inset-icon value="0" min="0" max="100">
       <span slot="icon" id="ic-on">on</span>

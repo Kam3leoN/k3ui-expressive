@@ -316,6 +316,106 @@ const COMPONENT_API: Record<
       ['menu', 'k3-menu-item × ≥2 (first/last edges)'],
     ],
   },
+  'buttons-arrow': {
+    properties: [
+      ['direction', "'horizontal'|'vertical'", 'horizontal', 'Chevron axis'],
+      ['variant', "'filled'|'tonal'|'outlined'", 'filled', 'Surface style'],
+      ['list', 'string[] (CSV / JSON)', '[]', 'Cyclic values'],
+      ['index', 'number', '0', 'Current list index'],
+    ],
+    events: [['k3-change', '{ value, index }', 'After step / setIndex']],
+    methods: [
+      ['prev', '() => void', 'Previous (cycle)'],
+      ['next', '() => void', 'Next (cycle)'],
+      ['setIndex', '(index) => void', 'Clamp + emit'],
+      ['setList', '(list, reset?) => void', 'Replace values'],
+    ],
+  },
+  'buttons-grid': {
+    properties: [
+      ['variant', "'filled'|'tonal'|'outlined'", 'filled', 'Cell / FAB style'],
+      ['trigger-fab', 'boolean', 'true', 'FAB reveal vs always-open pad'],
+      ['labels', 'string[] (CSV)', '1…9', 'Nine cell labels'],
+    ],
+    events: [['k3-select', '{ index, label }', 'Cell chosen (0-based)']],
+    methods: [
+      ['expand', '() => void', 'Open FAB grid'],
+      ['collapse', '() => void', 'Close FAB grid'],
+      ['select', '(index) => void', 'Emit + collapse FAB'],
+    ],
+  },
+  'buttons-pad': {
+    properties: [
+      ['mode', "'diagonal'|'cardinal'", 'diagonal', 'Corner vs rotated cardinal'],
+      ['variant', "'filled'|'tonal'|'outlined'", 'filled', 'Cell style'],
+    ],
+    events: [['k3-navigate', '{ direction }', 'Cell pressed']],
+    methods: [['navigate', '(direction) => void', 'Emit direction']],
+  },
+  'buttons-smart': {
+    properties: [
+      ['label', 'string', "''", 'Primary label / aria-label'],
+      ['active', 'boolean', 'false', 'ON squircle state'],
+      ['active-subtitle', 'string', "'On'", 'Subtitle when active'],
+      ['inactive-subtitle', 'string', "''", 'Subtitle when inactive'],
+      ['haptic-duration', 'number', '15', 'Vibrate ms (0 = light)'],
+      ['disabled', 'boolean', 'false', 'Disables toggle'],
+    ],
+    events: [['k3-toggle', '{ active }', 'After state change']],
+    methods: [
+      ['toggle', '() => void', 'Flip active'],
+      ['setActive', '(active) => void', 'Set + emit'],
+    ],
+    slots: [['icon', 'Leading Material Symbol']],
+  },
+  'fab-dial': {
+    properties: [
+      ['open', 'boolean', 'false', 'Expanded dial'],
+      ['position', "'bottom-right'|…|'top-left'", 'bottom-right', 'Corner'],
+      ['layout', "'flower'|'vertical'", 'flower', 'Flower fan (prefer); vertical → use FAB Rail'],
+      ['fixed', 'boolean', 'false', 'Viewport dock'],
+      ['show-labels', 'boolean', 'false', 'Action labels'],
+      ['scrim', 'boolean', 'true', 'Dismiss scrim'],
+      ['fab-icon', 'string', 'add', 'Trigger ligature'],
+      ['disabled', 'boolean', 'false', 'Disables trigger'],
+    ],
+    events: [['k3-item-click', '{ item }', 'Action activated']],
+    slots: [['(default)', 'k3-fab-dial-item children']],
+  },
+  'fab-rail': {
+    properties: [
+      ['open', 'boolean', 'false', 'Expanded rail'],
+      ['position', "'bottom-right'|…|'top-left'", 'bottom-right', 'Corner'],
+      ['direction', "'up'|'down'|'left'|'right'|''", "''", 'Axis (corner default)'],
+      ['fixed', 'boolean', 'false', 'Viewport dock'],
+      ['auto-fit', 'boolean', 'true', 'Scale to viewport'],
+      ['scrim', 'boolean', 'true', 'Dismiss scrim'],
+      ['fab-icon', 'string', 'add', 'Trigger ligature'],
+      ['disabled', 'boolean', 'false', 'Disables trigger'],
+    ],
+    events: [['k3-item-click', '{ item }', 'Action activated']],
+    slots: [['(default)', 'k3-fab-rail-item children']],
+  },
+  counter: {
+    properties: [
+      ['value', 'number', '0', 'Current value'],
+      ['size', "'xs'|'sm'|'md'|'lg'|'xl'", 'md', 'Circle diameter ladder'],
+      ['step', 'number', '1', 'Increment amount (e.g. 10)'],
+      ['min / max', 'number', '—', 'Optional bounds'],
+      ['decimals', 'number', '0', 'Display precision'],
+      ['allow-negative', 'boolean', 'false', 'Values < 0 (also if min < 0)'],
+      ['disabled', 'boolean', 'false', 'Non-interactive · faded'],
+      ['readonly', 'boolean', 'false', 'Display only · no ±'],
+    ],
+    events: [
+      ['k3-change', '{ value }', 'Value changed'],
+      ['k3-increment / k3-decrement', '{ value }', 'After ±'],
+    ],
+    methods: [
+      ['getValue', '() => number', 'Current value'],
+      ['setValue', '(next) => void', 'Clamp + emit'],
+    ],
+  },
   'buttons-menu': {
     properties: [
       ['label', 'string', 'Menu', 'Trigger label'],

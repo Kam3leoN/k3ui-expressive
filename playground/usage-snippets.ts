@@ -82,6 +82,63 @@ fav?.addEventListener("k3-change", (e) => {
 </k3-split-button>`,
     css: defaultCss,
   },
+  'buttons-arrow': {
+    components: ['k3-button-arrow'],
+    html: `<k3-button-arrow
+  direction="horizontal"
+  variant="filled"
+  list="Alpha,Beta,Gamma"
+  index="0"
+></k3-button-arrow>
+<p>Value: <span id="arrow-val">Alpha</span></p>`,
+    css: defaultCss,
+    jsExtra: `
+const arrow = document.querySelector("k3-button-arrow");
+const label = document.getElementById("arrow-val");
+arrow?.addEventListener("k3-change", (e) => {
+  if (label) label.textContent = e.detail.value;
+});`,
+  },
+  'buttons-grid': {
+    components: ['k3-button-grid'],
+    html: `<k3-button-grid variant="filled" trigger-fab></k3-button-grid>
+<k3-button-grid variant="tonal" trigger-fab="false"></k3-button-grid>`,
+    css: defaultCss,
+  },
+  'buttons-pad': {
+    components: ['k3-button-pad'],
+    html: `<k3-button-pad mode="diagonal" variant="filled"></k3-button-pad>
+<k3-button-pad mode="cardinal" variant="tonal"></k3-button-pad>`,
+    css: defaultCss,
+    jsExtra: `
+document.querySelector("k3-button-pad")?.addEventListener("k3-navigate", (e) => {
+  console.log("direction", e.detail.direction);
+});`,
+  },
+  'buttons-smart': {
+    components: ['k3-button-smart'],
+    html: `<div class="btn-smart-grid">
+  <k3-button-smart label="Do Not Disturb">
+    ${MS('do_not_disturb_on')}
+  </k3-button-smart>
+  <k3-button-smart label="Flashlight">
+    ${MS('flashlight_on')}
+  </k3-button-smart>
+  <k3-button-smart label="Airplane mode" active>
+    ${MS('airplanemode_active')}
+  </k3-button-smart>
+</div>`,
+    css: `${defaultCss}
+
+.btn-smart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px; /* AOSP qs_tile_margin_horizontal — snapped at runtime by k3-button-smart */
+}
+.btn-smart-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}`,
+  },
   'buttons-menu': {
     components: ['k3-button-menu', 'k3-menu-item'],
     html: `<k3-button-menu label="Options" variant="tonal" size="sm">
@@ -117,6 +174,24 @@ fav?.addEventListener("k3-change", (e) => {
   <k3-menu-item>Cut</k3-menu-item>
   <k3-menu-item>Paste</k3-menu-item>
 </k3-fab-menu>`,
+  },
+  'fab-dial': {
+    components: ['k3-fab-dial', 'k3-fab-dial-item'],
+    html: `<k3-fab-dial position="bottom-right" layout="flower" fab-icon="add">
+  <k3-fab-dial-item item-id="camera" label="Camera" icon="camera"></k3-fab-dial-item>
+  <k3-fab-dial-item item-id="image" label="Gallery" icon="image"></k3-fab-dial-item>
+  <k3-fab-dial-item item-id="list" label="List" icon="list"></k3-fab-dial-item>
+</k3-fab-dial>`,
+    css: defaultCss,
+  },
+  'fab-rail': {
+    components: ['k3-fab-rail', 'k3-fab-rail-item'],
+    html: `<k3-fab-rail position="bottom-right" direction="up" fab-icon="add">
+  <k3-fab-rail-item item-id="camera" label="Camera" icon="camera"></k3-fab-rail-item>
+  <k3-fab-rail-item item-id="image" label="Gallery" icon="image"></k3-fab-rail-item>
+  <k3-fab-rail-item item-id="list" label="List" icon="list"></k3-fab-rail-item>
+</k3-fab-rail>`,
+    css: defaultCss,
   },
   ripple: {
     components: ['k3-ripple'],
@@ -192,6 +267,13 @@ fav?.addEventListener("k3-change", (e) => {
   <k3-chip variant="filter" value="code">Code</k3-chip>
 </k3-chip-set>`,
     css: defaultCss,
+  },
+  counter: {
+    components: ['k3-counter'],
+    html: `<k3-counter value="3" min="0" max="10" size="md"></k3-counter>
+<k3-counter value="20" min="0" max="100" step="10"></k3-counter>
+<k3-counter value="0" min="-20" max="20" allow-negative></k3-counter>
+<k3-counter value="3" disabled></k3-counter>`,
   },
   slider: {
     components: ['k3-slider', 'k3-icon-button'],

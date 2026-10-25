@@ -16,6 +16,12 @@ export const sliderStyles = css`
     inherits: true;
     initial-value: 8px;
   }
+  /* thumbTrackGap alone — centered midpoint (no half-handle). */
+  @property --k3-slider-gap {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 4px;
+  }
 
   :host {
     display: block;
@@ -271,16 +277,19 @@ export const sliderStyles = css`
     min-width: 0;
     min-height: var(--k3-slider-handle-h, 44px);
     cursor: pointer;
-    /* Single press clock — hw (handle) + pad (track/progress gap) lockstep. */
+    /* Single press clock — hw + pad + origin gap lockstep. */
     --k3-slider-hw: var(--k3-slider-hw-rest, 4px);
     --k3-slider-pad: var(--k3-slider-pad-rest, 8px);
+    --k3-slider-gap: var(--k3-slider-gap-rest, 4px);
     transition:
       --k3-slider-hw var(--k3-slider-press-dur) var(--k3-slider-press-ease),
-      --k3-slider-pad var(--k3-slider-press-dur) var(--k3-slider-press-ease);
+      --k3-slider-pad var(--k3-slider-press-dur) var(--k3-slider-press-ease),
+      --k3-slider-gap var(--k3-slider-press-dur) var(--k3-slider-press-ease);
   }
   .area.pressed {
     --k3-slider-hw: var(--k3-slider-hw-press, 2px);
     --k3-slider-pad: var(--k3-slider-pad-press, 3px);
+    --k3-slider-gap: var(--k3-slider-gap-press, 2px);
   }
   :host([orientation='vertical']) .area {
     flex-direction: column;
@@ -356,6 +365,31 @@ export const sliderStyles = css`
   :host([orientation='vertical'][top-to-bottom]) .seg.trail-cap {
     border-end-start-radius: var(--k3-slider-corner, 8px);
     border-end-end-radius: var(--k3-slider-corner, 8px);
+    border-start-start-radius: var(--k3-slider-inner-corner, 2px);
+    border-start-end-radius: var(--k3-slider-inner-corner, 2px);
+  }
+  /* Vertical flat join — block axis (start = min end when bottom-up). */
+  :host([orientation='vertical']) .seg.flat-start {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+    border-start-start-radius: var(--k3-slider-inner-corner, 2px);
+    border-start-end-radius: var(--k3-slider-inner-corner, 2px);
+  }
+  :host([orientation='vertical']) .seg.flat-end {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+    border-end-start-radius: var(--k3-slider-inner-corner, 2px);
+    border-end-end-radius: var(--k3-slider-inner-corner, 2px);
+  }
+  :host([orientation='vertical'][top-to-bottom]) .seg.flat-start {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+    border-end-start-radius: var(--k3-slider-inner-corner, 2px);
+    border-end-end-radius: var(--k3-slider-inner-corner, 2px);
+  }
+  :host([orientation='vertical'][top-to-bottom]) .seg.flat-end {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
     border-start-start-radius: var(--k3-slider-inner-corner, 2px);
     border-start-end-radius: var(--k3-slider-inner-corner, 2px);
   }

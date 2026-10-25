@@ -47,7 +47,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Material Symbols subset (~22 KB) — full variable font is ~5 MB -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility,account_circle,add,alarm,anchor,android,animation,archive,arrow_back,arrow_drop_down,arrow_forward,article,back_hand,beach_access,bedtime,bluetooth,bluetooth_disabled,bolt,bookmark,brightness_auto,calendar_today,call_end,celebration,change_history,check,checkroom,chevron_left,chevron_right,clear,close,closed_caption,cloud_download,cloud_off,code,computer,content_copy,content_cut,content_paste,create_new_folder,dark_mode,dashboard,delete,design_services,desktop_windows,devices,directions_car,directions_walk,download,drafts,drag_handle,drag_indicator,drive_file_move,drive_file_rename_outline,edit,error,expand_less,expand_more,explore,favorite,filter_alt,flare,flight,flight_takeoff,folder,format_align_center,format_align_left,format_align_right,format_bold,format_italic,format_textdirection_l_to_r,format_textdirection_r_to_l,format_underlined,forward,gesture,grid_on,hearing_disabled,help,home,inbox,info,input,inventory_2,keyboard,language,laptop_mac,layers,library_music,light_mode,link,list,local_cafe,local_fire_department,location_off,logout,luggage,mail,map,match_case,menu,menu_book,menu_open,mic,mic_off,monitor,mood,more_horiz,more_vert,music_note,navigation,notifications,notifications_off,palette,pause,person,pets,play_arrow,present_to_all,question_mark,radio,rainy,redo,remove,repeat,reply,reply_all,restaurant,rocket_launch,route,schedule,search,select_all,send,sensors_off,sentiment_satisfied,settings,shapes,share,signal_cellular_off,spa,space_bar,sports_esports,star,steps,stop,straighten,sunny,swap_horiz,swap_vert,timer,title,touch_app,train,tune,two_wheeler,undo,videocam,videocam_off,view_column,view_list,visibility,visibility_off,volume_off,volume_up,watch,water_drop,widgets,wifi,wifi_off&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility,account_circle,add,airplanemode_active,alarm,anchor,android,animation,apps,archive,arrow_back,arrow_drop_down,arrow_forward,article,back_hand,beach_access,bedtime,bluetooth,bluetooth_disabled,bolt,bookmark,brightness_auto,calendar_today,call_end,camera,celebration,change_history,check,checkroom,chevron_left,chevron_right,clear,close,closed_caption,cloud_download,cloud_off,code,computer,content_copy,content_cut,content_paste,create_new_folder,dark_mode,dashboard,delete,design_services,desktop_windows,devices,directions_car,directions_walk,do_not_disturb_on,download,drafts,drag_handle,drag_indicator,drive_file_move,drive_file_rename_outline,east,edit,error,expand_less,expand_more,explore,favorite,filter_alt,flare,flashlight_on,flight,flight_takeoff,folder,format_align_center,format_align_left,format_align_right,format_bold,format_italic,format_textdirection_l_to_r,format_textdirection_r_to_l,format_underlined,forward,gesture,grid_on,hearing_disabled,help,home,image,inbox,info,input,inventory_2,keyboard,language,laptop_mac,layers,library_music,light_mode,link,list,local_cafe,local_fire_department,location_off,logout,luggage,mail,map,match_case,menu,menu_book,menu_open,mic,mic_off,monitor,mood,more_horiz,more_vert,music_note,navigation,north,north_east,north_west,notifications,notifications_off,palette,pause,person,pets,play_arrow,present_to_all,question_mark,radio,rainy,redo,remove,repeat,reply,reply_all,restaurant,rocket_launch,route,schedule,search,select_all,send,sensors_off,sentiment_satisfied,settings,shapes,share,signal_cellular_off,south,south_east,south_west,spa,space_bar,sports_esports,star,steps,stop,straighten,sunny,swap_horiz,swap_vert,timer,title,touch_app,train,tune,two_wheeler,undo,videocam,videocam_off,view_column,view_list,visibility,visibility_off,volume_off,volume_up,watch,water_drop,west,widgets,wifi,wifi_off&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./playground.css" />
@@ -1636,6 +1636,300 @@ fav?.addEventListener("k3-change", (e) => {
           </div>
         </article>
 
+
+        <!-- FAB DIAL -->
+        <article class="comp-page" data-page="fab-dial" id="page-fab-dial" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.actions">Actions</p>
+            <h1 data-i18n="doc.fab-dial.title">FAB Dial</h1>
+            <p data-i18n="doc.fab-dial.blurb">
+              Speed dial — flower fan · corner dock · up to four actions.
+            </p>
+            <p class="doc-intro" data-i18n="doc.fab-dial.intro">
+              FAB Dial fans related actions from a single FAB in a radial flower. Keep icons
+              unmistakable, dismiss with scrim or Escape, and avoid stacking with another open
+              dial. For a linear stack (including vertical), use FAB Rail.
+            </p>
+          </header>
+          <div class="surface stack gap-lg">
+            <div class="demo-block">
+              <!-- One stage · 4 corners · flower only (linear / vertical → FAB Rail) -->
+              <div class="demo-frame demo-frame--fab-menu fab-corners">
+                <div class="fab-anchor fab-anchor--tl">
+                  <k3-fab-dial position="top-left" layout="flower" fab-icon="add">
+                    <k3-fab-dial-item item-id="camera" label="Camera" icon="camera"></k3-fab-dial-item>
+                    <k3-fab-dial-item item-id="image" label="Gallery" icon="image"></k3-fab-dial-item>
+                    <k3-fab-dial-item item-id="list" label="List" icon="list"></k3-fab-dial-item>
+                  </k3-fab-dial>
+                </div>
+                <div class="fab-anchor fab-anchor--tr">
+                  <k3-fab-dial position="top-right" layout="flower" fab-icon="add">
+                    <k3-fab-dial-item item-id="camera" label="Camera" icon="camera"></k3-fab-dial-item>
+                    <k3-fab-dial-item item-id="image" label="Gallery" icon="image"></k3-fab-dial-item>
+                    <k3-fab-dial-item item-id="list" label="List" icon="list"></k3-fab-dial-item>
+                  </k3-fab-dial>
+                </div>
+                <div class="fab-anchor fab-anchor--bl">
+                  <k3-fab-dial position="bottom-left" layout="flower" fab-icon="add">
+                    <k3-fab-dial-item item-id="camera" label="Camera" icon="camera"></k3-fab-dial-item>
+                    <k3-fab-dial-item item-id="image" label="Gallery" icon="image"></k3-fab-dial-item>
+                    <k3-fab-dial-item item-id="list" label="List" icon="list"></k3-fab-dial-item>
+                  </k3-fab-dial>
+                </div>
+                <div class="fab-anchor fab-anchor--br">
+                  <k3-fab-dial position="bottom-right" layout="flower" fab-icon="add">
+                    <k3-fab-dial-item item-id="camera" label="Camera" icon="camera"></k3-fab-dial-item>
+                    <k3-fab-dial-item item-id="image" label="Gallery" icon="image"></k3-fab-dial-item>
+                    <k3-fab-dial-item item-id="list" label="List" icon="list"></k3-fab-dial-item>
+                  </k3-fab-dial>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li><span class="pill-num">1</span><span class="variant-label">TL · flower</span></li>
+                <li><span class="pill-num">2</span><span class="variant-label">TR · flower</span></li>
+                <li><span class="pill-num">3</span><span class="variant-label">BL · flower</span></li>
+                <li><span class="pill-num">4</span><span class="variant-label">BR · flower</span></li>
+              </ol>
+            </div>
+          </div>
+        </article>
+
+
+        <!-- FAB RAIL -->
+        <article class="comp-page" data-page="fab-rail" id="page-fab-rail" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.actions">Actions</p>
+            <h1 data-i18n="doc.fab-rail.title">FAB Rail</h1>
+            <p data-i18n="doc.fab-rail.blurb">
+              Speed dial — linear rail along an axis · auto-fit · up to five actions.
+            </p>
+            <p class="doc-intro" data-i18n="doc.fab-rail.intro">
+              FAB Rail expands actions in a straight line from the trigger. Choose direction by
+              corner, let auto-fit scale for short viewports, and keep labels optional. Use when
+              order matters more than a radial fan.
+            </p>
+          </header>
+          <div class="surface stack gap-lg">
+            <div class="demo-block">
+              <!-- One stage · 4 corners · linear axes (← → · up/down via direction) -->
+              <div class="demo-frame demo-frame--fab-menu fab-corners">
+                <div class="fab-anchor fab-anchor--tl">
+                  <k3-fab-rail position="top-left" direction="right" fab-icon="add">
+                    <k3-fab-rail-item item-id="camera" label="Camera" icon="camera"></k3-fab-rail-item>
+                    <k3-fab-rail-item item-id="image" label="Gallery" icon="image"></k3-fab-rail-item>
+                    <k3-fab-rail-item item-id="list" label="List" icon="list"></k3-fab-rail-item>
+                  </k3-fab-rail>
+                </div>
+                <div class="fab-anchor fab-anchor--tr">
+                  <k3-fab-rail position="top-right" direction="down" fab-icon="add">
+                    <k3-fab-rail-item item-id="camera" label="Camera" icon="camera"></k3-fab-rail-item>
+                    <k3-fab-rail-item item-id="image" label="Gallery" icon="image"></k3-fab-rail-item>
+                    <k3-fab-rail-item item-id="list" label="List" icon="list"></k3-fab-rail-item>
+                  </k3-fab-rail>
+                </div>
+                <div class="fab-anchor fab-anchor--bl">
+                  <k3-fab-rail position="bottom-left" direction="up" fab-icon="add">
+                    <k3-fab-rail-item item-id="camera" label="Camera" icon="camera"></k3-fab-rail-item>
+                    <k3-fab-rail-item item-id="image" label="Gallery" icon="image"></k3-fab-rail-item>
+                    <k3-fab-rail-item item-id="list" label="List" icon="list"></k3-fab-rail-item>
+                  </k3-fab-rail>
+                </div>
+                <div class="fab-anchor fab-anchor--br">
+                  <k3-fab-rail position="bottom-right" direction="left" fab-icon="add">
+                    <k3-fab-rail-item item-id="camera" label="Camera" icon="camera"></k3-fab-rail-item>
+                    <k3-fab-rail-item item-id="image" label="Gallery" icon="image"></k3-fab-rail-item>
+                    <k3-fab-rail-item item-id="list" label="List" icon="list"></k3-fab-rail-item>
+                  </k3-fab-rail>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li><span class="pill-num">1</span><span class="variant-label">TL · right</span></li>
+                <li><span class="pill-num">2</span><span class="variant-label">TR · down</span></li>
+                <li><span class="pill-num">3</span><span class="variant-label">BL · up</span></li>
+                <li><span class="pill-num">4</span><span class="variant-label">BR · left</span></li>
+              </ol>
+            </div>
+          </div>
+        </article>
+
+
+        <!-- BUTTONS ARROW -->
+        <article class="comp-page" data-page="buttons-arrow" id="page-buttons-arrow" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.buttons">Buttons</p>
+            <h1 data-i18n="doc.button-arrow.title">Buttons Arrow</h1>
+            <p data-i18n="doc.button-arrow.blurb">
+              Split chevrons — horizontal or vertical · filled · tonal · outlined · cyclic list.
+            </p>
+            <p class="doc-intro" data-i18n="doc.button-arrow.intro">
+              Arrow buttons step through a cyclic list with paired chevrons. Use horizontal for
+              carousels and vertical for stacked pages. Keep the list short, surface the current
+              value nearby, and match filled, tonal, or outlined to nearby controls.
+            </p>
+          </header>
+          <div class="surface stack gap-lg">
+            <p class="hint">
+              Value: <span id="arrow-val" class="notranslate" translate="no">Alpha</span>
+            </p>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-arrow
+                        direction="horizontal"
+                        variant="filled"
+                        list="Alpha,Beta,Gamma,Delta"
+                        index="0"
+                      ></k3-button-arrow>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">1</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-arrow
+                        direction="horizontal"
+                        variant="tonal"
+                        list="Alpha,Beta,Gamma,Delta"
+                        index="0"
+                      ></k3-button-arrow>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">2</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-arrow
+                        direction="horizontal"
+                        variant="outlined"
+                        list="Alpha,Beta,Gamma,Delta"
+                        index="0"
+                      ></k3-button-arrow>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">3</span>
+                  </div>
+                </div>
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-arrow
+                        direction="vertical"
+                        variant="filled"
+                        list="Alpha,Beta,Gamma,Delta"
+                        index="0"
+                      ></k3-button-arrow>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">4</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-arrow
+                        direction="vertical"
+                        variant="tonal"
+                        list="Alpha,Beta,Gamma,Delta"
+                        index="0"
+                      ></k3-button-arrow>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">5</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-arrow
+                        direction="vertical"
+                        variant="outlined"
+                        list="Alpha,Beta,Gamma,Delta"
+                        index="0"
+                      ></k3-button-arrow>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">6</span>
+                  </div>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li><span class="pill-num">1</span><span class="variant-label">H · filled</span></li>
+                <li><span class="pill-num">2</span><span class="variant-label">H · tonal</span></li>
+                <li><span class="pill-num">3</span><span class="variant-label">H · outlined</span></li>
+                <li><span class="pill-num">4</span><span class="variant-label">V · filled</span></li>
+                <li><span class="pill-num">5</span><span class="variant-label">V · tonal</span></li>
+                <li><span class="pill-num">6</span><span class="variant-label">V · outlined</span></li>
+              </ol>
+            </div>
+          </div>
+        </article>
+
+
+        <!-- BUTTONS GRID -->
+        <article class="comp-page" data-page="buttons-grid" id="page-buttons-grid" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.buttons">Buttons</p>
+            <h1 data-i18n="doc.button-grid.title">Buttons Grid</h1>
+            <p data-i18n="doc.button-grid.blurb">
+              3×3 Expressive pad — FAB reveal or always-open · filled · tonal · outlined.
+            </p>
+            <p class="doc-intro" data-i18n="doc.button-grid.intro">
+              Button Grid offers nine peer actions in a compact 3×3. FAB mode expands from a
+              centre trigger; pad mode stays open. Prefer short labels, one clear primary set,
+              and filled, tonal, or outlined to match the surface.
+            </p>
+          </header>
+          <div class="surface stack gap-lg">
+            <p class="hint">
+              Selected: <span id="grid-val" class="notranslate" translate="no">—</span>
+            </p>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-grid variant="filled" trigger-fab></k3-button-grid>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">1</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-grid variant="tonal" trigger-fab></k3-button-grid>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">2</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-grid variant="outlined" trigger-fab></k3-button-grid>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">3</span>
+                  </div>
+                </div>
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-grid variant="filled" trigger-fab="false" data-trigger="pad"></k3-button-grid>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">4</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-grid variant="tonal" trigger-fab="false" data-trigger="pad"></k3-button-grid>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">5</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-grid variant="outlined" trigger-fab="false" data-trigger="pad"></k3-button-grid>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">6</span>
+                  </div>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li><span class="pill-num">1</span><span class="variant-label">FAB · filled</span></li>
+                <li><span class="pill-num">2</span><span class="variant-label">FAB · tonal</span></li>
+                <li><span class="pill-num">3</span><span class="variant-label">FAB · outlined</span></li>
+                <li><span class="pill-num">4</span><span class="variant-label">Pad · filled</span></li>
+                <li><span class="pill-num">5</span><span class="variant-label">Pad · tonal</span></li>
+                <li><span class="pill-num">6</span><span class="variant-label">Pad · outlined</span></li>
+              </ol>
+            </div>
+          </div>
+        </article>
+
         <!-- BUTTON GROUP -->
         <article class="comp-page" data-page="buttons-group" id="page-buttons-group" hidden>
           <header class="section-head">
@@ -2198,6 +2492,123 @@ fav?.addEventListener("k3-change", (e) => {
         </article>
 
         <!-- SPLIT BUTTON -->
+
+        <!-- BUTTONS SMART -->
+        <article class="comp-page" data-page="buttons-smart" id="page-buttons-smart" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.buttons">Buttons</p>
+            <h1 data-i18n="doc.button-smart.title">Buttons Smart</h1>
+            <p data-i18n="doc.button-smart.blurb">
+              Quick Settings tile — pill ↔ squircle morph · marquee label · light haptic.
+            </p>
+            <p class="doc-intro" data-i18n="doc.button-smart.intro">
+              Smart buttons mirror Material You Quick Settings tiles: off is a charcoal pill, on
+              morphs to a squircle on primary-container. Pair an icon with a short label, optional
+              subtitles, and a two-column grid for denser control strips.
+            </p>
+          </header>
+          <div class="surface stack gap-lg">
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases demo-frame--stack">
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: min(100%, 22rem)">
+                    <div class="btn-smart-grid">
+                      <k3-button-smart label="Do Not Disturb">
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="do_not_disturb_on"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button-smart>
+                      <k3-button-smart label="Flashlight">
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="flashlight_on"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button-smart>
+                      <k3-button-smart label="Airplane mode" active class="btn-smart--span-2">
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="airplanemode_active"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button-smart>
+                    </div>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: min(100%, 40rem)">
+                    <div class="btn-smart-grid btn-smart-grid--4">
+                      <k3-button-smart label="Wi‑Fi" active>
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="wifi"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button-smart>
+                      <k3-button-smart label="Bluetooth">
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="bluetooth"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button-smart>
+                      <k3-button-smart label="Dark mode" active>
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="dark_mode"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button-smart>
+                      <k3-button-smart label="Bedtime">
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="bedtime"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button-smart>
+                    </div>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label">2-col · DND · flashlight · airplane</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label">4-col · Wi‑Fi · Bluetooth · Dark · Bedtime</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </article>
+
         <article class="comp-page" data-page="buttons-split" id="page-buttons-split" hidden>
           <header class="section-head">
             <p class="comp-category" data-i18n="doc.nav.buttons">Actions</p>
@@ -2394,6 +2805,80 @@ fav?.addEventListener("k3-change", (e) => {
                 <k3-menu-item>Share</k3-menu-item>
                 <k3-menu-item>Archive</k3-menu-item>
               </k3-button-menu>
+            </div>
+          </div>
+        </article>
+
+
+        <!-- BUTTONS PAD -->
+        <article class="comp-page" data-page="buttons-pad" id="page-buttons-pad" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.buttons">Buttons</p>
+            <h1 data-i18n="doc.button-pad.title">Buttons Pad</h1>
+            <p data-i18n="doc.button-pad.blurb">
+              Four-way pad — diagonal or cardinal · filled · tonal · outlined.
+            </p>
+            <p class="doc-intro" data-i18n="doc.button-pad.intro">
+              Button Pad maps four directions for navigation or pan. Diagonal keeps compass
+              corners; cardinal rotates the grid 45° for up/right/down/left. Use it for maps,
+              galleries, and spatial UIs — keep one pad per view.
+            </p>
+          </header>
+          <div class="surface stack gap-lg">
+            <p class="hint">
+              Direction: <span id="pad-val" class="notranslate" translate="no">—</span>
+            </p>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-pad mode="diagonal" variant="filled"></k3-button-pad>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">1</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-pad mode="diagonal" variant="tonal"></k3-button-pad>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">2</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-pad mode="diagonal" variant="outlined"></k3-button-pad>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">3</span>
+                  </div>
+                </div>
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-pad mode="cardinal" variant="filled"></k3-button-pad>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">4</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-pad mode="cardinal" variant="tonal"></k3-button-pad>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">5</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-pad mode="cardinal" variant="outlined"></k3-button-pad>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">6</span>
+                  </div>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li><span class="pill-num">1</span><span class="variant-label">Diagonal · filled</span></li>
+                <li><span class="pill-num">2</span><span class="variant-label">Diagonal · tonal</span></li>
+                <li><span class="pill-num">3</span><span class="variant-label">Diagonal · outlined</span></li>
+                <li><span class="pill-num">4</span><span class="variant-label">Cardinal · filled</span></li>
+                <li><span class="pill-num">5</span><span class="variant-label">Cardinal · tonal</span></li>
+                <li><span class="pill-num">6</span><span class="variant-label">Cardinal · outlined</span></li>
+              </ol>
             </div>
           </div>
         </article>
@@ -3136,6 +3621,143 @@ fav?.addEventListener("k3-change", (e) => {
                   <k3-menu-item value="apac" data-i18n="playground.demo.select.region.apac">Asia-Pacific</k3-menu-item>
                 </k3-select>
               </div>
+            </div>
+          </div>
+        </article>
+
+
+        <!-- COUNTER -->
+        <article class="comp-page" data-page="counter" id="page-counter" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.inputs">Inputs</p>
+            <h1 data-i18n="doc.counter.title">Counter</h1>
+            <p data-i18n="doc.counter.blurb">
+              − / value / + pill — XS–XL · step · negatives · disabled · drag spinbutton.
+            </p>
+            <p class="doc-intro" data-i18n="doc.counter.intro">
+              Counters adjust a numeric value with decrement, display, and increment. Five
+              Expressive sizes keep the pill aligned with nearby buttons. Set step (e.g. 10),
+              bounds, decimals, allow-negative, or disabled; the centre spinbutton supports drag
+              to nudge the value.
+            </p>
+          </header>
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="playground.sizes.title">Expressive sizes</h2>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end" data-demo-enhance="off">
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter size="xs" value="1" min="0" max="9"></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">1</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter size="sm" value="2" min="0" max="9"></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">2</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter size="md" value="3" min="0" max="9"></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">3</span>
+                  </div>
+                </div>
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter size="lg" value="4" min="0" max="9"></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">4</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter size="xl" value="5" min="0" max="9"></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">5</span>
+                  </div>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="playground.demo.size.xs">Extra small</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="playground.demo.size.sm">Small</span>
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="playground.demo.size.md">Medium</span>
+                </li>
+                <li>
+                  <span class="pill-num">4</span
+                  ><span class="variant-label" data-i18n="playground.demo.size.lg">Large</span>
+                </li>
+                <li>
+                  <span class="pill-num">5</span
+                  ><span class="variant-label" data-i18n="playground.demo.size.xl">Extra large</span>
+                </li>
+              </ol>
+            </div>
+            <header class="section-head sub">
+              <h2>Basic</h2>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end" data-demo-enhance="off">
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter value="0" min="0" max="99" step="1"></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">1</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter value="1.5" min="0" max="10" step="0.5" decimals="1"></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">2</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter value="20" min="0" max="100" step="10"></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">3</span>
+                  </div>
+                </div>
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter
+                        value="0"
+                        min="-20"
+                        max="20"
+                        step="1"
+                        allow-negative
+                      ></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">4</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-counter value="3" min="0" max="9" disabled></k3-counter>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">5</span>
+                  </div>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li><span class="pill-num">1</span><span class="variant-label">Integer · 0–99</span></li>
+                <li><span class="pill-num">2</span><span class="variant-label">Decimals · step 0.5</span></li>
+                <li><span class="pill-num">3</span><span class="variant-label">Step · 10</span></li>
+                <li><span class="pill-num">4</span><span class="variant-label">Negatives · −20…20</span></li>
+                <li><span class="pill-num">5</span><span class="variant-label">Disabled</span></li>
+              </ol>
             </div>
           </div>
         </article>
