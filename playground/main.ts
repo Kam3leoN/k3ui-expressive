@@ -74,6 +74,9 @@ const SHELL_COMPONENTS = [
   'k3-nav-item',
   'k3-fab',
   'k3-extended-fab',
+  'k3-fab-menu',
+  'k3-fab-menu-item',
+  'k3-scroll-to-top',
   'k3-menu',
   'k3-menu-item',
   'k3-icon-button',
@@ -1158,6 +1161,22 @@ function buildCatalogGrid(filter = ''): void {
     `<p class="hint">${t('playground.search.placeholder')}</p>`;
 }
 
+/** Shell FAB menu — open GitHub repo / profile in a new tab. */
+function wireShellGithubMenu(): void {
+  const menu = document.getElementById('shell-github-menu');
+  if (!menu) return;
+  menu.querySelectorAll<HTMLElement>('k3-fab-menu-item[data-href]').forEach((item) => {
+    item.addEventListener('k3-click', () => {
+      const href = item.getAttribute('data-href');
+      if (!href) return;
+      window.open(href, '_blank', 'noopener,noreferrer');
+      const closer = menu as HTMLElement & { hide?: (source?: string) => void; open?: boolean };
+      if (typeof closer.hide === 'function') void closer.hide('user');
+      else closer.open = false;
+    });
+  });
+}
+
 function showPage(id: string): void {
   const articleId = articlePageId(id);
   /* Canonicalize URL when alias / legacy hash was used */
@@ -1610,6 +1629,7 @@ async function boot(): Promise<void> {
     requestAnimationFrame(paintLocaleFlags);
     applyPlaygroundI18n();
     document.addEventListener('k3-locale-change', () => applyPlaygroundI18n());
+    wireShellGithubMenu();
     wireQuickStartTabs();
     wireCodeSamples();
     /* Demo frames → equal cases + horizontal nums (skip matrix / fab-menu) */

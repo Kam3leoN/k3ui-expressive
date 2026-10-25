@@ -27,6 +27,11 @@ export class K3ScrollToTop extends K3Element {
     ScrollToTopSpecs.behaviors.showProgress;
   @property({ type: Number, attribute: 'scroll-duration' }) scrollDuration =
     ScrollToTopSpecs.motion.scrollDuration;
+  /**
+   * CSS selector for a scrollable element (e.g. `.shell-scroll`).
+   * Empty = `window`.
+   */
+  @property({ attribute: 'scroll-container' }) scrollContainer = '';
   /** Material icon ligature for the inner glyph. */
   @property() icon = ScrollToTopSpecs.behaviors.icon;
   /** Dispatch `k3-scroll-top` when scroll-to-top animation finishes. */
@@ -38,6 +43,7 @@ export class K3ScrollToTop extends K3Element {
 
   private circumference = 0;
   private rafId: number | null = null;
+  private scrollRoot: Window | HTMLElement = window;
   private onScrollBound = (): void => this.updateFromScroll();
 
   private applyCssVars(): void {
@@ -52,13 +58,65 @@ export class K3ScrollToTop extends K3Element {
     return 2 * Math.PI * radius;
   }
 
+  private resolveScrollRoot(): Window | HTMLElement {
+    if (!this.scrollContainer.trim()) return window;
+    const el = document.querySelector(this.scrollContainer);
+    return el instanceof HTMLElement ? el : window;
+  }
+
+  /** Vitest/jsdom: `instanceof Window` can fail across realms — prefer identity. */
+  private isWindowRoot(root: Window | HTMLElement): root is Window {
+    return root === window || !(root instanceof Element);
+  }
+
+  private bindScrollRoot(root: Window | HTMLElement): void {
+    this.unbindScrollRoot();
+    this.scrollRoot = root;
+    if (this.isWindowRoot(root)) {
+      /* jsdom + some browsers: scroll may surface on window or document */
+      window.addEventListener('scroll', this.onScrollBound, { passive: true });
+      document.addEventListener('scroll', this.onScrollBound, { passive: true });
+    } else {
+      root.addEventListener('scroll', this.onScrollBound, { passive: true });
+    }
+    window.addEventListener('resize', this.onScrollBound, { passive: true });
+  }
+
+  private unbindScrollRoot(): void {
+    const root = this.scrollRoot;
+    if (this.isWindowRoot(root)) {
+      window.removeEventListener('scroll', this.onScrollBound);
+      document.removeEventListener('scroll', this.onScrollBound);
+    } else {
+      root.removeEventListener('scroll', this.onScrollBound);
+    }
+    window.removeEventListener('resize', this.onScrollBound);
+  }
+
   private getScrollState(): { top: number; max: number } {
-    const top = window.scrollY ?? document.documentElement.scrollTop ?? 0;
-    const max = Math.max(
-      0,
-      document.documentElement.scrollHeight - window.innerHeight,
-    );
-    return { top, max };
+    const root = this.scrollRoot;
+    if (this.isWindowRoot(root)) {
+      const top =
+        Number(root.scrollY) ||
+        Number(document.documentElement.scrollTop) ||
+        Number(document.body?.scrollTop) ||
+        0;
+      const max = Math.max(
+        0,
+        document.documentElement.scrollHeight - root.innerHeight,
+      );
+      return { top, max };
+    }
+    return {
+      top: root.scrollTop,
+      max: Math.max(0, root.scrollHeight - root.clientHeight),
+    };
+  }
+
+  private setScrollTop(value: number): void {
+    const root = this.scrollRoot;
+    if (this.isWindowRoot(root)) root.scrollTo(0, value);
+    else root.scrollTop = value;
   }
 
   private updateFromScroll(): void {
@@ -72,13 +130,13 @@ export class K3ScrollToTop extends K3Element {
     }
   }
 
-  /** Smooth-scrolls the window to the top. */
+  /** Smooth-scrolls the active scroll root to the top. */
   scrollToTop(): void {
     const { top } = this.getScrollState();
     if (top <= 0) return;
 
     if (prefersReducedMotion() || this.scrollDuration <= 0) {
-      window.scrollTo(0, 0);
+      this.setScrollTop(0);
       if (this.emitOnComplete) this.emit('k3-scroll-top', {});
       return;
     }
@@ -92,7 +150,10 @@ export class K3ScrollToTop extends K3Element {
     const startTime = performance.now();
     const minDuration = ScrollToTopSpecs.motion.minScrollDuration;
     const maxDuration = Math.max(minDuration, this.scrollDuration);
-    const travelRatio = Math.min(1, startTop / Math.max(1, window.innerHeight * 2));
+    const viewport = this.isWindowRoot(this.scrollRoot)
+      ? this.scrollRoot.innerHeight
+      : this.scrollRoot.clientHeight;
+    const travelRatio = Math.min(1, startTop / Math.max(1, viewport * 2));
     const duration = Math.round(minDuration + (maxDuration - minDuration) * travelRatio);
 
     const easeOutExpo = (t: number): number => (t >= 1 ? 1 : 1 - 2 ** (-10 * t));
@@ -100,7 +161,7 @@ export class K3ScrollToTop extends K3Element {
     const step = (now: number): void => {
       const t = Math.min((now - startTime) / duration, 1);
       const nextTop = Math.max(0, startTop * (1 - easeOutExpo(t)));
-      window.scrollTo(0, nextTop);
+      this.setScrollTop(nextTop);
       if (t < 1) {
         this.rafId = requestAnimationFrame(step);
         return;
@@ -117,14 +178,12 @@ export class K3ScrollToTop extends K3Element {
     this.circumference = this.computeCircumference();
     this.progressOffset = this.circumference;
     this.applyCssVars();
-    window.addEventListener('scroll', this.onScrollBound, { passive: true });
-    window.addEventListener('resize', this.onScrollBound, { passive: true });
+    this.bindScrollRoot(this.resolveScrollRoot());
     queueMicrotask(() => this.updateFromScroll());
   }
 
   override disconnectedCallback(): void {
-    window.removeEventListener('scroll', this.onScrollBound);
-    window.removeEventListener('resize', this.onScrollBound);
+    this.unbindScrollRoot();
     if (this.rafId != null) cancelAnimationFrame(this.rafId);
     this.rafId = null;
     super.disconnectedCallback();
@@ -132,6 +191,10 @@ export class K3ScrollToTop extends K3Element {
 
   override updated(changed: PropertyValues): void {
     super.updated(changed);
+    if (changed.has('scrollContainer')) {
+      this.bindScrollRoot(this.resolveScrollRoot());
+      this.updateFromScroll();
+    }
     if (
       changed.has('size') ||
       changed.has('strokeWidth') ||

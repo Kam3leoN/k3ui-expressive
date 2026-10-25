@@ -269,6 +269,20 @@ k3-doc-nav {
   z-index: 0;
 }
 
+/* Shell chrome — scroll-to-top sits left of fixed FAB menu (edge 16 + FAB 56 + gap 16) */
+k3-scroll-to-top.shell-stt {
+  z-index: 1090;
+}
+k3-fab-menu.shell-github-menu {
+  z-index: 1100;
+}
+.shell-gh-icon {
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}
+
 /*
  * Secondary destinations live outside .app (see index.html) so they never
  * join the shell CSS grid / fight k3-sheet’s display:contents.

@@ -49,4 +49,21 @@ describe('k3-scroll-to-top', () => {
     expect(onTop).toHaveBeenCalledTimes(1);
     document.documentElement.removeAttribute('data-k3-reduce-motion');
   });
+
+  it('tracks a custom scroll-container element', async () => {
+    const box = document.createElement('div');
+    box.className = 'test-scroll-root';
+    Object.defineProperty(box, 'scrollTop', { value: 0, writable: true, configurable: true });
+    Object.defineProperty(box, 'scrollHeight', { value: 2000, configurable: true });
+    Object.defineProperty(box, 'clientHeight', { value: 400, configurable: true });
+    document.body.appendChild(box);
+
+    el.scrollContainer = '.test-scroll-root';
+    await el.updateComplete;
+    box.scrollTop = 200;
+    box.dispatchEvent(new Event('scroll'));
+    await el.updateComplete;
+    expect(el.hasAttribute('data-visible')).toBe(true);
+    box.remove();
+  });
 });
