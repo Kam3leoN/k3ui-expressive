@@ -194,7 +194,7 @@ fav?.addEventListener("k3-change", (e) => {
     css: defaultCss,
   },
   slider: {
-    components: ['k3-slider'],
+    components: ['k3-slider', 'k3-icon-button'],
     html: `<!-- Standard · XS -->
 <k3-slider value="40" min="0" max="100" label="Volume"></k3-slider>
 
@@ -207,13 +207,30 @@ fav?.addEventListener("k3-change", (e) => {
 <!-- Range -->
 <k3-slider variant="range" value-start="20" value-end="70" label="Price"></k3-slider>
 
-<!-- MD + inset icon (standard only) -->
-<k3-slider size="md" value="60" inset-icon label="Media">
+<!-- MD + inset icon · optional icon-min at value=min (any pair: volume, mic, wifi, …) -->
+<k3-slider size="md" value="60" inset-icon label="Media" color="secondary">
   <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="volume_up" aria-hidden="true"></span>
+  <span slot="icon-min" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="volume_off" aria-hidden="true"></span>
+</k3-slider>
+<!-- Same pattern for mic → mic_off, wifi → wifi_off, videocam → videocam_off, … -->
+
+<!-- Stops + tick labels · linked field -->
+<input id="vol" type="number" />
+<k3-slider for="vol" value="50" step="25" stops stop-labels="0,25,50,75,100" label="Level"></k3-slider>
+
+<!-- Label (4dp above track) · ± addons -->
+<k3-slider value="40" label="Volume">
+  <k3-icon-button slot="start" variant="standard" size="sm" label="Decrease">
+    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="remove" aria-hidden="true"></span>
+  </k3-icon-button>
+  <k3-icon-button slot="end" variant="standard" size="sm" label="Increase">
+    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="add" aria-hidden="true"></span>
+  </k3-icon-button>
 </k3-slider>
 
-<!-- Vertical -->
-<k3-slider orientation="vertical" value="30" style="height:14rem"></k3-slider>`,
+<!-- Vertical top→bottom -->
+<k3-slider orientation="vertical" top-to-bottom value="30" label="Volume"></k3-slider>`,
+    css: defaultCss,
   },
   'date-picker': {
     components: ['k3-date-picker', 'k3-date-picker-toggle', 'k3-text-field', 'k3-icon-button'],
@@ -275,7 +292,20 @@ cal.addEventListener("k3-change", (e) => console.log(e.detail));`,
   },
   progress: {
     components: ['k3-progress'],
-    html: `<k3-progress value="0.6"></k3-progress>
+    html: `<!-- Linear default: Label ==== value% -->
+<k3-progress value="0.65" label="Downloading" show-percent layout="default"
+  supporting-text="About 2 minutes left"></k3-progress>
+
+<!-- Linear top / bottom -->
+<k3-progress value="0.65" label="Uploading" show-percent layout="top"></k3-progress>
+<k3-progress value="0.65" label="Syncing" show-percent layout="bottom"></k3-progress>
+
+<!-- Circular: label top · value inside or below -->
+<k3-progress variant="circular" value="0.65" label="Battery" show-percent
+  percent-position="inside"></k3-progress>
+<k3-progress variant="circular" value="0.65" label="Sync" show-percent
+  percent-position="below" supporting-text="Almost done"></k3-progress>
+
 <k3-progress indeterminate></k3-progress>`,
   },
   loading: {
@@ -359,19 +389,24 @@ document.getElementById("dlg")?.show?.();`,
   <k3-list-item value="b" selected><span slot="headline">Beta</span></k3-list-item>
 </k3-list>
 
-<!-- Accordion -->
-<k3-list accordion>
+<!-- M3E expand — standard (continuous) or segmented + exclusive -->
+<k3-list variant="standard">
   <k3-list-item expandable>
     <span slot="headline">Section</span>
-    <div slot="expand">Nested content</div>
+    <div slot="expand">Details in the same row surface</div>
+  </k3-list-item>
+</k3-list>
+
+<k3-list variant="segmented" accordion>
+  <k3-list-item expandable expanded>
+    <span slot="headline">Open</span>
+    <div slot="expand">Exclusive: one row open</div>
+  </k3-list-item>
+  <k3-list-item expandable>
+    <span slot="headline">Closed</span>
+    <div slot="expand">…</div>
   </k3-list-item>
 </k3-list>`,
-  },
-  expansion: {
-    components: ['k3-expansion'],
-    html: `<k3-expansion headline="Section">
-  Expandable content
-</k3-expansion>`,
   },
   table: {
     components: ['k3-table'],
@@ -438,12 +473,39 @@ document.getElementById("dlg")?.show?.();`,
 ></k3-doc-nav>`,
   },
   toolbar: {
-    components: ['k3-toolbar', 'k3-icon-button'],
-    html: `<k3-toolbar>
-  <k3-icon-button label="Edit">${MS('edit')}</k3-icon-button>
-  <k3-icon-button label="Share">${MS('share')}</k3-icon-button>
-</k3-toolbar>`,
-    css: defaultCss,
+    components: [
+      'k3-toolbar',
+      'k3-button',
+      'k3-button-group',
+      'k3-fab',
+      'k3-split-button',
+      'k3-menu-item',
+    ],
+    html: `<!-- Meet-style · rounded + expand reactions (scaleY) + FAB 56 -->
+<k3-toolbar variant="floating" shape="rounded" color="standard" label="Call controls">
+  <div slot="expand" class="meet-emoji-bar" role="toolbar" aria-label="Reactions">
+    <div class="meet-emoji-strip">…emojis…</div>
+  </div>
+  <k3-split-button size="md" variant="tonal" label="Microphone options">
+    <span slot="icon" class="ms">mic</span>
+    <k3-menu-item slot="menu">Mute</k3-menu-item>
+  </k3-split-button>
+  <k3-button-group variant="standard" selection="single" size="md" shape="round" sync label="Call actions">
+    <k3-button variant="tonal" value="reactions" aria-label="Reactions"><span slot="icon" class="ms">mood</span></k3-button>
+    <k3-button variant="tonal" value="captions" aria-label="Captions"><span slot="icon" class="ms">closed_caption</span></k3-button>
+  </k3-button-group>
+  <k3-fab slot="fab" size="default" variant="primary" class="toolbar-demo-hangup" aria-label="Leave call">
+    <span slot="icon" class="ms">call_end</span>
+  </k3-fab>
+</k3-toolbar>
+<!-- Toggle: click Reactions again to collapse (optional single, no required) -->`,
+    css: `${defaultCss}
+
+/* Hang-up FAB — error role · square default 56 */
+.toolbar-demo-hangup {
+  --k3-fab-bg: var(--k3-sys-color-error);
+  --k3-fab-fg: var(--k3-sys-color-on-error);
+}`,
   },
   gestures: {
     components: [],

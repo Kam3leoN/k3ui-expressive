@@ -66,10 +66,12 @@ export const listItemStyles = css`
 
   .item {
     position: relative;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    /* Flex — trailing stays at the end even when leading is absent.
+     * (Grid + display:none on .leading collapsed tracks → control sat mid-row.) */
+    display: flex;
+    flex-direction: row;
     align-items: center;
-    column-gap: 1rem; /* 16 */
+    gap: 1rem; /* 16 */
     box-sizing: border-box;
     width: 100%;
     min-height: 3.5rem; /* 56 — one line */
@@ -84,6 +86,7 @@ export const listItemStyles = css`
     text-align: start;
     cursor: default;
     outline: none;
+    /* visible — 48dp selection focus target must not clip */
     overflow: visible;
     transition:
       border-radius var(--k3-sys-motion-duration-spatial-fast, 200ms)
@@ -123,8 +126,11 @@ export const listItemStyles = css`
   }
 
   /*
-   * Segmented (M3E) — fill + radius on .item; host stays transparent.
-   * Inter-item 2dp = parent .list flex gap (equal for every pair).
+   * Segmented (M3E) — default: fill + radius on .item; host transparent.
+   * Expandable plain body: fill on HOST (revealed content lives in the same
+   * surface as the trigger — M3 expansion / list guidelines).
+   * Expandable + nested k3-list: folder pattern — header segment + 2dp gap +
+   * child segments (terminal child inherits bottom radius).
    */
   :host([data-seg]) {
     display: block;
@@ -140,7 +146,26 @@ export const listItemStyles = css`
       var(--k3-sys-color-surface-bright)
     );
     border-radius: var(--k3-list-item-radius);
+    overflow: visible;
+  }
+
+  /*
+   * Unified expandable (no nested k3-list) — one body, one shape.
+   * Host owns fill + radii; .item is transparent row chrome.
+   */
+  :host([data-seg][expandable]:not([data-expand-folder])) {
+    display: flex;
+    flex-direction: column;
+    background: var(
+      --k3-sys-color-surface-container-high,
+      var(--k3-sys-color-surface-bright)
+    );
+    border-radius: var(--k3-list-item-radius);
     overflow: hidden;
+  }
+  :host([data-seg][expandable]:not([data-expand-folder])) .item {
+    background: transparent;
+    border-radius: 0;
   }
 
   /*
@@ -191,14 +216,28 @@ export const listItemStyles = css`
     --_seg-bottom: var(--k3-list-item-radius-start);
   }
 
-  /* Expanded header — bottom → inner; top keeps position */
-  :host([data-seg][expanded]:not([selected])) {
+  /*
+   * Expanded — M3E (lists expand + m3e_expandable expandedRadius):
+   * - Unified (plain expand): one surface for trigger + revealed body.
+   *   Open item = island → uniform outer radius on all corners (not inner top).
+   *   Neighbors use data-after-open / data-before-open for outer edge to the gap.
+   * - Folder (nested k3-list): header bottom → inner; 2dp gap; children own end.
+   */
+  :host([data-seg][expandable][expanded]:not([data-expand-folder]):not([selected])) {
+    --_seg-top: var(--k3-list-item-radius-start);
+    --_seg-bottom: var(--k3-list-item-radius-start);
+    z-index: 1;
+  }
+  :host([data-seg][expandable][expanded][data-expand-folder]:not([selected])) {
     --_seg-bottom: var(--k3-list-item-radius-inner);
     z-index: 1;
   }
-  /* Gap header → expand body (same 2dp as inter-item spacer) */
-  :host([data-seg][expandable][expanded]) .item {
-    margin-bottom: 0.125rem;
+  /* Folder only — 2dp between header segment and nested list */
+  :host([data-seg][expandable][expanded][data-expand-folder]) .item {
+    margin-bottom: var(--k3-segmented-list-segment-gap, 0.125rem);
+  }
+  :host([data-seg][expandable][expanded]:not([data-expand-folder])) .item {
+    margin-bottom: 0;
   }
 
   /*
@@ -222,6 +261,13 @@ export const listItemStyles = css`
   :host([data-seg][selected]) .item {
     background: var(--k3-sys-color-secondary-container);
     color: inherit;
+  }
+  /* Unified expandable selected — fill stays on host */
+  :host([data-seg][expandable][selected]:not([data-expand-folder])) {
+    background: var(--k3-sys-color-secondary-container);
+  }
+  :host([data-seg][expandable][selected]:not([data-expand-folder])) .item {
+    background: transparent;
   }
 
   /*
@@ -402,7 +448,10 @@ export const listItemStyles = css`
     display: inline-flex;
   }
 
-  /* Auto selection indicator (radio / checkbox) */
+  /*
+   * Auto selection indicator — trailing end (M3).
+   * pointer-events none: row click toggles; keep 48dp focus target visible.
+   */
   .sel-indicator {
     display: inline-flex;
     align-items: center;
@@ -416,12 +465,24 @@ export const listItemStyles = css`
   :host([hide-selection-indicator]) .sel-indicator {
     display: none !important;
   }
+  /* Icon-only control — hide empty label; keep 48dp .target / thumb target */
+  .sel-indicator k3-checkbox::part(label),
+  .sel-indicator k3-radio::part(label),
+  .sel-indicator k3-switch::part(label) {
+    display: none;
+  }
+  .sel-indicator k3-checkbox,
+  .sel-indicator k3-radio,
+  .sel-indicator k3-switch {
+    flex-shrink: 0;
+  }
 
-  /* —— Content —— */
+  /* —— Content —— grows so trailing sits at the end */
   .content {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
+    flex: 1 1 auto;
     min-width: 0;
   }
   .overline {
@@ -471,15 +532,17 @@ export const listItemStyles = css`
     opacity: 0.85;
   }
 
-  /* —— Trailing —— */
+  /* —— Trailing (end of row) —— */
   .trailing:not(.has) {
     display: none;
   }
   .trailing {
     display: inline-flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 0.75rem; /* 12 */
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    margin-inline-start: auto;
     color: var(--k3-sys-color-on-surface-variant);
     font-size: var(--k3-sys-typescale-label-small-size, 0.6875rem);
   }
@@ -550,24 +613,29 @@ export const listItemStyles = css`
     color: var(--k3-sys-color-on-surface-variant);
     font-size: var(--k3-sys-typescale-body-medium-size);
   }
-  /* Segmented expandable — nested list is its own segment stack (no pad) */
-  :host([data-seg][expandable]) .expand-body {
+  /*
+   * Segmented expandable:
+   * - Nested k3-list → own segment stack (no pad on body)
+   * - Plain content → inside host surface (padding only, no second fill)
+   */
+  :host([data-seg][expandable][data-expand-folder]) .expand-body {
     padding: 0;
+  }
+  :host([data-seg][expandable]:not([data-expand-folder])) .expand-body {
+    padding: 0 1rem 1rem;
   }
   :host([data-seg][expandable]) .expand-body ::slotted(k3-list) {
     display: block;
     width: 100%;
   }
-  /* Plain text / non-list expand content — own inner segment surface */
-  :host([data-seg][expandable]) .expand-body ::slotted(:not(k3-list)) {
+  :host([data-seg][expandable]:not([data-expand-folder])) .expand-body ::slotted(*) {
     display: block;
     box-sizing: border-box;
-    padding: 0.75rem 1rem;
-    background: var(--k3-sys-color-surface-bright, var(--k3-sys-color-surface));
-    border-radius: var(--k3-list-item-radius-inner)
-      var(--k3-list-item-radius-inner) var(--k3-list-item-radius-end)
-      var(--k3-list-item-radius-end);
-    color: var(--k3-sys-color-on-surface-variant);
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    color: inherit;
   }
   .expand:not(.has) {
     display: none;

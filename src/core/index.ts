@@ -1,7 +1,14 @@
 export { K3Element, type Density } from './k3-element.js';
 export { hasSlot, hasLightSlot, hasNamedSlot, slotHasContent } from './slots.js';
 export { LayerPortal } from './layer-portal.js';
-export { resolveCssLengthPx, rootRemPx } from './css-length.js';
+export {
+  resolveCssLengthPx,
+  rootRemPx,
+  devicePixelRatioSafe,
+  devicePixelSnapPx,
+  devicePixelSnapCss,
+  watchDevicePixelRatio,
+} from './css-length.js';
 export {
   emitLifecycle,
   waitForMotion,
@@ -39,10 +46,18 @@ export { edgeScrollbarStyles } from './scrollbar.js';
 export { attachInternals, setFormValue } from './form-associated.js';
 export {
   attachDrag,
+  setAxisTranslate,
+  animateAxisTranslate,
+  clearAxisTranslate,
+  shouldDismissDrag,
+  resolveDismissThresholdPx,
+  M3_DISMISS_POSITION_DP,
+  M3_DISMISS_VELOCITY,
   type DragAxis,
   type DragDetail,
   type DragOptions,
   type DragController,
+  type DragSettleMode,
 } from './drag.js';
 export {
   dnd,

@@ -1,7 +1,7 @@
 import { css } from 'lit';
 
 /**
- * Shared M3E expand / collapse — used by `k3-list-item` and `k3-expansion-panel`.
+ * Shared M3E expand / collapse — used by `k3-list-item`.
  *
  * - Body: grid `0fr → 1fr` (spatial default · expressive overshoot curve).
  * - No opacity fade on the body (avoids ghosting over siblings).

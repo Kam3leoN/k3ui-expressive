@@ -1,18 +1,36 @@
 /**
  * Pointer drag controller — reusable for sheets, drawers, sliders, etc.
  *
+ * Gesture: {@link attachDrag}. Settle helpers (M3 sheet / dismissible):
+ * {@link setAxisTranslate}, {@link animateAxisTranslate}, {@link clearAxisTranslate},
+ * {@link shouldDismissDrag}, {@link resolveDismissThresholdPx}.
+ *
  * ```ts
  * const drag = attachDrag(handle, {
  *   axis: 'y',
- *   target: sheetEl,
- *   onMove: ({ dy }) => { sheetEl.style.transform = `translateY(${dy}px)`; },
- *   onEnd: ({ dy, velocityY }) => { ... },
+ *   onMove: ({ dy }) => setAxisTranslate(sheet, 'y', Math.max(0, dy)),
+ *   onEnd: async ({ dy, velocityY }) => {
+ *     if (shouldDismissDrag({ offset: dy, size: h, velocity: velocityY })) {
+ *       await animateAxisTranslate(sheet, 'y', h, 'dismiss');
+ *     } else {
+ *       await animateAxisTranslate(sheet, 'y', 0, 'snap');
+ *       clearAxisTranslate(sheet);
+ *     }
+ *   },
  * });
- * // later: drag.destroy();
  * ```
  */
 
+import { waitForMotion } from './lifecycle.js';
+
 export type DragAxis = 'x' | 'y' | 'both';
+
+/** Material `SheetDefaults.positionalThreshold` — 56dp. */
+export const M3_DISMISS_POSITION_DP = 56;
+/** Material `SheetDefaults.velocityThreshold` — 125dp/s as px/ms. */
+export const M3_DISMISS_VELOCITY = 125 / 1000;
+
+export type DragSettleMode = 'snap' | 'dismiss';
 
 export interface DragDetail {
   /** Delta from pointer-down (axis-clamped) */
@@ -294,6 +312,81 @@ function computeVelocity(samples: Sample[]): { velocityX: number; velocityY: num
     velocityX: (b.x - a.x) / dt,
     velocityY: (b.y - a.y) / dt,
   };
+}
+
+/**
+ * Resolve a dismiss threshold to CSS px.
+ * Values in (0, 1] are treated as a fraction of `size` (legacy API).
+ */
+export function resolveDismissThresholdPx(
+  threshold: number,
+  size: number,
+  fallbackDp = M3_DISMISS_POSITION_DP,
+): number {
+  const t = Number.isFinite(threshold) ? threshold : fallbackDp;
+  if (t > 0 && t <= 1) return t * size;
+  return Math.min(Math.max(0, t), Math.max(0, size));
+}
+
+/** M3 anchored-drag dismiss: positional OR fling velocity. */
+export function shouldDismissDrag(opts: {
+  offset: number;
+  size: number;
+  velocity: number;
+  /** px, or fraction ≤1 — see {@link resolveDismissThresholdPx} */
+  positionalThreshold?: number;
+  /** px/ms — default {@link M3_DISMISS_VELOCITY} */
+  velocityThreshold?: number;
+}): boolean {
+  const size = Math.max(1, opts.size);
+  const pos = resolveDismissThresholdPx(
+    opts.positionalThreshold ?? M3_DISMISS_POSITION_DP,
+    size,
+  );
+  const vel = opts.velocityThreshold ?? M3_DISMISS_VELOCITY;
+  return opts.offset >= pos || opts.velocity >= vel;
+}
+
+/** Set `translateX/Y` inline (dismiss axis). `sign` flips side-sheet RTL/LTR. */
+export function setAxisTranslate(
+  el: HTMLElement,
+  axis: 'x' | 'y',
+  offset: number,
+  sign = 1,
+): void {
+  const v = offset * sign;
+  el.style.transform = axis === 'y' ? `translateY(${v}px)` : `translateX(${v}px)`;
+}
+
+/**
+ * Animate inline axis translate to `offset`.
+ * - `snap` — standard decelerate (no overshoot; keeps docked edge glued)
+ * - `dismiss` — spatial-fast expressive slide-off
+ */
+export async function animateAxisTranslate(
+  el: HTMLElement,
+  axis: 'x' | 'y',
+  offset: number,
+  mode: DragSettleMode,
+  sign = 1,
+): Promise<void> {
+  if (mode === 'dismiss') {
+    el.style.transition = `transform var(--k3-sys-motion-duration-spatial-fast, 350ms)
+      var(--k3-sys-motion-easing-spatial-fast, var(--k3-sys-motion-easing-expressive-spatial-fast))`;
+  } else {
+    el.style.transition = `transform var(--k3-sys-motion-duration-spatial-default, 500ms)
+      var(--k3-sys-motion-easing-standard-decelerate, cubic-bezier(0, 0, 0, 1))`;
+  }
+  setAxisTranslate(el, axis, offset, sign);
+  await waitForMotion(el, mode === 'dismiss' ? 450 : 600);
+}
+
+/** Clear inline transform + transition (after snap settle or teardown). */
+export function clearAxisTranslate(el: HTMLElement): void {
+  el.style.transition = 'none';
+  el.style.transform = '';
+  void el.offsetWidth;
+  el.style.removeProperty('transition');
 }
 
 export default attachDrag;

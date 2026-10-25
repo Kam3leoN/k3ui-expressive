@@ -26,8 +26,6 @@ const SKIP_PAGE =
 const WIDE_TAG = new Set([
   'k3-button-group',
   'k3-list',
-  'k3-expansion-group',
-  'k3-expansion',
   'k3-top-app-bar',
   'k3-footer-bar',
   'k3-table',

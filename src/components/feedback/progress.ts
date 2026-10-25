@@ -1,8 +1,10 @@
-import { html, nothing } from 'lit';
+import { html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import {
   K3Element,
+  devicePixelSnapPx,
+  hasLightSlot,
   prefersReducedMotion,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
@@ -15,13 +17,16 @@ import {
   DEFAULT_THICKNESS,
   GAP_DP,
   LINEAR_WAVE_AMP,
+  LINEAR_WAVE_HEIGHT,
   LINEAR_WAVE_LEN,
   STOP_DP,
+  STOP_INSET_THICK_DP,
   drawFlatArc,
   drawFlatBar,
   drawStop,
   drawWavyArc,
   drawWavyBar,
+  indicatorAmplitudeFactor,
 } from './progress-draw.js';
 import {
   CIRCULAR_CYCLE_MS,
@@ -35,30 +40,23 @@ import { progressStyles } from './progress.styles.js';
 
 export type ProgressVariant = 'linear' | 'circular';
 export type ProgressShape = 'flat' | 'wavy';
+/** Linear chrome — where leading + trailing sit relative to the bar. */
+export type ProgressLayout = 'default' | 'top' | 'bottom';
 /**
- * Where the percent text renders.
- * - Circular: `inside` · `below`
- * - Linear: `below-start` · `below-end` · `leading` · `trailing`
- * - `below` resolves to circular below / linear below-end
+ * Where the percent value renders.
+ * - Circular: `inside` (in ring) · `below` / `trailing` (under ring)
+ * - Linear: always `trailing` (layout moves the row)
  */
-export type PercentPosition =
-  | 'inside'
-  | 'below'
-  | 'below-start'
-  | 'below-end'
-  | 'leading'
-  | 'trailing';
+export type PercentPosition = 'inside' | 'below' | 'trailing';
 
 /**
  * M3 / M3 Expressive progress indicator.
  *
- * - Variants: `linear` · `circular`
- * - Behavior: determinate (`value`) · `indeterminate`
- * - Thickness: default 4dp · variable via `thickness`
- * - Shape: `flat` (default) · `wavy` (Expressive)
- * - Percent: `show-percent` + `percent-position`
- * - Optional caption: `label`
- * - Slots: `leading` · `trailing` (linear inline accessories)
+ * Slots: `leading` (label ± icon) · progress middle · `trailing` (value%) ·
+ * `supporting` (always under — flush with the bar when there is no label).
+ *
+ * Linear `layout`: `default` | `top` | `bottom`.
+ * Circular: label top · value inside or below · supporting under everything.
  *
  * @see https://m3.material.io/components/progress-indicators/specs
  * @see https://m3.material.io/components/progress-indicators/guidelines
@@ -85,20 +83,25 @@ export class K3Progress extends K3Element {
   @property({ type: Number }) size = 0;
   /** Linear determinate stop at trailing end (default on). */
   @property({ type: Boolean, attribute: 'show-stop' }) showStop = true;
-  /** Show determinate percent text. */
+  /** Show determinate percent in trailing (or inside when circular). */
   @property({ type: Boolean, reflect: true, attribute: 'show-percent' })
   showPercent = false;
   /**
-   * Percent placement. Circular: `inside` · `below`. Linear: `below-start` ·
-   * `below-end` · `leading` · `trailing`. `below` → circular below / linear end.
+   * Percent placement. Circular: `inside` · `below`/`trailing`.
+   * Linear: ignored (value is always trailing; use `layout`).
    */
   @property({ reflect: true, attribute: 'percent-position' })
-  percentPosition: PercentPosition = 'below';
+  percentPosition: PercentPosition = 'trailing';
   /**
-   * Optional visible caption + accessible name. Empty uses i18n `progress.label`
-   * for aria only (not shown).
+   * Linear only — `default` (inline with bar) · `top` · `bottom`.
+   */
+  @property({ reflect: true }) layout: ProgressLayout = 'default';
+  /**
+   * Leading caption (also aria name). Empty → i18n `progress.label` for aria only.
    */
   @property() label = '';
+  /** Optional supporting text under the chrome. */
+  @property({ attribute: 'supporting-text' }) supportingText = '';
   /**
    * @deprecated Use `show-percent`. Kept so existing markup keeps working.
    */
@@ -106,6 +109,9 @@ export class K3Progress extends K3Element {
 
   @query('canvas') private canvas!: HTMLCanvasElement | null;
   @state() private displayProgress = 0;
+  @state() private hasLeadingSlot = false;
+  @state() private hasTrailingSlot = false;
+  @state() private hasSupportingSlot = false;
 
   private raf = 0;
   private startMs = 0;
@@ -114,6 +120,13 @@ export class K3Progress extends K3Element {
   private animStart = 0;
   private ro: ResizeObserver | null = null;
   private reduceMotion = false;
+
+  /** Light-DOM only — never treat slot fallback as “has content”. */
+  private syncSlots = (): void => {
+    this.hasLeadingSlot = hasLightSlot(this, 'leading');
+    this.hasTrailingSlot = hasLightSlot(this, 'trailing');
+    this.hasSupportingSlot = hasLightSlot(this, 'supporting');
+  };
 
   private get isWavy(): boolean {
     return this.wavy || this.shape === 'wavy';
@@ -137,20 +150,21 @@ export class K3Progress extends K3Element {
   }
 
   private percentVisible(): boolean {
+    /*
+     * Value % from show-percent (or deprecated show-label alias).
+     * Never tied to the leading `label` caption string.
+     */
     return (this.showPercent || this.showLabel) && !this.indeterminate;
   }
 
-  /** Resolved placement for the current variant. */
-  private resolvedPercentPos(): PercentPosition {
-    const raw = this.percentPosition || 'below';
-    if (this.variant === 'circular') {
-      return raw === 'inside' ? 'inside' : 'below';
-    }
-    if (raw === 'inside' || raw === 'below') return 'below-end';
-    if (raw === 'below-start' || raw === 'below-end' || raw === 'leading' || raw === 'trailing') {
-      return raw;
-    }
-    return 'below-end';
+  /** Circular: inside vs below. Linear: always trailing. */
+  private percentInside(): boolean {
+    if (this.variant !== 'circular' || !this.percentVisible()) return false;
+    return this.percentPosition === 'inside';
+  }
+
+  private percentTrailing(): boolean {
+    return this.percentVisible() && !this.percentInside();
   }
 
   private cssColor(name: string, fallback: string): string {
@@ -169,7 +183,16 @@ export class K3Progress extends K3Element {
   private linearHeight(): number {
     const th = this.thicknessPx;
     if (!this.isWavy) return Math.max(th, STOP_DP);
-    return LINEAR_WAVE_AMP * 2 + th;
+    return Math.max(LINEAR_WAVE_HEIGHT, LINEAR_WAVE_AMP * 2 + th);
+  }
+
+  /** Clear circular inline canvas size so linear can stretch again. */
+  private resetCanvasBox(canvas: HTMLCanvasElement, linear: boolean): void {
+    if (linear) {
+      canvas.style.width = '100%';
+      canvas.style.removeProperty('max-width');
+      this.style.removeProperty('--k3-progress-size');
+    }
   }
 
   private paint = (now?: number): void => {
@@ -218,71 +241,127 @@ export class K3Progress extends K3Element {
     dpr: number,
     now: number,
   ): void {
-    const cssW = Math.max(1, canvas.clientWidth || this.clientWidth || 240);
+    this.resetCanvasBox(canvas, true);
+    const hostW =
+      (this.shadowRoot?.querySelector('.indicator') as HTMLElement | null)
+        ?.clientWidth ||
+      this.clientWidth ||
+      240;
+    const cssW = Math.max(1, hostW);
     const cssH = this.linearHeight();
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = '100%';
     canvas.style.height = `${cssH}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cssW, cssH);
 
     const { active, track, stop } = this.colors();
-    const th = this.thicknessPx;
-    const trackTh = this.isWavy ? th : Math.min(DEFAULT_THICKNESS, th);
+    const th = devicePixelSnapPx(this.thicknessPx, dpr);
+    const gap = devicePixelSnapPx(GAP_DP, dpr);
+    const stopSize = devicePixelSnapPx(STOP_DP, dpr);
+    const waveLen = devicePixelSnapPx(LINEAR_WAVE_LEN, dpr);
+    /* Round-cap inset — geometric ends are cap centers. */
+    const edge = th / 2;
     const cy = cssH / 2;
     const rtl = getComputedStyle(this).direction === 'rtl';
+    /* Logical LTR coords → physical (RTL mirrors progress + stop). */
     const mapX = (x: number) => (rtl ? cssW - x : x);
     const phase =
       ((now - this.startMs) / 1000) * (this.isWavy ? (2 * Math.PI) / 1.2 : 0);
+    const ampFactor = this.isWavy
+      ? this.indeterminate
+        ? 1
+        : indicatorAmplitudeFactor(this.displayProgress)
+      : 0;
+    const amp = devicePixelSnapPx(LINEAR_WAVE_AMP, dpr) * ampFactor;
+    /*
+     * Visual 4dp gap between round caps ⇒ geometric gap = gap + thickness
+     * (each cap extends th/2 past its endpoint).
+     */
+    const geoGap = gap + th;
 
-    const drawSeg = (a: number, b: number, color: string, wavy: boolean) => {
+    const drawSeg = (
+      a: number,
+      b: number,
+      color: string,
+      wavy: boolean,
+      stroke = th,
+    ) => {
       const x0 = mapX(Math.min(a, b));
       const x1 = mapX(Math.max(a, b));
       const left = Math.min(x0, x1);
       const right = Math.max(x0, x1);
-      if (wavy) {
-        drawWavyBar(
-          ctx,
-          left,
-          right,
-          cy,
-          th,
-          LINEAR_WAVE_AMP,
-          LINEAR_WAVE_LEN,
-          phase,
-          color,
-        );
+      if (right - left < 0.5) return;
+      if (wavy && amp > 0.05) {
+        drawWavyBar(ctx, left, right, cy, stroke, amp, waveLen, phase, color);
       } else {
-        drawFlatBar(ctx, left, right, cy, color === track ? trackTh : th, color);
+        drawFlatBar(ctx, left, right, cy, stroke, color);
       }
     };
 
     if (this.indeterminate) {
-      drawSeg(0, cssW, track, false);
+      /* Track only in gaps between active segments — never under progress. */
       const cycle = this.reduceMotion
         ? 0.35
         : ((now - this.startMs) % LINEAR_INDET_MS) / LINEAR_INDET_MS;
-      for (const seg of linearIndeterminateSegments(cycle)) {
-        drawSeg(seg.start * cssW, seg.end * cssW, active, this.isWavy);
+      const span = cssW - edge * 2;
+      const segs = linearIndeterminateSegments(cycle).map((s) => ({
+        a: edge + s.start * span,
+        b: edge + s.end * span,
+      }));
+      let cursor = edge;
+      for (const s of segs) {
+        const trackEnd = s.a - geoGap;
+        if (trackEnd > cursor) drawSeg(cursor, trackEnd, track, false);
+        cursor = s.b + geoGap;
       }
+      if (cssW - edge > cursor) drawSeg(cursor, cssW - edge, track, false);
+      for (const s of segs) drawSeg(s.a, s.b, active, this.isWavy);
       return;
     }
 
     const p = this.displayProgress;
-    const stopOn = this.showStop && p < 1;
-    const stopX = cssW - STOP_DP / 2;
-    const usable = stopOn ? cssW - STOP_DP - GAP_DP : cssW;
-    const activeEnd = Math.max(th, p * usable);
-    const trackStart = Math.min(cssW, activeEnd + (p > 0 ? GAP_DP : 0));
-    const trackEnd = stopOn ? stopX - STOP_DP / 2 - GAP_DP : cssW;
+    const complete = p >= 0.999;
+    const stopOn = this.showStop && !complete;
+    /*
+     * Stop — always 4dp circle, inside the track (M3 linear specs):
+     * - thickness 4dp → flush to trailing edge (inset 0)
+     * - thickness 8dp → 2dp inset from trailing edge
+     * Logical end = right in LTR (mapX mirrors for RTL).
+     */
+    const stopInset =
+      th >= 8 - 0.01 ? devicePixelSnapPx(STOP_INSET_THICK_DP, dpr) : 0;
+    const stopCenter = stopOn
+      ? cssW - stopInset - stopSize / 2
+      : cssW - edge;
+    /*
+     * Progress grows up to (stop − gap). Track runs from after progress
+     * through to the stop center so the stop sits in the track.
+     */
+    const endLimit = stopOn ? stopCenter - geoGap : cssW - edge;
+    const startLimit = edge;
+    const span = Math.max(0, endLimit - startLimit);
 
-    if (trackEnd > trackStart) drawSeg(trackStart, trackEnd, track, false);
-    if (p <= 0) {
-      drawFlatBar(ctx, mapX(0), mapX(th), cy, th, active);
-    } else {
-      drawSeg(0, activeEnd, active, this.isWavy);
+    if (complete) {
+      drawSeg(startLimit, cssW - edge, active, this.isWavy && amp > 0.05);
+      return;
     }
-    if (stopOn) drawStop(ctx, mapX(stopX), cy, STOP_DP, stop);
+
+    const activeEnd =
+      p <= 0 ? startLimit : startLimit + Math.max(0, p * span);
+    const trackStart = activeEnd + (p > 0 ? geoGap : 0);
+    const trackEnd = stopOn ? stopCenter : cssW - edge;
+
+    if (trackEnd > trackStart + 0.5) {
+      drawSeg(trackStart, trackEnd, track, false);
+    }
+    if (p <= 0) {
+      drawSeg(startLimit, startLimit + 0.01, active, false);
+    } else if (activeEnd > startLimit) {
+      drawSeg(startLimit, activeEnd, active, this.isWavy);
+    }
+    if (stopOn) drawStop(ctx, mapX(stopCenter), cy, stopSize, stop);
   }
 
   private paintCircular(
@@ -292,7 +371,11 @@ export class K3Progress extends K3Element {
     now: number,
   ): void {
     const size = this.circularSizePx;
-    const th = this.thicknessPx;
+    const th = devicePixelSnapPx(this.thicknessPx, dpr);
+    const gap = devicePixelSnapPx(GAP_DP, dpr);
+    const waveLenPx = devicePixelSnapPx(CIRCULAR_WAVE_LEN, dpr);
+    const baseAmp = devicePixelSnapPx(CIRCULAR_WAVE_AMP, dpr);
+
     canvas.width = Math.round(size * dpr);
     canvas.height = Math.round(size * dpr);
     canvas.style.width = `${size}px`;
@@ -304,66 +387,80 @@ export class K3Progress extends K3Element {
     const { active, track } = this.colors();
     const cx = size / 2;
     const cy = size / 2;
-    const amp = this.isWavy ? CIRCULAR_WAVE_AMP * (size / CIRCULAR_SIZE) : 0;
-    const radius = (size - th) / 2 - amp;
+    const ampFactor = this.isWavy
+      ? this.indeterminate
+        ? 1
+        : indicatorAmplitudeFactor(this.displayProgress)
+      : 0;
+    const amp = baseAmp * ampFactor;
+    const radius = Math.max(1, (size - th) / 2 - (this.isWavy ? baseAmp : 0));
     const phase = ((now - this.startMs) / 1000) * ((2 * Math.PI) / 1.5);
-    const waveLen = CIRCULAR_WAVE_LEN * (size / CIRCULAR_SIZE);
+    const circ = 2 * Math.PI * radius;
+    /* Visual 4dp gap between round caps ⇒ arc gap = gap + stroke. */
+    const gapDeg = ((gap + th) / circ) * 360;
+    const rtl = getComputedStyle(this).direction === 'rtl';
+    /* RTL: mirror sweep direction (grow counter-clockwise from 12 o'clock). */
+    const dir = rtl ? -1 : 1;
+    const origin = -90;
 
-    const drawTrackFull = () => {
-      if (this.isWavy) {
-        drawWavyArc(
-          ctx,
-          cx,
-          cy,
-          radius,
-          -90,
-          360,
-          th,
-          amp,
-          waveLen,
-          phase,
-          track,
-        );
-      } else {
-        drawFlatArc(ctx, cx, cy, radius, -90, 360, th, track);
-      }
-    };
-
-    const drawActive = (start: number, sweep: number) => {
-      if (this.isWavy) {
+    /** `sweepMag` is always ≥0; `dir` flips for RTL. */
+    const drawActive = (start: number, sweepMag: number, wavyAmp: number) => {
+      const sw = sweepMag * dir;
+      if (this.isWavy && wavyAmp > 0.05) {
         drawWavyArc(
           ctx,
           cx,
           cy,
           radius,
           start,
-          sweep,
+          sw,
           th,
-          amp,
-          waveLen,
+          wavyAmp,
+          waveLenPx,
           phase,
           active,
         );
       } else {
-        drawFlatArc(ctx, cx, cy, radius, start, sweep, th, active);
+        drawFlatArc(ctx, cx, cy, radius, start, sw, th, active);
       }
     };
 
+    const drawTrackArc = (start: number, sweepSigned: number) => {
+      if (Math.abs(sweepSigned) < 0.5) return;
+      drawFlatArc(ctx, cx, cy, radius, start, sweepSigned, th, track);
+    };
+
     if (this.indeterminate) {
-      drawTrackFull();
       const cycle = this.reduceMotion
         ? 0.2
         : ((now - this.startMs) % CIRCULAR_CYCLE_MS) / CIRCULAR_CYCLE_MS;
       const { startAngle, sweep } = circularIndeterminate(cycle);
-      drawActive(startAngle, sweep);
+      const activeStart = startAngle;
+      const trackStart = activeStart + (sweep + gapDeg) * dir;
+      const trackSweep = (360 - sweep - gapDeg * 2) * dir;
+      drawTrackArc(trackStart, trackSweep);
+      drawActive(activeStart, sweep, amp);
       return;
     }
 
-    drawTrackFull();
-    const sweep = this.displayProgress * 360;
-    const gapDeg = (GAP_DP / (radius * 2 * Math.PI)) * 360;
-    if (sweep > gapDeg) drawActive(-90, sweep - gapDeg);
-    else if (this.displayProgress > 0) drawActive(-90, Math.max(sweep, 0.5));
+    const p = this.displayProgress;
+    const complete = p >= 0.999;
+
+    if (complete) {
+      drawActive(origin, 360, amp);
+      return;
+    }
+
+    const sweep = p * 360;
+    if (sweep > 0.5) {
+      drawActive(origin, sweep, amp);
+    }
+    /* Track only on remaining arc — gap after progress and before start. */
+    const trackStart = origin + (sweep + gapDeg) * dir;
+    const trackSweep = (360 - sweep - gapDeg * 2) * dir;
+    if (Math.abs(trackSweep) > 0.5) {
+      drawTrackArc(trackStart, trackSweep);
+    }
   }
 
   private restartLoop(): void {
@@ -387,6 +484,7 @@ export class K3Progress extends K3Element {
     this.reduceMotion = prefersReducedMotion();
     this.displayProgress = this.fraction();
     this.animTo = this.displayProgress;
+    this.addEventListener('slotchange', this.syncSlots, true);
     this.bindRo();
     this.restartLoop();
   }
@@ -395,10 +493,16 @@ export class K3Progress extends K3Element {
     cancelAnimationFrame(this.raf);
     this.ro?.disconnect();
     this.ro = null;
+    this.removeEventListener('slotchange', this.syncSlots, true);
     super.disconnectedCallback();
   }
 
-  override willUpdate(changed: Map<PropertyKey, unknown>): void {
+  override firstUpdated(): void {
+    this.syncSlots();
+    this.restartLoop();
+  }
+
+  override willUpdate(changed: PropertyValues): void {
     if (changed.has('wavy') && this.wavy && this.shape !== 'wavy') {
       this.shape = 'wavy';
     } else if (changed.has('shape') && this.shape === 'wavy' && !this.wavy) {
@@ -406,13 +510,9 @@ export class K3Progress extends K3Element {
     } else if (changed.has('shape') && this.shape === 'flat' && this.wavy) {
       this.wavy = false;
     }
-    /* Legacy show-label → show-percent */
-    if (changed.has('showLabel') && this.showLabel && !this.showPercent) {
-      this.showPercent = true;
-    }
   }
 
-  override updated(changed: Map<string, unknown>): void {
+  override updated(changed: PropertyValues): void {
     if (
       changed.has('value') ||
       changed.has('max') ||
@@ -424,11 +524,15 @@ export class K3Progress extends K3Element {
       changed.has('size') ||
       changed.has('showStop')
     ) {
+      if (changed.has('variant') && this.variant === 'linear' && this.canvas) {
+        this.resetCanvasBox(this.canvas, true);
+      }
       if (
         changed.has('indeterminate') ||
         changed.has('variant') ||
         changed.has('shape') ||
-        changed.has('wavy')
+        changed.has('wavy') ||
+        changed.has('size')
       ) {
         this.restartLoop();
       } else {
@@ -438,85 +542,96 @@ export class K3Progress extends K3Element {
     }
   }
 
-  override firstUpdated(): void {
-    this.restartLoop();
-  }
+  override render() {
+    /* Guard null from attribute removal (Lit string converter). */
+    const caption = String(this.label ?? '').trim();
+    const support = String(this.supportingText ?? '').trim();
+    const ariaName = caption || i18n.t('progress.label');
+    const pct = Math.round(this.fraction() * 100);
+    const isCirc = this.variant === 'circular';
+    const layout: ProgressLayout = isCirc ? 'default' : this.layout;
+    const showDefaultLabel = !!caption && !this.hasLeadingSlot;
+    const showDefaultPct = this.percentTrailing() && !this.hasTrailingSlot;
+    const showDefaultSupport = !!support && !this.hasSupportingSlot;
+    const showLead = showDefaultLabel || this.hasLeadingSlot;
+    const showTrail = showDefaultPct || this.hasTrailingSlot;
+    const showSupport = showDefaultSupport || this.hasSupportingSlot;
+    const pctInside = this.percentInside();
+    const size = this.circularSizePx;
 
-  private renderPercent(pos: PercentPosition, pct: number) {
-    const on = this.percentVisible() && this.resolvedPercentPos() === pos;
-    const belowAlign =
-      pos === 'below-start' ? 'start' : pos === 'below-end' || pos === 'below' ? 'end' : '';
-    const isInside = pos === 'inside';
-    const isBelow = pos === 'below' || pos === 'below-start' || pos === 'below-end';
+    const leadPos =
+      layout === 'top' ? 'above-start' : layout === 'bottom' ? 'below-start' : 'start';
+    const trailPos =
+      layout === 'top' ? 'above-end' : layout === 'bottom' ? 'below-end' : 'end';
+
     return html`
       <div
         class=${classMap({
-          percent: true,
-          has: on,
-          'percent--inside': isInside,
-          'percent--below': isBelow,
-          start: belowAlign === 'start',
-          end: belowAlign === 'end',
+          root: true,
+          linear: !isCirc,
+          circular: isCirc,
+          [`layout-${layout}`]: !isCirc,
+          'has-label': !isCirc && showLead,
+          'has-trailing': !isCirc && showTrail,
+          'has-below':
+            !isCirc && layout === 'bottom' && (showLead || showTrail),
         })}
-        part="percent"
-        aria-hidden="true"
-      >
-        ${pct}%
-      </div>
-    `;
-  }
-
-  override render() {
-    const caption = this.label.trim();
-    const ariaName = caption || i18n.t('progress.label');
-    const pct = Math.round(this.fraction() * 100);
-    const pos = this.resolvedPercentPos();
-    const showPct = this.percentVisible();
-    const leadingPct = showPct && pos === 'leading';
-    const trailingPct = showPct && pos === 'trailing';
-    const size = this.circularSizePx;
-
-    return html`
-      <div
-        class="root"
         part="root"
         role="progressbar"
         aria-label=${ariaName}
         aria-valuemin="0"
         aria-valuemax="100"
         aria-valuenow=${this.indeterminate ? nothing : pct}
-        style=${this.variant === 'circular'
-          ? `--k3-progress-size:${size}px`
-          : nothing}
+        style=${isCirc ? `--k3-progress-size:${size}px` : nothing}
       >
-        <div class="track-row" part="track-row">
+        <div
+          class=${classMap({
+            cell: true,
+            leading: true,
+            label: true,
+            has: showLead,
+            [leadPos]: !isCirc,
+          })}
+          part="leading"
+        >
+          <slot name="leading" @slotchange=${this.syncSlots}></slot>
+          ${showDefaultLabel
+            ? html`<span class="label-text">${caption}</span>`
+            : nothing}
+        </div>
+        <div class="indicator" part="indicator">
+          <canvas part="canvas" aria-hidden="true"></canvas>
           <div
-            class=${classMap({ side: true, leading: true, has: leadingPct })}
-            part="leading"
+            class=${classMap({ percent: true, inside: true, has: pctInside })}
+            part="percent"
+            aria-hidden="true"
           >
-            <slot name="leading">${leadingPct ? html`${pct}%` : nothing}</slot>
-          </div>
-          <div class="indicator" part="indicator">
-            <canvas part="canvas" aria-hidden="true"></canvas>
-            ${this.renderPercent('inside', pct)}
-          </div>
-          <div
-            class=${classMap({ side: true, trailing: true, has: trailingPct })}
-            part="trailing"
-          >
-            <slot name="trailing"
-              >${trailingPct ? html`${pct}%` : nothing}</slot
-            >
+            ${pctInside ? html`${pct}%` : nothing}
           </div>
         </div>
-        ${this.renderPercent('below', pct)}
-        ${this.renderPercent('below-start', pct)}
-        ${this.renderPercent('below-end', pct)}
         <div
-          class=${classMap({ caption: true, has: !!caption })}
-          part="label"
+          class=${classMap({
+            cell: true,
+            trailing: true,
+            percent: true,
+            has: showTrail,
+            [trailPos]: !isCirc,
+          })}
+          part="trailing"
         >
-          <slot name="label">${caption}</slot>
+          <slot name="trailing" @slotchange=${this.syncSlots}></slot>
+          ${showDefaultPct
+            ? html`<span class="value-text" aria-hidden="true">${pct}%</span>`
+            : nothing}
+        </div>
+        <div
+          class=${classMap({ supporting: true, has: showSupport })}
+          part="supporting"
+        >
+          <slot name="supporting" @slotchange=${this.syncSlots}></slot>
+          ${showDefaultSupport
+            ? html`<span class="supporting-text">${support}</span>`
+            : nothing}
         </div>
       </div>
     `;

@@ -4,9 +4,11 @@ import '../../src/components/containment/list.js';
 import '../../src/components/containment/list-item.js';
 import type { K3List } from '../../src/components/containment/list.js';
 import type { K3ListItem } from '../../src/components/containment/list-item.js';
+import { devicePixelSnapCss } from '../../src/core/css-length.js';
 
 describe('k3-list segmented gap', () => {
   let el: K3List;
+  const expectedGap = devicePixelSnapCss(2);
 
   beforeEach(async () => {
     el = await fixture<K3List>(html`
@@ -28,17 +30,23 @@ describe('k3-list segmented gap', () => {
   it('marks every item except last with data-seg-gap', () => {
     const items = [...el.querySelectorAll('k3-list-item')] as K3ListItem[];
     expect(items).toHaveLength(3);
-    expect(items[0]!.getAttribute('data-seg')).toBe('first');
-    expect(items[1]!.getAttribute('data-seg')).toBe('middle');
-    expect(items[2]!.getAttribute('data-seg')).toBe('last');
     expect(items[0]!.segGap).toBe(true);
     expect(items[1]!.segGap).toBe(true);
     expect(items[2]!.segGap).toBe(false);
   });
 
-  it('uses 2dp flex gap on .list', () => {
-    const list = el.shadowRoot!.querySelector('.list') as HTMLElement;
-    const gap = getComputedStyle(list).rowGap || getComputedStyle(list).gap;
-    expect(gap === '2px' || gap === '0.125rem').toBe(true);
+  it('applies DPR-snapped margin-bottom on first and middle', () => {
+    const items = [...el.querySelectorAll('k3-list-item')] as K3ListItem[];
+    expect(items[0]!.style.getPropertyValue('margin-bottom')).toBe(expectedGap);
+    expect(items[0]!.style.getPropertyPriority('margin-bottom')).toBe('important');
+    expect(items[1]!.style.getPropertyValue('margin-bottom')).toBe(expectedGap);
+    expect(items[1]!.style.getPropertyPriority('margin-bottom')).toBe('important');
+    expect(items[2]!.style.getPropertyValue('margin-bottom')).toBe('');
+  });
+
+  it('sets host --k3-segmented-list-segment-gap to snapped value', () => {
+    expect(
+      el.style.getPropertyValue('--k3-segmented-list-segment-gap').trim(),
+    ).toBe(expectedGap);
   });
 });

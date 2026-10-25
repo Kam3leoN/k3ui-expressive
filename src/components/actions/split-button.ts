@@ -7,6 +7,8 @@ import {
   focusRingStyles,
   hasNamedSlot,
   hasSlot,
+  devicePixelSnapCss,
+  watchDevicePixelRatio,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
@@ -15,6 +17,7 @@ import '../containment/menu-item.js';
 import { markMenuTreeEdges } from '../containment/menu-edges.js';
 import type { K3Menu } from '../containment/menu.js';
 import {
+  SplitButtonGapDp,
   SplitButtonSpecs,
   type SplitButtonSize,
   type SplitButtonVariant,
@@ -54,6 +57,16 @@ export class K3SplitButton extends K3Element {
   @state() private hasLabel = false;
   private _menuMo: MutationObserver | null = null;
   private _openMo: MutationObserver | null = null;
+  private _unwatchDpr: (() => void) | null = null;
+
+  /**
+   * Snap the 2dp leading↔trailing gap to integer device pixels.
+   * At Windows 125% DPI, raw `2px` → 2.5 physical and flex-gap rounds unevenly
+   * (hairline seam looks thicker / thinner). Same helper as segmented lists.
+   */
+  private applyGapToken = (): void => {
+    this.style.setProperty('--k3-sb-gap', devicePixelSnapCss(SplitButtonGapDp));
+  };
 
   private syncLeadingContent = (): void => {
     this.hasIcon = hasNamedSlot(this, 'icon');
@@ -155,6 +168,9 @@ export class K3SplitButton extends K3Element {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    this.applyGapToken();
+    this._unwatchDpr?.();
+    this._unwatchDpr = watchDevicePixelRatio(this.applyGapToken);
     this.syncLeadingContent();
     queueMicrotask(() => {
       this.syncLeadingContent();
@@ -169,6 +185,7 @@ export class K3SplitButton extends K3Element {
   }
 
   override firstUpdated(): void {
+    this.applyGapToken();
     this.syncLeadingContent();
     this.adoptMenuItems();
     const root = this.shadowRoot;
@@ -190,6 +207,8 @@ export class K3SplitButton extends K3Element {
   }
 
   override disconnectedCallback(): void {
+    this._unwatchDpr?.();
+    this._unwatchDpr = null;
     this._menuMo?.disconnect();
     this._menuMo = null;
     this._openMo?.disconnect();

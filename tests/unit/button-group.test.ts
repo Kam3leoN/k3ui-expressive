@@ -35,7 +35,7 @@ describe('button-group specs (M3 / Android / Compose)', () => {
     expect(ButtonGroupSpecs.connectedPressedInnerDp).toBe(4);
     expect(ButtonGroupConnectedSelectedInnerPercent).toBe(50);
     expect(ButtonGroupExpandedRatio).toBe(0.15);
-    expect(ButtonGroupSpecs.pressReleaseMs).toBe(520);
+    expect(ButtonGroupSpecs.pressReleaseMs).toBe(370);
   });
 });
 
@@ -126,6 +126,32 @@ describe('k3-button-group', () => {
     week.click();
     await el.updateComplete;
     expect(el.selectedValues()).toEqual(['week']);
+  });
+
+  it('optional single clears on second click', async () => {
+    host.innerHTML = `
+      <k3-button-group selection="single" label="Mood">
+        <k3-button value="reactions">Reactions</k3-button>
+        <k3-button value="hand">Hand</k3-button>
+      </k3-button-group>
+    `;
+    const el = host.querySelector('k3-button-group') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+      selectedValues: () => string[];
+    };
+    await el.updateComplete;
+    await Promise.resolve();
+
+    const reactions = el.querySelector('k3-button[value="reactions"]') as HTMLElement;
+    reactions.click();
+    await el.updateComplete;
+    await new Promise((r) => setTimeout(r, 200));
+    expect(el.selectedValues()).toEqual(['reactions']);
+
+    reactions.click();
+    await el.updateComplete;
+    await new Promise((r) => setTimeout(r, 200));
+    expect(el.selectedValues()).toEqual([]);
   });
 
   it('multi-select toggles and emits values', async () => {

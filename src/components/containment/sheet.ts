@@ -1,4 +1,4 @@
-import { html, css, type PropertyValues } from 'lit';
+import { html, css, type CSSResultGroup, type PropertyValues } from 'lit';
 import { property, state, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import {
@@ -6,12 +6,20 @@ import {
   runOpenClose,
   afterPaint,
   attachDrag,
+  setAxisTranslate,
+  animateAxisTranslate,
+  clearAxisTranslate,
+  shouldDismissDrag,
+  resolveDismissThresholdPx,
+  M3_DISMISS_POSITION_DP,
+  M3_DISMISS_VELOCITY,
   haptic,
   edgeScrollbarStyles,
   isRtl as readRtl,
   type DragController,
   type DragDetail,
 } from '../../core/index.js';
+import { enterSheetBottom, enterSheetSide } from '../../motion/enter.js';
 import { i18n } from '../../i18n/index.js';
 import { hostReset } from '../_shared.js';
 
@@ -45,9 +53,15 @@ export type SheetWidth = 'standard' | 'full';
  * ```
  */
 export class K3Sheet extends K3Element {
-  static override styles = [
+  static override styles: CSSResultGroup = [
     hostReset,
     edgeScrollbarStyles,
+    /*
+     * Edge-pinned scale + spatial-fast overshoot (same spring as menus).
+     * Never translate→0 with overshoot — that lifts the sheet off the edge.
+     */
+    enterSheetBottom('.sheet.bottom'),
+    enterSheetSide('.sheet.side'),
     css`
       :host {
         display: contents;
@@ -60,12 +74,14 @@ export class K3Sheet extends K3Element {
         pointer-events: none;
         /* Above shell chrome (rail ~30); menus/dialogs share this band */
         z-index: 100;
-        transition: opacity var(--k3-sys-motion-duration-short4)
-          var(--k3-sys-motion-easing-expressive-effects);
+        transition: opacity var(--k3-sys-motion-duration-effects-fast, 150ms)
+          var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects));
       }
       .backdrop.open {
         opacity: 1;
         pointer-events: auto;
+        transition: opacity var(--k3-sys-motion-duration-effects-default, 200ms)
+          var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects));
       }
       .backdrop.dragging {
         transition: none;
@@ -79,21 +95,19 @@ export class K3Sheet extends K3Element {
         gap: 1rem;
         background: var(--k3-sys-color-surface-container-low);
         color: var(--k3-sys-color-on-surface);
-        opacity: 0;
         pointer-events: none;
-        transition:
-          transform var(--k3-sys-motion-duration-spatial-default)
-            var(--k3-sys-motion-easing-expressive-spatial),
-          opacity var(--k3-sys-motion-duration-short4)
-            var(--k3-sys-motion-easing-expressive-effects);
         will-change: transform;
       }
       .sheet.open {
-        opacity: 1;
         pointer-events: auto;
       }
       .sheet.dragging {
+        /* Inline translate owns transform — kill scale transition morph */
         transition: none !important;
+        user-select: none;
+      }
+      .sheet.settling {
+        /* Transition comes from inline style in animateDragTo */
         user-select: none;
       }
 
@@ -111,7 +125,6 @@ export class K3Sheet extends K3Element {
         padding: 0 1.5rem max(1.5rem, env(safe-area-inset-bottom));
         border-radius: var(--k3-sys-shape-corner-extra-large)
           var(--k3-sys-shape-corner-extra-large) 0 0;
-        transform: translateY(100%);
         box-sizing: border-box;
       }
       /* Opt-in edge-to-edge (M3 documents 640dp max; full remains available) */
@@ -121,9 +134,6 @@ export class K3Sheet extends K3Element {
         max-width: none;
         margin-inline: 0;
         max-height: 90dvh;
-      }
-      .sheet.bottom.open:not(.dragging) {
-        transform: translateY(0);
       }
       /* Drag handle — 32×4 bar · 22dp pad → 48dp accessible target (M3) */
       .sheet.bottom .handle {
@@ -137,9 +147,18 @@ export class K3Sheet extends K3Element {
         margin-inline: -0.5rem;
         cursor: grab;
         touch-action: none;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
       }
       .sheet.bottom .handle:active {
         cursor: grabbing;
+      }
+      .sheet.bottom .handle:focus-visible {
+        outline: 0.125rem solid var(--k3-sys-color-secondary);
+        outline-offset: -0.125rem;
+        border-radius: var(--k3-sys-shape-corner-extra-small);
       }
       .sheet.bottom .handle::after {
         content: '';
@@ -196,28 +215,22 @@ export class K3Sheet extends K3Element {
           env(safe-area-inset-bottom, 0px)
         );
       }
+      /* Docked edge = scale origin (overshoot grows into the page, not off-screen) */
       .sheet.side.end {
         inset-inline-end: 0;
         inset-inline-start: auto;
-        transform: translateX(100%);
+        transform-origin: right center;
       }
       .sheet.side.start {
         inset-inline-start: 0;
         inset-inline-end: auto;
-        transform: translateX(-100%);
+        transform-origin: left center;
       }
-      .sheet.side.open:not(.dragging) {
-        transform: translateX(0);
+      :host(:dir(rtl)) .sheet.side.end {
+        transform-origin: left center;
       }
-      :host(:dir(rtl)) .sheet.side.end:not(.open),
-      :host(:dir(rtl)) .sheet.side.end.open:not(.dragging) {
-        /* open = 0 handled above; closed direction flips in JS + closed rule */
-      }
-      :host(:dir(rtl)) .sheet.side.end:not(.open) {
-        transform: translateX(-100%);
-      }
-      :host(:dir(rtl)) .sheet.side.start:not(.open) {
-        transform: translateX(100%);
+      :host(:dir(rtl)) .sheet.side.start {
+        transform-origin: right center;
       }
       .sheet.side .handle {
         display: none;
@@ -337,13 +350,20 @@ export class K3Sheet extends K3Element {
   railAttached = false;
   /** Enable drag-to-dismiss (default on) */
   @property({ type: Boolean, reflect: true }) draggable = true;
-  /** Fraction of size (0–1) to dismiss on release — default 0.28 */
-  @property({ type: Number, attribute: 'dismiss-threshold' }) dismissThreshold = 0.28;
-  /** Velocity (px/ms) to dismiss — default 0.55 */
-  @property({ type: Number, attribute: 'dismiss-velocity' }) dismissVelocity = 0.55;
+  /**
+   * Positional dismiss threshold in CSS px (M3 SheetDefaults = 56dp).
+   * Values ≤ 1 are treated as a fraction of sheet size (legacy).
+   */
+  @property({ type: Number, attribute: 'dismiss-threshold' })
+  dismissThreshold = M3_DISMISS_POSITION_DP;
+  /** Fling velocity (px/ms) to dismiss — M3 = 125dp/s ≈ 0.125 */
+  @property({ type: Number, attribute: 'dismiss-velocity' })
+  dismissVelocity = M3_DISMISS_VELOCITY;
 
   @state() private visible = false;
   @state() private dragging = false;
+  /** True while animating snap-back / slide-off after pointer up. */
+  @state() private settling = false;
 
   @query('.sheet', true) private sheetEl!: HTMLElement;
   @query('.handle', true) private handleEl!: HTMLElement;
@@ -388,7 +408,7 @@ export class K3Sheet extends K3Element {
 
   /**
    * Paint closed transform first, then flip `.open` — required after portal /
-   * first open so the slide transition actually runs (no sudden pop-in).
+   * first open so the edge-scale + overshoot actually runs (no sudden pop-in).
    */
   private playEnter(): Promise<void> {
     if (this.visible) return Promise.resolve();
@@ -430,6 +450,7 @@ export class K3Sheet extends K3Element {
         this.open = false;
         this.visible = false;
         this.dragging = false;
+        this.settling = false;
         this.clearDragTransform();
         if (source === 'drag') haptic.light();
       },
@@ -472,7 +493,7 @@ export class K3Sheet extends K3Element {
       preventScroll: true,
       /* Keep CSS touch-action so content can still scroll */
       touchAction: null,
-      disabled: () => !this.visible && !this.open,
+      disabled: () => (!this.visible && !this.open) || this.settling,
       minY: isBottom ? 0 : undefined,
       maxY: isBottom ? () => this.sheetEl?.offsetHeight ?? 0 : undefined,
       canStart: (e) => this.canStartDrag(e, isBottom),
@@ -482,6 +503,8 @@ export class K3Sheet extends K3Element {
       },
       onActivate: () => {
         this.dragging = true;
+        /* Lock rest translate so CSS scale rule can drop without a jump */
+        this.applyDragTransform(0);
         haptic.selection();
         this.emit('k3-drag-start', { placement: this.placement });
       },
@@ -491,12 +514,16 @@ export class K3Sheet extends K3Element {
   }
 
   private canStartDrag(e: PointerEvent, isBottom: boolean): boolean {
-    if (!this.draggable) return false;
+    if (!this.draggable || this.settling) return false;
     if (!(this.visible || this.open)) return false;
     const path = e.composedPath();
-    /* Never steal clicks from links / buttons / form controls / disclosures */
+    /* Never steal clicks from links / buttons / form controls / disclosures.
+     * Drag handle is role=button — allow it explicitly. */
     for (const n of path) {
       if (!(n instanceof Element)) continue;
+      if (this.handleEl && (n === this.handleEl || this.handleEl.contains(n))) {
+        return true;
+      }
       if (
         n.closest(
           'a, button, input, textarea, select, label, summary, details, [href], [role="link"], [role="button"]',
@@ -523,81 +550,118 @@ export class K3Sheet extends K3Element {
     return true;
   }
 
+  private dragAxis(): 'x' | 'y' {
+    return this.placement === 'bottom' ? 'y' : 'x';
+  }
+
+  private applyDragTransform(offset: number): void {
+    if (!this.sheetEl) return;
+    this.dragOffset = offset;
+    setAxisTranslate(this.sheetEl, this.dragAxis(), offset, this.dismissSign());
+  }
+
+  private syncBackdrop(offset: number, size: number): void {
+    if (!this.backdropEl) return;
+    const progress = size > 0 ? Math.min(1, offset / size) : 0;
+    this.backdropEl.style.opacity = String(Math.max(0, 1 - progress));
+  }
+
+  /** Settle via shared {@link animateAxisTranslate} (snap / dismiss). */
+  private async animateDragTo(
+    offset: number,
+    mode: 'snap' | 'dismiss',
+  ): Promise<void> {
+    if (!this.sheetEl) return;
+    this.dragging = false;
+    this.settling = true;
+    await this.updateComplete;
+
+    const el = this.sheetEl;
+    const size = this.placement === 'bottom' ? el.offsetHeight : el.offsetWidth;
+    if (this.backdropEl) {
+      this.backdropEl.style.transition = `opacity var(--k3-sys-motion-duration-effects-fast, 150ms)
+        var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects))`;
+    }
+    this.dragOffset = offset;
+    this.syncBackdrop(offset, size || 1);
+    await animateAxisTranslate(el, this.dragAxis(), offset, mode, this.dismissSign());
+  }
+
   private onDragMove(d: DragDetail, isBottom: boolean): void {
     if (!d.active || !this.sheetEl) return;
     const sign = this.dismissSign();
     const raw = isBottom ? d.dy : d.dx;
     const offset = Math.max(0, raw * sign);
-    this.dragOffset = offset;
+    this.applyDragTransform(offset);
 
-    if (isBottom) {
-      this.sheetEl.style.transform = `translateY(${offset}px)`;
-    } else {
-      this.sheetEl.style.transform = `translateX(${offset * sign}px)`;
-    }
+    const size = isBottom ? this.sheetEl.offsetHeight : this.sheetEl.offsetWidth;
+    this.syncBackdrop(offset, size);
 
-    const size = isBottom
-      ? this.sheetEl.offsetHeight
-      : this.sheetEl.offsetWidth;
-    const progress = size > 0 ? Math.min(1, offset / size) : 0;
-    if (this.backdropEl) {
-      this.backdropEl.style.opacity = String(Math.max(0, 1 - progress));
-    }
-
-    if (!this.crossedThreshold && progress >= this.dismissThreshold) {
+    const posPx = resolveDismissThresholdPx(this.dismissThreshold, size);
+    if (!this.crossedThreshold && offset >= posPx) {
       this.crossedThreshold = true;
       haptic.medium();
-    } else if (this.crossedThreshold && progress < this.dismissThreshold * 0.85) {
+    } else if (this.crossedThreshold && offset < posPx * 0.85) {
       this.crossedThreshold = false;
     }
 
     this.emit('k3-drag', {
       placement: this.placement,
       offset,
-      progress,
+      progress: size > 0 ? Math.min(1, offset / size) : 0,
     });
   }
 
   private async onDragEnd(d: DragDetail, isBottom: boolean): Promise<void> {
     const wasDragging = this.dragging;
-    this.dragging = false;
     if (!wasDragging && !d.active) {
+      this.dragging = false;
       this.clearDragTransform();
       return;
     }
 
-    const sign = this.dismissSign();
     const offset = this.dragOffset;
     const size = isBottom
       ? (this.sheetEl?.offsetHeight ?? 1)
       : (this.sheetEl?.offsetWidth ?? 1);
+    const sign = this.dismissSign();
     const velocity = isBottom ? d.velocityY * sign : d.velocityX * sign;
-    const shouldDismiss =
-      offset / size >= this.dismissThreshold || velocity >= this.dismissVelocity;
+    const dismiss = shouldDismissDrag({
+      offset,
+      size,
+      velocity,
+      positionalThreshold: this.dismissThreshold,
+      velocityThreshold: this.dismissVelocity,
+    });
 
     this.emit('k3-drag-end', {
       placement: this.placement,
       offset,
       velocity,
-      dismiss: shouldDismiss,
+      dismiss,
     });
 
-    if (shouldDismiss) {
-      /* Keep offset while close animation runs from current position */
-      void this.hide('drag');
+    if (dismiss) {
+      /* M3: continue fling off-screen, then tear down */
+      await this.animateDragTo(size, 'dismiss');
+      await this.hide('drag');
       return;
     }
 
-    /* Snap back */
+    await this.animateDragTo(0, 'snap');
     this.clearDragTransform();
     haptic.light();
   }
 
   private clearDragTransform(): void {
-    if (this.sheetEl) this.sheetEl.style.transform = '';
-    if (this.backdropEl) this.backdropEl.style.opacity = '';
+    if (this.sheetEl) clearAxisTranslate(this.sheetEl);
+    if (this.backdropEl) {
+      this.backdropEl.style.opacity = '';
+      this.backdropEl.style.removeProperty('transition');
+    }
     this.dragOffset = 0;
     this.crossedThreshold = false;
+    this.settling = false;
   }
 
   override connectedCallback(): void {
@@ -662,6 +726,7 @@ export class K3Sheet extends K3Element {
           sheet: true,
           open,
           dragging: this.dragging,
+          settling: this.settling,
           bottom: isBottom,
           side: !isBottom,
           start: !isBottom && this.side === 'start',
@@ -673,11 +738,21 @@ export class K3Sheet extends K3Element {
         aria-modal=${this.modal ? 'true' : 'false'}
         data-draggable=${this.draggable ? 'true' : 'false'}
       >
-        <div
-          class="handle"
-          part="handle"
-          aria-hidden=${this.draggable && isBottom ? 'false' : 'true'}
-        ></div>
+        ${isBottom && this.draggable
+          ? html`<div
+              class="handle"
+              part="handle"
+              role="button"
+              tabindex="0"
+              aria-label=${i18n.t('sheet.dragHandle')}
+              @keydown=${(e: KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  void this.hide('user');
+                }
+              }}
+            ></div>`
+          : html`<div class="handle" part="handle" aria-hidden="true"></div>`}
         <div class="header" part="header">
           <div class="headline" part="headline"><slot name="headline"></slot></div>
           ${this.closeAction

@@ -1321,11 +1321,26 @@ k3-avatar [slot='badge'].ms {
 /*
  * Grid demos — cases fill tracks and MUST shrink (minmax(0,1fr)).
  * Never let card / media intrinsic size blow past the frame edge.
+ *
+ * IMPORTANT: bare `.grid-2` sets `width/max-width: 100%` (same specificity,
+ * later in file) which would cancel the --cases breakout and leave cases
+ * 40dp short of the overlay (12-col tracks no longer align). Re-assert
+ * breakout + the same tracks/gutter as `.k3-layout-grid` / overlay here.
  */
 .demo-frame--cases.grid-2,
 .demo-frame--cases.grid-3,
 .demo-frame--demo.grid-2,
 .demo-frame--demo.grid-3 {
+  /* Prefer grid tracks over flex wrap (keeps 2-up side-by-side) */
+  display: grid;
+  grid-template-columns: repeat(var(--k3-layout-columns, 12), minmax(0, 1fr));
+  gap: var(--k3-layout-gutter, 0.5rem);
+  /* Restore breakout — must beat `.grid-2 { width/max-width: 100% }` */
+  margin-inline: calc(-1 * var(--k3-layout-full-gap, 1.25rem));
+  width: calc(100% + 2 * var(--k3-layout-full-gap, 1.25rem));
+  max-width: none;
+  padding-inline: var(--k3-layout-full-gap, 1.25rem);
+  box-sizing: border-box;
   /* Safety: clip accidental horizontal overflow; menus are position:fixed */
   overflow-x: clip;
   overflow-y: visible;
@@ -1358,6 +1373,12 @@ k3-avatar [slot='badge'].ms {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+}
+/* Hug-content floating toolbars — don't stretch the pill to the track */
+.demo-frame--cases.grid-2 .demo-case-stage > k3-toolbar[variant='floating'],
+.demo-frame--cases.grid-3 .demo-case-stage > k3-toolbar[variant='floating'] {
+  width: auto;
+  max-width: 100%;
 }
 /* Full-bleed case (e.g. card-set spanning all columns) */
 .demo-frame--cases.grid-2 > .demo-case[style*='grid-column'],
@@ -2165,13 +2186,75 @@ html[data-k3-color-mode='dark'] .demo-frame {
   font-size: var(--k3-sys-typescale-body-small-size);
 }
 
+/* Meet-style hang-up FAB — error role (call end) */
+.toolbar-demo-hangup {
+  --k3-fab-bg: var(--k3-sys-color-error);
+  --k3-fab-fg: var(--k3-sys-color-on-error);
+}
+
+/* Meet call bar — grow upward (bottom-anchored stage) */
+#meet-call-toolbar {
+  align-self: flex-end;
+}
+.demo-case-stage:has(#meet-call-toolbar) {
+  min-height: 9rem; /* room for expand strip above */
+  align-items: flex-end;
+}
+
+/* Meet reactions strip — centered nested pill inside slot=expand */
+.meet-emoji-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.meet-emoji-strip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem; /* 2 */
+  padding: 0.25rem 0.5rem; /* 4 · 8 */
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-surface-container-high);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.meet-emoji {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0.35rem;
+  min-width: 2.5rem; /* 40 */
+  min-height: 2.5rem;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+}
+.meet-emoji:hover {
+  background: color-mix(in srgb, var(--k3-sys-color-on-surface) 8%, transparent);
+}
+.meet-emoji:focus-visible {
+  outline: 2px solid var(--k3-sys-color-secondary);
+  outline-offset: 2px;
+}
+
 /* Case + legend: container first, numbered pills always below */
 .demo-block {
   display: flex;
   flex-direction: column;
   align-items: stretch; /* full-width single-column case */
   width: 100%;
-  gap: 0.75rem; /* 12dp under the case */
+  gap: var(--k3-sys-spacing-space300, 1rem); /* 16dp — frame → legend */
+}
+/* Space between successive demos — avoid frames / legends touching */
+.comp-page > .demo-block + .demo-block {
+  margin-block-start: var(--k3-sys-spacing-space600, 3rem); /* 48dp */
 }
 /*
  * Dual legends (numbers + alpha) — only when both sets exist (opt-in via --split).
@@ -2578,27 +2661,29 @@ k3-avatar [slot='badge'].ms {
   background: var(--k3-sys-color-surface-container-highest);
 }
 
-/* Slider interactive lab */
-#slider-lab .demo-frame--stack > .slider-lab-case {
-  justify-content: center;
-  min-width: 0;
-  width: 100%;
+/* Slider playground — H | V frames + controls */
+#slider-lab .demo-frame--cases {
+  align-items: stretch;
 }
-#slider-lab .demo-frame--stack .demo-case-stage.slider-lab-stage {
-  width: 100%;
-  max-width: 100%;
-  min-height: 7rem;
-  flex-direction: column;
+#slider-lab .slider-lab-stage {
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding-inline: var(--k3-sys-spacing-space300, 1.5rem);
+  width: 100%;
+  min-width: max-content;
+  padding: var(--k3-sys-spacing-space300, 1.5rem);
 }
-#slider-lab-el {
-  width: min(100%, 28rem);
+#slider-lab .slider-lab-stage--h {
+  min-height: 7rem;
 }
-#slider-lab-el[orientation='vertical'] {
-  width: auto;
-  height: 14rem;
+#slider-lab .slider-lab-stage--h #slider-lab-h {
+  width: min(100%, 20rem);
+}
+#slider-lab .slider-lab-stage--v {
+  min-height: 16rem;
+}
+#slider-lab > .variant-guide {
+  margin-block-start: var(--k3-sys-spacing-space200, 1rem);
 }
 .slider-lab-controls {
   margin-block-start: var(--k3-sys-spacing-space300, 1.5rem);
@@ -2623,10 +2708,24 @@ k3-avatar [slot='badge'].ms {
   font-weight: 500;
   color: var(--k3-sys-color-on-surface-variant);
 }
-.slider-lab-radios {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--k3-sys-spacing-space200, 1rem);
+.slider-lab-field--size,
+.slider-lab-field--variant,
+.slider-lab-field--color {
+  grid-column: span 8;
+}
+@media (max-width: 904px) {
+  .slider-lab-field--size,
+  .slider-lab-field--variant,
+  .slider-lab-field--color {
+    grid-column: span 4;
+  }
+}
+.slider-lab-field--size k3-button-group,
+.slider-lab-field--variant k3-button-group,
+.slider-lab-field--color k3-button-group {
+  display: block;
+  width: max-content;
+  max-width: 100%;
 }
 
 
@@ -2636,16 +2735,18 @@ k3-avatar [slot='badge'].ms {
   max-width: 100%;
   min-height: 7rem;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   padding-inline: var(--k3-sys-spacing-space300, 1.5rem);
 }
 #progress-lab-el {
   width: 100%;
   max-width: 28rem;
+  align-self: center;
 }
 #progress-lab-el[variant='circular'] {
   width: auto;
+  max-width: none;
   align-self: center;
 }
 .progress-lab-controls {
@@ -2672,6 +2773,12 @@ k3-avatar [slot='badge'].ms {
 .progress-lab-radios {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--k3-sys-spacing-space200, 1rem);
+}
+.progress-lab-switches {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: var(--k3-sys-spacing-space200, 1rem);
 }
 .progress-lab-value {

@@ -265,6 +265,11 @@ function applyPlaygroundI18n(): void {
     if (!key) return;
     setCeProp(el, 'label', 'label', t(key));
   });
+  document.querySelectorAll<HTMLElement>('[data-i18n-aria-label]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (!key) return;
+    el.setAttribute('aria-label', t(key));
+  });
   document.querySelectorAll<HTMLElement>('[data-i18n-supporting-text]').forEach((el) => {
     const key = el.getAttribute('data-i18n-supporting-text');
     if (!key) return;
@@ -2278,6 +2283,7 @@ function wireDemoPages(): void {
   void import('./gestures-demo.js').then((m) => m.wireUtilityDemos());
   wireColorLab();
   wireButtonPillDemos();
+  wireMeetToolbarDemo();
 
   const wireToggle = (id: string): void => {
     const el = document.getElementById(id) as (HTMLElement & { selected: boolean }) | null;
@@ -2300,26 +2306,38 @@ function wireProgressLab(): void {
         indeterminate: boolean;
         thickness: number;
         showStop: boolean;
+        showPercent: boolean;
+        showLabel: boolean;
+        percentPosition: string;
+        layout: string;
         label: string;
+        supportingText: string;
         value: number;
+        size: number;
         wavy: boolean;
       })
     | null;
-  if (!lab || !el) return;
+  if (!lab || !el || lab.dataset.progressWired) return;
+  lab.dataset.progressWired = '1';
 
   type RadioEl = HTMLElement & { value: string; checked: boolean; name: string; localName: string };
+  type SwitchEl = HTMLElement & { selected: boolean; localName: string };
   const radioValue = (name: string): string => {
     const radios = [...lab.querySelectorAll<RadioEl>(`k3-radio[name="${name}"]`)];
-    return radios.find((r) => r.checked)?.value ?? radios[0]?.value ?? '';
+    const on = radios.find((r) => !!r.checked);
+    return on?.value ?? radios[0]?.value ?? '';
   };
-  const setRadio = (name: string, value: string): void => {
-    lab.querySelectorAll<RadioEl>(`k3-radio[name="${name}"]`).forEach((r) => {
-      r.checked = r.value === value;
-    });
+  const switchOn = (id: string): boolean => {
+    const sw = document.getElementById(id) as SwitchEl | null;
+    /* Property only — hasAttribute lags Lit reflect and can stick “on”. */
+    return sw?.selected === true;
   };
 
   const valueWrap = document.getElementById('progress-lab-value-wrap');
   const stopField = document.getElementById('progress-lab-stop-field');
+  const layoutField = document.getElementById('progress-lab-layout-field');
+  const pctPosField = document.getElementById('progress-lab-pct-pos-field');
+  const sizeField = document.getElementById('progress-lab-size-field');
   const pctLabel = document.getElementById('progress-lab-value-pct');
   const slider = document.getElementById('progress-lab-slider') as
     | (HTMLElement & { value: number; disabled: boolean })
@@ -2330,8 +2348,14 @@ function wireProgressLab(): void {
     const shape = radioValue('prog-shape') || 'flat';
     const behavior = radioValue('prog-behavior') || 'determinate';
     const thickness = Number(radioValue('prog-thickness') || '4');
-    const stopOn = radioValue('prog-stop') !== 'off';
-    const labelOn = radioValue('prog-label') === 'on';
+    const stopOn = radioValue('prog-stop') === 'on';
+    const layout = radioValue('prog-layout') || 'default';
+    const pctPos = radioValue('prog-pct-pos') || 'trailing';
+    const sizeRaw = Number(radioValue('prog-size') || '0');
+    /* Three independent chrome toggles — never couple label ↔ value %. */
+    const labelOn = switchOn('prog-sw-label');
+    const percentOn = switchOn('prog-sw-percent');
+    const supportingOn = switchOn('prog-sw-supporting');
     const indeterminate = behavior === 'indeterminate';
 
     el.variant = variant;
@@ -2339,17 +2363,42 @@ function wireProgressLab(): void {
     el.wavy = shape === 'wavy';
     el.indeterminate = indeterminate;
     el.thickness = thickness;
+    el.size = Number.isFinite(sizeRaw) ? sizeRaw : 0;
     el.showStop = stopOn && variant === 'linear' && !indeterminate;
+    el.layout = layout;
+    el.percentPosition = pctPos;
+    /*
+     * String props only via JS — do NOT removeAttribute('label'): Lit then
+     * sets the property to null, render's .trim() throws, and the old
+     * caption stays on screen (Value % is fine: boolean show-percent).
+     */
     el.label = labelOn ? 'Downloading' : '';
+    el.supportingText = supportingOn ? 'About 2 minutes left' : '';
+    el.showPercent = percentOn && !indeterminate;
+    el.showLabel = false;
     el.setAttribute('variant', variant);
     el.setAttribute('shape', shape);
+    el.setAttribute('layout', layout);
+    el.setAttribute('percent-position', pctPos);
     el.toggleAttribute('wavy', shape === 'wavy');
     el.toggleAttribute('indeterminate', indeterminate);
     el.toggleAttribute('show-stop', el.showStop);
+    el.toggleAttribute('show-percent', el.showPercent);
+    el.removeAttribute('show-label');
+    if (el.size > 0) el.setAttribute('size', String(el.size));
+    else el.removeAttribute('size');
+    /* Keep attributes in sync without remove→null (use empty string). */
     if (labelOn) el.setAttribute('label', el.label);
-    else el.removeAttribute('label');
+    else el.setAttribute('label', '');
+    if (supportingOn) el.setAttribute('supporting-text', el.supportingText);
+    else el.setAttribute('supporting-text', '');
 
     if (stopField) (stopField as HTMLElement).hidden = variant !== 'linear' || indeterminate;
+    if (layoutField) (layoutField as HTMLElement).hidden = variant !== 'linear';
+    if (sizeField) (sizeField as HTMLElement).hidden = variant !== 'circular';
+    if (pctPosField) {
+      (pctPosField as HTMLElement).hidden = variant !== 'circular' || !percentOn || indeterminate;
+    }
     if (valueWrap) (valueWrap as HTMLElement).hidden = indeterminate;
     if (slider) {
       slider.disabled = indeterminate;
@@ -2358,20 +2407,19 @@ function wireProgressLab(): void {
     if (pctLabel && slider) pctLabel.textContent = `${Math.round(slider.value)}%`;
   };
 
+  lab.querySelectorAll<RadioEl>('k3-radio').forEach((radio) => {
+    radio.addEventListener('k3-change', () => {
+      queueMicrotask(sync);
+    });
+  });
+  lab.querySelectorAll<SwitchEl>('k3-switch').forEach((sw) => {
+    sw.addEventListener('k3-change', () => {
+      queueMicrotask(sync);
+    });
+  });
   lab.addEventListener('k3-change', (e) => {
-    const path = e.composedPath();
-    const t = (path.find((n) => (n as HTMLElement).localName === 'k3-radio') ??
-      path.find((n) => (n as HTMLElement).localName === 'k3-slider') ??
-      e.target) as RadioEl | null;
-    if (!t) return;
-    if (t.localName === 'k3-radio') {
-      const detail = (e as CustomEvent<{ value?: string }>).detail;
-      const value = detail?.value ?? t.value;
-      if (t.name && value != null && value !== '') setRadio(t.name, String(value));
-      sync();
-      return;
-    }
-    if (t.localName === 'k3-slider') sync();
+    const t = e.target as HTMLElement | null;
+    if (t?.localName === 'k3-slider') sync();
   });
   lab.addEventListener('k3-input', (e) => {
     const t = e.target as HTMLElement | null;
@@ -2380,95 +2428,166 @@ function wireProgressLab(): void {
   sync();
 }
 
-/** Slider page — interactive M3E lab. */
+/** Slider page — H | V frames + size / stops / inset / label / VI / ±. */
 function wireSliderLab(): void {
   const lab = document.getElementById('slider-lab');
-  const el = document.getElementById('slider-lab-el') as
-    | (HTMLElement & {
-        variant: string;
-        size: string;
-        orientation: string;
-        stops: boolean;
-        valueIndicator: boolean;
-        insetIcon: boolean;
-        value: number;
-        valueStart: number;
-        valueEnd: number;
-        min: number;
-        max: number;
-        step: number;
-        label: string;
-      })
-    | null;
-  if (!lab || !el) return;
+  if (!lab) return;
 
-  type RadioEl = HTMLElement & { value: string; checked: boolean; name: string };
-  const radioValue = (name: string): string => {
-    const radios = [...lab.querySelectorAll<RadioEl>(`k3-radio[name="${name}"]`)];
-    return radios.find((r) => r.checked)?.value ?? radios[0]?.value ?? '';
+  type SliderEl = HTMLElement & {
+    value: number;
+    valueStart: number;
+    valueEnd: number;
+    min: number;
+    max: number;
+    step: number;
+    size: string;
+    variant: string;
+    color: string;
+    topToBottom: boolean;
+    stops: boolean;
+    stopLabels: string;
+    insetIcon: boolean;
+    valueIndicator: boolean;
+    label: string;
+    disabled: boolean;
   };
-  const setRadio = (name: string, value: string): void => {
-    lab.querySelectorAll<RadioEl>(`k3-radio[name="${name}"]`).forEach((r) => {
-      r.checked = r.value === value;
-    });
+  type SwitchEl = HTMLElement & { selected: boolean };
+  type GroupEl = HTMLElement & { selectedValues: () => string[] };
+
+  const sliderH = document.getElementById('slider-lab-h') as SliderEl | null;
+  const sliderV = document.getElementById('slider-lab-v') as SliderEl | null;
+  const sliders = [sliderH, sliderV].filter(Boolean) as SliderEl[];
+  const sizeGroup = document.getElementById('sl-size') as GroupEl | null;
+  const variantGroup = document.getElementById('sl-variant') as GroupEl | null;
+  const colorGroup = document.getElementById('sl-color') as GroupEl | null;
+
+  const switchOn = (id: string): boolean => {
+    const sw = document.getElementById(id) as SwitchEl | null;
+    return sw?.selected === true;
   };
 
   const iconField = document.getElementById('slider-lab-icon-field');
 
+  const nudge = (slider: SliderEl, dir: -1 | 1): void => {
+    if (slider.variant === 'range') return;
+    const step = slider.step > 0 ? slider.step : 1;
+    const next = Math.min(slider.max, Math.max(slider.min, slider.value + dir * step));
+    slider.value = next;
+    slider.dispatchEvent(
+      new CustomEvent('k3-change', {
+        bubbles: true,
+        composed: true,
+        detail: { value: next },
+      }),
+    );
+  };
+
+  sliders.forEach((slider) => {
+    slider
+      .querySelector('.sl-pm[data-pm-slot="start"]')
+      ?.addEventListener('click', () => nudge(slider, -1));
+    slider
+      .querySelector('.sl-pm[data-pm-slot="end"]')
+      ?.addEventListener('click', () => nudge(slider, 1));
+  });
+
+  const setSlot = (el: HTMLElement, name: string, on: boolean): void => {
+    if (on) {
+      el.slot = name;
+      el.hidden = false;
+    } else {
+      el.removeAttribute('slot');
+      el.hidden = true;
+    }
+  };
+
   const sync = (): void => {
-    const variant = radioValue('sl-variant') || 'standard';
-    const size = radioValue('sl-size') || 'xs';
-    const orientation = radioValue('sl-orient') || 'horizontal';
-    const stopsOn = radioValue('sl-stops') === 'on';
-    const viOn = radioValue('sl-vi') === 'on';
-    const iconOn = radioValue('sl-icon') === 'on';
+    const size = sizeGroup?.selectedValues()?.[0] || 'xs';
+    const variant = variantGroup?.selectedValues()?.[0] || 'standard';
+    const color = colorGroup?.selectedValues()?.[0] || 'primary';
+    const isRange = variant === 'range';
+    const isCentered = variant === 'centered';
+    const stopsOn = switchOn('sl-sw-stops');
+    const iconOn = switchOn('sl-sw-icon');
+    const labelOn = switchOn('sl-sw-label');
+    const viOn = switchOn('sl-sw-vi');
+    const pmOn = switchOn('sl-sw-pm');
+    const disabledOn = switchOn('sl-sw-disabled');
+    const ttbOn = switchOn('sl-sw-ttb');
+    /* Inset icon: standard · md+ only (M3 — not centered / range). */
     const canIcon =
       variant === 'standard' && (size === 'md' || size === 'lg' || size === 'xl');
 
-    el.variant = variant;
-    el.size = size;
-    el.orientation = orientation;
-    el.stops = stopsOn;
-    el.valueIndicator = viOn;
-    el.insetIcon = iconOn && canIcon;
-    el.step = stopsOn ? 10 : 1;
-    el.setAttribute('variant', variant);
-    el.setAttribute('size', size);
-    el.setAttribute('orientation', orientation);
-    el.toggleAttribute('stops', stopsOn);
-    el.toggleAttribute('value-indicator', viOn);
-    el.toggleAttribute('inset-icon', el.insetIcon);
-
-    if (variant === 'centered') {
-      el.min = -50;
-      el.max = 50;
-      if (el.value < -50 || el.value > 50) el.value = 0;
-      el.label = 'Brightness';
-    } else if (variant === 'range') {
-      el.min = 0;
-      el.max = 100;
-      el.valueStart = 20;
-      el.valueEnd = 70;
-      el.label = 'Price range';
-    } else {
-      el.min = 0;
-      el.max = 100;
-      el.label = 'Volume';
-    }
-
     if (iconField) iconField.hidden = !canIcon;
+
+    sliders.forEach((el) => {
+      const isVertical = el.id === 'slider-lab-v';
+      /* Range = horizontal only — disable the vertical demo. */
+      const forceDisabled = disabledOn || (isRange && isVertical);
+      const elVariant = isRange && isVertical ? 'standard' : variant;
+      const prevVariant = el.variant;
+
+      el.size = size;
+      el.setAttribute('size', size);
+      el.variant = elVariant;
+      el.setAttribute('variant', elVariant);
+      el.color = color;
+      el.setAttribute('color', color);
+      el.topToBottom = isVertical && ttbOn;
+      el.toggleAttribute('top-to-bottom', el.topToBottom);
+      el.stops = stopsOn;
+      el.toggleAttribute('stops', stopsOn);
+      el.step = stopsOn ? 10 : 1;
+      el.valueIndicator = viOn;
+      el.toggleAttribute('value-indicator', viOn);
+      el.insetIcon = iconOn && canIcon;
+      el.toggleAttribute('inset-icon', el.insetIcon);
+      el.disabled = forceDisabled;
+      el.toggleAttribute('disabled', forceDisabled);
+      el.label = labelOn ? 'Volume' : '';
+
+      if (isCentered) {
+        if (prevVariant !== 'centered' || el.min !== -50 || el.max !== 50) {
+          el.min = -50;
+          el.max = 50;
+          el.value = 0;
+        }
+      } else if (isRange && !isVertical) {
+        if (prevVariant !== 'range' || el.min !== 0 || el.max !== 100) {
+          el.min = 0;
+          el.max = 100;
+          el.valueStart = 20;
+          el.valueEnd = 70;
+          el.setAttribute('value-start', '20');
+          el.setAttribute('value-end', '70');
+        }
+      } else if (prevVariant === 'centered' || prevVariant === 'range' || el.min !== 0 || el.max !== 100) {
+        el.min = 0;
+        el.max = 100;
+        el.value = 40;
+      }
+
+      el.querySelectorAll<HTMLElement>('.sl-inset-icon').forEach((node) => {
+        setSlot(node, 'icon', el.insetIcon);
+      });
+      el.querySelectorAll<HTMLElement>('.sl-inset-icon-min').forEach((node) => {
+        setSlot(node, 'icon-min', el.insetIcon);
+      });
+      el.querySelectorAll<HTMLElement>('.sl-pm').forEach((btn) => {
+        const showPm = pmOn && !forceDisabled && !isRange;
+        setSlot(btn, btn.dataset.pmSlot ?? '', showPm);
+        if ('disabled' in btn) {
+          (btn as HTMLElement & { disabled: boolean }).disabled = forceDisabled;
+        }
+      });
+    });
   };
 
-  lab.addEventListener('k3-change', (e) => {
-    const path = e.composedPath();
-    const t = path.find((n) => (n as HTMLElement).localName === 'k3-radio') as
-      | RadioEl
-      | undefined;
-    if (!t) return;
-    const detail = (e as CustomEvent<{ value?: string }>).detail;
-    const value = detail?.value ?? t.value;
-    if (t.name && value != null && value !== '') setRadio(t.name, String(value));
-    sync();
+  sizeGroup?.addEventListener('k3-change', () => queueMicrotask(sync));
+  variantGroup?.addEventListener('k3-change', () => queueMicrotask(sync));
+  colorGroup?.addEventListener('k3-change', () => queueMicrotask(sync));
+  lab.querySelectorAll<SwitchEl>('k3-switch').forEach((sw) => {
+    sw.addEventListener('k3-change', () => queueMicrotask(sync));
   });
   sync();
 }
@@ -2496,6 +2615,26 @@ function wireButtonPillDemos(): void {
   page.querySelectorAll<Pill>('k3-button-pill').forEach((pill) => {
     if (pill.closest('[data-button-pill-group]')) return;
     pill.addEventListener('k3-activate', () => setSelected(pill, !pill.selected));
+  });
+}
+
+/**
+ * Meet call bar — Reactions toggles `slot=expand` (click again to hide).
+ * Strip scaleY opens upward (bottom origin) for bottom-of-screen toolbars.
+ */
+function wireMeetToolbarDemo(): void {
+  const toolbar = document.getElementById('meet-call-toolbar') as
+    | (HTMLElement & { expanded: boolean })
+    | null;
+  const group = document.getElementById('meet-call-actions');
+  if (!toolbar || !group || group.dataset.meetWired) return;
+  group.dataset.meetWired = '1';
+
+  group.addEventListener('k3-change', (e) => {
+    const values = (e as CustomEvent<{ values?: string[] }>).detail?.values ?? [];
+    const open = values.includes('reactions');
+    toolbar.expanded = open;
+    toolbar.toggleAttribute('expanded', open);
   });
 }
 

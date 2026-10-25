@@ -1,6 +1,17 @@
-import { css } from 'lit';
+import { css, type CSSResultGroup } from 'lit';
+import { enterDialogMotion } from '../../motion/enter.js';
 
-export const dialogStyles = css`
+/**
+ * Styles for `k3-dialog`.
+ *
+ * Enter motion (M3E within-bounds · expressive overshoot):
+ * - Basic: `enterDialogMotion` — scaleY from center + spatial-fast spring
+ *   (same bounce as menus). Not uniform scale / z-axis.
+ * - Fullscreen: translateY + fade · spatial default (mild overshoot).
+ */
+export const dialogStyles: CSSResultGroup = [
+  enterDialogMotion('.panel.basic', '.panel.basic.open'),
+  css`
       :host {
         display: contents;
       }
@@ -12,12 +23,14 @@ export const dialogStyles = css`
         opacity: 0;
         pointer-events: none;
         z-index: 40;
-        transition: opacity var(--k3-sys-motion-duration-short4)
+        transition: opacity var(--k3-sys-motion-duration-effects-fast, 150ms)
           var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects));
       }
       .backdrop.open {
         opacity: 1;
         pointer-events: auto;
+        transition: opacity var(--k3-sys-motion-duration-effects-default, 200ms)
+          var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects));
       }
 
       .panel {
@@ -29,36 +42,27 @@ export const dialogStyles = css`
         overflow: hidden;
         background: var(--k3-sys-color-surface-container-high);
         color: var(--k3-sys-color-on-surface);
-        opacity: 0;
         pointer-events: none;
-        transition:
-          opacity var(--k3-sys-motion-duration-short4)
-            var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects)),
-          transform var(--k3-sys-motion-duration-spatial-default)
-            var(--k3-sys-motion-easing-spatial, var(--k3-sys-motion-easing-expressive-spatial));
       }
       .panel.open {
-        opacity: 1;
         pointer-events: auto;
       }
 
-      /* —— Basic (centered alert / confirm) —— */
+      /* Layout only — opacity / scaleY owned by enterDialogMotion */
       .panel.basic {
         inset-inline: 50%;
         top: 50%;
-        transform: translate(-50%, -40%) scale(0.92);
         width: min(35rem, calc(100vw - 3rem)); /* max 560 · 24dp*2 inset */
         min-width: min(17.5rem, calc(100vw - 3rem)); /* min 280 */
         max-height: min(80vh, 40rem);
         border-radius: var(--k3-sys-shape-corner-extra-large); /* 28dp */
-        /* Inset track from rounded corners */
         --k3-scroll-track-inset: 0.5rem;
       }
-      .panel.basic.open {
-        transform: translate(-50%, -50%) scale(1);
-      }
 
-      /* —— Full-screen (compact task) —— */
+      /*
+       * Full-screen — Y-axis enter/exit + fade · spatial overshoot (milder
+       * than menu fast — large surface).
+       */
       .panel.fullscreen {
         inset: 0;
         width: 100%;
@@ -67,11 +71,29 @@ export const dialogStyles = css`
         height: 100%;
         max-height: none;
         border-radius: 0;
-        transform: translateY(1.5rem);
+        opacity: 0;
+        transform: translateY(1.5rem); /* 24dp */
         --k3-scroll-track-inset: 0;
+        transition:
+          opacity var(--k3-sys-motion-duration-effects-fast, 150ms)
+            var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects)),
+          transform var(--k3-sys-motion-duration-spatial-fast, 350ms)
+            var(
+              --k3-sys-motion-easing-spatial-fast,
+              var(--k3-sys-motion-easing-expressive-spatial-fast)
+            );
       }
       .panel.fullscreen.open {
+        opacity: 1;
         transform: translateY(0);
+        transition:
+          opacity var(--k3-sys-motion-duration-effects-default, 200ms)
+            var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects)),
+          transform var(--k3-sys-motion-duration-spatial-default, 500ms)
+            var(
+              --k3-sys-motion-easing-spatial,
+              var(--k3-sys-motion-easing-expressive-spatial)
+            );
       }
 
       /* Header — sticky chrome */
@@ -221,7 +243,7 @@ export const dialogStyles = css`
         margin: 0;
         background: var(--k3-sys-color-outline-variant);
         opacity: 0;
-        transition: opacity var(--k3-sys-motion-duration-short4)
+        transition: opacity var(--k3-sys-motion-duration-effects-fast, 150ms)
           var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects));
         pointer-events: none;
       }
@@ -257,8 +279,15 @@ export const dialogStyles = css`
       @media (prefers-reduced-motion: reduce) {
         .backdrop,
         .panel,
+        .panel.fullscreen,
         .divider {
-          transition: none;
+          transition: none !important;
+          animation: none !important;
+        }
+        .panel.fullscreen.open {
+          transform: none;
+          opacity: 1;
         }
       }
-    `;
+    `,
+];

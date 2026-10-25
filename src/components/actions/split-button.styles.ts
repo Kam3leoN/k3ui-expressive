@@ -23,6 +23,11 @@ export const splitButtonStyles = css`
   :host {
     /* Small (default) — M3E Size · Small */
     --k3-sb-h: ${rem(sm.height)};
+    /*
+     * 2dp seam — fallback only. Runtime sets --k3-sb-gap via
+     * devicePixelSnapCss(2) so the hairline stays integer device pixels
+     * at fractional DPR (e.g. Windows 125%).
+     */
     --k3-sb-gap: ${rem(SplitButtonGapDp)};
     /* Outer = half height (true pill). CSS 50% = ellipse on wide segments. */
     --k3-sb-outer-r: calc(var(--k3-sb-h) / 2);

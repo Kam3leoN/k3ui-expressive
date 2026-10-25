@@ -6,8 +6,9 @@
  * | Menu / flyout / docked picker | scaleY expand | expressive spatial fast (bounce) |
  * | FAB menu items (separate) | scaleX + stagger | same FastSpatial tokens — not this helper |
  * | Snackbar | scaleY from bottom | standard (no bounce) — M3E |
- * | Dialog | translateY + surface height morph | emphasized — M3E (no uniform scale) |
- * | Sheet | edge slide | standard decelerate — heavy, non-bouncy |
+ * | Dialog basic | scaleY from center | expressive spatial fast (same bounce as menus) |
+ * | Dialog fullscreen | translateY | expressive spatial default (mild overshoot) |
+ * | Sheet | scaleY/X from docked edge | expressive spatial fast (bounce, edge-pinned) |
  *
  * @see https://m3.material.io/styles/motion/transitions
  * @see https://m3.material.io/styles/motion/overview/how-it-works
@@ -39,34 +40,35 @@ export const motionStandardMedium = css`
     var(--k3-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1))
 `;
 
-/** Sheet enter — heavy surface, non-bouncy decelerate (M3E bottom-sheet). */
-export const motionSheetEnter = css`
-  var(--k3-sys-motion-duration-medium2, 300ms)
-    var(--k3-sys-motion-easing-standard-decelerate, cubic-bezier(0, 0, 0, 1))
-`;
+/**
+ * Sheet enter — same FastSpatial spring as menus (overshoot).
+ * Must pair with edge-pinned scale (not translate to 0) or the bounce
+ * lifts the sheet off the screen edge.
+ */
+export const motionSheetEnter = motionSpatialFast;
 
-/** Sheet / dialog exit — shorter. */
-export const motionSheetExit = css`
-  var(--k3-sys-motion-duration-short3, 150ms)
-    var(--k3-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1))
-`;
+/** Sheet exit — FastSpatial collapse toward docked edge. */
+export const motionSheetExit = motionSpatialFast;
 
-/** Dialog enter — emphasized long (M3E dialog). */
-export const motionDialogEnter = css`
-  var(--k3-sys-motion-duration-long2, 500ms)
-    var(--k3-sys-motion-easing-emphasized, cubic-bezier(0.2, 0, 0, 1))
-`;
+/** Dialog enter — same FastSpatial spring as menus (overshoot). */
+export const motionDialogEnter = motionSpatialFast;
 
-/** Dialog exit — short3 + emphasized (M3E). */
-export const motionDialogExit = css`
-  var(--k3-sys-motion-duration-short3, 150ms)
-    var(--k3-sys-motion-easing-emphasized, cubic-bezier(0.2, 0, 0, 1))
-`;
+/** Dialog exit — FastSpatial (collapse); opacity uses effects separately. */
+export const motionDialogExit = motionSpatialFast;
 
-/** Dialog surface height collapse — emphasized accelerate (M3E). */
-export const motionDialogSurfaceExit = css`
-  var(--k3-sys-motion-duration-short3, 150ms)
-    var(--k3-sys-motion-easing-emphasized-accelerate, cubic-bezier(0.3, 0, 0.8, 0.15))
+/** Dialog surface height collapse — effects fast (no overshoot). */
+export const motionDialogSurfaceExit = motionEffectsFast;
+
+/** Basic dialog — scaleY + centering translate (overshoot from spatial-fast). */
+export const enterDialogBasicKeyframes = css`
+  @keyframes k3-dialog-enter-basic {
+    from {
+      transform: translate(-50%, -50%) scaleY(0);
+    }
+    to {
+      transform: translate(-50%, -50%) scaleY(1);
+    }
+  }
 `;
 
 /** Shared keyframe — spring easing supplies the bounce (no mid stops). */
@@ -238,58 +240,140 @@ export function enterSnackbarScaleY(
 }
 
 /**
- * Dialog panel transform only — M3E: translateY(-50px)→0, **no** uniform scale,
- * **no** panel-level opacity (surface height + content fades live in dialog styles).
+ * Dialog basic enter — scaleY from center + expressive spatial-fast overshoot
+ * (same spring as `enterScaleY` menus). Axis expand only — not uniform scale /
+ * z-axis (M3 Android within-bounds).
  *
- * @see https://github.com/matraic/m3e/blob/main/packages/web/src/dialog/DialogElement.ts
+ * Closed starts at scaleY(0.8); open runs keyframes 0→1 so the cubic can
+ * overshoot past 1 then settle. Centering translate stays in every keyframe.
+ *
+ * @example
+ * ```ts
+ * static styles = [
+ *   enterDialogMotion('.panel.basic', '.panel.basic.open'),
+ *   css`…`,
+ * ];
+ * ```
  */
 export function enterDialogMotion(
   panelSelector: string,
   openSelector: string,
 ): CSSResult {
   return css`
+    ${enterDialogBasicKeyframes}
     ${unsafeCSS(panelSelector)} {
-      transform-origin: top center;
+      opacity: 0;
+      transform: translate(-50%, -50%) scaleY(0.8);
+      transform-origin: center center;
       transition:
-        transform ${motionDialogExit},
-        visibility ${motionDialogExit} allow-discrete;
+        opacity ${motionEffectsFast},
+        transform ${motionDialogExit};
     }
     ${unsafeCSS(openSelector)} {
-      transition:
-        transform ${motionDialogEnter},
-        visibility ${motionDialogEnter} allow-discrete;
+      opacity: 1;
+      transform: translate(-50%, -50%) scaleY(1);
+      /* Animation owns enter transform — no transition fight / stutter */
+      transition: opacity ${motionEffectsFast};
+      animation: k3-dialog-enter-basic ${motionDialogEnter} backwards;
     }
     @media (prefers-reduced-motion: reduce) {
       ${unsafeCSS(panelSelector)},
       ${unsafeCSS(openSelector)} {
         transition: none !important;
+        animation: none !important;
+      }
+      ${unsafeCSS(openSelector)} {
+        transform: translate(-50%, -50%);
+        opacity: 1;
       }
     }
   `;
 }
 
 /**
- * Sheet edge slide — non-bouncy decelerate enter, faster exit (M3E heavy surface).
- * Component supplies closed translate (e.g. translateY(100%) / translateX).
+ * Bottom sheet enter — scaleY from bottom + spatial-fast overshoot.
+ * Bottom edge stays pinned (unlike translateY→0 + overshoot, which gaps).
+ *
+ * `base` = e.g. `.sheet.bottom`. Open opacity stays on while `.dragging` /
+ * `.settling` (inline translate owns transform during gestures).
  */
-export function enterSheetSlide(
-  sheetSelector: string,
-  openSelector: string,
-): CSSResult {
+export function enterSheetBottom(baseSelector: string): CSSResult {
+  const base = unsafeCSS(baseSelector);
   return css`
-    ${unsafeCSS(sheetSelector)} {
-      /* Exit (when .open removed) — short */
-      transition: transform ${motionSheetExit};
+    ${base}:not(.open) {
+      opacity: 0;
+      transform: scaleY(0.8);
+      transform-origin: bottom center;
+      transition:
+        opacity ${motionEffectsFast},
+        transform ${motionSheetExit};
     }
-    ${unsafeCSS(openSelector)} {
-      /* Enter — medium2 + standard decelerate, no overshoot */
-      transition: transform ${motionSheetEnter};
+    ${base}.open {
+      opacity: 1;
+    }
+    ${base}.open:not(.dragging):not(.settling) {
+      transform: scaleY(1);
+      transform-origin: bottom center;
+      transition:
+        opacity ${motionEffectsFast},
+        transform ${motionSheetEnter};
     }
     @media (prefers-reduced-motion: reduce) {
-      ${unsafeCSS(sheetSelector)},
-      ${unsafeCSS(openSelector)} {
+      ${base}:not(.open),
+      ${base}.open:not(.dragging):not(.settling) {
         transition: none !important;
+      }
+      ${base}.open {
+        transform: none;
+        opacity: 1;
       }
     }
   `;
+}
+
+/**
+ * Side sheet enter — scaleX from docked edge + spatial-fast overshoot.
+ * Set `transform-origin` on start/end (and RTL flips) in component styles.
+ */
+export function enterSheetSide(baseSelector: string): CSSResult {
+  const base = unsafeCSS(baseSelector);
+  return css`
+    ${base}:not(.open) {
+      opacity: 0;
+      transform: scaleX(0.8);
+      transition:
+        opacity ${motionEffectsFast},
+        transform ${motionSheetExit};
+    }
+    ${base}.open {
+      opacity: 1;
+    }
+    ${base}.open:not(.dragging):not(.settling) {
+      transform: scaleX(1);
+      transition:
+        opacity ${motionEffectsFast},
+        transform ${motionSheetEnter};
+    }
+    @media (prefers-reduced-motion: reduce) {
+      ${base}:not(.open),
+      ${base}.open:not(.dragging):not(.settling) {
+        transition: none !important;
+      }
+      ${base}.open {
+        transform: none;
+        opacity: 1;
+      }
+    }
+  `;
+}
+
+/**
+ * @deprecated Use `enterSheetBottom(base)` (edge-pinned scale).
+ * Second arg ignored — kept for older imports.
+ */
+export function enterSheetSlide(
+  sheetSelector: string,
+  _openSelector?: string,
+): CSSResult {
+  return enterSheetBottom(sheetSelector);
 }

@@ -7,19 +7,24 @@ import {
   attachInternals,
   setFormValue,
   hasNamedSlot,
+  focusRingStyles,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import {
   SLIDER_HANDLE_GAP,
+  SLIDER_HANDLE_GAP_PRESSED,
   SLIDER_HANDLE_WIDTH_PRESSED,
   SLIDER_INNER_CORNER,
+  SLIDER_JUMP_MS,
   SLIDER_SIZES,
   SLIDER_STOP,
+  SLIDER_STOP_EDGE_INSET,
   SLIDER_VALUE_INDICATOR_GAP,
   SLIDER_VALUE_INDICATOR_H,
   SLIDER_VALUE_INDICATOR_W,
   canInsetIcon,
   resolveSliderSize,
+  type SliderColor,
   type SliderOrientation,
   type SliderSize,
   type SliderVariant,
@@ -27,25 +32,50 @@ import {
 import { sliderStyles } from './slider.styles.js';
 
 export type {
+  SliderColor,
   SliderOrientation,
   SliderSize,
   SliderVariant,
 } from './slider-tokens.js';
+export {
+  SLIDER_ICON_MIN_PAIRS,
+  canInsetIcon,
+  resolveSliderSize,
+  sliderIconAtMin,
+} from './slider-tokens.js';
+
+/** Track segment along the value axis (0 = min … 100 = max). */
+interface SegDesc {
+  start: number;
+  end: number;
+  lead: boolean;
+  trail: boolean;
+  /** Inset 6dp+half-handle from the start edge (toward handle). */
+  padStart: boolean;
+  /** Inset 6dp+half-handle from the end edge (toward handle). */
+  padEnd: boolean;
+}
 
 /**
  * M3 / M3 Expressive slider.
  *
- * - Variants: `standard` · `centered` · `range`
+ * - Variants: `standard` · `centered` · `range` (range = horizontal only)
  * - Sizes: `xs` · `sm` · `md` · `lg` · `xl`
- * - Orientation: `horizontal` · `vertical`
- * - Stops (discrete), value indicator, inset icon (standard · md+)
+ * - Orientation: `horizontal` · `vertical` (min at bottom; `top-to-bottom` flips)
+ * - Color: `primary` · `secondary` · `tertiary` · `error`
+ * - Stops + optional `stop-labels`, value indicator (range: one VI at a time)
+ * - Inset icon (standard · md+) via `slot="icon"`; optional `slot="icon-min"`
+ *   for any alternate glyph at min (volume_off, mic_off, wifi_off, …) —
+ *   see {@link sliderIconAtMin}
+ * - Linked fields via `for` / `for-start` / `for-end`
+ * - Optional `slot="start"` / `slot="end"` addons (±)
  *
  * @see https://m3.material.io/components/sliders/specs
  * @see https://m3.material.io/components/sliders/guidelines
  */
 export class K3Slider extends K3Element {
   static formAssociated = true;
-  static override styles = [hostReset, sliderStyles];
+  static override styles = [hostReset, focusRingStyles, sliderStyles];
 
   internals = attachInternals(this);
 
@@ -66,29 +96,58 @@ export class K3Slider extends K3Element {
   @property({ reflect: true }) orientation: SliderOrientation = 'horizontal';
   /** `standard` (default) · `centered` · `range`. */
   @property({ reflect: true }) variant: SliderVariant = 'standard';
+  /** Active/handle color role (default `primary`). */
+  @property({ reflect: true }) color: SliderColor = 'primary';
+  /**
+   * Vertical only — put min at the top (default is min at bottom).
+   */
+  @property({ type: Boolean, reflect: true, attribute: 'top-to-bottom' })
+  topToBottom = false;
   /** Show discrete stop indicators (and snap). */
   @property({ type: Boolean, reflect: true }) stops = false;
+  /**
+   * Optional tick labels aligned to stops (comma-separated, same order as stops).
+   * Example: `stop-labels="Low,Med,High"` with `stops step="50"`.
+   */
+  @property({ attribute: 'stop-labels' }) stopLabels = '';
   /** Show floating value indicator while dragging. */
   @property({ type: Boolean, reflect: true, attribute: 'value-indicator' })
   valueIndicator = false;
   /**
-   * Opt-in inset icon (standard · md/lg/xl only). Content via `slot="icon"`.
+   * Opt-in inset icon (standard · md/lg/xl only).
+   * `slot="icon"` = default · `slot="icon-min"` = optional alternate at min
+   * (any glyph — not volume-specific; see {@link sliderIconAtMin}).
    */
   @property({ type: Boolean, reflect: true, attribute: 'inset-icon' })
   insetIcon = false;
   /** Optional accessible / visible label. */
   @property() label = '';
+  /** Linked input / text-field id (standard · centered). */
+  @property() for = '';
+  /** Range — linked field for the start handle. */
+  @property({ attribute: 'for-start' }) forStart = '';
+  /** Range — linked field for the end handle. */
+  @property({ attribute: 'for-end' }) forEnd = '';
 
   @state() private pressed = false;
   @state() private activeHandle: 'value' | 'start' | 'end' = 'value';
   @state() private showIndicator = false;
   @state() private hasIconSlot = false;
+  @state() private hasIconMinSlot = false;
+  /** Optional leading icon in the label row (`slot="label-icon"`). */
+  @state() private hasLabelIconSlot = false;
+  /** Optional ± / step affordances beside the track (`slot="start"` / `slot="end"`). */
+  @state() private hasStartSlot = false;
+  @state() private hasEndSlot = false;
   /** Track length along the value axis (px) — for exact 6dp gaps. */
   @state() private trackLenPx = 200;
 
   private dragCleanup: (() => void) | null = null;
   private trackRo: ResizeObserver | null = null;
   private trackEl: HTMLElement | null = null;
+  private jumpRaf = 0;
+  private linkedCleanup: (() => void) | null = null;
+  private syncingFromField = false;
 
   private get tokens() {
     return SLIDER_SIZES[resolveSliderSize(this.size)];
@@ -98,8 +157,16 @@ export class K3Slider extends K3Element {
     return this.orientation === 'vertical';
   }
 
+  /** Vertical with min at top (attribute `top-to-bottom`). */
+  private get minAtTop(): boolean {
+    return this.vertical && this.topToBottom;
+  }
+
+  /**
+   * Range is horizontal-only (M3: vertical range adds too much cognitive load).
+   */
   private get range(): boolean {
-    return this.variant === 'range';
+    return this.variant === 'range' && !this.vertical;
   }
 
   private get centered(): boolean {
@@ -110,19 +177,27 @@ export class K3Slider extends K3Element {
     const lo = this.min;
     const hi = this.max;
     let x = Math.min(hi, Math.max(lo, v));
+    /* Always snap to step so VI / aria / geometry agree at the ends while dragging. */
     const step = this.step > 0 ? this.step : 1;
-    if (this.stops || step !== 1) {
-      const n = Math.round((x - lo) / step);
-      x = lo + n * step;
-      x = Math.min(hi, Math.max(lo, x));
-    }
-    return x;
+    const n = Math.round((x - lo) / step);
+    x = lo + n * step;
+    return Math.min(hi, Math.max(lo, x));
   }
 
   private fraction(v: number): number {
     const span = this.max - this.min;
     if (span <= 0) return 0;
     return Math.min(1, Math.max(0, (v - this.min) / span));
+  }
+
+  /** True min — epsilon covers float residue after pointer mapping. */
+  private atMin(v: number): boolean {
+    return this.fraction(v) <= 1e-6;
+  }
+
+  /** True max — epsilon covers float residue after pointer mapping. */
+  private atMax(v: number): boolean {
+    return this.fraction(v) >= 1 - 1e-6;
   }
 
   private valueFromFraction(f: number): number {
@@ -169,9 +244,10 @@ export class K3Slider extends K3Element {
   private pointerFraction(e: PointerEvent, area: HTMLElement): number {
     const r = area.getBoundingClientRect();
     if (this.vertical) {
-      /* Min at top · max at bottom — active grows downward (inverted vs prior). */
       const y = e.clientY - r.top;
-      return Math.min(1, Math.max(0, y / r.height));
+      /* Default: min at bottom. `top-to-bottom`: min at top. */
+      const f = this.minAtTop ? y / r.height : 1 - y / r.height;
+      return Math.min(1, Math.max(0, f));
     }
     const rtl = getComputedStyle(this).direction === 'rtl';
     const x = e.clientX - r.left;
@@ -189,7 +265,52 @@ export class K3Slider extends K3Element {
       this.value = v;
     }
     this.syncForm();
+    this.syncLinkedFields();
     this.emitValue();
+  }
+
+  private handleFraction(handle: 'value' | 'start' | 'end'): number {
+    if (handle === 'start') return this.fraction(this.valueStart);
+    if (handle === 'end') return this.fraction(this.valueEnd);
+    return this.fraction(this.value);
+  }
+
+  private cancelJump(): void {
+    if (this.jumpRaf) {
+      cancelAnimationFrame(this.jumpRaf);
+      this.jumpRaf = 0;
+    }
+  }
+
+  /** Ease-out cubic — same settle family as determinate progress. */
+  private easeJump(t: number): number {
+    const x = Math.min(1, Math.max(0, t));
+    return 1 - (1 - x) ** 3;
+  }
+
+  /** Animate handle to a fraction (select-jump). Cancelled by drag move. */
+  private animateToFraction(
+    targetF: number,
+    handle: 'value' | 'start' | 'end',
+  ): void {
+    this.cancelJump();
+    const from = this.handleFraction(handle);
+    const to = Math.min(1, Math.max(0, targetF));
+    if (Math.abs(to - from) < 0.0005) {
+      this.setFromFraction(to, handle);
+      return;
+    }
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - t0) / SLIDER_JUMP_MS);
+      this.setFromFraction(from + (to - from) * this.easeJump(t), handle);
+      if (t < 1) {
+        this.jumpRaf = requestAnimationFrame(tick);
+      } else {
+        this.jumpRaf = 0;
+      }
+    };
+    this.jumpRaf = requestAnimationFrame(tick);
   }
 
   private pickHandle(f: number): 'value' | 'start' | 'end' {
@@ -208,12 +329,25 @@ export class K3Slider extends K3Element {
     this.activeHandle = handle;
     this.pressed = true;
     this.showIndicator = this.valueIndicator;
-    this.setFromFraction(f, handle);
+
+    /* Select-jump when tap is away from the active handle — animate, don’t snap. */
+    const cur = this.handleFraction(handle);
+    const jumpThreshold = Math.max(
+      0.02,
+      (this.handlePadRestPx() * 2) / Math.max(1, this.trackLenPx),
+    );
+    if (Math.abs(f - cur) > jumpThreshold) {
+      this.animateToFraction(f, handle);
+    } else {
+      this.setFromFraction(f, handle);
+    }
 
     const move = (ev: PointerEvent) => {
+      this.cancelJump();
       this.setFromFraction(this.pointerFraction(ev, area), handle);
     };
     const up = () => {
+      this.cancelJump();
       this.pressed = false;
       this.showIndicator = false;
       this.emitChange();
@@ -239,30 +373,38 @@ export class K3Slider extends K3Element {
     const big = step * 10;
     let delta = 0;
     const vert = this.vertical;
+    /* Vertical: ArrowUp moves toward the visual top. */
+    const upDelta = this.minAtTop ? -step : step;
+    const downDelta = this.minAtTop ? step : -step;
     switch (e.key) {
       case 'ArrowRight':
-      case 'ArrowUp':
-        delta = vert && e.key === 'ArrowUp' ? step : e.key === 'ArrowRight' ? step : step;
-        if (vert && e.key === 'ArrowUp') delta = step;
-        if (!vert && e.key === 'ArrowUp') delta = step;
-        if (vert && e.key === 'ArrowRight') delta = 0;
+        if (vert) return;
+        delta = step;
         break;
       case 'ArrowLeft':
-      case 'ArrowDown':
+        if (vert) return;
         delta = -step;
         break;
+      case 'ArrowUp':
+        delta = vert ? upDelta : step;
+        break;
+      case 'ArrowDown':
+        delta = vert ? downDelta : -step;
+        break;
       case 'PageUp':
-        delta = big;
+        delta = this.minAtTop && vert ? -big : big;
         break;
       case 'PageDown':
-        delta = -big;
+        delta = this.minAtTop && vert ? big : -big;
         break;
       case 'Home':
+        this.activeHandle = handle;
         this.setFromFraction(0, handle);
         this.emitChange();
         e.preventDefault();
         return;
       case 'End':
+        this.activeHandle = handle;
         this.setFromFraction(1, handle);
         this.emitChange();
         e.preventDefault();
@@ -270,8 +412,8 @@ export class K3Slider extends K3Element {
       default:
         return;
     }
-    if (vert && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
     e.preventDefault();
+    this.activeHandle = handle;
     const cur =
       handle === 'start'
         ? this.valueStart
@@ -285,7 +427,9 @@ export class K3Slider extends K3Element {
   };
 
   override disconnectedCallback(): void {
+    this.cancelJump();
     this.dragCleanup?.();
+    this.unlinkFields();
     this.trackRo?.disconnect();
     this.trackRo = null;
     this.trackEl = null;
@@ -294,23 +438,83 @@ export class K3Slider extends K3Element {
 
   override willUpdate(): void {
     this.size = resolveSliderSize(this.size);
-    if (this.range) {
-      if (this.valueStart > this.valueEnd) {
-        const t = this.valueStart;
-        this.valueStart = this.valueEnd;
-        this.valueEnd = t;
-      }
+    if (this.color !== 'primary' && this.color !== 'secondary' && this.color !== 'tertiary' && this.color !== 'error') {
+      this.color = 'primary';
     }
+    /* M3 guidelines — avoid vertical range (cognitive load). */
+    if (this.vertical && this.variant === 'range') {
+      this.variant = 'standard';
+    }
+    /* top-to-bottom only applies to vertical. */
+    if (!this.vertical && this.topToBottom) {
+      this.topToBottom = false;
+    }
+    if (this.range && this.valueStart > this.valueEnd) {
+      const t = this.valueStart;
+      this.valueStart = this.valueEnd;
+      this.valueEnd = t;
+    }
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    /* Light-DOM slots known before first paint (avoids a second update). */
+    this.syncSlots();
   }
 
   override firstUpdated(): void {
     this.syncForm();
-    this.syncIconSlot();
+    this.syncSlots();
+    this.syncHostMetrics();
     this.bindTrackObserver();
+    this.bindLinkedFields();
+    this.syncLinkedFields();
   }
 
-  override updated(): void {
+  override updated(changed?: Map<string, unknown>): void {
+    this.syncHostMetrics();
     this.bindTrackObserver();
+    /* Form-associated a11y mirror (jsdom may lack ARIA reflection on internals). */
+    try {
+      this.internals.ariaDisabled = this.disabled ? 'true' : 'false';
+    } catch {
+      /* ignore */
+    }
+    if (
+      changed?.has('for') ||
+      changed?.has('forStart') ||
+      changed?.has('forEnd') ||
+      changed?.has('variant')
+    ) {
+      this.bindLinkedFields();
+    }
+    if (
+      changed?.has('value') ||
+      changed?.has('valueStart') ||
+      changed?.has('valueEnd') ||
+      changed?.has('min') ||
+      changed?.has('max')
+    ) {
+      this.syncLinkedFields();
+    }
+  }
+
+  /** Fieldset / form disables the control. */
+  formDisabledCallback(disabled: boolean): void {
+    this.disabled = disabled;
+  }
+
+  /**
+   * Size tokens on the host — inherited by the shadow tree.
+   * Vertical track length lives on `.area` via `--k3-slider-vertical-len`
+   * (host height stays content-sized so start/end addons fit).
+   */
+  private syncHostMetrics(): void {
+    for (const [k, v] of Object.entries(this.cssVars())) {
+      this.style.setProperty(k, v);
+    }
+    /* Clear legacy inline height from older builds / external demos. */
+    this.style.removeProperty('height');
   }
 
   private bindTrackObserver(): void {
@@ -331,115 +535,278 @@ export class K3Slider extends K3Element {
     }
   }
 
-  private syncIconSlot = (): void => {
+  private syncSlots = (): void => {
     this.hasIconSlot = hasNamedSlot(this, 'icon');
+    this.hasIconMinSlot = hasNamedSlot(this, 'icon-min');
+    this.hasLabelIconSlot = hasNamedSlot(this, 'label-icon');
+    this.hasStartSlot = hasNamedSlot(this, 'start');
+    this.hasEndSlot = hasNamedSlot(this, 'end');
   };
 
-  /**
-   * Distance from handle center to segment edge as % of track.
-   * Gap between handle *edge* and track is always 6dp (pressed or not).
-   */
-  private handlePadPct(): number {
-    const tok = this.tokens;
-    const hw = this.pressed ? SLIDER_HANDLE_WIDTH_PRESSED : tok.handleWidth;
-    const len = Math.max(1, this.trackLenPx);
-    return ((SLIDER_HANDLE_GAP + hw / 2) / len) * 100;
+  private resolveField(id: string): (HTMLElement & { value?: string }) | null {
+    const t = id.trim();
+    if (!t) return null;
+    return document.getElementById(t) as (HTMLElement & { value?: string }) | null;
   }
 
-  /** Segment layout in % along the track axis. */
-  private segments(): {
-    active: { start: number; end: number; lead: boolean; trail: boolean }[];
-    inactive: { start: number; end: number; lead: boolean; trail: boolean }[];
-  } {
-    const pad = this.handlePadPct();
+  private unlinkFields(): void {
+    this.linkedCleanup?.();
+    this.linkedCleanup = null;
+  }
 
-    const active: { start: number; end: number; lead: boolean; trail: boolean }[] =
-      [];
-    const inactive: {
-      start: number;
-      end: number;
-      lead: boolean;
-      trail: boolean;
-    }[] = [];
+  /** Wire `for` / `for-start` / `for-end` to input or k3-text-field. */
+  private bindLinkedFields(): void {
+    this.unlinkFields();
+    const cleanups: Array<() => void> = [];
+    const bind = (
+      id: string,
+      apply: (raw: string) => void,
+    ): void => {
+      const el = this.resolveField(id);
+      if (!el) return;
+      const onInput = () => {
+        if (this.disabled) return;
+        this.syncingFromField = true;
+        apply(String(el.value ?? ''));
+        this.syncingFromField = false;
+        this.syncForm();
+        this.emitValue();
+        this.emitChange();
+      };
+      el.addEventListener('input', onInput);
+      el.addEventListener('change', onInput);
+      cleanups.push(() => {
+        el.removeEventListener('input', onInput);
+        el.removeEventListener('change', onInput);
+      });
+    };
 
     if (this.range) {
-      const a = this.fraction(this.valueStart) * 100;
-      const b = this.fraction(this.valueEnd) * 100;
-      const a0 = Math.max(0, a - pad);
-      const b1 = Math.min(100, b + pad);
-      if (a0 > 0.5) {
-        inactive.push({ start: 0, end: a0, lead: true, trail: false });
-      }
-      if (b - a > pad * 2) {
-        active.push({
-          start: a + pad,
-          end: b - pad,
-          lead: false,
-          trail: false,
-        });
-      }
-      if (b1 < 99.5) {
-        inactive.push({ start: b1, end: 100, lead: false, trail: true });
-      }
-      return { active, inactive };
-    }
-
-    const f = this.fraction(this.value) * 100;
-    if (this.centered) {
-      const c = this.centerFraction() * 100;
-      const lo = Math.min(c, f);
-      const hi = Math.max(c, f);
-      if (lo > 0.5) {
-        inactive.push({ start: 0, end: Math.max(0, lo - pad), lead: true, trail: false });
-      }
-      if (hi - lo > pad) {
-        active.push({
-          start: lo + (f < c ? 0 : pad),
-          end: hi - (f > c ? 0 : pad),
-          lead: f < c,
-          trail: f > c,
-        });
-      }
-      if (hi < 99.5) {
-        inactive.push({
-          start: Math.min(100, hi + pad),
-          end: 100,
-          lead: false,
-          trail: true,
-        });
-      }
-      /* Ensure inactive covers both sides when value ≈ center */
-      if (Math.abs(f - c) < 0.5) {
-        inactive.length = 0;
-        inactive.push({ start: 0, end: Math.max(0, c - pad), lead: true, trail: false });
-        inactive.push({
-          start: Math.min(100, c + pad),
-          end: 100,
-          lead: false,
-          trail: true,
-        });
-      }
-      return { active, inactive };
-    }
-
-    /* Standard */
-    if (f > pad) {
-      active.push({
-        start: 0,
-        end: Math.max(0, f - pad),
-        lead: true,
-        trail: false,
+      bind(this.forStart || this.for, (raw) => {
+        const n = Number.parseFloat(raw);
+        if (!Number.isFinite(n)) return;
+        this.valueStart = Math.min(this.clamp(n), this.valueEnd);
+      });
+      bind(this.forEnd, (raw) => {
+        const n = Number.parseFloat(raw);
+        if (!Number.isFinite(n)) return;
+        this.valueEnd = Math.max(this.clamp(n), this.valueStart);
+      });
+    } else {
+      bind(this.for, (raw) => {
+        const n = Number.parseFloat(raw);
+        if (!Number.isFinite(n)) return;
+        this.value = this.clamp(n);
       });
     }
-    if (f < 100 - pad) {
+    this.linkedCleanup = () => cleanups.forEach((c) => c());
+  }
+
+  /** Push slider values into linked fields (skip while reading from them). */
+  private syncLinkedFields(): void {
+    if (this.syncingFromField) return;
+    const write = (id: string, v: number): void => {
+      const el = this.resolveField(id);
+      if (!el || el.value === undefined) return;
+      const next = String(Math.round(v));
+      if (el.value !== next) el.value = next;
+    };
+    if (this.range) {
+      if (this.forStart) write(this.forStart, this.valueStart);
+      if (this.forEnd) write(this.forEnd, this.valueEnd);
+      /* Single `for` on range → "start–end" when no split fields. */
+      if (this.for && !this.forStart && !this.forEnd) {
+        const el = this.resolveField(this.for);
+        if (el && el.value !== undefined) {
+          const next = `${Math.round(this.valueStart)}–${Math.round(this.valueEnd)}`;
+          if (el.value !== next) el.value = next;
+        }
+      }
+    } else if (this.for) {
+      write(this.for, this.value);
+    }
+  }
+
+  /** Parsed stop-labels list (aligned to stop indices). */
+  private parsedStopLabels(): string[] {
+    if (!this.stopLabels.trim()) return [];
+    return this.stopLabels.split(',').map((s) => s.trim());
+  }
+
+  /**
+   * Resting pad (gap + half-handle) in CSS px — for jump threshold / icon fit.
+   * Press geometry is animated purely in CSS via `--k3-slider-pad` / `--k3-slider-hw`.
+   */
+  private handlePadRestPx(): number {
+    return SLIDER_HANDLE_GAP + this.tokens.handleWidth / 2;
+  }
+
+  private handlePadPressPx(): number {
+    return SLIDER_HANDLE_GAP_PRESSED + SLIDER_HANDLE_WIDTH_PRESSED / 2;
+  }
+
+  /**
+   * Segments along the value axis (0 = min … 100 = max).
+   * Handle gap is applied later in {@link segStyle} as absolute CSS px.
+   * At true min/max the track is flush (no leftover inactive/progress past the handle).
+   */
+  private segments(): {
+    active: SegDesc[];
+    inactive: SegDesc[];
+  } {
+    const active: SegDesc[] = [];
+    const inactive: SegDesc[] = [];
+
+    if (this.range) {
+      const a = this.atMin(this.valueStart)
+        ? 0
+        : this.axisPct(this.fraction(this.valueStart));
+      const b = this.atMax(this.valueEnd)
+        ? 100
+        : this.axisPct(this.fraction(this.valueEnd));
+      if (a > 0.5) {
+        inactive.push({
+          start: 0,
+          end: a,
+          lead: true,
+          trail: false,
+          padStart: false,
+          padEnd: true,
+        });
+      }
+      if (b - a > 0.5) {
+        active.push({
+          start: a,
+          end: b,
+          /* Handle-facing ends stay inner 2dp; always keep the M3 gap to each handle. */
+          lead: false,
+          trail: false,
+          padStart: true,
+          padEnd: true,
+        });
+      }
+      if (b < 99.5) {
+        inactive.push({
+          start: b,
+          end: 100,
+          lead: false,
+          trail: true,
+          padStart: true,
+          padEnd: false,
+        });
+      }
+      return { active, inactive };
+    }
+
+    const raw = this.fraction(this.value);
+    /*
+     * At true min/max: no inactive/active stub past the handle, but the M3
+     * handle gap + inner 2dp corner always remain (never fuse track into handle).
+     */
+    if (!this.centered && this.atMin(this.value)) {
       inactive.push({
-        start: Math.min(100, f + pad),
+        start: 0,
         end: 100,
         lead: false,
         trail: true,
+        padStart: true,
+        padEnd: false,
       });
-    } else if (f >= 100 - pad) {
-      /* Near max — tiny inactive omitted; end stop still drawn */
+      return { active, inactive };
+    }
+    if (!this.centered && this.atMax(this.value)) {
+      active.push({
+        start: 0,
+        end: 100,
+        lead: true,
+        trail: false,
+        padStart: false,
+        padEnd: true,
+      });
+      return { active, inactive };
+    }
+
+    const f = this.atMin(this.value)
+      ? 0
+      : this.atMax(this.value)
+        ? 100
+        : this.axisPct(raw);
+    if (this.centered) {
+      const c = this.axisPct(this.centerFraction());
+      if (Math.abs(f - c) < 0.5) {
+        /* At center — gaps on both sides of the handle (central gap). */
+        inactive.push({
+          start: 0,
+          end: c,
+          lead: true,
+          trail: false,
+          padStart: false,
+          padEnd: true,
+        });
+        inactive.push({
+          start: c,
+          end: 100,
+          lead: false,
+          trail: true,
+          padStart: true,
+          padEnd: false,
+        });
+        return { active, inactive };
+      }
+      const lo = Math.min(c, f);
+      const hi = Math.max(c, f);
+      if (lo > 0.5) {
+        inactive.push({
+          start: 0,
+          end: lo,
+          lead: true,
+          trail: false,
+          padStart: false,
+          padEnd: true, /* gap at center (or handle when below) */
+        });
+      }
+      active.push({
+        start: lo,
+        end: hi,
+        /* Both ends face a gap (center or handle) — inner 2dp + pad always. */
+        lead: false,
+        trail: false,
+        padStart: true,
+        padEnd: true,
+      });
+      if (hi < 99.5) {
+        inactive.push({
+          start: hi,
+          end: 100,
+          lead: false,
+          trail: true,
+          padStart: true,
+          padEnd: false,
+        });
+      }
+      return { active, inactive };
+    }
+
+    /* Standard — active from min → handle */
+    if (f > 0.5) {
+      active.push({
+        start: 0,
+        end: f,
+        lead: true,
+        trail: false,
+        padStart: false,
+        padEnd: true,
+      });
+    }
+    if (f < 99.5) {
+      inactive.push({
+        start: f,
+        end: 100,
+        lead: false,
+        trail: true,
+        padStart: true,
+        padEnd: false,
+      });
     }
     return { active, inactive };
   }
@@ -457,6 +824,25 @@ export class K3Slider extends K3Element {
     return out;
   }
 
+  /**
+   * Map a 0…1 value fraction onto the track so first/last stops sit
+   * {@link SLIDER_STOP_EDGE_INSET} dp inside the ends (all sizes).
+   */
+  private stopVisualPct(fraction01: number): number {
+    const len = Math.max(1, this.trackLenPx);
+    const insetPct = (SLIDER_STOP_EDGE_INSET / len) * 100;
+    const f = Math.min(1, Math.max(0, fraction01));
+    return insetPct + f * (100 - 2 * insetPct);
+  }
+
+  /**
+   * Inset axis for mid-range handle / stops / segments.
+   * True min/max use 0%/100% instead ({@link handlePct}) so the track is flush.
+   */
+  private axisPct(fraction01: number): number {
+    return this.stopVisualPct(fraction01);
+  }
+
   private handlePct(which: 'value' | 'start' | 'end'): number {
     const v =
       which === 'start'
@@ -464,20 +850,29 @@ export class K3Slider extends K3Element {
         : which === 'end'
           ? this.valueEnd
           : this.value;
-    return this.fraction(v) * 100;
+    if (this.atMin(v)) return 0;
+    if (this.atMax(v)) return 100;
+    return this.axisPct(this.fraction(v));
   }
 
   private cssVars(): Record<string, string> {
     const t = this.tokens;
+    const padRest = this.handlePadRestPx();
+    const padPress = this.handlePadPressPx();
     return {
       '--k3-slider-track-h': `${t.track}px`,
       '--k3-slider-handle-h': `${t.handle}px`,
       '--k3-slider-handle-w': `${t.handleWidth}px`,
-      '--k3-slider-handle-w-pressed': `${SLIDER_HANDLE_WIDTH_PRESSED}px`,
+      '--k3-slider-hw-rest': `${t.handleWidth}px`,
+      '--k3-slider-hw-press': `${SLIDER_HANDLE_WIDTH_PRESSED}px`,
+      '--k3-slider-pad-rest': `${padRest}px`,
+      '--k3-slider-pad-press': `${padPress}px`,
+      '--k3-slider-vertical-len': `${t.verticalLen}px`,
       '--k3-slider-corner': `${t.corner}px`,
       '--k3-slider-inner-corner': `${SLIDER_INNER_CORNER}px`,
-      '--k3-slider-stop': `${SLIDER_STOP}px`,
-      '--k3-slider-stop-inset': `${t.stopInset}px`,
+      /* Size only — color stays --k3-slider-stop / --k3-slider-stop-on-active in CSS. */
+      '--k3-slider-stop-size': `${SLIDER_STOP}px`,
+      '--k3-slider-stop-inset': `${SLIDER_STOP_EDGE_INSET}px`,
       '--k3-slider-icon-size': `${t.icon || 24}px`,
       '--k3-slider-vi-w': `${SLIDER_VALUE_INDICATOR_W}px`,
       '--k3-slider-vi-h': `${SLIDER_VALUE_INDICATOR_H}px`,
@@ -485,79 +880,193 @@ export class K3Slider extends K3Element {
     };
   }
 
-  private segStyle(
-    start: number,
-    end: number,
-  ): Record<string, string> {
+  /**
+   * Segment box — pad is `var(--k3-slider-pad)`, animated in lockstep with
+   * `--k3-slider-hw` (same duration + easing on `.area`).
+   */
+  private segStyle(s: SegDesc): Record<string, string> {
+    const pad = 'var(--k3-slider-pad)';
+    const span = Math.max(0, s.end - s.start);
+    const padSum =
+      s.padStart && s.padEnd
+        ? `calc(2 * ${pad})`
+        : s.padStart || s.padEnd
+          ? pad
+          : '0px';
+    const len = `max(0px, calc(${span}% - ${padSum}))`;
     if (this.vertical) {
+      if (this.minAtTop) {
+        return {
+          bottom: 'auto',
+          top: s.padStart ? `calc(${s.start}% + ${pad})` : `${s.start}%`,
+          height: len,
+        };
+      }
       return {
-        top: `${start}%`,
-        height: `${Math.max(0, end - start)}%`,
+        top: 'auto',
+        bottom: s.padStart ? `calc(${s.start}% + ${pad})` : `${s.start}%`,
+        height: len,
       };
     }
     return {
-      insetInlineStart: `${start}%`,
-      width: `${Math.max(0, end - start)}%`,
+      insetInlineStart: s.padStart
+        ? `calc(${s.start}% + ${pad})`
+        : `${s.start}%`,
+      width: len,
     };
   }
 
   private posStyle(pct: number): Record<string, string> {
     if (this.vertical) {
-      return { top: `${pct}%` };
+      if (this.minAtTop) {
+        return { top: `${pct}%`, bottom: 'auto' };
+      }
+      return { bottom: `${pct}%`, top: 'auto' };
     }
     return { insetInlineStart: `${pct}%` };
   }
 
-  private stopInsetPct(): number {
-    const len = Math.max(1, this.trackLenPx);
-    return (this.tokens.stopInset / len) * 100;
-  }
-
   private endStopPct(): number {
-    return 100 - this.stopInsetPct();
+    return this.stopVisualPct(1);
   }
 
-  private displayValue(): string {
-    if (this.range) {
-      return `${Math.round(this.valueStart)}–${Math.round(this.valueEnd)}`;
-    }
-    return String(Math.round(this.value));
+  /**
+   * Contrast tip on the trailing inactive track (M3). Hidden when discrete
+   * stops are on, or when the max-side handle sits on that tip:
+   * standard/centered → `value` at max · range → `valueEnd` at max.
+   */
+  private renderEndStop(endStop: number) {
+    if (this.stops) return nothing;
+    const atEnd = this.range
+      ? this.atMax(this.valueEnd)
+      : this.atMax(this.value);
+    if (atEnd) return nothing;
+    return html`
+      <div
+        class="stop"
+        style=${styleMap(this.posStyle(endStop))}
+        part="end-stop"
+      ></div>
+    `;
   }
 
-  private indicatorPct(): number {
-    if (this.range) {
-      return this.handlePct(this.activeHandle === 'start' ? 'start' : 'end');
-    }
-    return this.handlePct('value');
+  /**
+   * Inset track icon — `icon` by default, `icon-min` when value is at min
+   * (consumer-supplied glyphs; not tied to volume).
+   */
+  private renderInsetIcon(
+    show: boolean,
+    onInactive: boolean,
+    useMin: boolean,
+    pos: Record<string, string> | typeof nothing,
+  ) {
+    return html`
+      <div
+        class=${classMap({
+          'inset-icon': true,
+          has: show,
+          'on-inactive': onInactive,
+        })}
+        style=${pos === nothing ? nothing : styleMap(pos)}
+        part="inset-icon"
+      >
+        <span class="inset-icon-face" ?hidden=${useMin}>
+          <slot name="icon" @slotchange=${this.syncSlots}></slot>
+        </span>
+        <span class="inset-icon-face" ?hidden=${!useMin}>
+          <slot name="icon-min" @slotchange=${this.syncSlots}></slot>
+        </span>
+      </div>
+    `;
+  }
+
+  /** Single-value bubble text (range uses two separate indicators). */
+  private formatValue(n: number): string {
+    return String(Math.round(n));
   }
 
   override render() {
-    const tok = this.tokens;
     const { active, inactive } = this.segments();
     const stops = this.stopPositions();
+    const tickLabels = this.parsedStopLabels();
+    const atValueMin = this.atMin(this.value);
+    const useMinIcon = atValueMin && this.hasIconMinSlot;
     const showIcon =
       this.insetIcon &&
       canInsetIcon(resolveSliderSize(this.size), this.variant) &&
-      this.hasIconSlot;
+      (useMinIcon || this.hasIconSlot);
+    /* M3: when active track can’t fit the icon, move it onto the inactive track. */
+    const iconNeedPx = (this.tokens.icon || 24) + 8;
+    const activePx =
+      this.fraction(this.value) * Math.max(1, this.trackLenPx) -
+      this.handlePadRestPx();
     const iconOnInactive =
-      showIcon && !this.range && !this.centered && this.fraction(this.value) < 0.2;
+      showIcon && !this.range && !this.centered && activePx < iconNeedPx;
     const endStop = this.endStopPct();
     const label = this.label.trim();
+    /* Sticky: active → leading edge · inactive → just past handle (not far end). */
+    const iconEdgeKey = this.minAtTop ? 'top' : 'bottom';
+    const iconPosStyle = !showIcon
+      ? nothing
+      : this.vertical
+        ? iconOnInactive
+          ? {
+              [iconEdgeKey]: `calc(${this.handlePct('value')}% + var(--k3-slider-pad) + var(--k3-slider-icon-edge))`,
+            }
+          : { [iconEdgeKey]: 'var(--k3-slider-icon-edge)' }
+        : iconOnInactive
+          ? {
+              insetInlineStart: `calc(${this.handlePct('value')}% + var(--k3-slider-pad) + var(--k3-slider-icon-edge))`,
+            }
+          : { insetInlineStart: 'var(--k3-slider-icon-edge)' };
 
     const ariaValue = this.range ? this.valueStart : this.value;
     const ariaNow = Math.round(ariaValue);
 
+    const showLabel = !!label || this.hasLabelIconSlot;
+
     return html`
-      <div class="root" style=${styleMap(this.cssVars())} part="root">
-        <div class=${classMap({ label: true, has: !!label })} part="label">
-          ${label || nothing}
-        </div>
+      <div class="root" part="root">
         <div
-          class="area"
-          part="area"
-          @pointerdown=${this.onAreaPointerDown}
+          class=${classMap({
+            rail: true,
+            'has-start': this.hasStartSlot,
+            'has-end': this.hasEndSlot,
+          })}
+          part="rail"
         >
-          <div class="track" part="track">
+          <div
+            class=${classMap({ addon: true, start: true, has: this.hasStartSlot })}
+            part="start"
+          >
+            <slot name="start" @slotchange=${this.syncSlots}></slot>
+          </div>
+          <div class="stack" part="stack">
+            <div
+              class=${classMap({
+                label: true,
+                has: showLabel,
+                'has-icon': this.hasLabelIconSlot,
+              })}
+              part="label"
+            >
+              <span
+                class=${classMap({
+                  'label-icon': true,
+                  has: this.hasLabelIconSlot,
+                })}
+                part="label-icon"
+              >
+                <slot name="label-icon" @slotchange=${this.syncSlots}></slot>
+              </span>
+              <span class="label-text">${label || nothing}</span>
+            </div>
+            <div
+              class=${classMap({ area: true, pressed: this.pressed })}
+              part="area"
+              @pointerdown=${this.onAreaPointerDown}
+            >
+              <div class="track" part="track">
             ${inactive.map(
               (s) => html`
                 <div
@@ -567,7 +1076,7 @@ export class K3Slider extends K3Element {
                     'lead-cap': s.lead,
                     'trail-cap': s.trail,
                   })}
-                  style=${styleMap(this.segStyle(s.start, s.end))}
+                  style=${styleMap(this.segStyle(s))}
                   part="inactive"
                 ></div>
               `,
@@ -581,66 +1090,67 @@ export class K3Slider extends K3Element {
                     'lead-cap': s.lead,
                     'trail-cap': s.trail,
                   })}
-                  style=${styleMap(this.segStyle(s.start, s.end))}
+                  style=${styleMap(this.segStyle(s))}
                   part="active"
                 ></div>
               `,
             )}
 
-            ${stops.map((f) => {
-              const pct = f * 100;
+            ${stops.map((f, i) => {
+              /*
+               * At true min/max the handle is flush (0%/100%) — hide the inset
+               * end paliers so they don’t sit beside the handle on the track.
+               */
+              if (f <= 0 && this.atMin(this.range ? this.valueStart : this.value)) {
+                return nothing;
+              }
+              if (f >= 1 && this.atMax(this.range ? this.valueEnd : this.value)) {
+                return nothing;
+              }
+              /* Color from logical value; position from shared axisPct. */
               let onActive = false;
               if (this.range) {
                 onActive =
-                  pct >= this.handlePct('start') && pct <= this.handlePct('end');
+                  f >= this.fraction(this.valueStart) &&
+                  f <= this.fraction(this.valueEnd);
               } else if (this.centered) {
-                const c = this.centerFraction() * 100;
-                const v = this.handlePct('value');
-                onActive = pct >= Math.min(c, v) && pct <= Math.max(c, v);
+                const c = this.centerFraction();
+                const v = this.fraction(this.value);
+                onActive = f >= Math.min(c, v) && f <= Math.max(c, v);
               } else {
-                onActive = pct <= this.handlePct('value');
+                onActive = f <= this.fraction(this.value);
               }
+              const tick = tickLabels[i] ?? '';
+              const pct = this.axisPct(f);
               return html`
                 <div
                   class=${classMap({ stop: true, 'on-active': onActive })}
                   style=${styleMap(this.posStyle(pct))}
                   part="stop"
                 ></div>
+                ${tick
+                  ? html`
+                      <div
+                        class="stop-label"
+                        style=${styleMap(this.posStyle(pct))}
+                        part="stop-label"
+                      >
+                        ${tick}
+                      </div>
+                    `
+                  : nothing}
               `;
             })}
 
-            ${!this.stops
-              ? html`
-                  <div
-                    class="stop"
-                    style=${styleMap(this.posStyle(endStop))}
-                    part="end-stop"
-                  ></div>
-                `
-              : nothing}
-
-            <div
-              class=${classMap({
-                'inset-icon': true,
-                has: showIcon,
-                'on-inactive': iconOnInactive,
-              })}
-              part="inset-icon"
-              style=${showIcon && iconOnInactive
-                ? this.vertical
-                  ? 'inset-block-end:auto;inset-block-start:0'
-                  : 'inset-inline-start:auto;inset-inline-end:0'
-                : nothing}
-            >
-              <slot name="icon" @slotchange=${this.syncIconSlot}></slot>
-            </div>
+            ${this.renderEndStop(endStop)}
+            ${this.renderInsetIcon(showIcon, iconOnInactive, useMinIcon, iconPosStyle)}
 
             ${this.range
               ? html`
                   <div
                     class=${classMap({
                       handle: true,
-                      pressed: this.pressed && this.activeHandle === 'start',
+                      'k3-focus-ring': true,
                       'active-drag': this.activeHandle === 'start',
                     })}
                     style=${styleMap(this.posStyle(this.handlePct('start')))}
@@ -650,13 +1160,15 @@ export class K3Slider extends K3Element {
                     aria-valuemin=${this.min}
                     aria-valuemax=${this.valueEnd}
                     aria-valuenow=${Math.round(this.valueStart)}
+                    aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
+                    aria-disabled=${this.disabled ? 'true' : 'false'}
                     aria-label=${label || 'Minimum'}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'start')}
                   ></div>
                   <div
                     class=${classMap({
                       handle: true,
-                      pressed: this.pressed && this.activeHandle === 'end',
+                      'k3-focus-ring': true,
                       'active-drag': this.activeHandle === 'end',
                     })}
                     style=${styleMap(this.posStyle(this.handlePct('end')))}
@@ -666,6 +1178,8 @@ export class K3Slider extends K3Element {
                     aria-valuemin=${this.valueStart}
                     aria-valuemax=${this.max}
                     aria-valuenow=${Math.round(this.valueEnd)}
+                    aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
+                    aria-disabled=${this.disabled ? 'true' : 'false'}
                     aria-label=${label || 'Maximum'}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'end')}
                   ></div>
@@ -674,7 +1188,7 @@ export class K3Slider extends K3Element {
                   <div
                     class=${classMap({
                       handle: true,
-                      pressed: this.pressed,
+                      'k3-focus-ring': true,
                       'active-drag': true,
                     })}
                     style=${styleMap(this.posStyle(this.handlePct('value')))}
@@ -684,21 +1198,64 @@ export class K3Slider extends K3Element {
                     aria-valuemin=${this.min}
                     aria-valuemax=${this.max}
                     aria-valuenow=${ariaNow}
+                    aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
+                    aria-disabled=${this.disabled ? 'true' : 'false'}
                     aria-label=${label || nothing}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'value')}
                   ></div>
                 `}
 
-            <div
-              class=${classMap({
-                'value-indicator': true,
-                has: this.showIndicator && this.valueIndicator,
-              })}
-              style=${styleMap(this.posStyle(this.indicatorPct()))}
-              part="value-indicator"
-            >
-              ${this.displayValue()}
+            ${this.range
+              ? html`
+                  <div
+                    class=${classMap({
+                      'value-indicator': true,
+                      has:
+                        this.showIndicator &&
+                        this.valueIndicator &&
+                        this.activeHandle === 'start',
+                    })}
+                    style=${styleMap(this.posStyle(this.handlePct('start')))}
+                    part="value-indicator"
+                    data-edge="start"
+                  >
+                    ${this.formatValue(this.valueStart)}
+                  </div>
+                  <div
+                    class=${classMap({
+                      'value-indicator': true,
+                      has:
+                        this.showIndicator &&
+                        this.valueIndicator &&
+                        this.activeHandle === 'end',
+                    })}
+                    style=${styleMap(this.posStyle(this.handlePct('end')))}
+                    part="value-indicator"
+                    data-edge="end"
+                  >
+                    ${this.formatValue(this.valueEnd)}
+                  </div>
+                `
+              : html`
+                  <div
+                    class=${classMap({
+                      'value-indicator': true,
+                      has: this.showIndicator && this.valueIndicator,
+                    })}
+                    style=${styleMap(this.posStyle(this.handlePct('value')))}
+                    part="value-indicator"
+                  >
+                    ${this.formatValue(this.value)}
+                  </div>
+                `}
+              </div>
             </div>
+          </div>
+          <div
+            class=${classMap({ addon: true, end: true, has: this.hasEndSlot })}
+            part="end"
+          >
+            <slot name="end" @slotchange=${this.syncSlots}></slot>
           </div>
         </div>
       </div>

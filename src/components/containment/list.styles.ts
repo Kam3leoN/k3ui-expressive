@@ -7,7 +7,8 @@ import { css } from 'lit';
  * - gap 2dp · outer 24 · inner 4 · hover 12 · selected = outer
  * Nested under expandable: embedded — inner corners; last inherits outer bottom.
  *
- * Gap 2dp: flex gap on .list (flat tree → slotted items are flex children).
+ * Gap 2dp: margin-bottom on every non-last item (data-seg-gap), snapped to
+ * integer device pixels via devicePixelSnapCss(2) — stable at 125% Windows DPI.
  * Fill is on inner .item (host transparent).
  *
  * @see https://m3.material.io/components/lists/specs
@@ -66,10 +67,13 @@ export const listStyles = css`
     margin-bottom: 0;
   }
 
-  /* Segmented — equal 2dp between every pair (flex gap · flat tree) */
+  /*
+   * Segmented — gap via item margin-bottom (set in syncChildren, DPR-snapped).
+   * Flex gap alone rounds unevenly at fractional devicePixelRatio (e.g. 1.25).
+   */
   :host([variant='segmented']) .list,
   :host(:not([variant])) .list {
-    gap: var(--k3-segmented-list-segment-gap, 0.125rem);
+    gap: 0;
     padding: 0;
   }
   :host([variant='segmented']) ::slotted(k3-list-item),
@@ -90,7 +94,10 @@ export const listStyles = css`
       --k3-segmented-list-item-selected-shape,
       1.5rem
     );
-    margin: 0 !important;
+  }
+  :host([variant='segmented']) ::slotted(k3-list-item[data-seg-gap]),
+  :host(:not([variant])) ::slotted(k3-list-item[data-seg-gap]) {
+    margin-bottom: var(--k3-segmented-list-segment-gap, 0.125rem) !important;
   }
 
   :host([embedded]) ::slotted(k3-list-item) {

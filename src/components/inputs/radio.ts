@@ -62,17 +62,28 @@ export class K3Radio extends K3Element {
   @property() name = '';
   @property() value = '';
 
+  /** Scope exclusive group to fieldset / form — never the whole document. */
+  private groupScope(): ParentNode {
+    return (
+      this.closest('fieldset') ??
+      this.closest('form') ??
+      (this.parentElement as ParentNode | null) ??
+      this.getRootNode()
+    );
+  }
+
   private select = (): void => {
     if (this.disabled) return;
     if (this.name) {
-      document.querySelectorAll(`k3-radio[name="${CSS.escape(this.name)}"]`).forEach((el) => {
+      const scope = this.groupScope();
+      scope.querySelectorAll(`k3-radio[name="${CSS.escape(this.name)}"]`).forEach((el) => {
         (el as K3Radio).checked = el === this;
       });
     } else {
       this.checked = true;
     }
     setFormValue(this.internals, this.checked ? this.value : null);
-    this.emit('k3-change', { value: this.value, checked: this.checked });
+    this.emit('k3-change', { value: this.value, checked: true });
   };
 
   override render() {

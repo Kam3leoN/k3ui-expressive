@@ -111,8 +111,9 @@ export class K3Dialog extends K3Element {
   }
 
   /**
-   * Paint closed transform first, then flip `.open` — required after portal /
-   * first open so scale/slide actually runs (no sudden pop-in).
+   * Paint closed state first, then flip `.open` — required after portal /
+   * first open so fade / Y-slide actually runs (no sudden pop-in).
+   * Basic = scaleY + spatial-fast overshoot (menus); fullscreen = translateY + fade.
    */
   private playEnter(): Promise<void> {
     if (this.visible) return Promise.resolve();
@@ -222,7 +223,14 @@ export class K3Dialog extends K3Element {
 
   override updated(changed: PropertyValues): void {
     super.updated(changed);
-    if (this.open && !this.visible) void this.show();
+    /* Attribute `open` without show() — enter path only (no 2nd open-start) */
+    if (changed.has('open')) {
+      if (this.open && !this.visible) {
+        void this.playEnter();
+      } else if (!this.open && !this.visible) {
+        this.restoreLayer();
+      }
+    }
     if (
       changed.has('variant') ||
       changed.has('closeAction') ||

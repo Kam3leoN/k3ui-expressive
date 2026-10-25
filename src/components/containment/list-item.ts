@@ -68,6 +68,7 @@ export class K3ListItem extends K3Element {
   /** Selection mode inherited from list, or set locally. */
   @property({ reflect: true }) selection: ListItemSelection = 'none';
   /** Where auto selection control renders. */
+  /** Where auto selection control renders — M3 default = trailing (end). */
   @property({ reflect: true, attribute: 'selection-position' })
   selectionPosition: 'leading' | 'trailing' = 'trailing';
   /** Trailing meta text (time, count…) — or `slot="meta"`. */
@@ -104,7 +105,25 @@ export class K3ListItem extends K3Element {
     this.hasExpand =
       hasNamedSlot(this, 'expand') || hasNamedSlot(this, 'content');
     if (this.hasExpand && !this.expandable) this.expandable = true;
+    this.syncExpandMode();
   };
+
+  /**
+   * M3E folder expand = nested `k3-list` in expand slot (separate segments).
+   * Otherwise unified body — revealed content shares the trigger surface.
+   * Attr drives CSS (:host(:has()) is unreliable across shadow boundaries).
+   */
+  private syncExpandMode(): void {
+    const folder = [...this.children].some(
+      (c) =>
+        c instanceof HTMLElement &&
+        c.localName === 'k3-list' &&
+        (!c.getAttribute('slot') ||
+          c.getAttribute('slot') === 'expand' ||
+          c.getAttribute('slot') === 'content'),
+    );
+    this.toggleAttribute('data-expand-folder', folder);
+  }
 
   /** Resolved line count for layout. */
   get resolvedLines(): 'one' | 'two' | 'three' {
@@ -459,7 +478,7 @@ export class K3ListItem extends K3Element {
           'k3-state-layer': actionable && !this.disabled,
           'k3-focus-ring': actionable && !this.disabled,
         })}
-        part="container"
+      part="container"
         role=${this.selection === 'none' ? 'listitem' : 'option'}
         tabindex=${actionable && !this.disabled ? 0 : -1}
         aria-disabled=${this.disabled ? 'true' : 'false'}
@@ -496,8 +515,8 @@ export class K3ListItem extends K3Element {
             part="overline"
           >
             <slot name="overline" @slotchange=${this.syncSlots}></slot>
-          </span>
-          <span class="headline" part="headline">
+      </span>
+        <span class="headline" part="headline">
             <slot name="headline" @slotchange=${this.syncSlots}></slot>
             <slot></slot>
           </span>

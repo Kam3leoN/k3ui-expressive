@@ -7,6 +7,7 @@ import {
   splitButtonTrailPadDp,
 } from '../../src/components/actions/split-button.specs.js';
 import type { K3SplitButton } from '../../src/components/actions/split-button.js';
+import { devicePixelSnapCss } from '../../src/core/css-length.js';
 
 describe('split-button specs (M3E)', () => {
   it('matches m3.material.io split-button/specs tokens', () => {
@@ -117,5 +118,18 @@ describe('k3-split-button', () => {
     const leading = el.shadowRoot!.querySelector('.leading')!;
     expect(leading.tagName).toBe('DIV');
     expect(leading.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('snaps --k3-sb-gap to integer device pixels (125% DPI hairline)', async () => {
+    const el = await mount(`
+      <k3-split-button>
+        Label
+        <k3-menu-item slot="menu" value="a">A</k3-menu-item>
+        <k3-menu-item slot="menu" value="b">B</k3-menu-item>
+      </k3-split-button>
+    `);
+    expect(el.style.getPropertyValue('--k3-sb-gap').trim()).toBe(
+      devicePixelSnapCss(SplitButtonGapDp),
+    );
   });
 });

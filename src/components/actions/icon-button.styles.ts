@@ -234,8 +234,9 @@ export const iconButtonStyles = css`
     background: transparent;
     overflow: visible;
     cursor: inherit;
-    transition: border-radius var(--k3-sys-motion-duration-spatial-fast)
-      var(--k3-sys-motion-easing-expressive-spatial);
+    /* Shape morph — M3E FastSpatial (scheme-aware aliases) */
+    transition: border-radius var(--k3-sys-motion-duration-spatial-fast, 350ms)
+      var(--k3-sys-motion-easing-spatial-fast, cubic-bezier(0.42, 1.67, 0.21, 0.9));
   }
   :host([data-connected]) .btn {
     width: 100%;

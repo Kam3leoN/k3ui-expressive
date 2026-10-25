@@ -87,10 +87,12 @@ export const ButtonGroupExpandedRatio = 0.15;
 export const ButtonGroupCompressionLimitFallbackDp = 16;
 
 /**
- * Clear delay after release — matches `--k3-sys-motion-duration-spatial-default`
+ * Clear delay after release — matches `--k3-sys-motion-duration-spatial-fast`
  * (+ small buffer so the CSS width transition finishes before snap-clear).
+ * Press morph uses M3E FastSpatial (350ms · spring cubic) — same as button
+ * shape morph; Standard scheme remaps via `data-k3-motion`.
  */
-export const ButtonGroupPressReleaseMs = 520;
+export const ButtonGroupPressReleaseMs = 370;
 
 export const ButtonGroupSpecs = {
   standardGapDp: ButtonGroupStandardGapDp,

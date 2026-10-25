@@ -4,6 +4,8 @@ import {
   K3Element,
   handleFocusNavKey,
   runWhenConnected,
+  devicePixelSnapCss,
+  watchDevicePixelRatio,
 } from '../../core/index.js';
 import { attachSortable, type SortableController } from '../../core/dnd.js';
 import { hostReset } from '../_shared.js';
@@ -11,6 +13,9 @@ import type { K3ListItem } from './list-item.js';
 import K3Menu from './menu.js';
 import K3MenuItem from './menu-item.js';
 import { listStyles } from './list.styles.js';
+
+/** M3E segmented inter-item gap (logical dp) — snapped to device pixels. */
+const SEGMENTED_GAP_DP = 2;
 
 if (!customElements.get('k3-menu')) customElements.define('k3-menu', K3Menu);
 if (!customElements.get('k3-menu-item')) customElements.define('k3-menu-item', K3MenuItem);
@@ -24,8 +29,9 @@ export type ListSelection = 'none' | 'single' | 'multiple' | 'switch';
  * Variants: `standard` · `segmented` (default, M3E gaps + shape morph).
  * Selection: `none` · `single` (radio) · `multiple` (checkbox) · `switch`.
  * `hide-selection-indicator` keeps selected surface without control chrome.
- * Accordion: expandable items; `accordion` makes expand exclusive.
- * `embedded`: nested under an expandable — inner radii; last inherits outer bottom.
+ * Expand (Google M3E): `k3-list-item expandable` — standard = continuous,
+ * segmented = 2 dp gaps. `accordion` = exclusive (one row open). Nested
+ * `k3-list` in expand slot = folder. `embedded` = nested radii.
  * DnD / dismiss: `sortable` · `dismissible` + a11y actions menu.
  *
  * @see https://m3.material.io/components/lists/overview
@@ -42,7 +48,7 @@ export class K3List extends K3Element {
   /** Hide auto radio/checkbox; keep selected container treatment. */
   @property({ type: Boolean, reflect: true, attribute: 'hide-selection-indicator' })
   hideSelectionIndicator = false;
-  /** Exclusive expand (accordion) among expandable children. */
+  /** Exclusive expand among expandable children (one open at a time). */
   @property({ type: Boolean, reflect: true }) accordion = false;
   /**
    * Nested under an expandable header — all corners inner (4);
@@ -59,6 +65,7 @@ export class K3List extends K3Element {
 
   private sortableCtrl: SortableController | null = null;
   private sortingActive = false;
+  private unwatchDpr: (() => void) | null = null;
 
   private items(): K3ListItem[] {
     return [...this.querySelectorAll(':scope > k3-list-item')].filter(
@@ -69,10 +76,22 @@ export class K3List extends K3Element {
     ) as K3ListItem[];
   }
 
+  /** Snap 2dp gap to integer device pixels (fixes uneven gaps @125% DPI). */
+  private applySegmentGapToken(): void {
+    const segmented = this.variant === 'segmented' || !this.variant;
+    if (!segmented) {
+      this.style.removeProperty('--k3-segmented-list-segment-gap');
+      return;
+    }
+    const gap = devicePixelSnapCss(SEGMENTED_GAP_DP);
+    this.style.setProperty('--k3-segmented-list-segment-gap', gap);
+  }
+
   private syncChildren(): void {
     const list = this.items();
     const n = list.length;
     const segmented = this.variant === 'segmented' || !this.variant;
+    this.applySegmentGapToken();
 
     list.forEach((item, i) => {
       /* Segment position for shape morph */
@@ -89,16 +108,32 @@ export class K3List extends K3Element {
         else pos = 'middle';
         item.setAttribute('data-seg', pos);
 
-        /* Marker for non-last; spacing = parent .list flex gap */
+        /*
+         * 2dp (DPR-snapped) margin-bottom on every item except last —
+         * first / middle / before-last all get the same physical gap.
+         */
+        const gapCss = devicePixelSnapCss(SEGMENTED_GAP_DP);
         item.segGap = i < n - 1;
-        item.style.removeProperty('margin-bottom');
+        if (i < n - 1) {
+          item.style.setProperty('margin-bottom', gapCss, 'important');
+        } else {
+          item.style.removeProperty('margin-bottom');
+        }
         item.style.removeProperty('padding-bottom');
 
-        /* Closed item next to an open expandable — outer edge toward the gap */
-        const prevOpen = i > 0 && !!list[i - 1]?.expanded;
-        const nextOpen = i < n - 1 && !!list[i + 1]?.expanded;
-        item.toggleAttribute('data-after-open', prevOpen && !item.expanded);
-        item.toggleAttribute('data-before-open', nextOpen && !item.expanded);
+        /*
+         * Closed item next to an open expandable — outer edge toward the gap.
+         * Prefer reflected attr over Lit `.expanded` so first sync (and
+         * microtask after toggle) stays correct even if a sibling isn't
+         * fully upgraded yet.
+         */
+        const isOpen = (el: K3ListItem | undefined): boolean =>
+          !!el && (el.expanded || el.hasAttribute('expanded'));
+        const prevOpen = i > 0 && isOpen(list[i - 1]);
+        const nextOpen = i < n - 1 && isOpen(list[i + 1]);
+        const selfOpen = isOpen(item);
+        item.toggleAttribute('data-after-open', prevOpen && !selfOpen);
+        item.toggleAttribute('data-before-open', nextOpen && !selfOpen);
 
         /* Nested list in expand slot → embedded (inherits end radius via CSS) */
         this.syncNestedLists(item);
@@ -379,6 +414,8 @@ export class K3List extends K3Element {
     this.addEventListener('k3-actions-request', this.onActionsRequest);
     this.addEventListener('k3-expand', this.onExpand);
     this.addEventListener('keydown', this.onKeydown);
+    this.unwatchDpr?.();
+    this.unwatchDpr = watchDevicePixelRatio(() => this.syncChildren());
     runWhenConnected(this, () => {
       this.syncChildren();
       this.bindSortable();
@@ -405,6 +442,8 @@ export class K3List extends K3Element {
   }
 
   override disconnectedCallback(): void {
+    this.unwatchDpr?.();
+    this.unwatchDpr = null;
     this.unbindSortable();
     this.removeEventListener('k3-select-request', this.onSelectRequest);
     this.removeEventListener('k3-dismiss', this.onItemDismiss);

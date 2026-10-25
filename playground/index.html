@@ -47,7 +47,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Material Symbols subset (~22 KB) — full variable font is ~5 MB -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility,account_circle,add,alarm,anchor,android,animation,archive,arrow_back,arrow_drop_down,arrow_forward,article,beach_access,bedtime,bluetooth,bolt,bookmark,brightness_auto,calendar_today,celebration,change_history,check,checkroom,chevron_left,chevron_right,clear,close,cloud_download,cloud_off,code,computer,content_copy,content_cut,content_paste,create_new_folder,dark_mode,dashboard,delete,design_services,desktop_windows,devices,directions_car,directions_walk,download,drafts,drag_handle,drag_indicator,drive_file_move,drive_file_rename_outline,edit,error,expand_less,expand_more,explore,favorite,filter_alt,flare,flight,flight_takeoff,folder,format_align_center,format_align_left,format_align_right,format_bold,format_italic,format_textdirection_l_to_r,format_textdirection_r_to_l,format_underlined,forward,gesture,grid_on,help,home,inbox,info,input,inventory_2,keyboard,language,laptop_mac,layers,library_music,light_mode,link,list,local_cafe,local_fire_department,logout,luggage,mail,map,match_case,menu,menu_book,menu_open,monitor,mood,more_horiz,more_vert,music_note,navigation,notifications,palette,pause,person,pets,play_arrow,question_mark,radio,rainy,redo,remove,repeat,reply,reply_all,restaurant,rocket_launch,route,schedule,search,select_all,send,sentiment_satisfied,settings,shapes,share,spa,space_bar,sports_esports,star,steps,stop,straighten,sunny,swap_horiz,swap_vert,timer,title,touch_app,train,tune,two_wheeler,undo,view_column,view_list,visibility,visibility_off,volume_off,volume_up,watch,water_drop,widgets,wifi&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility,account_circle,add,alarm,anchor,android,animation,archive,arrow_back,arrow_drop_down,arrow_forward,article,back_hand,beach_access,bedtime,bluetooth,bluetooth_disabled,bolt,bookmark,brightness_auto,calendar_today,call_end,celebration,change_history,check,checkroom,chevron_left,chevron_right,clear,close,closed_caption,cloud_download,cloud_off,code,computer,content_copy,content_cut,content_paste,create_new_folder,dark_mode,dashboard,delete,design_services,desktop_windows,devices,directions_car,directions_walk,download,drafts,drag_handle,drag_indicator,drive_file_move,drive_file_rename_outline,edit,error,expand_less,expand_more,explore,favorite,filter_alt,flare,flight,flight_takeoff,folder,format_align_center,format_align_left,format_align_right,format_bold,format_italic,format_textdirection_l_to_r,format_textdirection_r_to_l,format_underlined,forward,gesture,grid_on,hearing_disabled,help,home,inbox,info,input,inventory_2,keyboard,language,laptop_mac,layers,library_music,light_mode,link,list,local_cafe,local_fire_department,location_off,logout,luggage,mail,map,match_case,menu,menu_book,menu_open,mic,mic_off,monitor,mood,more_horiz,more_vert,music_note,navigation,notifications,notifications_off,palette,pause,person,pets,play_arrow,present_to_all,question_mark,radio,rainy,redo,remove,repeat,reply,reply_all,restaurant,rocket_launch,route,schedule,search,select_all,send,sensors_off,sentiment_satisfied,settings,shapes,share,signal_cellular_off,spa,space_bar,sports_esports,star,steps,stop,straighten,sunny,swap_horiz,swap_vert,timer,title,touch_app,train,tune,two_wheeler,undo,videocam,videocam_off,view_column,view_list,visibility,visibility_off,volume_off,volume_up,watch,water_drop,widgets,wifi,wifi_off&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./playground.css" />
@@ -3473,86 +3473,267 @@ fav?.addEventListener("k3-change", (e) => {
               M3 Expressive · standard · centered · range · XS–XL · stops · inset icon.
             </p>
             <p class="doc-intro" data-i18n="doc.slider.intro">
-              Sliders select from a continuous or discrete range. Prefer the standard variant for most cases; use centered when values cross a midpoint, and range for a min–max pair. Larger sizes (MD+) can host an inset icon on standard sliders only. See M3 specs and guidelines.
+              Sliders select from a continuous or discrete range. Prefer standard for most cases; centered when values cross a midpoint; range for a min–max pair (horizontal only — avoid vertical range). MD+ standard can host an inset icon that moves between active and inactive track. Keep a large enough handle for touch.
             </p>
           </header>
 
           <header class="section-head sub">
             <h2 data-i18n="doc.slider.section.playground">Playground</h2>
             <p data-i18n="doc.slider.section.playground.blurb">
-              Tune variant, size, orientation, stops, and value indicator live.
+              Horizontal and vertical side by side · size · stops · inset icon · label · indicator · ±.
             </p>
           </header>
           <div class="demo-block" id="slider-lab">
-            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
-              <div class="demo-case slider-lab-case">
-                <div class="demo-case-stage slider-lab-stage">
+            <div
+              class="demo-frame demo-frame--cases items-end"
+              data-demo-enhance="off"
+              id="slider-lab-frames"
+            >
+              <div class="demo-case">
+                <div class="demo-case-stage slider-lab-stage slider-lab-stage--h">
                   <k3-slider
-                    id="slider-lab-el"
+                    id="slider-lab-h"
                     value="40"
                     min="0"
                     max="100"
                     size="xs"
+                    orientation="horizontal"
                     label="Volume"
+                    value-indicator
                   >
                     <span
                       slot="icon"
-                      class="ms notranslate"
+                      class="ms notranslate sl-inset-icon"
                       translate="no"
                       lang="zxx"
                       data-k3-icon="volume_up"
                       aria-hidden="true"
+                      hidden
                     ></span>
+                    <span
+                      slot="icon-min"
+                      class="ms notranslate sl-inset-icon-min"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="volume_off"
+                      aria-hidden="true"
+                      hidden
+                    ></span>
+                    <k3-icon-button
+                      slot="start"
+                      data-pm-slot="start"
+                      class="sl-pm"
+                      variant="standard"
+                      size="sm"
+                      label="Decrease"
+                    >
+                      <span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="remove"
+                        aria-hidden="true"
+                      ></span>
+                    </k3-icon-button>
+                    <k3-icon-button
+                      slot="end"
+                      data-pm-slot="end"
+                      class="sl-pm"
+                      variant="standard"
+                      size="sm"
+                      label="Increase"
+                    >
+                      <span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="add"
+                        aria-hidden="true"
+                      ></span>
+                    </k3-icon-button>
                   </k3-slider>
                 </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage slider-lab-stage slider-lab-stage--v">
+                  <k3-slider
+                    id="slider-lab-v"
+                    value="40"
+                    min="0"
+                    max="100"
+                    size="xs"
+                    orientation="vertical"
+                    label="Volume"
+                    value-indicator
+                  >
+                    <span
+                      slot="icon"
+                      class="ms notranslate sl-inset-icon"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="volume_up"
+                      aria-hidden="true"
+                      hidden
+                    ></span>
+                    <span
+                      slot="icon-min"
+                      class="ms notranslate sl-inset-icon-min"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="volume_off"
+                      aria-hidden="true"
+                      hidden
+                    ></span>
+                    <k3-icon-button
+                      slot="start"
+                      data-pm-slot="start"
+                      class="sl-pm"
+                      variant="standard"
+                      size="sm"
+                      label="Decrease"
+                    >
+                      <span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="remove"
+                        aria-hidden="true"
+                      ></span>
+                    </k3-icon-button>
+                    <k3-icon-button
+                      slot="end"
+                      data-pm-slot="end"
+                      class="sl-pm"
+                      variant="standard"
+                      size="sm"
+                      label="Increase"
+                    >
+                      <span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="add"
+                        aria-hidden="true"
+                      ></span>
+                    </k3-icon-button>
+                  </k3-slider>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
               </div>
             </div>
+            <ol class="variant-guide" aria-hidden="true">
+              <li>
+                <span class="pill-num">1</span>
+                <span class="variant-label" data-i18n="doc.slider.demo.horizontal"
+                  >Horizontal</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">2</span>
+                <span class="variant-label" data-i18n="doc.slider.demo.vertical"
+                  >Vertical</span
+                >
+              </li>
+            </ol>
             <div class="slider-lab-controls k3-layout-grid surface-flush">
-              <fieldset class="slider-lab-field">
+              <fieldset class="slider-lab-field slider-lab-field--variant">
                 <legend data-i18n="doc.slider.control.variant">Variant</legend>
-                <div class="slider-lab-radios">
-                  <k3-radio name="sl-variant" value="standard" checked>Standard</k3-radio>
-                  <k3-radio name="sl-variant" value="centered">Centered</k3-radio>
-                  <k3-radio name="sl-variant" value="range">Range</k3-radio>
-                </div>
+                <k3-button-group
+                  id="sl-variant"
+                  variant="connected"
+                  shape="round"
+                  selection="single"
+                  size="sm"
+                  sync
+                  required
+                  label="Variant"
+                >
+                  <k3-button
+                    variant="outlined"
+                    value="standard"
+                    selected
+                    data-i18n="doc.slider.variant.standard"
+                    >Standard</k3-button
+                  >
+                  <k3-button
+                    variant="outlined"
+                    value="centered"
+                    data-i18n="doc.slider.variant.centered"
+                    >Centered</k3-button
+                  >
+                  <k3-button
+                    variant="outlined"
+                    value="range"
+                    data-i18n="doc.slider.variant.range"
+                    >Range</k3-button
+                  >
+                </k3-button-group>
               </fieldset>
-              <fieldset class="slider-lab-field">
+              <fieldset class="slider-lab-field slider-lab-field--size">
                 <legend data-i18n="doc.slider.control.size">Size</legend>
-                <div class="slider-lab-radios">
-                  <k3-radio name="sl-size" value="xs" checked>XS</k3-radio>
-                  <k3-radio name="sl-size" value="sm">SM</k3-radio>
-                  <k3-radio name="sl-size" value="md">MD</k3-radio>
-                  <k3-radio name="sl-size" value="lg">LG</k3-radio>
-                  <k3-radio name="sl-size" value="xl">XL</k3-radio>
-                </div>
+                <k3-button-group
+                  id="sl-size"
+                  variant="connected"
+                  shape="round"
+                  selection="single"
+                  size="sm"
+                  sync
+                  required
+                  label="Size"
+                >
+                  <k3-button variant="outlined" value="xs" selected>XS</k3-button>
+                  <k3-button variant="outlined" value="sm">SM</k3-button>
+                  <k3-button variant="outlined" value="md">MD</k3-button>
+                  <k3-button variant="outlined" value="lg">LG</k3-button>
+                  <k3-button variant="outlined" value="xl">XL</k3-button>
+                </k3-button-group>
               </fieldset>
               <fieldset class="slider-lab-field">
-                <legend data-i18n="doc.slider.control.orientation">Orientation</legend>
-                <div class="slider-lab-radios">
-                  <k3-radio name="sl-orient" value="horizontal" checked>Horizontal</k3-radio>
-                  <k3-radio name="sl-orient" value="vertical">Vertical</k3-radio>
-                </div>
+                <legend data-i18n="doc.slider.control.plusMinus">Minus / plus</legend>
+                <k3-switch id="sl-sw-pm" selected aria-label="Minus / plus"></k3-switch>
               </fieldset>
               <fieldset class="slider-lab-field">
                 <legend data-i18n="doc.slider.control.stops">Stops</legend>
-                <div class="slider-lab-radios">
-                  <k3-radio name="sl-stops" value="off" checked>Off</k3-radio>
-                  <k3-radio name="sl-stops" value="on">On</k3-radio>
-                </div>
+                <k3-switch id="sl-sw-stops" aria-label="Stops"></k3-switch>
+              </fieldset>
+              <fieldset class="slider-lab-field" id="slider-lab-icon-field" hidden>
+                <legend data-i18n="doc.slider.control.insetIcon">Inset icon</legend>
+                <k3-switch id="sl-sw-icon" aria-label="Inset icon"></k3-switch>
+              </fieldset>
+              <fieldset class="slider-lab-field">
+                <legend data-i18n="doc.slider.control.label">Label</legend>
+                <k3-switch id="sl-sw-label" selected aria-label="Label"></k3-switch>
               </fieldset>
               <fieldset class="slider-lab-field">
                 <legend data-i18n="doc.slider.control.valueIndicator">Value indicator</legend>
-                <div class="slider-lab-radios">
-                  <k3-radio name="sl-vi" value="off" checked>Off</k3-radio>
-                  <k3-radio name="sl-vi" value="on">On</k3-radio>
-                </div>
+                <k3-switch id="sl-sw-vi" selected aria-label="Value indicator"></k3-switch>
               </fieldset>
-              <fieldset class="slider-lab-field" id="slider-lab-icon-field">
-                <legend data-i18n="doc.slider.control.insetIcon">Inset icon</legend>
-                <div class="slider-lab-radios">
-                  <k3-radio name="sl-icon" value="off" checked>Off</k3-radio>
-                  <k3-radio name="sl-icon" value="on">On</k3-radio>
-                </div>
+              <fieldset class="slider-lab-field">
+                <legend data-i18n="doc.slider.control.disabled">Disabled</legend>
+                <k3-switch id="sl-sw-disabled" aria-label="Disabled"></k3-switch>
+              </fieldset>
+              <fieldset class="slider-lab-field slider-lab-field--color">
+                <legend data-i18n="doc.slider.control.color">Color</legend>
+                <k3-button-group
+                  id="sl-color"
+                  variant="connected"
+                  shape="round"
+                  selection="single"
+                  size="sm"
+                  sync
+                  required
+                  label="Color"
+                >
+                  <k3-button variant="outlined" value="primary" selected>Primary</k3-button>
+                  <k3-button variant="outlined" value="secondary">Secondary</k3-button>
+                  <k3-button variant="outlined" value="tertiary">Tertiary</k3-button>
+                  <k3-button variant="outlined" value="error">Error</k3-button>
+                </k3-button-group>
+              </fieldset>
+              <fieldset class="slider-lab-field" id="slider-lab-ttb-field">
+                <legend data-i18n="doc.slider.control.topToBottom">Top → bottom</legend>
+                <k3-switch id="sl-sw-ttb" aria-label="Top to bottom"></k3-switch>
               </fieldset>
             </div>
           </div>
@@ -3965,6 +4146,8 @@ fav?.addEventListener("k3-change", (e) => {
                     value="0.65"
                     thickness="4"
                     show-stop
+                    show-percent
+                    layout="default"
                   ></k3-progress>
                 </div>
               </div>
@@ -4005,12 +4188,41 @@ fav?.addEventListener("k3-change", (e) => {
                   <k3-radio name="prog-stop" value="off">Off</k3-radio>
                 </div>
               </fieldset>
+              <fieldset class="progress-lab-field" id="progress-lab-layout-field">
+                <legend data-i18n="doc.progress.control.layout">Layout</legend>
+                <div class="progress-lab-radios">
+                  <k3-radio name="prog-layout" value="default" checked>Default</k3-radio>
+                  <k3-radio name="prog-layout" value="top">Top</k3-radio>
+                  <k3-radio name="prog-layout" value="bottom">Bottom</k3-radio>
+                </div>
+              </fieldset>
+              <fieldset class="progress-lab-field" id="progress-lab-pct-pos-field" hidden>
+                <legend data-i18n="doc.progress.control.percentPos">Percent</legend>
+                <div class="progress-lab-radios">
+                  <k3-radio name="prog-pct-pos" value="trailing" checked>Below</k3-radio>
+                  <k3-radio name="prog-pct-pos" value="inside">Inside</k3-radio>
+                </div>
+              </fieldset>
+              <fieldset class="progress-lab-field" id="progress-lab-size-field" hidden>
+                <legend data-i18n="doc.progress.control.size">Size</legend>
+                <div class="progress-lab-radios">
+                  <k3-radio name="prog-size" value="0" checked>Auto</k3-radio>
+                  <k3-radio name="prog-size" value="48">48</k3-radio>
+                  <k3-radio name="prog-size" value="64">64</k3-radio>
+                  <k3-radio name="prog-size" value="96">96</k3-radio>
+                </div>
+              </fieldset>
               <fieldset class="progress-lab-field">
                 <legend data-i18n="doc.progress.control.label">Label</legend>
-                <div class="progress-lab-radios">
-                  <k3-radio name="prog-label" value="off" checked>Off</k3-radio>
-                  <k3-radio name="prog-label" value="on">On</k3-radio>
-                </div>
+                <k3-switch id="prog-sw-label" aria-label="Label"></k3-switch>
+              </fieldset>
+              <fieldset class="progress-lab-field">
+                <legend data-i18n="doc.progress.control.percent">Value %</legend>
+                <k3-switch id="prog-sw-percent" selected aria-label="Value %"></k3-switch>
+              </fieldset>
+              <fieldset class="progress-lab-field">
+                <legend data-i18n="doc.progress.control.supporting">Supporting</legend>
+                <k3-switch id="prog-sw-supporting" aria-label="Supporting"></k3-switch>
               </fieldset>
               <div class="progress-lab-value" id="progress-lab-value-wrap">
                 <label class="progress-lab-value-label" for="progress-lab-slider"
@@ -5292,7 +5504,7 @@ fav?.addEventListener("k3-change", (e) => {
             <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
             <h1 data-i18n="doc.list.title">Lists</h1>
             <p data-i18n="doc.list.blurb">
-              M3 Expressive — standard · segmented · selection · accordion · DnD.
+              M3 Expressive — standard · segmented · selection · expand · DnD.
             </p>
             <p class="doc-intro" data-i18n="doc.list.intro">
               Lists are continuous vertical indexes of text and images. Prefer segmented
@@ -5539,23 +5751,24 @@ fav?.addEventListener("k3-change", (e) => {
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.list.section.accordion">Accordion</h2>
+            <h2 data-i18n="doc.list.section.accordion">Expand</h2>
             <p data-i18n="doc.list.section.accordion.blurb">
-              Multiple — several rows open. Exclusive — opening one collapses the others.
+              M3E expand lives on List — standard (continuous) or segmented
+              (2 dp gaps). Exclusive (`accordion`) = one row open.
             </p>
           </header>
           <div class="demo-block">
             <div class="demo-frame demo-frame--cases grid-2">
               <div class="demo-case">
                 <div class="demo-case-stage">
-                  <k3-list variant="segmented" label="Topics">
+                  <k3-list variant="standard" label="Topics">
                     <k3-list-item expandable leading="icon" expanded>
                       <span slot="leading" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="folder"></span>
                       <span slot="headline">Design tokens</span>
                       <span slot="supporting">Color · type · shape</span>
                       <div slot="expand">
-                        Nested details use the same expressive spatial expand
-                        (0fr → 1fr) as expansion panels.
+                        Standard list — continuous surface, no segment gaps
+                        (M3E “without border” expand).
                       </div>
                     </k3-list-item>
                     <k3-list-item expandable leading="icon">
@@ -5588,8 +5801,8 @@ fav?.addEventListener("k3-change", (e) => {
                       <span slot="headline">Design tokens</span>
                       <span slot="supporting">Color · type · shape</span>
                       <div slot="expand">
-                        Nested details use the same expressive spatial expand
-                        (0fr → 1fr) as expansion panels.
+                        Segmented + exclusive: opening another row collapses
+                        this one.
                       </div>
                     </k3-list-item>
                     <k3-list-item expandable leading="icon" expanded>
@@ -5618,14 +5831,14 @@ fav?.addEventListener("k3-change", (e) => {
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span>
-                <span class="variant-label" data-i18n="doc.list.legend.accordion.multiple"
-                  >multiple</span
+                <span class="variant-label" data-i18n="doc.list.legend.expand.standard"
+                  >standard</span
                 >
               </li>
               <li>
                 <span class="pill-num">2</span>
-                <span class="variant-label" data-i18n="doc.list.legend.accordion.exclusive"
-                  >exclusive</span
+                <span class="variant-label" data-i18n="doc.list.legend.expand.segmented"
+                  >segmented · exclusive</span
                 >
               </li>
             </ol>
@@ -5680,77 +5893,6 @@ fav?.addEventListener("k3-change", (e) => {
                 >
               </li>
             </ol>
-          </div>
-        </article>
-
-        <!-- EXPANSION -->
-        <article class="comp-page" data-page="expansion" id="page-expansion" hidden>
-          <header class="section-head">
-            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
-            <h1 data-i18n="doc.expansion.title">Expansion panel</h1>
-            <p data-i18n="doc.expansion.blurb">
-              Chevron expand_more · individual or exclusive (accordion).
-            </p>
-            <p class="doc-intro" data-i18n="doc.expansion.intro">
-              Expansion panels hide and reveal sections behind a headline and chevron. Use multiple mode when several sections can stay open, and exclusive (accordion) when space is tight. Keep panel bodies focused; do not bury primary actions only inside collapsed sections.
-            </p>
-          </header>
-          <div class="surface stack gap-lg">
-            <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">multiple</span></li>
-              <li><span class="pill-num">2</span><span class="variant-label">exclusive</span></li>
-            </ol>
-
-            <header class="section-head sub"><h2 data-i18n="playground.demo.section.expansion.multiple">Multiple — independent</h2></header>
-            <p class="hint">Each panel toggles on its own (4 panels open at once OK).</p>
-            <k3-expansion-group mode="multiple" id="expansion-multiple">
-              <k3-expansion-panel open>
-                <span slot="icon" class="ms">dashboard</span>
-                <span slot="headline">Layout</span>
-                <span slot="supporting-text">Grids, lists, scrolling</span>
-                Introduction, build a layout, lists &amp; grids, scrolling.
-              </k3-expansion-panel>
-              <k3-expansion-panel>
-                <span slot="icon" class="ms">palette</span>
-                <span slot="headline">Design &amp; theming</span>
-                Color, type, shape, and motion tokens.
-              </k3-expansion-panel>
-              <k3-expansion-panel>
-                <span slot="icon" class="ms">animation</span>
-                <span slot="headline">Animations &amp; transitions</span>
-                Spatial and effects motion schemes.
-              </k3-expansion-panel>
-              <k3-expansion-panel>
-                <span slot="icon" class="ms">accessibility</span>
-                <span slot="headline">Accessibility</span>
-                Focus, contrast, reduced motion.
-              </k3-expansion-panel>
-            </k3-expansion-group>
-
-            <header class="section-head sub"><h2 data-i18n="playground.demo.section.expansion.exclusive">Exclusive — accordion</h2></header>
-            <p class="hint">Opening one panel collapses the others.</p>
-            <k3-expansion-group mode="exclusive" id="expansion-exclusive">
-              <k3-expansion-panel open>
-                <span slot="icon" class="ms">widgets</span>
-                <span slot="headline">Base widgets</span>
-                Buttons, fields, and selection controls.
-              </k3-expansion-panel>
-              <k3-expansion-panel>
-                <span slot="icon" class="ms">devices</span>
-                <span slot="headline">Adaptive &amp; responsive</span>
-                Breakpoints and dual-pane patterns.
-              </k3-expansion-panel>
-              <k3-expansion-panel>
-                <span slot="icon" class="ms">route</span>
-                <span slot="headline">Navigation &amp; routing</span>
-                Rails, bars, sheets, and deep links.
-              </k3-expansion-panel>
-              <k3-expansion-panel>
-                <span slot="icon" class="ms">language</span>
-                <span slot="headline">Internationalization</span>
-                Locale, RTL, and translated strings.
-              </k3-expansion-panel>
-            </k3-expansion-group>
           </div>
         </article>
 
@@ -6082,30 +6224,508 @@ fav?.addEventListener("k3-change", (e) => {
           </div>
         </article>
 
-        <!-- TOOLBAR -->
+        <!-- TOOLBAR — M3E docked / floating -->
         <article class="comp-page" data-page="toolbar" id="page-toolbar" hidden>
           <header class="section-head">
             <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
             <h1 data-i18n="doc.toolbar.title">Toolbar</h1>
-            <p data-i18n="doc.toolbar.blurb">Compact action strip.</p>
+            <p data-i18n="doc.toolbar.blurb">
+              M3E — docked or floating · standard / vibrant · pair with FAB.
+            </p>
             <p class="doc-intro" data-i18n="doc.toolbar.intro">
-              Toolbars gather compact actions for the current context — cut, copy, paste, or view controls. Keep icons recognizable, group with dividers when needed, and avoid overcrowding: overflow into a menu when actions exceed the available width.
+              Material 3 Expressive toolbars replace the bottom app bar with two variants: docked
+              (full-width strip) and floating (elevated pill, horizontal or vertical). Use vibrant
+              color for emphasis. Slots hold icon buttons, buttons, or text fields; pair a FAB with
+              an 8 dp gap. Do not show a toolbar at the same time as a navigation bar.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases grid-2" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-toolbar variant="docked" color="standard" label="Mail actions">
+                    <k3-icon-button variant="standard" label="Archive"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="archive"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Delete"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="delete"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Alarm"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="alarm"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Star"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="star"></span
+                    ></k3-icon-button>
+                  </k3-toolbar>
+                </div>
+                <span class="demo-case-num">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-toolbar variant="floating" color="vibrant" label="Format">
+                    <k3-icon-button variant="tonal" toggle selected label="Bold"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="format_bold"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Italic"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="format_italic"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Underline"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="format_underlined"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Color"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="palette"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="More"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="more_vert"></span
+                    ></k3-icon-button>
+                  </k3-toolbar>
+                </div>
+                <span class="demo-case-num">2</span>
+              </div>
+            </div>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
-                ><span class="variant-label" data-i18n="doc.toolbar.title">Toolbar</span>
+                ><span class="variant-label" data-i18n="doc.toolbar.demo.docked">Docked</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.toolbar.demo.floating">Floating</span>
               </li>
             </ol>
-            <k3-toolbar>
-              <k3-icon-button label="Cut"><span class="ms">content_cut</span></k3-icon-button>
-              <k3-icon-button label="Copy"><span class="ms">content_copy</span></k3-icon-button>
-              <k3-icon-button label="Paste"><span class="ms">content_paste</span></k3-icon-button>
-              <k3-divider vertical></k3-divider>
-              <k3-button variant="text" size="sm">Share</k3-button>
-            </k3-toolbar>
+          </div>
+
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases grid-2" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-toolbar variant="floating" color="standard" label="Format standard">
+                    <k3-icon-button variant="tonal" toggle selected label="Bold"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="format_bold"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Italic"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="format_italic"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Underline"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="format_underlined"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="More"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="more_vert"></span
+                    ></k3-icon-button>
+                  </k3-toolbar>
+                </div>
+                <span class="demo-case-num">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-toolbar variant="floating" color="vibrant" label="Format vibrant">
+                    <k3-icon-button variant="tonal" toggle selected label="Bold"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="format_bold"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Italic"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="format_italic"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Underline"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="format_underlined"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="More"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="more_vert"></span
+                    ></k3-icon-button>
+                  </k3-toolbar>
+                </div>
+                <span class="demo-case-num">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.toolbar.demo.standard">Standard</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.toolbar.demo.vibrant">Vibrant</span>
+              </li>
+            </ol>
+          </div>
+
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases grid-2 items-end" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-toolbar variant="floating" color="vibrant" orientation="horizontal" label="H">
+                    <k3-icon-button variant="standard" label="Undo"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="undo"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Redo"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="redo"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="filled" label="Add"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="add"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="More"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="more_vert"></span
+                    ></k3-icon-button>
+                  </k3-toolbar>
+                </div>
+                <span class="demo-case-num">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-toolbar variant="floating" color="vibrant" orientation="vertical" label="V">
+                    <k3-icon-button variant="standard" label="Undo"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="undo"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Redo"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="redo"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="filled" label="Add"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="add"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="More"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="more_vert"></span
+                    ></k3-icon-button>
+                  </k3-toolbar>
+                </div>
+                <span class="demo-case-num">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.toolbar.demo.horizontal">Horizontal</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.toolbar.demo.vertical">Vertical</span>
+              </li>
+            </ol>
+          </div>
+
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases grid-2 items-end" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-toolbar variant="floating" color="standard" label="Actions + FAB">
+                    <k3-icon-button variant="standard" label="Search"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="search"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Delete"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="delete"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Archive"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="archive"></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="standard" label="Reply"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="reply"></span
+                    ></k3-icon-button>
+                    <k3-fab slot="fab" size="default" aria-label="Add">
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="add"
+                      ></span>
+                    </k3-fab>
+                  </k3-toolbar>
+                </div>
+                <span class="demo-case-num">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-toolbar
+                    variant="docked"
+                    layout="spread"
+                    color="standard"
+                    label="Spread actions"
+                  >
+                    <k3-icon-button slot="leading" variant="standard" label="Back"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="arrow_back"
+                      ></span
+                    ></k3-icon-button>
+                    <k3-icon-button variant="filled" label="Add"
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="add"></span
+                    ></k3-icon-button>
+                    <k3-icon-button slot="trailing" variant="standard" label="Forward"
+                      ><span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="arrow_forward"
+                      ></span
+                    ></k3-icon-button>
+                  </k3-toolbar>
+                </div>
+                <span class="demo-case-num">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.toolbar.demo.fab">Floating + FAB</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.toolbar.demo.spread"
+                  >Docked spread (leading · middle · trailing)</span
+                >
+              </li>
+            </ol>
+          </div>
+
+          <header class="section-head sub">
+            <h2 data-i18n="doc.toolbar.demo.meet.title">Google Meet–style call bar</h2>
+            <p data-i18n="doc.toolbar.demo.meet.blurb">
+              Floating · rounded · reactions toggle (scaleY up) · FAB 56.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-toolbar
+                    id="meet-call-toolbar"
+                    variant="floating"
+                    shape="rounded"
+                    color="standard"
+                    label="Call controls"
+                    data-i18n-label="doc.toolbar.demo.meet.label"
+                  >
+                    <div
+                      slot="expand"
+                      class="meet-emoji-bar"
+                      role="toolbar"
+                      aria-label="Reactions"
+                      data-i18n-aria-label="doc.toolbar.demo.meet.reactionsBar"
+                    >
+                      <div class="meet-emoji-strip" role="group">
+                        <button type="button" class="meet-emoji" aria-label="Love">💖</button>
+                        <button type="button" class="meet-emoji" aria-label="Thumbs up">👍</button>
+                        <button type="button" class="meet-emoji" aria-label="Party">🎉</button>
+                        <button type="button" class="meet-emoji" aria-label="Clap">👏</button>
+                        <button type="button" class="meet-emoji" aria-label="Joy">😂</button>
+                        <button type="button" class="meet-emoji" aria-label="Surprised">😮</button>
+                        <button type="button" class="meet-emoji" aria-label="Cry">😢</button>
+                        <button type="button" class="meet-emoji" aria-label="Thinking">🤔</button>
+                        <button type="button" class="meet-emoji" aria-label="Thumbs down">👎</button>
+                      </div>
+                    </div>
+                    <k3-split-button
+                      size="md"
+                      variant="tonal"
+                      label="Microphone options"
+                      data-i18n-label="doc.toolbar.demo.meet.micOpts"
+                    >
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="mic"
+                        aria-hidden="true"
+                      ></span>
+                      <k3-menu-item slot="menu" value="mute"
+                        ><span data-i18n="doc.toolbar.demo.meet.mute">Mute</span></k3-menu-item
+                      >
+                      <k3-menu-item slot="menu" value="settings"
+                        ><span data-i18n="doc.toolbar.demo.meet.micSettings"
+                          >Audio settings</span
+                        ></k3-menu-item
+                      >
+                    </k3-split-button>
+                    <k3-split-button
+                      size="md"
+                      variant="tonal"
+                      label="Camera options"
+                      data-i18n-label="doc.toolbar.demo.meet.camOpts"
+                    >
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="videocam"
+                        aria-hidden="true"
+                      ></span>
+                      <k3-menu-item slot="menu" value="off"
+                        ><span data-i18n="doc.toolbar.demo.meet.camOff">Turn off camera</span></k3-menu-item
+                      >
+                      <k3-menu-item slot="menu" value="settings"
+                        ><span data-i18n="doc.toolbar.demo.meet.camSettings"
+                          >Video settings</span
+                        ></k3-menu-item
+                      >
+                    </k3-split-button>
+                    <!--
+                      Press morph (+15% width, neighbors compress) only works with k3-button —
+                      k3-icon-button stays fixed square by design.
+                    -->
+                    <k3-button-group
+                      id="meet-call-actions"
+                      variant="standard"
+                      selection="single"
+                      size="md"
+                      shape="round"
+                      sync
+                      label="Call actions"
+                      data-i18n-label="doc.toolbar.demo.meet.actions"
+                    >
+                      <k3-button
+                        variant="tonal"
+                        value="present"
+                        aria-label="Present now"
+                        data-i18n-aria-label="doc.toolbar.demo.meet.present"
+                      >
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="present_to_all"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button>
+                      <k3-button
+                        variant="tonal"
+                        value="reactions"
+                        aria-label="Reactions"
+                        data-i18n-aria-label="doc.toolbar.demo.meet.reactions"
+                      >
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="mood"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button>
+                      <k3-button
+                        variant="tonal"
+                        value="captions"
+                        aria-label="Captions"
+                        data-i18n-aria-label="doc.toolbar.demo.meet.captions"
+                      >
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="closed_caption"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button>
+                      <k3-button
+                        variant="tonal"
+                        value="hand"
+                        aria-label="Raise hand"
+                        data-i18n-aria-label="doc.toolbar.demo.meet.hand"
+                      >
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="back_hand"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button>
+                      <k3-button
+                        variant="tonal"
+                        value="more"
+                        aria-label="More options"
+                        data-i18n-aria-label="doc.toolbar.demo.meet.more"
+                      >
+                        <span
+                          slot="icon"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="more_vert"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-button>
+                    </k3-button-group>
+                    <k3-fab
+                      slot="fab"
+                      size="default"
+                      variant="primary"
+                      class="toolbar-demo-hangup"
+                      aria-label="Leave call"
+                      data-i18n-aria-label="doc.toolbar.demo.meet.hangup"
+                    >
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="call_end"
+                        aria-hidden="true"
+                      ></span>
+                    </k3-fab>
+                  </k3-toolbar>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.toolbar.demo.meet.guide"
+                  >Rounded · expand reactions · FAB 56</span
+                >
+              </li>
+            </ol>
           </div>
         </article>
 

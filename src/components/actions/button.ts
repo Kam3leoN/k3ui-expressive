@@ -157,15 +157,16 @@ export class K3Button extends K3Element {
         overflow: visible;
         user-select: none;
         -webkit-user-select: none;
+        /* Shape morph — M3E FastSpatial (scheme-aware aliases) */
         transition:
-          border-radius var(--k3-sys-motion-duration-spatial-fast)
-            var(--k3-sys-motion-easing-expressive-spatial),
-          background-color var(--k3-sys-motion-duration-short4)
-            var(--k3-sys-motion-easing-expressive-effects),
-          box-shadow var(--k3-sys-motion-duration-short4)
-            var(--k3-sys-motion-easing-expressive-effects),
-          gap var(--k3-sys-motion-duration-spatial-fast)
-            var(--k3-sys-motion-easing-expressive-spatial);
+          border-radius var(--k3-sys-motion-duration-spatial-fast, 350ms)
+            var(--k3-sys-motion-easing-spatial-fast, cubic-bezier(0.42, 1.67, 0.21, 0.9)),
+          background-color var(--k3-sys-motion-duration-effects-default, 200ms)
+            var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+          box-shadow var(--k3-sys-motion-duration-effects-default, 200ms)
+            var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+          gap var(--k3-sys-motion-duration-spatial-fast, 350ms)
+            var(--k3-sys-motion-easing-spatial-fast, cubic-bezier(0.42, 1.67, 0.21, 0.9));
       }
       /*
        * Standard group press — shell tracks host width; label/icon keep

@@ -1,5 +1,8 @@
 import { K3FooterBar } from './footer-bar.js';
 
-/** @deprecated Prefer `k3-footer-bar` — same component. */
+/**
+ * @deprecated M3E — prefer `k3-toolbar variant="docked"` for action strips,
+ * or `k3-footer-bar` for sticky form footers. Bottom app bar is not recommended.
+ */
 export class K3BottomAppBar extends K3FooterBar {}
 export default K3BottomAppBar;

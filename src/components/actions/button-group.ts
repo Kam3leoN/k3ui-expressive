@@ -302,8 +302,10 @@ export class K3ButtonGroup extends K3Element {
           emitLifecycle(this, 'select-end', { source: 'user' });
           return;
         }
+        /* Optional single — click again clears (Meet reactions toggle). */
+        const clear = this.isSelected(t) && !this.required;
         for (const el of this.childrenOf()) {
-          const on = el === t;
+          const on = !clear && el === t;
           el.selected = on;
           el.toggleAttribute('selected', on);
         }

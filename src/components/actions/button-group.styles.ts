@@ -90,6 +90,8 @@ export const buttonGroupStyles = css`
     max-width: 100%;
     width: max-content;
     gap: var(--k3-btn-group-gap);
+    /* Clip press-morph overshoot so shells never paint past the pinned row */
+    overflow: hidden;
   }
 
   :host([orientation='vertical']) .group {
@@ -106,14 +108,18 @@ export const buttonGroupStyles = css`
     flex: 0 0 auto;
     min-width: 0;
     overflow: visible;
-    /* M3e spatial-default — shell only; content size never animates */
+    /*
+     * Width morph — FastSpatial *duration* (350ms) + effects easing (no overshoot).
+     * Spatial-fast bounce would briefly exceed the pinned .group width (Meet glitch).
+     * Shape morph on the button itself still uses spatial-fast bounce.
+     */
     transition:
-      width var(--k3-sys-motion-duration-spatial-default, 500ms)
-        var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.38, 1.21, 0.22, 1)),
-      min-width var(--k3-sys-motion-duration-spatial-default, 500ms)
-        var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.38, 1.21, 0.22, 1)),
-      max-width var(--k3-sys-motion-duration-spatial-default, 500ms)
-        var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.38, 1.21, 0.22, 1));
+      width var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+      min-width var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+      max-width var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1));
   }
 
   /* Icon buttons — square paint + ≥48dp target; no width morph */

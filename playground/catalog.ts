@@ -304,13 +304,6 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.list.blurb',
   },
   {
-    id: 'expansion',
-    category: 'Containment',
-    title: 'Expansion panel',
-    titleKey: 'doc.expansion.title',
-    blurbKey: 'doc.expansion.blurb',
-  },
-  {
     id: 'table',
     category: 'Containment',
     title: 'Tables',

@@ -11,5 +11,7 @@ export function setFormValue(
   value: string | null,
   state?: string | null,
 ): void {
+  /* jsdom / older runtimes may lack ElementInternals.setFormValue. */
+  if (typeof internals.setFormValue !== 'function') return;
   internals.setFormValue(value, state ?? value);
 }
