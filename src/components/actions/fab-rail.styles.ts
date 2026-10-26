@@ -32,10 +32,19 @@ export const fabRailStyles = css`
 
   :host([fixed]) {
     position: fixed;
-    inset-block-end: var(--k3-fab-rail-inset);
+    inset-block-end: calc(
+      var(--k3-fab-rail-inset) + var(--k3-nav-chrome-inset-block-end, 0px)
+    );
     inset-inline-end: var(--k3-fab-rail-inset);
     inset-block-start: auto;
     inset-inline-start: auto;
+    transition:
+      inset-block-end var(--k3-sys-motion-duration-medium2, 300ms)
+        var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.2, 0, 0, 1)),
+      opacity var(--k3-sys-motion-duration-short4, 200ms)
+        var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1)),
+      visibility var(--k3-sys-motion-duration-short4, 200ms)
+        var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1));
   }
   :host([fixed][position='bottom-left']) {
     inset-inline-end: auto;

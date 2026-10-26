@@ -37,12 +37,19 @@ export const audioPlayerStyles = css`
   :host([variant='sticky']) {
     position: fixed;
     inset-inline: 0;
-    bottom: 0;
+    bottom: var(--k3-nav-chrome-inset-block-end, 0px);
     z-index: 40;
     margin: 0;
     border-radius: var(--k3-sys-shape-corner-large, 1rem)
       var(--k3-sys-shape-corner-large, 1rem) 0 0;
     box-shadow: var(--k3-sys-elevation-level3);
+    transition:
+      bottom var(--k3-sys-motion-duration-medium2, 300ms)
+        var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.2, 0, 0, 1)),
+      opacity var(--k3-sys-motion-duration-short4, 200ms)
+        var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1)),
+      visibility var(--k3-sys-motion-duration-short4, 200ms)
+        var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1));
   }
 
   .shell {

@@ -22,6 +22,11 @@ import {
 import { enterSheetBottom, enterSheetSide } from '../../motion/enter.js';
 import { i18n } from '../../i18n/index.js';
 import { hostReset } from '../_shared.js';
+import {
+  registerSheetChromeHost,
+  unregisterSheetChromeHost,
+  recomputeSheetChromeShift,
+} from './sheet-chrome-shift.js';
 
 export type SheetPlacement = 'bottom' | 'side';
 export type SheetSide = 'start' | 'end';
@@ -428,8 +433,13 @@ export class K3Sheet extends K3Element {
     return this.enterPromise;
   }
 
+  /** Used by sheet-chrome-shift (visible surface, not just `open` attr). */
+  isSheetVisible(): boolean {
+    return this.visible;
+  }
+
   async show(): Promise<boolean> {
-    return runOpenClose(
+    const ok = await runOpenClose(
       this,
       'open',
       async () => {
@@ -438,6 +448,11 @@ export class K3Sheet extends K3Element {
       },
       { source: 'api' },
     );
+    if (ok) {
+      /* After enter paint so getBoundingClientRect matches open size. */
+      requestAnimationFrame(() => recomputeSheetChromeShift());
+    }
+    return ok;
   }
 
   async hide(
@@ -458,6 +473,7 @@ export class K3Sheet extends K3Element {
     );
     /* Restore after close motion so the sheet is not yanked mid-exit */
     if (ok) this.restoreLayer();
+    recomputeSheetChromeShift();
     return ok;
   }
 
@@ -667,6 +683,7 @@ export class K3Sheet extends K3Element {
   override connectedCallback(): void {
     super.connectedCallback();
     document.addEventListener('keydown', this.onKey);
+    registerSheetChromeHost(this);
   }
 
   override disconnectedCallback(): void {
@@ -674,8 +691,9 @@ export class K3Sheet extends K3Element {
     document.removeEventListener('keydown', this.onKey);
     this.drag?.destroy();
     this.drag = null;
-    /* Reparent to body fires disconnect — keep home markers for restore */
+    /* Reparent to body fires disconnect — keep host + home markers */
     if (!this.elevating) {
+      unregisterSheetChromeHost(this);
       this.homeParent = null;
       this.homeNext = null;
     }
@@ -686,10 +704,16 @@ export class K3Sheet extends K3Element {
     /* Attribute `open` without show() — same enter path (slide, not pop) */
     if (changed.has('open')) {
       if (this.open && !this.visible) {
-        void this.playEnter();
+        void this.playEnter().then(() => {
+          requestAnimationFrame(() => recomputeSheetChromeShift());
+        });
       } else if (!this.open && !this.visible) {
         this.restoreLayer();
+        recomputeSheetChromeShift();
       }
+    }
+    if (changed.has('visible') && this.visible) {
+      requestAnimationFrame(() => recomputeSheetChromeShift());
     }
     if (
       changed.has('draggable') ||

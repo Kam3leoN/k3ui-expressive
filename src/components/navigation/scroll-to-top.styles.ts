@@ -26,7 +26,10 @@ export const scrollToTopStyles = css`
     position: fixed;
     z-index: 40;
     inset-inline-end: var(--k3-scroll-to-top-right, ${inset});
-    inset-block-end: var(--k3-scroll-to-top-bottom, ${inset});
+    inset-block-end: calc(
+      var(--k3-scroll-to-top-bottom, ${inset}) +
+        var(--k3-nav-chrome-inset-block-end, 0px)
+    );
     display: block;
     width: var(--k3-scroll-to-top-size);
     height: var(--k3-scroll-to-top-size);
@@ -37,7 +40,11 @@ export const scrollToTopStyles = css`
       opacity var(--k3-sys-motion-duration-short4)
         var(--k3-sys-motion-easing-expressive-effects),
       transform var(--k3-sys-motion-duration-spatial-fast)
-        var(--k3-sys-motion-easing-expressive-spatial);
+        var(--k3-sys-motion-easing-expressive-spatial),
+      inset-block-end var(--k3-sys-motion-duration-medium2, 300ms)
+        var(--k3-sys-motion-easing-expressive-spatial),
+      visibility var(--k3-sys-motion-duration-short4)
+        var(--k3-sys-motion-easing-expressive-effects);
   }
 
   :host([variant='primary']),

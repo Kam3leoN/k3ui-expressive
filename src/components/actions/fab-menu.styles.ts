@@ -76,18 +76,28 @@ export const fabMenuStyles = css`
     --k3-fab-menu-origin: right center;
   }
 
-  /* ── Corner dock (16dp) ── */
+  /* ── Corner dock (16dp) + nav-bar lift · sheet hide via html attr ── */
   :host([fixed]) {
     position: fixed;
     inset-inline-end: var(--k3-fab-menu-edge);
     inset-inline-start: auto;
-    bottom: var(--k3-fab-menu-edge);
+    bottom: calc(
+      var(--k3-fab-menu-edge) + var(--k3-nav-chrome-inset-block-end, 0px)
+    );
     top: auto;
     z-index: 1100;
+    transition:
+      bottom var(--k3-sys-motion-duration-medium2, 300ms)
+        var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.2, 0, 0, 1)),
+      opacity var(--k3-sys-motion-duration-short4, 200ms)
+        var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1)),
+      visibility var(--k3-sys-motion-duration-short4, 200ms)
+        var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1));
   }
   :host([fixed][contained]) {
     position: absolute;
     z-index: 20;
+    transition: none;
   }
   :host([fixed][placement='bottom-start']),
   :host([fixed][placement='top-start']) {

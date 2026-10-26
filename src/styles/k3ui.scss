@@ -39,6 +39,20 @@
   [density='compact'] {
     --k3-sys-touch-target: 2.5rem;
   }
+
+  /*
+   * Modal sheet open — M3 FAB: disappear / reappear on layout change.
+   * Toggled by sheet-chrome-shift (`data-k3-sheet-chrome-hidden` on <html>).
+   */
+  html[data-k3-sheet-chrome-hidden] k3-fab-menu[fixed],
+  html[data-k3-sheet-chrome-hidden] k3-fab-dial[fixed],
+  html[data-k3-sheet-chrome-hidden] k3-fab-rail[fixed],
+  html[data-k3-sheet-chrome-hidden] k3-scroll-to-top,
+  html[data-k3-sheet-chrome-hidden] k3-audio-player[variant='sticky'] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
 }
 
 /* Type-scale utilities — full M3 set */

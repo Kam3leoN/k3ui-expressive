@@ -230,6 +230,14 @@ k3-doc-nav {
   background: var(--k3-sys-color-surface-container);
 }
 
+/* Compact nav-bar (64dp) — lift fixed FAB / scroll-to-top above the bar */
+.app[data-nav='bar'] {
+  --k3-nav-chrome-inset-block-end: 4rem; /* k3-nav-bar height */
+}
+.app[data-nav='rail'] {
+  --k3-nav-chrome-inset-block-end: 0px;
+}
+
 /* Tablet / desktop: rail + content */
 .app[data-nav='rail'] .shell-bar {
   display: none !important;
