@@ -16,6 +16,8 @@ export const ScrollToTopSpecs = {
     threshold: 80 as number,
     size: 56 as number,
     strokeWidth: 6 as number,
+    /** Extra dp on progress stroke so it fully covers the track (no 1dp halo). */
+    progressStrokeExtra: 2 as number,
     rightOffset: ScrollToTopFloatingInsetDp as number,
     bottomOffset: ScrollToTopFloatingInsetDp as number,
     showProgress: true as boolean,

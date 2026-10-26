@@ -67,10 +67,17 @@ export class K3ScrollToTop extends K3Element {
     this.style.setProperty('--k3-scroll-to-top-bottom', `${this.bottomOffset}px`);
   }
 
-  private computeCircumference(): number {
+  private ringGeometry(): { box: number; stroke: number; progressStroke: number; radius: number } {
     const stroke = Math.max(2, this.strokeWidth);
-    const radius = (Math.max(36, this.size) - stroke) / 2;
-    return 2 * Math.PI * radius;
+    const progressStroke = stroke + ScrollToTopSpecs.behaviors.progressStrokeExtra;
+    const box = Math.max(36, this.size);
+    /* Radius sized for the thicker progress stroke so it isn't clipped by the viewBox. */
+    const radius = (box - progressStroke) / 2;
+    return { box, stroke, progressStroke, radius };
+  }
+
+  private computeCircumference(): number {
+    return 2 * Math.PI * this.ringGeometry().radius;
   }
 
   private resolveScrollRoot(): Window | HTMLElement {
@@ -229,9 +236,7 @@ export class K3ScrollToTop extends K3Element {
   }
 
   override render() {
-    const stroke = Math.max(2, this.strokeWidth);
-    const box = Math.max(36, this.size);
-    const radius = (box - stroke) / 2;
+    const { box, stroke, progressStroke, radius } = this.ringGeometry();
     const cx = box / 2;
 
     return html`
@@ -269,7 +274,7 @@ export class K3ScrollToTop extends K3Element {
                   cx=${cx}
                   cy=${cx}
                   r=${radius}
-                  stroke-width=${stroke}
+                  stroke-width=${progressStroke}
                   stroke-dasharray=${this.circumference}
                   stroke-dashoffset=${this.progressOffset}
                 ></circle>

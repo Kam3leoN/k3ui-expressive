@@ -17,12 +17,12 @@ export const scrollToTopStyles = css`
     --k3-scroll-to-top-size: 3.5rem;
     /*
      * Face = fab-menu trigger (solid role).
-     * Ring track = fab-menu item container · progress = on-*-container.
+     * Ring track = *-container (submenu face) · progress = on-*-container.
      */
     --k3-scroll-to-top-bg: var(--k3-sys-color-primary);
     --k3-scroll-to-top-fg: var(--k3-sys-color-on-primary);
-    --k3-scroll-to-top-track: var(--k3-sys-color-on-primary-container);
-    --k3-scroll-to-top-progress: var(--k3-sys-color-primary-container);
+    --k3-scroll-to-top-track: var(--k3-sys-color-primary-container);
+    --k3-scroll-to-top-progress: var(--k3-sys-color-on-primary-container);
     position: fixed;
     z-index: 40;
     inset-inline-end: var(--k3-scroll-to-top-right, ${inset});
@@ -44,29 +44,29 @@ export const scrollToTopStyles = css`
   :host(:not([variant])) {
     --k3-scroll-to-top-bg: var(--k3-sys-color-primary);
     --k3-scroll-to-top-fg: var(--k3-sys-color-on-primary);
-    --k3-scroll-to-top-track: var(--k3-sys-color-on-primary-container);
-    --k3-scroll-to-top-progress: var(--k3-sys-color-primary-container);
+    --k3-scroll-to-top-track: var(--k3-sys-color-primary-container);
+    --k3-scroll-to-top-progress: var(--k3-sys-color-on-primary-container);
   }
 
   :host([variant='secondary']) {
     --k3-scroll-to-top-bg: var(--k3-sys-color-secondary);
     --k3-scroll-to-top-fg: var(--k3-sys-color-on-secondary);
-    --k3-scroll-to-top-track: var(--k3-sys-color-on-secondary-container);
-    --k3-scroll-to-top-progress: var(--k3-sys-color-secondary-container);
+    --k3-scroll-to-top-track: var(--k3-sys-color-secondary-container);
+    --k3-scroll-to-top-progress: var(--k3-sys-color-on-secondary-container);
   }
 
   :host([variant='tertiary']) {
     --k3-scroll-to-top-bg: var(--k3-sys-color-tertiary);
     --k3-scroll-to-top-fg: var(--k3-sys-color-on-tertiary);
-    --k3-scroll-to-top-track: var(--k3-sys-color-on-tertiary-container);
-    --k3-scroll-to-top-progress: var(--k3-sys-color-tertiary-container);
+    --k3-scroll-to-top-track: var(--k3-sys-color-tertiary-container);
+    --k3-scroll-to-top-progress: var(--k3-sys-color-on-tertiary-container);
   }
 
   :host([variant='surface']) {
     --k3-scroll-to-top-bg: var(--k3-sys-color-surface-container-high);
     --k3-scroll-to-top-fg: var(--k3-sys-color-primary);
-    --k3-scroll-to-top-track: var(--k3-sys-color-primary);
-    --k3-scroll-to-top-progress: var(--k3-sys-color-surface-container-highest);
+    --k3-scroll-to-top-track: var(--k3-sys-color-surface-container-highest);
+    --k3-scroll-to-top-progress: var(--k3-sys-color-primary);
   }
 
   :host([data-visible]) {
