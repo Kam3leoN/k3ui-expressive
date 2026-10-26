@@ -5,6 +5,7 @@ import {
   K3Element,
   afterFrames,
   afterPaint,
+  edgeScrollbarStyles,
   runOpenClose,
   waitForMotion,
   handleFocusNavKey,
@@ -85,7 +86,7 @@ export type MenuMotionOptions = {
  * @see https://m3.material.io/components/menus/specs
  */
 export class K3Menu extends K3Element {
-  static override styles = [hostReset, menuStyles];
+  static override styles = [hostReset, edgeScrollbarStyles, menuStyles];
 
   // ── Public API ────────────────────────────────────────────────────────────
 
@@ -660,7 +661,7 @@ export class K3Menu extends K3Element {
         role="menu"
         tabindex="-1"
       >
-        <div class="list" part="list">
+        <div class="list k3-scroll" part="list">
           <slot></slot>
         </div>
       </div>

@@ -215,14 +215,17 @@ export const menuStyles: CSSResultGroup = [
     inset-inline-end: calc(100% + 0.5rem);
   }
 
+  /*
+   * Scrollport — cap tall menus; class `k3-scroll` (edgeScrollbarStyles)
+   * provides the discreet thumb (no Windows arrows). overflow-y comes from
+   * that class; keep max-height here.
+   */
   .list {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: var(--k3-menu-item-gap);
-    max-height: min(22.5rem, 70vh);
-    overflow-x: visible;
-    overflow-y: auto;
+    max-height: min(28rem, 75vh); /* room for dual-line items (L1+en-US) */
   }
   /* Submenus use position:fixed — don’t clip while a flyout is open */
   :host([data-submenu-open]) .list {
