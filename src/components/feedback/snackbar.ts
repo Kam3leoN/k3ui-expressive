@@ -13,6 +13,7 @@ import {
   LayerPortal,
   rootRemPx,
   normalizeLabel,
+  haptic,
   type GestureController,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
@@ -365,6 +366,8 @@ export class K3Snackbar extends K3Element {
 
   private onActionClick(e: Event): void {
     e.stopPropagation();
+    /* User action only — never vibrate on auto-appear (low-priority surface). */
+    haptic.light();
     this.dispatchEvent(
       new CustomEvent('k3-action', {
         bubbles: true,
@@ -377,6 +380,7 @@ export class K3Snackbar extends K3Element {
 
   private onDismissClick(e: Event): void {
     e.stopPropagation();
+    haptic.light();
     void this.hide('user');
   }
 

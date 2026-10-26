@@ -6,12 +6,14 @@ import {
   setFormValue,
   stateLayerStyles,
   selectionTargetStyles,
+  haptic,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 
 /**
  * M3 Checkbox — 18dp box · Material Symbols check / remove · M3E check-in.
  * 48×48 state target on the control (see `selectionTargetStyles`).
+ * Toggle fires `haptic.selection` (Android selection / toggle pattern).
  *
  * @see https://m3.material.io/components/checkbox
  */
@@ -106,6 +108,7 @@ export class K3Checkbox extends K3Element {
     this.indeterminate = false;
     this.checked = !this.checked;
     setFormValue(this.internals, this.checked ? this.value : null);
+    haptic.selection();
     this.emit('k3-change', { checked: this.checked });
   };
 

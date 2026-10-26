@@ -10,6 +10,7 @@ import {
   waitForMotion,
   handleFocusNavKey,
   resolveFocusNavKey,
+  haptic,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import type { K3MenuItem } from './menu-item.js';
@@ -489,6 +490,7 @@ export class K3Menu extends K3Element {
   // ── Event bridges ─────────────────────────────────────────────────────────
 
   private onItemSelect = (_e: Event): void => {
+    haptic.selection();
     if (this.closeOnSelect) void this.hide('user');
   };
 

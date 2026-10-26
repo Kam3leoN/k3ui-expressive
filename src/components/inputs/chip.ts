@@ -1,6 +1,12 @@
 import { html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
-import { K3Element, stateLayerStyles, emitLifecycle, hasNamedSlot } from '../../core/index.js';
+import {
+  K3Element,
+  stateLayerStyles,
+  emitLifecycle,
+  hasNamedSlot,
+  haptic,
+} from '../../core/index.js';
 import { hostReset, dropSlotStyles } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
 import { chipStyles } from './chip.styles.js';
@@ -135,15 +141,18 @@ export class K3Chip extends K3Element {
     if (this.isFilter) {
       this.selected = !this.selected;
       this.syncSlots();
+      haptic.selection();
       this.emit('k3-change', { selected: this.selected, value: this.value || this.labelText });
       return;
     }
+    haptic.light();
     this.emit('k3-change', { selected: this.selected, value: this.value || this.labelText });
   }
 
   private onRemove = (e: Event) => {
     e.stopPropagation();
     if (this.isDisabled || (this.disabled && this.disabledInteractive)) return;
+    haptic.light();
     this.emit('k3-remove', { value: this.value || this.labelText });
   };
 

@@ -8,6 +8,7 @@ import {
   setFormValue,
   hasNamedSlot,
   focusRingStyles,
+  haptic,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import {
@@ -158,6 +159,9 @@ export class K3Slider extends K3Element {
   private jumpRaf = 0;
   private linkedCleanup: (() => void) | null = null;
   private syncingFromField = false;
+  /** Last stepped value that fired a CLOCK_TICK-style haptic while dragging. */
+  private hapticStepAt: number | null = null;
+  private hapticTickAt = 0;
 
   private get tokens() {
     return SLIDER_SIZES[resolveSliderSize(this.size)];
@@ -251,6 +255,38 @@ export class K3Slider extends K3Element {
     }
   }
 
+  /** Snap active handle to step grid for tick compare. */
+  private steppedActive(): number {
+    const raw =
+      this.activeHandle === 'start'
+        ? this.valueStart
+        : this.activeHandle === 'end'
+          ? this.valueEnd
+          : this.value;
+    const step = this.step > 0 ? this.step : 1;
+    return Math.round(raw / step) * step;
+  }
+
+  /**
+   * Android CLOCK_TICK while scrubbing discrete steps — throttled.
+   * Release still gets a selection tick via {@link tickHapticCommit}.
+   */
+  private tickHapticStep(): void {
+    const stepped = this.steppedActive();
+    if (this.hapticStepAt !== null && stepped === this.hapticStepAt) return;
+    const now = performance.now();
+    if (now - this.hapticTickAt < 32) return;
+    this.hapticStepAt = stepped;
+    this.hapticTickAt = now;
+    haptic.selection();
+  }
+
+  private tickHapticCommit(): void {
+    /* Avoid double-pulse when the last drag frame already ticked a step. */
+    if (performance.now() - this.hapticTickAt > 48) haptic.selection();
+    this.hapticStepAt = null;
+  }
+
   private pointerFraction(e: PointerEvent, area: HTMLElement): number {
     const r = area.getBoundingClientRect();
     if (this.vertical) {
@@ -339,6 +375,7 @@ export class K3Slider extends K3Element {
     this.activeHandle = handle;
     this.pressed = true;
     this.showIndicator = this.valueIndicator;
+    this.hapticStepAt = this.steppedActive();
 
     /* Select-jump when tap is away from the active handle — animate, don’t snap. */
     const cur = this.handleFraction(handle);
@@ -355,11 +392,13 @@ export class K3Slider extends K3Element {
     const move = (ev: PointerEvent) => {
       this.cancelJump();
       this.setFromFraction(this.pointerFraction(ev, area), handle);
+      this.tickHapticStep();
     };
     const up = () => {
       this.cancelJump();
       this.pressed = false;
       this.showIndicator = false;
+      this.tickHapticCommit();
       this.emitChange();
       area.releasePointerCapture(e.pointerId);
       area.removeEventListener('pointermove', move);

@@ -152,7 +152,7 @@ export class K3ButtonSegmented extends K3Element {
   }
 
   private toggle(index: number): void {
-    haptic.light();
+    haptic.selection();
     if (this.multiSelect) {
       const next = new Set(this._selected);
       if (next.has(index)) next.delete(index);

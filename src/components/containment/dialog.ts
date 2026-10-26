@@ -10,6 +10,7 @@ import {
   stateLayerStyles,
   hasNamedSlot,
   LayerPortal,
+  haptic,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
@@ -146,6 +147,8 @@ export class K3Dialog extends K3Element {
           if (e.key === 'Escape') void this.hide('escape');
         };
         window.addEventListener('keydown', this.onKey);
+        /* Surface open — same light tick as sheet / FAB menus */
+        haptic.light();
       },
       { source: 'api' },
     );
@@ -161,6 +164,7 @@ export class K3Dialog extends K3Element {
         this.open = false;
         if (this.onKey) window.removeEventListener('keydown', this.onKey);
         this.trap.deactivate();
+        haptic.light();
       },
       { source },
     );

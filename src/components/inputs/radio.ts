@@ -6,12 +6,14 @@ import {
   setFormValue,
   stateLayerStyles,
   selectionTargetStyles,
+  haptic,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 
 /**
  * Radio — outer 20dp / inner 12dp · stroke 2px (= checkbox).
  * 48×48 state target on the control (see `selectionTargetStyles`).
+ * Selecting a new option fires `haptic.selection` (not when already checked).
  */
 export class K3Radio extends K3Element {
   static formAssociated = true;
@@ -74,6 +76,7 @@ export class K3Radio extends K3Element {
 
   private select = (): void => {
     if (this.disabled) return;
+    const already = this.checked;
     if (this.name) {
       const scope = this.groupScope();
       scope.querySelectorAll(`k3-radio[name="${CSS.escape(this.name)}"]`).forEach((el) => {
@@ -83,6 +86,7 @@ export class K3Radio extends K3Element {
       this.checked = true;
     }
     setFormValue(this.internals, this.checked ? this.value : null);
+    if (!already) haptic.selection();
     this.emit('k3-change', { value: this.value, checked: true });
   };
 
