@@ -6,6 +6,7 @@ import {
   setFormValue,
   stateLayerStyles,
   selectionThumbStateStyles,
+  haptic,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 
@@ -13,6 +14,9 @@ import { hostReset } from '../_shared.js';
  * M3 Switch — track 52×32, handle 16 (off) / 24 (on).
  * 48×48 state layer centered on the thumb (see `selectionThumbStateStyles`).
  * RTL-safe via inset-inline + margin-inline (no translateX).
+ *
+ * Travel uses FastSpatial spring (same overshoot as menus) + `haptic.selection`
+ * on toggle.
  */
 export class K3Switch extends K3Element {
   static formAssociated = true;
@@ -25,6 +29,12 @@ export class K3Switch extends K3Element {
         display: inline-flex;
         align-items: center;
         gap: 0.75rem;
+        /* Menu-matched FastSpatial spring — overshoot at end of travel */
+        --k3-switch-travel: var(--k3-sys-motion-duration-spatial-fast)
+          var(
+            --k3-sys-motion-easing-spatial-fast,
+            var(--k3-sys-motion-easing-expressive-spatial-fast)
+          );
       }
       .track {
         position: relative;
@@ -36,7 +46,7 @@ export class K3Switch extends K3Element {
         box-sizing: border-box;
         padding: 0;
         flex-shrink: 0;
-        overflow: visible;
+        overflow: visible; /* allow thumb overshoot past resting inset */
         transition:
           background var(--k3-sys-motion-duration-short4)
             var(--k3-sys-motion-easing-expressive-effects),
@@ -63,14 +73,10 @@ export class K3Switch extends K3Element {
         place-items: center;
         overflow: visible;
         transition:
-          inset-inline-start var(--k3-sys-motion-duration-spatial-fast)
-            var(--k3-sys-motion-easing-expressive-spatial),
-          width var(--k3-sys-motion-duration-spatial-fast)
-            var(--k3-sys-motion-easing-expressive-spatial),
-          height var(--k3-sys-motion-duration-spatial-fast)
-            var(--k3-sys-motion-easing-expressive-spatial),
-          margin-top var(--k3-sys-motion-duration-spatial-fast)
-            var(--k3-sys-motion-easing-expressive-spatial),
+          inset-inline-start var(--k3-switch-travel),
+          width var(--k3-switch-travel),
+          height var(--k3-switch-travel),
+          margin-top var(--k3-switch-travel),
           background var(--k3-sys-motion-duration-short4)
             var(--k3-sys-motion-easing-expressive-effects);
       }
@@ -124,6 +130,8 @@ export class K3Switch extends K3Element {
     if (this.disabled) return;
     this.selected = !this.selected;
     setFormValue(this.internals, this.selected ? this.value : null);
+    /* Selection tick — on and off (same pattern as sheet / segmented). */
+    haptic.selection();
     this.emit('k3-change', { selected: this.selected });
   };
 
