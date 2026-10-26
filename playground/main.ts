@@ -202,6 +202,46 @@ function t(key: string, vars?: Record<string, string | number>): string {
   return window.K3UI?.i18n.t(key, undefined, vars) ?? key;
 }
 
+/** en-US gloss for dual-line nav — omit when locale is EN or L1 === EN. */
+function enUs(key: string): string | undefined {
+  return window.K3UI?.i18n.enUs?.(key);
+}
+
+/** Append M3 supporting-text (smaller · muted) with en-US name when useful. */
+function appendEnSupporting(host: HTMLElement, key: string): void {
+  const gloss = enUs(key);
+  if (!gloss) return;
+  const span = document.createElement('span');
+  span.slot = 'supporting-text';
+  span.lang = 'en';
+  span.translate = false;
+  span.className = 'notranslate';
+  span.textContent = gloss;
+  host.append(span);
+}
+
+/**
+ * Sheet label column — L1 localized + optional L2 en-US (M3 supporting text).
+ */
+function sheetLabel(key: string): HTMLElement {
+  const wrap = document.createElement('span');
+  wrap.className = 'label';
+  const primary = document.createElement('span');
+  primary.className = 'label-primary';
+  primary.textContent = t(key);
+  wrap.append(primary);
+  const gloss = enUs(key);
+  if (gloss) {
+    const secondary = document.createElement('span');
+    secondary.className = 'label-secondary notranslate';
+    secondary.lang = 'en';
+    secondary.translate = false;
+    secondary.textContent = gloss;
+    wrap.append(secondary);
+  }
+  return wrap;
+}
+
 function currentPageId(): string {
   const hash = location.hash.replace(/^#\/?/, '') || 'home';
   const raw = hash === '' ? 'home' : hash;
@@ -807,10 +847,7 @@ function sheetNavLink(comp: DocComponent, pageId: string): HTMLElement {
     a.classList.add('is-active');
     a.setAttribute('aria-current', 'page');
   }
-  const label = document.createElement('span');
-  label.className = 'label';
-  label.textContent = t(comp.titleKey);
-  a.append(label);
+  a.append(sheetLabel(comp.titleKey));
   return a;
 }
 
@@ -831,6 +868,7 @@ function leafMenuItem(
   item.setAttribute('value', comp.id);
   if (opts?.slot) item.slot = opts.slot;
   item.append(t(comp.titleKey));
+  appendEnSupporting(item, comp.titleKey);
   if (opts?.selectCurrent && comp.id === pageId) item.setAttribute('selected', '');
   return item;
 }
@@ -913,9 +951,7 @@ function buildNavSheet(destId: string): void {
       const icon = document.createElement('span');
       icon.className = 'ms';
       setMsIcon(icon, group.icon);
-      const name = document.createElement('span');
-      name.className = 'label';
-      name.textContent = t(group.labelKey);
+      const name = sheetLabel(group.labelKey);
       const chevron = document.createElement('span');
       chevron.className = 'ms chevron';
       setMsIcon(chevron, 'expand_more');
@@ -981,9 +1017,13 @@ function buildNavSheet(destId: string): void {
         for (const [hash, labelKey] of COLOR_SUBPAGES) {
           const li = document.createElement('li');
           const a = document.createElement('a');
+          a.className = 'shell-sheet-link';
           a.href = `#/${hash}`;
-          a.textContent = t(labelKey);
-          if (selectCurrent && resolved === hash) a.setAttribute('aria-current', 'page');
+          a.append(sheetLabel(labelKey));
+          if (selectCurrent && resolved === hash) {
+            a.classList.add('is-active');
+            a.setAttribute('aria-current', 'page');
+          }
           li.append(a);
           panel.append(li);
         }
@@ -999,9 +1039,7 @@ function buildNavSheet(destId: string): void {
         const icon = document.createElement('span');
         icon.className = 'ms';
         setMsIcon(icon, 'palette');
-        const name = document.createElement('span');
-        name.className = 'label';
-        name.textContent = t('doc.colors.title');
+        const name = sheetLabel('doc.colors.title');
         const chevron = document.createElement('span');
         chevron.className = 'ms chevron';
         setMsIcon(chevron, 'expand_more');
@@ -1058,6 +1096,7 @@ function fillNavMenu(destId?: string | null): {
         parent.setAttribute('value', `cat-${group.category}`);
         parent.setAttribute('has-submenu', '');
         parent.append(menuItemIcon(group.icon), t(group.labelKey));
+        appendEnSupporting(parent, group.labelKey);
         for (const c of componentsInCategory(group.category)) {
           parent.appendChild(
             leafMenuItem(c, pageId, { slot: 'submenu', selectCurrent }),
@@ -1094,11 +1133,13 @@ function fillNavMenu(destId?: string | null): {
         parent.setAttribute('value', 'color-roles');
         parent.setAttribute('has-submenu', '');
         parent.append(t('doc.colors.title'));
+        appendEnSupporting(parent, 'doc.colors.title');
         for (const [value, labelKey] of COLOR_SUBPAGES) {
           const child = document.createElement('k3-menu-item');
           child.setAttribute('value', value);
           child.slot = 'submenu';
           child.append(t(labelKey));
+          appendEnSupporting(child, labelKey);
           if (selectCurrent && resolved === value) child.setAttribute('selected', '');
           parent.appendChild(child);
         }

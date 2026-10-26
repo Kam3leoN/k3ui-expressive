@@ -51,4 +51,19 @@ export const i18n = {
     }
     return s;
   },
+  /**
+   * en-US gloss for dual-line nav (L1 localized · L2 English).
+   * Returns `undefined` when locale is already English, or when EN equals L1
+   * (no redundant second line — e.g. Badge, FAB, Navigation).
+   */
+  enUs(key: string): string | undefined {
+    if (current === 'en') return undefined;
+    const local = (catalogs[current][key] ?? catalogs.en[key] ?? key).trim();
+    const en = (catalogs.en[key] ?? key).trim();
+    if (!en) return undefined;
+    if (local.localeCompare(en, undefined, { sensitivity: 'accent' }) === 0) {
+      return undefined;
+    }
+    return en;
+  },
 };

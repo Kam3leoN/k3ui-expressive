@@ -489,8 +489,33 @@ k3-fab-menu.shell-github-menu {
 }
 .shell-sheet-link .label,
 .shell-sheet-group-btn .label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.125rem; /* 2dp — L1 ↔ L2 */
   flex: 1 1 auto;
   min-width: 0;
+}
+/* M3 supporting text — smaller · muted en-US gloss (non-EN locales only) */
+.shell-sheet-link .label-secondary,
+.shell-sheet-group-btn .label-secondary {
+  font-size: var(--k3-sys-typescale-body-small-size, 0.75rem);
+  font-weight: 400;
+  line-height: var(--k3-sys-typescale-body-small-line-height, 1rem);
+  letter-spacing: var(--k3-sys-typescale-body-small-tracking, 0.025rem);
+  color: var(--k3-sys-color-on-surface-variant);
+  opacity: 0.72;
+}
+.shell-sheet-link[aria-current='page'] .label-secondary,
+.shell-sheet-link.is-active .label-secondary {
+  color: inherit;
+  opacity: 0.72;
+}
+/* Chip children — center the dual-line stack */
+.shell-sheet-children .shell-sheet-link .label {
+  align-items: center;
+  text-align: center;
 }
 .shell-sheet-group {
   margin: 0;

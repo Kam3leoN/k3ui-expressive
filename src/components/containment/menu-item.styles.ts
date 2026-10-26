@@ -235,6 +235,7 @@ export const menuItemStyles: CSSResultGroup = [
     line-height: var(--k3-sys-typescale-body-small-line-height, 1rem);
     letter-spacing: var(--k3-sys-typescale-body-small-tracking, 0.025rem);
     color: var(--k3-menu-item-icon-fg, var(--k3-sys-color-on-surface-variant));
+    opacity: 0.72; /* secondary gloss — quieter than label */
   }
   .supporting:not(.has) {
     display: none;
