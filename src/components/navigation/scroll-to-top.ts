@@ -4,16 +4,31 @@ import { classMap } from 'lit/directives/class-map.js';
 import { K3Element, prefersReducedMotion } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
-import { ScrollToTopSpecs } from './scroll-to-top.specs.js';
+import {
+  ScrollToTopSpecs,
+  resolveScrollToTopVariant,
+  type ScrollToTopVariant,
+} from './scroll-to-top.specs.js';
 import { scrollToTopStyles } from './scroll-to-top.styles.js';
+
+export type { ScrollToTopVariant } from './scroll-to-top.specs.js';
+export {
+  ScrollToTopSpecs,
+  resolveScrollToTopVariant,
+} from './scroll-to-top.specs.js';
 
 /**
  * Floating scroll-to-top — shows after `threshold`, optional SVG progress ring.
+ * Color roles match `k3-fab-menu` trigger (`variant`, default `primary`).
  *
  * @fires k3-scroll-top — after scroll animation completes (if enabled)
  */
 export class K3ScrollToTop extends K3Element {
   static override styles = [hostReset, scrollToTopStyles];
+
+  /** Same roles as `k3-fab-menu` / `k3-fab` — default `primary`. */
+  @property({ reflect: true })
+  variant: ScrollToTopVariant = ScrollToTopSpecs.behaviors.defaultVariant;
 
   @property({ type: Number }) threshold = ScrollToTopSpecs.behaviors.threshold;
   @property({ type: Number }) size = ScrollToTopSpecs.behaviors.size;
@@ -187,6 +202,12 @@ export class K3ScrollToTop extends K3Element {
     if (this.rafId != null) cancelAnimationFrame(this.rafId);
     this.rafId = null;
     super.disconnectedCallback();
+  }
+
+  override willUpdate(changed: PropertyValues): void {
+    if (changed.has('variant')) {
+      this.variant = resolveScrollToTopVariant(this.variant);
+    }
   }
 
   override updated(changed: PropertyValues): void {

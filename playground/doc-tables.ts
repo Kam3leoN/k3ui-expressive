@@ -569,14 +569,21 @@ const COMPONENT_API: Record<
   },
   'scroll-to-top': {
     properties: [
+      [
+        'variant',
+        "'primary'|'secondary'|'tertiary'|'surface'",
+        'primary',
+        'Same roles as k3-fab-menu trigger',
+      ],
       ['threshold', 'number', '80', 'Show after scrollY > threshold'],
       ['size', 'number', '56', 'FAB diameter'],
       ['show-progress', 'boolean', 'true', 'SVG progress ring'],
+      ['scroll-container', 'string', '—', 'CSS selector · empty = window'],
       ['icon', 'string', 'keyboard_arrow_up', 'Inner glyph'],
       ['scroll-duration', 'number', '450', 'Smooth scroll ms'],
     ],
     events: [['k3-scroll-top', '—', 'Scroll animation finished']],
-    methods: [['scrollToTop', '() => void', 'Scroll window to top']],
+    methods: [['scrollToTop', '() => void', 'Scroll active root to top']],
   },
   'buttons-menu': {
     properties: [

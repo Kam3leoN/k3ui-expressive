@@ -7,13 +7,18 @@ const inset = unsafeCSS(`${ScrollToTopSpecs.behaviors.rightOffset / 16}rem`);
  * Styles for `k3-scroll-to-top`.
  *
  * Host = floating chrome container (position / show-hide).
- * `.control` = circular surface (not an M3 button shape).
+ * `.control` = circular surface — color roles match `k3-fab-menu` trigger.
  *
  * @see ./scroll-to-top.specs.ts
+ * @see ../actions/fab-menu.styles.ts
  */
 export const scrollToTopStyles = css`
   :host {
     --k3-scroll-to-top-size: 3.5rem;
+    /* Default = fab-menu primary trigger */
+    --k3-scroll-to-top-bg: var(--k3-sys-color-primary);
+    --k3-scroll-to-top-fg: var(--k3-sys-color-on-primary);
+    --k3-scroll-to-top-ring: var(--k3-sys-color-on-primary);
     position: fixed;
     z-index: 40;
     inset-inline-end: var(--k3-scroll-to-top-right, ${inset});
@@ -31,17 +36,37 @@ export const scrollToTopStyles = css`
         var(--k3-sys-motion-easing-expressive-spatial);
   }
 
+  :host([variant='primary']),
+  :host(:not([variant])) {
+    --k3-scroll-to-top-bg: var(--k3-sys-color-primary);
+    --k3-scroll-to-top-fg: var(--k3-sys-color-on-primary);
+    --k3-scroll-to-top-ring: var(--k3-sys-color-on-primary);
+  }
+
+  :host([variant='secondary']) {
+    --k3-scroll-to-top-bg: var(--k3-sys-color-secondary);
+    --k3-scroll-to-top-fg: var(--k3-sys-color-on-secondary);
+    --k3-scroll-to-top-ring: var(--k3-sys-color-on-secondary);
+  }
+
+  :host([variant='tertiary']) {
+    --k3-scroll-to-top-bg: var(--k3-sys-color-tertiary);
+    --k3-scroll-to-top-fg: var(--k3-sys-color-on-tertiary);
+    --k3-scroll-to-top-ring: var(--k3-sys-color-on-tertiary);
+  }
+
+  :host([variant='surface']) {
+    --k3-scroll-to-top-bg: var(--k3-sys-color-surface-container-high);
+    --k3-scroll-to-top-fg: var(--k3-sys-color-primary);
+    --k3-scroll-to-top-ring: var(--k3-sys-color-primary);
+  }
+
   :host([data-visible]) {
     opacity: 1;
     pointer-events: auto;
     transform: none;
   }
 
-  /*
-   * Own circular chrome (V1) — secondary-container + secondary ring/icon.
-   * Solid fill (no translucent mix) so light/dark themes stay readable
-   * next to the primary FAB.
-   */
   .control {
     position: relative;
     display: block;
@@ -52,8 +77,8 @@ export const scrollToTopStyles = css`
     margin: 0;
     border: none;
     border-radius: 50%;
-    background: var(--k3-sys-color-secondary-container);
-    color: var(--k3-sys-color-on-secondary-container);
+    background: var(--k3-scroll-to-top-bg);
+    color: var(--k3-scroll-to-top-fg);
     cursor: pointer;
     box-shadow: var(--k3-sys-elevation-level3);
     transition:
@@ -62,6 +87,8 @@ export const scrollToTopStyles = css`
       transform var(--k3-sys-motion-duration-spatial-fast)
         var(--k3-sys-motion-easing-expressive-spatial),
       background-color var(--k3-sys-motion-duration-short4)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+      color var(--k3-sys-motion-duration-short4)
         var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1));
   }
 
@@ -70,7 +97,7 @@ export const scrollToTopStyles = css`
   }
 
   .control:focus-visible {
-    outline: 2px solid var(--k3-sys-color-secondary);
+    outline: 2px solid var(--k3-scroll-to-top-ring);
     outline-offset: 2px;
   }
 
@@ -93,12 +120,12 @@ export const scrollToTopStyles = css`
   }
 
   .ring-base {
-    stroke: var(--k3-sys-color-on-secondary-container);
+    stroke: var(--k3-scroll-to-top-ring);
     opacity: 0.28;
   }
 
   .ring-progress {
-    stroke: var(--k3-sys-color-secondary);
+    stroke: var(--k3-scroll-to-top-ring);
     stroke-linecap: butt;
     transition: stroke-dashoffset 60ms linear;
   }
@@ -114,7 +141,7 @@ export const scrollToTopStyles = css`
     line-height: 1;
     width: auto;
     height: auto;
-    color: var(--k3-sys-color-on-secondary-container);
+    color: var(--k3-scroll-to-top-fg);
     font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', sans-serif;
     font-variation-settings:
       'FILL' 0,
