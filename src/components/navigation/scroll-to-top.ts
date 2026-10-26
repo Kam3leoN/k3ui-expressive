@@ -67,17 +67,26 @@ export class K3ScrollToTop extends K3Element {
     this.style.setProperty('--k3-scroll-to-top-bottom', `${this.bottomOffset}px`);
   }
 
-  private ringGeometry(): { box: number; stroke: number; progressStroke: number; radius: number } {
+  private ringGeometry(): {
+    box: number;
+    stroke: number;
+    progressStroke: number;
+    radius: number;
+    progressRadius: number;
+  } {
     const stroke = Math.max(2, this.strokeWidth);
-    const progressStroke = stroke + ScrollToTopSpecs.behaviors.progressStrokeExtra;
+    const extra = ScrollToTopSpecs.behaviors.progressStrokeExtra;
+    const progressStroke = stroke + extra;
     const box = Math.max(36, this.size);
-    /* Radius sized for the thicker progress stroke so it isn't clipped by the viewBox. */
-    const radius = (box - progressStroke) / 2;
-    return { box, stroke, progressStroke, radius };
+    /* Track flush with the circular face — no primary rim outside the ring. */
+    const radius = (box - stroke) / 2;
+    /* Thicker progress shares the same outer edge, grows inward only. */
+    const progressRadius = radius - extra / 2;
+    return { box, stroke, progressStroke, radius, progressRadius };
   }
 
   private computeCircumference(): number {
-    return 2 * Math.PI * this.ringGeometry().radius;
+    return 2 * Math.PI * this.ringGeometry().progressRadius;
   }
 
   private resolveScrollRoot(): Window | HTMLElement {
@@ -236,7 +245,7 @@ export class K3ScrollToTop extends K3Element {
   }
 
   override render() {
-    const { box, stroke, progressStroke, radius } = this.ringGeometry();
+    const { box, stroke, progressStroke, radius, progressRadius } = this.ringGeometry();
     const cx = box / 2;
 
     return html`
@@ -273,7 +282,7 @@ export class K3ScrollToTop extends K3Element {
                   class="ring-progress"
                   cx=${cx}
                   cy=${cx}
-                  r=${radius}
+                  r=${progressRadius}
                   stroke-width=${progressStroke}
                   stroke-dasharray=${this.circumference}
                   stroke-dashoffset=${this.progressOffset}
