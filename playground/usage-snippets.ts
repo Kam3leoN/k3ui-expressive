@@ -665,7 +665,10 @@ ConfettiPresets.fireFireworks();`,
 <!-- Compact mini card -->
 <k3-audio-player variant="compact" tracks='[...]'></k3-audio-player>
 
-<!-- Full-width bottom bar -->
+<!-- Toolbar — FAB cover · icon-button transport -->
+<k3-audio-player variant="toolbar" tracks='[...]'></k3-audio-player>
+
+<!-- Sticky = toolbar fixed to the bottom -->
 <k3-audio-player variant="sticky" tracks='[...]'></k3-audio-player>`,
   },
   breadcrumb: {

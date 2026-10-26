@@ -31,10 +31,13 @@ describe('k3-audio-player', () => {
     expect(el.variant).toBe('card');
   });
 
-  it('supports compact and sticky variants', async () => {
+  it('supports compact, toolbar and sticky variants', async () => {
     el.variant = 'compact';
     await el.updateComplete;
     expect(el.getAttribute('variant')).toBe('compact');
+    el.variant = 'toolbar';
+    await el.updateComplete;
+    expect(el.getAttribute('variant')).toBe('toolbar');
     el.variant = 'sticky';
     await el.updateComplete;
     expect(el.getAttribute('variant')).toBe('sticky');

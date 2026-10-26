@@ -2871,3 +2871,10 @@ k3-avatar [slot='badge'].ms {
   width: 100%;
   max-width: none;
 }
+
+.demo-audio-toolbar-stage {
+  width: 100%;
+  min-height: 5.5rem;
+  padding: var(--k3-sys-spacing-space200, 1rem);
+  box-sizing: border-box;
+}

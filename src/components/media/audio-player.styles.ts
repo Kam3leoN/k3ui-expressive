@@ -23,17 +23,23 @@ export const audioPlayerStyles = css`
     border-radius: var(--k3-sys-shape-corner-extra-large, 1.75rem);
   }
 
-  /* ── Sticky full-width bottom bar ── */
+  /* ── Toolbar (horizontal) + sticky (toolbar + fixed bottom) ── */
+  :host([variant='toolbar']),
+  :host([variant='sticky']) {
+    max-width: none;
+    width: 100%;
+    padding: var(--k3-sys-spacing-space200, 1rem)
+      var(--k3-sys-spacing-space300, 1.5rem);
+    border-radius: var(--k3-sys-shape-corner-large, 1rem);
+    box-shadow: var(--k3-sys-elevation-level2);
+  }
+
   :host([variant='sticky']) {
     position: fixed;
     inset-inline: 0;
     bottom: 0;
     z-index: 40;
-    max-width: none;
-    width: 100%;
     margin: 0;
-    padding: var(--k3-sys-spacing-space200, 1rem)
-      var(--k3-sys-spacing-space300, 1.5rem);
     border-radius: var(--k3-sys-shape-corner-large, 1rem)
       var(--k3-sys-shape-corner-large, 1rem) 0 0;
     box-shadow: var(--k3-sys-elevation-level3);
@@ -46,16 +52,25 @@ export const audioPlayerStyles = css`
     min-width: 0;
   }
 
-  :host([variant='compact']) .shell,
-  :host([variant='sticky']) .shell {
+  :host([variant='compact']) .shell {
     gap: var(--k3-sys-spacing-space100, 0.5rem);
   }
 
-  :host([variant='sticky']) .shell {
+  .shell--toolbar {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: var(--k3-sys-spacing-space200, 1rem) var(--k3-sys-spacing-space300, 1.5rem);
+    gap: var(--k3-sys-spacing-space200, 1rem);
+  }
+
+  .cover-fab {
+    flex-shrink: 0;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .cover-fab::part(container) {
+    cursor: default;
   }
 
   .row-meta {
@@ -65,9 +80,11 @@ export const audioPlayerStyles = css`
     min-width: 0;
   }
 
-  :host([variant='sticky']) .row-meta {
-    flex: 0 1 14rem;
-    min-width: 10rem;
+  :host([variant='toolbar']) .meta,
+  :host([variant='sticky']) .meta {
+    flex: 0 1 9rem;
+    min-width: 5.5rem;
+    max-width: 11rem;
   }
 
   .art {
@@ -149,9 +166,11 @@ export const audioPlayerStyles = css`
     min-width: 0;
   }
 
+  :host([variant='toolbar']) .timeline,
   :host([variant='sticky']) .timeline {
-    flex: 1 1 12rem;
-    min-width: 8rem;
+    flex: 1 1 10rem;
+    min-width: 7rem;
+    align-self: center;
   }
 
   .progress {
@@ -167,11 +186,13 @@ export const audioPlayerStyles = css`
     font-variant-numeric: tabular-nums;
   }
 
+  :host([variant='toolbar']) .times,
   :host([variant='sticky']) .times {
     justify-content: flex-start;
     gap: 0.35rem;
   }
 
+  :host([variant='toolbar']) .times .sep,
   :host([variant='sticky']) .times .sep {
     opacity: 0.6;
   }
@@ -187,15 +208,21 @@ export const audioPlayerStyles = css`
     justify-content: space-between;
   }
 
+  :host([variant='toolbar']) .controls,
   :host([variant='sticky']) .controls {
     flex: 0 0 auto;
     flex-wrap: nowrap;
+    margin-inline-start: 0;
   }
 
   .transport {
     display: inline-flex;
     align-items: center;
     gap: var(--k3-sys-spacing-space100, 0.5rem);
+  }
+
+  .transport--ib {
+    gap: var(--k3-sys-spacing-space50, 0.25rem);
   }
 
   .btn {
@@ -284,16 +311,26 @@ export const audioPlayerStyles = css`
     display: none;
   }
 
+  :host([variant='toolbar']) .volume,
   :host([variant='sticky']) .volume {
     flex: 0 1 9rem;
     margin-inline-start: 0;
     max-width: 10rem;
+    align-self: center;
+    /* Align track with progress bar (no label above slider) */
+    min-height: 2.5rem;
   }
 
   .vol-slider {
     flex: 1 1 auto;
     min-width: 4.5rem;
     width: 100%;
+    align-self: center;
+  }
+
+  /* Hide empty label row if slider still reserves space */
+  .vol-slider::part(label) {
+    display: none;
   }
 
   audio {
@@ -301,14 +338,17 @@ export const audioPlayerStyles = css`
   }
 
   @media (max-width: 720px) {
+    :host([variant='toolbar']) .volume,
     :host([variant='sticky']) .volume {
       display: none;
     }
 
-    :host([variant='sticky']) .shell {
+    .shell--toolbar {
+      flex-wrap: wrap;
       gap: var(--k3-sys-spacing-space100, 0.5rem);
     }
 
+    :host([variant='toolbar']) .timeline,
     :host([variant='sticky']) .timeline {
       order: 3;
       flex-basis: 100%;

@@ -2,8 +2,8 @@ export const AudioPlayerSpecs = {
   storageKey: 'k3-music-muted',
   defaultVolume: 0.7,
   formats: ['ogg', 'mp3'] as const,
-  /** `card` stacked · `compact` mini card · `sticky` full-width bottom bar */
-  variants: ['card', 'compact', 'sticky'] as const,
+  /** `card` · `compact` · `toolbar` (horizontal) · `sticky` (toolbar + fixed bottom) */
+  variants: ['card', 'compact', 'toolbar', 'sticky'] as const,
   accessibility: {
     role: 'region' as const,
   },

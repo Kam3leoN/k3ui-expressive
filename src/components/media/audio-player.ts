@@ -5,6 +5,8 @@ import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
 import '../feedback/progress.js';
 import '../inputs/slider.js';
+import '../actions/fab.js';
+import '../actions/icon-button.js';
 import {
   AudioPlayerSpecs,
   type AudioPlayerVariant,
@@ -69,7 +71,7 @@ export class K3AudioPlayer extends K3Element {
   @property({ type: Boolean }) loop = false;
   /** Loop the whole playlist. */
   @property({ type: Boolean, attribute: 'loop-playlist' }) loopPlaylist = false;
-  /** `card` (default) · `compact` · `sticky` */
+  /** `card` (default) · `compact` · `toolbar` · `sticky` */
   @property({ reflect: true }) variant: AudioPlayerVariant = 'card';
 
   @state() private playing = false;
@@ -327,8 +329,12 @@ export class K3AudioPlayer extends K3Element {
     `;
   }
 
-  private renderProgress(stickyTimes: boolean) {
+  private renderProgress(opts: { inlineTimes: boolean; showCaption: boolean }) {
     const progressMax = Math.max(0.001, this.duration || 0.001);
+    /* Empty label → no visible caption; progress keeps an aria-label fallback. */
+    const caption = opts.showCaption
+      ? i18n.t('audioPlayer.seek', 'Seek')
+      : '';
     return html`
       <div class="timeline" part="timeline">
         <k3-progress
@@ -339,10 +345,10 @@ export class K3AudioPlayer extends K3Element {
           .value=${this.currentTime}
           .max=${progressMax}
           .showStop=${false}
-          label=${i18n.t('audioPlayer.seek', 'Seek')}
+          label=${caption}
           aria-valuetext=${`${formatTime(this.currentTime)} / ${formatTime(this.duration)}`}
         ></k3-progress>
-        ${stickyTimes
+        ${opts.inlineTimes
           ? html`<div class="times" part="times">
               <span>${formatTime(this.currentTime)}</span>
               <span class="sep" aria-hidden="true">/</span>
@@ -356,6 +362,7 @@ export class K3AudioPlayer extends K3Element {
     `;
   }
 
+  /** Native circular buttons (card / compact). */
   private renderTransport(opts: { stop: boolean; ghost: boolean }) {
     const track = this.currentTrack;
     const playIcon = this.playing ? 'pause' : 'play_arrow';
@@ -411,12 +418,92 @@ export class K3AudioPlayer extends K3Element {
     `;
   }
 
+  /** Toolbar / sticky — prev·next narrow, play default width. */
+  private renderToolbarTransport() {
+    const track = this.currentTrack;
+    const playIcon = this.playing ? 'pause' : 'play_arrow';
+    const playLabel = this.playing
+      ? i18n.t('audioPlayer.pause', 'Pause')
+      : i18n.t('audioPlayer.play', 'Play');
+    return html`
+      <div class="transport transport--ib" part="transport">
+        <k3-icon-button
+          part="prev"
+          variant="standard"
+          size="sm"
+          width="narrow"
+          label=${i18n.t('audioPlayer.prev', 'Previous')}
+          ?disabled=${!this.tracks.length}
+          @k3-click=${() => this.prev()}
+        >
+          ${this.renderIcon('skip_previous')}
+        </k3-icon-button>
+        <k3-icon-button
+          part="play"
+          variant="filled"
+          size="sm"
+          width="default"
+          label=${playLabel}
+          ?disabled=${!track}
+          @k3-click=${() => this.togglePlay()}
+        >
+          ${this.renderIcon(playIcon)}
+        </k3-icon-button>
+        <k3-icon-button
+          part="next"
+          variant="standard"
+          size="sm"
+          width="narrow"
+          label=${i18n.t('audioPlayer.next', 'Next')}
+          ?disabled=${!this.tracks.length}
+          @k3-click=${() => this.next()}
+        >
+          ${this.renderIcon('skip_next')}
+        </k3-icon-button>
+      </div>
+    `;
+  }
+
+  /** Cover as FAB chrome (artwork via --k3-fab-bg, else music_note). */
+  private renderCoverFab(track: AudioTrack | undefined) {
+    const art = track?.artwork?.trim();
+    const title =
+      track?.title ?? i18n.t('audioPlayer.noTrack', 'No track');
+    return html`
+      <k3-fab
+        class="cover-fab"
+        part="artwork"
+        size="default"
+        variant="surface"
+        aria-hidden="true"
+        tabindex="-1"
+        aria-label=${title}
+        style=${art
+          ? `--k3-fab-bg: center / cover no-repeat url("${art.replace(/"/g, '')}")`
+          : nothing}
+        @k3-click=${(e: Event) => e.stopPropagation()}
+      >
+        ${art
+          ? nothing
+          : html`<span
+              slot="icon"
+              class="ms notranslate"
+              translate="no"
+              lang="zxx"
+              data-k3-icon="music_note"
+              aria-hidden="true"
+            ></span>`}
+      </k3-fab>
+    `;
+  }
+
   private renderVolume() {
     const muteIcon = this.musicMuted ? 'volume_off' : 'volume_up';
     const muteLabel = this.musicMuted
       ? i18n.t('audioPlayer.unmute', 'Unmute music')
       : i18n.t('audioPlayer.mute', 'Mute music');
     const volumeValue = this.musicMuted ? 0 : this.volume;
+    const volAria = i18n.t('audioPlayer.volume', 'Volume');
     return html`
       <div class="volume" part="volume">
         <button
@@ -436,10 +523,33 @@ export class K3AudioPlayer extends K3Element {
           max="1"
           step="0.01"
           .value=${volumeValue}
-          label=${i18n.t('audioPlayer.volume', 'Volume')}
+          .label=${volAria}
           @k3-input=${(e: Event) => this.onVolumeInput(e)}
           @k3-change=${(e: Event) => this.onVolumeInput(e)}
         ></k3-slider>
+      </div>
+    `;
+  }
+
+  private renderToolbarShell() {
+    const track = this.currentTrack;
+    return html`
+      ${this.renderAudio(track)}
+      <div class="shell shell--toolbar" part="shell">
+        ${this.renderCoverFab(track)}
+        <div class="meta" part="meta" aria-live="polite">
+          <p class="title" part="title">
+            ${track?.title ?? i18n.t('audioPlayer.noTrack', 'No track')}
+          </p>
+          ${track?.artist
+            ? html`<p class="artist" part="artist">${track.artist}</p>`
+            : nothing}
+        </div>
+        <div class="controls" part="controls">
+          ${this.renderToolbarTransport()}
+        </div>
+        ${this.renderProgress({ inlineTimes: true, showCaption: false })}
+        ${this.renderVolume()}
       </div>
     `;
   }
@@ -456,23 +566,13 @@ export class K3AudioPlayer extends K3Element {
           <div class="controls" part="controls">
             ${this.renderTransport({ stop: false, ghost: true })}
           </div>
-          ${this.renderProgress(false)}
+          ${this.renderProgress({ inlineTimes: false, showCaption: false })}
         </div>
       `;
     }
 
-    if (v === 'sticky') {
-      return html`
-        ${this.renderAudio(track)}
-        <div class="shell" part="shell">
-          ${this.renderMeta(track, true)}
-          <div class="controls" part="controls">
-            ${this.renderTransport({ stop: false, ghost: true })}
-          </div>
-          ${this.renderProgress(true)}
-          ${this.renderVolume()}
-        </div>
-      `;
+    if (v === 'toolbar' || v === 'sticky') {
+      return this.renderToolbarShell();
     }
 
     /* card (default) */
@@ -480,7 +580,7 @@ export class K3AudioPlayer extends K3Element {
       ${this.renderAudio(track)}
       <div class="shell" part="shell">
         ${this.renderMeta(track, Boolean(track?.artwork))}
-        ${this.renderProgress(false)}
+        ${this.renderProgress({ inlineTimes: false, showCaption: false })}
         <div class="controls" part="controls">
           ${this.renderTransport({ stop: true, ghost: false })}
           ${this.renderVolume()}
