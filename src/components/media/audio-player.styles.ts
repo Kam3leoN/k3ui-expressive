@@ -111,6 +111,51 @@ export const audioPlayerStyles = css`
     box-sizing: border-box;
   }
 
+  /* Progress + volume share one row (same vertical center); times under seek */
+  .seek-vol {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem; /* 4 */
+    flex: 1 1 12rem;
+    min-width: 8rem;
+  }
+
+  .seek-vol-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--k3-sys-spacing-space200, 1rem);
+    min-width: 0;
+    width: 100%;
+  }
+
+  .seek-vol-row .timeline {
+    flex: 1 1 auto;
+    min-width: 5rem;
+    /* Single progress child — no padding that shifts the stroke up */
+    padding: 0;
+    position: static;
+    display: block;
+  }
+
+  .seek-vol-row .volume {
+    flex: 0 1 9rem;
+    max-width: 10rem;
+    margin-inline-start: 0;
+    align-self: center;
+    min-height: 0;
+  }
+
+  .times--toolbar {
+    justify-content: flex-start;
+    gap: 0.35rem;
+  }
+
+  .times--toolbar .sep {
+    opacity: 0.6;
+  }
+
   :host([variant='sticky']) .toolbar-bar {
     box-shadow: var(--k3-sys-elevation-level3);
   }
@@ -218,33 +263,9 @@ export const audioPlayerStyles = css`
     min-width: 0;
   }
 
-  /*
-   * Timeline — progress stroke centered with volume slider track;
-   * times sit below without shifting the optical center.
-   */
-  :host([variant='toolbar']) .timeline,
-  :host([variant='sticky']) .timeline {
-    position: relative;
-    flex: 1 1 10rem;
-    min-width: 7rem;
-    align-self: stretch;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    /* Room for absolute times under the 8dp stroke */
-    padding-block-end: 1rem;
-    box-sizing: border-box;
-  }
-
   .progress {
     display: block;
     width: 100%;
-  }
-
-  :host([variant='toolbar']) .progress,
-  :host([variant='sticky']) .progress {
-    /* Keep wavy canvas optically centered on the volume track */
-    flex: 0 0 auto;
   }
 
   .times {
@@ -253,20 +274,6 @@ export const audioPlayerStyles = css`
     font: var(--k3-sys-typescale-label-small-font, 0.6875rem/1rem system-ui);
     color: var(--k3-sys-color-on-surface-variant);
     font-variant-numeric: tabular-nums;
-  }
-
-  :host([variant='toolbar']) .times,
-  :host([variant='sticky']) .times {
-    position: absolute;
-    inset-inline-start: 0;
-    bottom: 0;
-    justify-content: flex-start;
-    gap: 0.35rem;
-  }
-
-  :host([variant='toolbar']) .times .sep,
-  :host([variant='sticky']) .times .sep {
-    opacity: 0.6;
   }
 
   .controls {
@@ -383,26 +390,10 @@ export const audioPlayerStyles = css`
     display: none;
   }
 
-  :host([variant='toolbar']) .volume,
-  :host([variant='sticky']) .volume {
-    flex: 0 1 9rem;
-    margin-inline-start: 0;
-    max-width: 10rem;
-    align-self: stretch;
-    /* Same vertical center as progress stroke (mute + track) */
-    min-height: 0;
-  }
-
   .vol-slider {
     flex: 1 1 auto;
     min-width: 4.5rem;
     width: 100%;
-    align-self: center;
-  }
-
-  /* Slider xs track is 16dp — progress toolbar uses 8dp stroke; center both */
-  :host([variant='toolbar']) .vol-slider,
-  :host([variant='sticky']) .vol-slider {
     align-self: center;
   }
 
@@ -416,8 +407,8 @@ export const audioPlayerStyles = css`
   }
 
   @media (max-width: 720px) {
-    :host([variant='toolbar']) .volume,
-    :host([variant='sticky']) .volume {
+    :host([variant='toolbar']) .seek-vol-row .volume,
+    :host([variant='sticky']) .seek-vol-row .volume {
       display: none;
     }
 
@@ -426,8 +417,7 @@ export const audioPlayerStyles = css`
       gap: var(--k3-sys-spacing-space100, 0.5rem);
     }
 
-    :host([variant='toolbar']) .timeline,
-    :host([variant='sticky']) .timeline {
+    .seek-vol {
       order: 3;
       flex-basis: 100%;
     }

@@ -208,13 +208,29 @@ export class K3Progress extends K3Element {
     if (!this.indeterminate && !this.reduceMotion) {
       const target = this.fraction();
       if (Math.abs(target - this.animTo) > 0.0005) {
-        this.animFrom = this.displayProgress;
-        this.animTo = target;
-        this.animStart = t;
+        const delta = Math.abs(target - this.displayProgress);
+        /*
+         * Small / frequent updates (e.g. media timeupdate) — snap.
+         * Avoids restarting a 500ms ease every ~250ms → perpetual rAF.
+         */
+        if (delta < 0.02) {
+          this.displayProgress = target;
+          this.animFrom = target;
+          this.animTo = target;
+          this.animStart = t;
+        } else {
+          this.animFrom = this.displayProgress;
+          this.animTo = target;
+          this.animStart = t;
+        }
       }
-      const u = Math.min(1, (t - this.animStart) / DETERMINATE_MS);
-      this.displayProgress =
-        this.animFrom + (this.animTo - this.animFrom) * easeDeterminate(u);
+      if (Math.abs(this.displayProgress - this.animTo) > 0.0005) {
+        const u = Math.min(1, (t - this.animStart) / DETERMINATE_MS);
+        this.displayProgress =
+          this.animFrom + (this.animTo - this.animFrom) * easeDeterminate(u);
+      } else {
+        this.displayProgress = this.animTo;
+      }
     } else if (!this.indeterminate) {
       this.displayProgress = this.fraction();
     }
@@ -230,9 +246,11 @@ export class K3Progress extends K3Element {
       Math.abs(this.displayProgress - this.animTo) > 0.0005
     ) {
       this.raf = requestAnimationFrame(this.paint);
-    } else if (this.isWavy && !this.reduceMotion && !this.indeterminate) {
-      this.raf = requestAnimationFrame(this.paint);
     }
+    /*
+     * Determinate wavy: paint once (static phase). Continuous wave rAF was
+     * burning CPU with multiple progress instances (audio player demos).
+     */
   };
 
   private paintLinear(

@@ -223,10 +223,17 @@ export class K3AudioPlayer extends K3Element {
     });
   }
 
+  private timeRaf = 0;
+
+  /** Coalesce timeupdate → one Lit update per frame (4 demos × media events). */
   private onTimeUpdate(): void {
-    if (!this.audioEl) return;
-    this.currentTime = this.audioEl.currentTime;
-    this.duration = this.audioEl.duration || 0;
+    if (!this.audioEl || this.timeRaf) return;
+    this.timeRaf = requestAnimationFrame(() => {
+      this.timeRaf = 0;
+      if (!this.audioEl) return;
+      this.currentTime = this.audioEl.currentTime;
+      this.duration = this.audioEl.duration || 0;
+    });
   }
 
   private onEnded(): void {
@@ -556,12 +563,21 @@ export class K3AudioPlayer extends K3Element {
           <div class="controls" part="controls">
             ${this.renderToolbarTransport()}
           </div>
-          ${this.renderProgress({
-            inlineTimes: true,
-            showCaption: false,
-            toolbar: true,
-          })}
-          ${this.renderVolume()}
+          <div class="seek-vol" part="seek-vol">
+            <div class="seek-vol-row" part="seek-vol-row">
+              ${this.renderProgress({
+                inlineTimes: false,
+                showCaption: false,
+                toolbar: true,
+              })}
+              ${this.renderVolume()}
+            </div>
+            <div class="times times--toolbar" part="times">
+              <span>${formatTime(this.currentTime)}</span>
+              <span class="sep" aria-hidden="true">/</span>
+              <span>${formatTime(this.duration)}</span>
+            </div>
+          </div>
         </div>
       </div>
     `;
