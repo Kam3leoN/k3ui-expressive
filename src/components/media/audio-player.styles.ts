@@ -5,22 +5,44 @@ export const audioPlayerStyles = css`
     display: block;
     box-sizing: border-box;
     max-width: 28rem;
-    padding: var(--k3-sys-spacing-space400, 2rem);
-    border-radius: var(--k3-sys-shape-corner-large, 1rem);
-    background: var(--k3-sys-color-surface-container);
+    /* Card / compact chrome comes from nested k3-card */
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    background: transparent;
     color: var(--k3-sys-color-on-surface);
-    box-shadow: var(--k3-sys-elevation-level1);
+    box-shadow: none;
   }
 
   :host([hidden]) {
     display: none !important;
   }
 
+  .player-card {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Card body already pads 16/12 — keep content on-surface (not variant mute) */
+  .player-card::part(content) {
+    color: var(--k3-sys-color-on-surface);
+  }
+
+  .player-card::part(body) {
+    padding: var(--k3-sys-spacing-space400, 2rem);
+    gap: var(--k3-sys-spacing-space200, 1rem);
+  }
+
   /* ── Compact mini card ── */
   :host([variant='compact']) {
     max-width: 20rem;
-    padding: var(--k3-sys-spacing-space200, 1rem);
-    border-radius: var(--k3-sys-shape-corner-extra-large, 1.75rem);
+  }
+
+  :host([variant='compact']) .player-card::part(body) {
+    padding: var(--k3-sys-spacing-space300, 1.5rem);
+    gap: var(--k3-sys-spacing-space200, 1rem);
   }
 
   /* ── Toolbar (horizontal) + sticky (toolbar + fixed bottom) ── */
@@ -28,20 +50,27 @@ export const audioPlayerStyles = css`
   :host([variant='sticky']) {
     max-width: none;
     width: 100%;
-    padding: var(--k3-sys-spacing-space200, 1rem)
-      var(--k3-sys-spacing-space300, 1.5rem);
+    /* Never let controls / FAB / volume kiss the chrome edge */
+    padding: var(--k3-sys-spacing-space300, 1.5rem)
+      var(--k3-sys-spacing-space400, 2rem);
     border-radius: var(--k3-sys-shape-corner-large, 1rem);
+    background: var(--k3-sys-color-surface-container);
     box-shadow: var(--k3-sys-elevation-level2);
+    box-sizing: border-box;
   }
 
   :host([variant='sticky']) {
     position: fixed;
-    inset-inline: 0;
-    bottom: var(--k3-nav-chrome-inset-block-end, 0px);
+    /* Float inset from viewport edges (safe + breathing room) */
+    inset-inline: var(--k3-sys-spacing-space200, 1rem);
+    bottom: calc(
+      var(--k3-nav-chrome-inset-block-end, 0px) +
+        var(--k3-sys-spacing-space200, 1rem)
+    );
+    width: auto;
     z-index: 40;
     margin: 0;
-    border-radius: var(--k3-sys-shape-corner-large, 1rem)
-      var(--k3-sys-shape-corner-large, 1rem) 0 0;
+    border-radius: var(--k3-sys-shape-corner-large, 1rem);
     box-shadow: var(--k3-sys-elevation-level3);
     transition:
       bottom var(--k3-sys-motion-duration-medium2, 300ms)

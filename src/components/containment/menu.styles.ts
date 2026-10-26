@@ -216,7 +216,7 @@ export const menuStyles: CSSResultGroup = [
   }
 
   /*
-   * Scrollport — cap tall menus; class `k3-scroll` (edgeScrollbarStyles)
+   * Scrollport — cap tall menus; class k3-scroll (edgeScrollbarStyles)
    * provides the discreet thumb (no Windows arrows). overflow-y comes from
    * that class; keep max-height here.
    */

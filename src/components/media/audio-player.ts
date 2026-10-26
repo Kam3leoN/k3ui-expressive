@@ -7,6 +7,7 @@ import '../feedback/progress.js';
 import '../inputs/slider.js';
 import '../actions/fab.js';
 import '../actions/icon-button.js';
+import '../containment/card.js';
 import {
   AudioPlayerSpecs,
   type AudioPlayerVariant,
@@ -561,13 +562,15 @@ export class K3AudioPlayer extends K3Element {
     if (v === 'compact') {
       return html`
         ${this.renderAudio(track)}
-        <div class="shell" part="shell">
-          ${this.renderMeta(track, true)}
-          <div class="controls" part="controls">
-            ${this.renderTransport({ stop: false, ghost: true })}
+        <k3-card class="player-card" variant="elevated" part="card">
+          <div class="shell" part="shell">
+            ${this.renderMeta(track, true)}
+            <div class="controls" part="controls">
+              ${this.renderTransport({ stop: false, ghost: true })}
+            </div>
+            ${this.renderProgress({ inlineTimes: false, showCaption: false })}
           </div>
-          ${this.renderProgress({ inlineTimes: false, showCaption: false })}
-        </div>
+        </k3-card>
       `;
     }
 
@@ -575,17 +578,19 @@ export class K3AudioPlayer extends K3Element {
       return this.renderToolbarShell();
     }
 
-    /* card (default) */
+    /* card (default) — chrome via k3-card */
     return html`
       ${this.renderAudio(track)}
-      <div class="shell" part="shell">
-        ${this.renderMeta(track, Boolean(track?.artwork))}
-        ${this.renderProgress({ inlineTimes: false, showCaption: false })}
-        <div class="controls" part="controls">
-          ${this.renderTransport({ stop: true, ghost: false })}
-          ${this.renderVolume()}
+      <k3-card class="player-card" variant="elevated" part="card">
+        <div class="shell" part="shell">
+          ${this.renderMeta(track, Boolean(track?.artwork))}
+          ${this.renderProgress({ inlineTimes: false, showCaption: false })}
+          <div class="controls" part="controls">
+            ${this.renderTransport({ stop: true, ghost: false })}
+            ${this.renderVolume()}
+          </div>
         </div>
-      </div>
+      </k3-card>
     `;
   }
 }

@@ -2896,23 +2896,26 @@ k3-avatar [slot='badge'].ms {
 .demo-audio-sticky-stage {
   position: relative;
   width: 100%;
-  min-height: 7.5rem;
+  min-height: 8.5rem;
   overflow: hidden;
   border-radius: var(--k3-sys-shape-corner-large, 1rem);
   background: var(--k3-sys-color-surface-container-low);
+  padding: var(--k3-sys-spacing-space200, 1rem);
+  box-sizing: border-box;
 }
 .demo-audio-sticky-stage k3-audio-player[variant='sticky'],
 .demo-audio-sticky-stage .demo-audio-sticky {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  width: 100%;
+  /* Staged preview — absolute inset, not viewport-fixed */
+  position: absolute !important;
+  inset-inline: var(--k3-sys-spacing-space200, 1rem) !important;
+  bottom: var(--k3-sys-spacing-space200, 1rem) !important;
+  width: auto !important;
   max-width: none;
 }
 
 .demo-audio-toolbar-stage {
   width: 100%;
   min-height: 5.5rem;
-  padding: var(--k3-sys-spacing-space200, 1rem);
+  padding: var(--k3-sys-spacing-space300, 1.5rem);
   box-sizing: border-box;
 }
