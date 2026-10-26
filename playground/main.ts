@@ -553,6 +553,17 @@ function applyAdaptiveShell(): void {
   app?.setAttribute('data-nav', mode);
   app?.setAttribute('data-size', medium ? 'medium' : mode === 'bar' ? 'compact' : 'expanded');
 
+  /* Mirror on <html> — fixed shell chrome is outside .app and needs the inset. */
+  const root = document.documentElement;
+  if (mode === 'bar') {
+    root.style.setProperty(
+      '--k3-nav-chrome-inset-block-end',
+      'calc(4rem + env(safe-area-inset-bottom, 0px))',
+    );
+  } else {
+    root.style.setProperty('--k3-nav-chrome-inset-block-end', '0px');
+  }
+
   const bar = document.getElementById('nav-bar') as HTMLElement & { layout?: string } | null;
   // Compact phone: vertical items; medium tablet with bar fallback would be horizontal —
   // we use rail on tablet, so bar stays vertical for phone only.

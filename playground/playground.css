@@ -230,11 +230,16 @@ k3-doc-nav {
   background: var(--k3-sys-color-surface-container);
 }
 
-/* Compact nav-bar (64dp) — lift fixed FAB / scroll-to-top above the bar */
-.app[data-nav='bar'] {
-  --k3-nav-chrome-inset-block-end: 4rem; /* k3-nav-bar height */
+/*
+ * Compact nav-bar (64dp) — lift fixed FAB / scroll-to-top 16dp above the bar.
+ * Var must live on <html>: shell chrome (stt / fab-menu) is a sibling of .app,
+ * so .app[data-nav] alone never reaches them.
+ * bottom = edge(16) + inset(64 + safe-area) → 16dp clear of the bar.
+ */
+html:has(.app[data-nav='bar']) {
+  --k3-nav-chrome-inset-block-end: calc(4rem + env(safe-area-inset-bottom, 0px));
 }
-.app[data-nav='rail'] {
+html:has(.app[data-nav='rail']) {
   --k3-nav-chrome-inset-block-end: 0px;
 }
 
