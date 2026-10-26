@@ -45,17 +45,14 @@ export const audioPlayerStyles = css`
     gap: var(--k3-sys-spacing-space200, 1rem);
   }
 
-  /* ── Toolbar (horizontal) + sticky (toolbar + fixed bottom) ── */
+  /* ── Toolbar / sticky — host is transparent; pill is .toolbar-bar ── */
   :host([variant='toolbar']),
   :host([variant='sticky']) {
     max-width: none;
     width: 100%;
-    /* Never let controls / FAB / volume kiss the chrome edge */
-    padding: var(--k3-sys-spacing-space300, 1.5rem)
-      var(--k3-sys-spacing-space400, 2rem);
-    border-radius: var(--k3-sys-shape-corner-large, 1rem);
-    background: var(--k3-sys-color-surface-container);
-    box-shadow: var(--k3-sys-elevation-level2);
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
     box-sizing: border-box;
   }
 
@@ -70,8 +67,6 @@ export const audioPlayerStyles = css`
     width: auto;
     z-index: 40;
     margin: 0;
-    border-radius: var(--k3-sys-shape-corner-large, 1rem);
-    box-shadow: var(--k3-sys-elevation-level3);
     transition:
       bottom var(--k3-sys-motion-duration-medium2, 300ms)
         var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.2, 0, 0, 1)),
@@ -92,11 +87,32 @@ export const audioPlayerStyles = css`
     gap: var(--k3-sys-spacing-space100, 0.5rem);
   }
 
+  /* FAB outside left · pill bar to the right */
   .shell--toolbar {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
     gap: var(--k3-sys-spacing-space200, 1rem);
+  }
+
+  .toolbar-bar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--k3-sys-spacing-space200, 1rem);
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--k3-sys-spacing-space300, 1.5rem)
+      var(--k3-sys-spacing-space400, 2rem);
+    border-radius: var(--k3-sys-shape-corner-large, 1rem);
+    background: var(--k3-sys-color-surface-container);
+    box-shadow: var(--k3-sys-elevation-level2);
+    box-sizing: border-box;
+  }
+
+  :host([variant='sticky']) .toolbar-bar {
+    box-shadow: var(--k3-sys-elevation-level3);
   }
 
   .cover-fab {
@@ -202,16 +218,33 @@ export const audioPlayerStyles = css`
     min-width: 0;
   }
 
+  /*
+   * Timeline — progress stroke centered with volume slider track;
+   * times sit below without shifting the optical center.
+   */
   :host([variant='toolbar']) .timeline,
   :host([variant='sticky']) .timeline {
+    position: relative;
     flex: 1 1 10rem;
     min-width: 7rem;
-    align-self: center;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* Room for absolute times under the 8dp stroke */
+    padding-block-end: 1rem;
+    box-sizing: border-box;
   }
 
   .progress {
     display: block;
     width: 100%;
+  }
+
+  :host([variant='toolbar']) .progress,
+  :host([variant='sticky']) .progress {
+    /* Keep wavy canvas optically centered on the volume track */
+    flex: 0 0 auto;
   }
 
   .times {
@@ -224,6 +257,9 @@ export const audioPlayerStyles = css`
 
   :host([variant='toolbar']) .times,
   :host([variant='sticky']) .times {
+    position: absolute;
+    inset-inline-start: 0;
+    bottom: 0;
     justify-content: flex-start;
     gap: 0.35rem;
   }
@@ -352,15 +388,21 @@ export const audioPlayerStyles = css`
     flex: 0 1 9rem;
     margin-inline-start: 0;
     max-width: 10rem;
-    align-self: center;
-    /* Align track with progress bar (no label above slider) */
-    min-height: 2.5rem;
+    align-self: stretch;
+    /* Same vertical center as progress stroke (mute + track) */
+    min-height: 0;
   }
 
   .vol-slider {
     flex: 1 1 auto;
     min-width: 4.5rem;
     width: 100%;
+    align-self: center;
+  }
+
+  /* Slider xs track is 16dp — progress toolbar uses 8dp stroke; center both */
+  :host([variant='toolbar']) .vol-slider,
+  :host([variant='sticky']) .vol-slider {
     align-self: center;
   }
 
@@ -379,7 +421,7 @@ export const audioPlayerStyles = css`
       display: none;
     }
 
-    .shell--toolbar {
+    .toolbar-bar {
       flex-wrap: wrap;
       gap: var(--k3-sys-spacing-space100, 0.5rem);
     }

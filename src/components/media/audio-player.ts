@@ -330,7 +330,12 @@ export class K3AudioPlayer extends K3Element {
     `;
   }
 
-  private renderProgress(opts: { inlineTimes: boolean; showCaption: boolean }) {
+  private renderProgress(opts: {
+    inlineTimes: boolean;
+    showCaption: boolean;
+    /** Toolbar / sticky — 8dp stroke, aligned with volume slider track. */
+    toolbar?: boolean;
+  }) {
     const progressMax = Math.max(0.001, this.duration || 0.001);
     /* Empty label → no visible caption; progress keeps an aria-label fallback. */
     const caption = opts.showCaption
@@ -343,6 +348,7 @@ export class K3AudioPlayer extends K3Element {
           part="seek"
           variant="linear"
           wavy
+          .thickness=${opts.toolbar ? 8 : 4}
           .value=${this.currentTime}
           .max=${progressMax}
           .showStop=${false}
@@ -538,19 +544,25 @@ export class K3AudioPlayer extends K3Element {
       ${this.renderAudio(track)}
       <div class="shell shell--toolbar" part="shell">
         ${this.renderCoverFab(track)}
-        <div class="meta" part="meta" aria-live="polite">
-          <p class="title" part="title">
-            ${track?.title ?? i18n.t('audioPlayer.noTrack', 'No track')}
-          </p>
-          ${track?.artist
-            ? html`<p class="artist" part="artist">${track.artist}</p>`
-            : nothing}
+        <div class="toolbar-bar" part="toolbar-bar">
+          <div class="meta" part="meta" aria-live="polite">
+            <p class="title" part="title">
+              ${track?.title ?? i18n.t('audioPlayer.noTrack', 'No track')}
+            </p>
+            ${track?.artist
+              ? html`<p class="artist" part="artist">${track.artist}</p>`
+              : nothing}
+          </div>
+          <div class="controls" part="controls">
+            ${this.renderToolbarTransport()}
+          </div>
+          ${this.renderProgress({
+            inlineTimes: true,
+            showCaption: false,
+            toolbar: true,
+          })}
+          ${this.renderVolume()}
         </div>
-        <div class="controls" part="controls">
-          ${this.renderToolbarTransport()}
-        </div>
-        ${this.renderProgress({ inlineTimes: true, showCaption: false })}
-        ${this.renderVolume()}
       </div>
     `;
   }
