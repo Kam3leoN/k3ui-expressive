@@ -1,4 +1,11 @@
 export { K3Element, type Density } from './k3-element.js';
+export {
+  getSoundFx,
+  SoundFxController,
+  resetSoundFxForTests,
+  type SoundFxEvent,
+  type SoundFxOptions,
+} from './sound-fx.js';
 export { hasSlot, hasLightSlot, hasNamedSlot, slotHasContent } from './slots.js';
 export { LayerPortal } from './layer-portal.js';
 export {

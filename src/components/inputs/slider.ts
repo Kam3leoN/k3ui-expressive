@@ -223,7 +223,7 @@ export class K3Slider extends K3Element {
     if (this.range) {
       setFormValue(this.internals, `${this.valueStart},${this.valueEnd}`);
     } else {
-      setFormValue(this.internals, String(this.value));
+    setFormValue(this.internals, String(this.value));
     }
   }
 
@@ -235,7 +235,7 @@ export class K3Slider extends K3Element {
         valueEnd: this.valueEnd,
       });
     } else {
-      this.emit('k3-input', { value: this.value });
+    this.emit('k3-input', { value: this.value });
     }
   }
 

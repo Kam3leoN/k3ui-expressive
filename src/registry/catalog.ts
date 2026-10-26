@@ -60,6 +60,10 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-badge', load: () => import('../components/feedback/badge.js') },
   { tag: 'k3-countdown', load: () => import('../components/feedback/countdown.js') },
   { tag: 'k3-marquee', load: () => import('../components/feedback/marquee.js') },
+  { tag: 'k3-confetti', load: () => import('../components/feedback/confetti.js') },
+  { tag: 'k3-sound-fx', load: () => import('../components/feedback/sound-fx.js') },
+  // media
+  { tag: 'k3-audio-player', load: () => import('../components/media/audio-player.js') },
   // containment
   { tag: 'k3-divider', load: () => import('../components/containment/divider.js') },
   { tag: 'k3-dialog', load: () => import('../components/containment/dialog.js') },

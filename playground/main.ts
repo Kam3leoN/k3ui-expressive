@@ -62,6 +62,7 @@ import {
 import { armNavActive, navItemFromEvent } from '../src/components/navigation/nav-selection.js';
 import type { K3NavItem } from '../src/components/navigation/nav-item.js';
 import type { DocComponent } from './catalog.js';
+import { getSoundFx } from '../src/core/sound-fx.js';
 
 /**
  * Shell-critical custom elements — enough for first paint (home + chrome).
@@ -436,6 +437,16 @@ function syncSettingsDialog(): void {
     | null;
   if (grid) grid.selected = gridOn;
 
+  const audioSw = document.getElementById('settings-audio') as
+    | (HTMLElement & { selected?: boolean })
+    | null;
+  if (audioSw) audioSw.selected = isAudioEnabled();
+
+  const musicSw = document.getElementById('settings-music') as
+    | (HTMLElement & { selected?: boolean })
+    | null;
+  if (musicSw) musicSw.selected = isMusicEnabled();
+
   applyContainerLayout();
 
   const seed = seeds[seedIdx] ?? seeds[0]!;
@@ -476,6 +487,45 @@ function applyAnimationsPreference(): void {
   else root.setAttribute('data-k3-reduce-motion', '');
   docStore.set(DocKeys.uiAnimations, animationsOn);
   syncMotionControls();
+}
+
+const MUSIC_MUTE_KEY = 'k3-music-muted';
+
+/** Interaction SFX on (Audio true) — inverse of SFX mute. */
+function isAudioEnabled(): boolean {
+  return !getSoundFx().isMuted();
+}
+
+/** Music player on (Music true) — inverse of music mute storage. */
+function isMusicEnabled(): boolean {
+  try {
+    const v = localStorage.getItem(MUSIC_MUTE_KEY);
+    return v !== '1' && v !== 'true';
+  } catch {
+    return true;
+  }
+}
+
+/** Enable / mute interaction Sound FX (settings Audio). */
+function setAudioEnabled(on: boolean): void {
+  getSoundFx().setMuted(!on);
+  document.querySelectorAll('k3-sound-fx').forEach((el) => {
+    const host = el as HTMLElement & { setMuted?: (m: boolean) => void };
+    host.setMuted?.(!on);
+  });
+}
+
+/** Enable / mute music players (settings Music). */
+function setMusicEnabled(on: boolean): void {
+  try {
+    localStorage.setItem(MUSIC_MUTE_KEY, on ? '0' : '1');
+  } catch {
+    /* private mode */
+  }
+  document.querySelectorAll('k3-audio-player').forEach((el) => {
+    const host = el as HTMLElement & { setMusicMuted?: (m: boolean) => void };
+    host.setMusicMuted?.(!on);
+  });
 }
 
 function setThemeMode(mode: ColorMode): void {
@@ -2032,6 +2082,20 @@ function wireShellChrome(): void {
     syncSettingsDialog();
   });
 
+  document.getElementById('settings-audio')?.addEventListener('k3-change', (e) => {
+    const selected = (e as CustomEvent<{ selected?: boolean }>).detail?.selected;
+    if (typeof selected !== 'boolean') return;
+    setAudioEnabled(selected);
+    syncSettingsDialog();
+  });
+
+  document.getElementById('settings-music')?.addEventListener('k3-change', (e) => {
+    const selected = (e as CustomEvent<{ selected?: boolean }>).detail?.selected;
+    if (typeof selected !== 'boolean') return;
+    setMusicEnabled(selected);
+    syncSettingsDialog();
+  });
+
   const seedPicker = document.getElementById('settings-seed-picker') as HTMLInputElement | null;
   /** Big bubble = custom picker only. */
   const onSeedPick = (): void => {
@@ -2316,6 +2380,29 @@ function wireDemoPages(): void {
   wireToggle('btn-toggle-square');
   wireSliderLab();
   wireProgressLab();
+  wireConfettiDemo();
+}
+
+/** Confetti playground — preset buttons → `k3-confetti#demo-confetti`. */
+function wireConfettiDemo(): void {
+  const page = document.getElementById('page-confetti');
+  if (!page || page.dataset.confettiWired) return;
+  page.dataset.confettiWired = '1';
+  page.addEventListener('k3-click', ((e: Event) => {
+    const path = e.composedPath() as EventTarget[];
+    const btn = path.find(
+      (n): n is HTMLElement =>
+        n instanceof HTMLElement && n.hasAttribute('data-confetti-preset'),
+    );
+    if (!btn) return;
+    const preset = btn.getAttribute('data-confetti-preset');
+    const host = document.getElementById('demo-confetti') as
+      | (HTMLElement & { presetFire?: (id: string) => void; fire?: () => void })
+      | null;
+    if (!host || !preset) return;
+    if (typeof host.presetFire === 'function') host.presetFire(preset);
+    else if (typeof host.fire === 'function') host.fire();
+  }) as EventListener);
 }
 
 /** Buttons Arrow / Pad / Grid — live value labels on demo pages. */

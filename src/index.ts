@@ -198,6 +198,30 @@ export {
   type SnackbarDuration,
   type SnackbarPosition,
 } from './components/feedback/snackbar.js';
+export {
+  ConfettiCannon,
+  ConfettiPresets,
+  ConfettiSpecs,
+  firePreset,
+  shapeFromPath,
+  shapeFromText,
+  type ConfettiFireOptions,
+  type ConfettiPresetId,
+} from './components/feedback/confetti.js';
+export {
+  getSoundFx,
+  SoundFxController,
+  SoundFxSpecs,
+  resetSoundFxForTests,
+  type SoundFxEvent,
+  type SoundFxOptions,
+} from './components/feedback/sound-fx.js';
+export {
+  AudioPlayerSpecs,
+  type AudioTrack,
+} from './components/media/audio-player.js';
+export type { K3SoundFx } from './components/feedback/sound-fx.js';
+export type { K3AudioPlayer } from './components/media/audio-player.js';
 
 export const K3UI: K3UIGlobal = {
   version: VERSION,

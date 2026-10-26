@@ -364,6 +364,27 @@ export const DOC_COMPONENTS: DocComponent[] = [
     titleKey: 'doc.marquee.title',
     blurbKey: 'doc.marquee.blurb',
   },
+  {
+    id: 'confetti',
+    category: 'Feedback',
+    title: 'Confetti',
+    titleKey: 'doc.confetti.title',
+    blurbKey: 'doc.confetti.blurb',
+  },
+  {
+    id: 'sound-fx',
+    category: 'Feedback',
+    title: 'Sound FX',
+    titleKey: 'doc.sound-fx.title',
+    blurbKey: 'doc.sound-fx.blurb',
+  },
+  {
+    id: 'audio-player',
+    category: 'Feedback',
+    title: 'Audio player',
+    titleKey: 'doc.audio-player.title',
+    blurbKey: 'doc.audio-player.blurb',
+  },
   // Containment
   {
     id: 'avatar',

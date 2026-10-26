@@ -630,6 +630,44 @@ document.getElementById("dlg")?.show?.();`,
   <span>K3ui · Material 3 Expressive · Playground demo · </span>
 </k3-marquee>`,
   },
+  confetti: {
+    components: ['k3-confetti', 'k3-button'],
+    html: `<k3-confetti id="celebrate"></k3-confetti>
+<k3-button variant="filled" onclick="document.getElementById('celebrate').presetFire('basic')">
+  Celebrate
+</k3-button>`,
+    jsExtra: `import { ConfettiPresets } from 'k3ui';
+// Imperative (no element required):
+ConfettiPresets.fireBasic();
+ConfettiPresets.fireFireworks();`,
+  },
+  'sound-fx': {
+    components: ['k3-sound-fx', 'k3-button'],
+    html: `<k3-sound-fx sounds-path="/sounds/"></k3-sound-fx>
+<k3-button
+  data-k3-sound-click="click"
+  data-k3-sound-hover="hover"
+  data-k3-sound-enter="enter"
+  data-k3-sound-leave="leave"
+>Interactive</k3-button>`,
+  },
+  'audio-player': {
+    components: ['k3-audio-player'],
+    html: `<k3-audio-player
+  variant="card"
+  loop-playlist
+  tracks='[
+    {"src":"/sounds/cashcash.mp3","title":"Cash Cash","artist":"PhysicHall"},
+    {"src":"/sounds/hello.mp3","title":"Hello","artist":"PhysicHall"}
+  ]'
+></k3-audio-player>
+
+<!-- Compact mini card -->
+<k3-audio-player variant="compact" tracks='[...]'></k3-audio-player>
+
+<!-- Full-width bottom bar -->
+<k3-audio-player variant="sticky" tracks='[...]'></k3-audio-player>`,
+  },
   breadcrumb: {
     components: ['k3-breadcrumb'],
     html: `<k3-breadcrumb

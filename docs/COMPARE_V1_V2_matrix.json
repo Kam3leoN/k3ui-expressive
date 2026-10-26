@@ -1,0 +1,562 @@
+[
+  {
+    "id": "button",
+    "v1": "Button",
+    "v2": "k3-button",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "icon-button",
+    "v1": "ButtonIcon",
+    "v2": "k3-icon-button",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "fab",
+    "v1": "ButtonFab",
+    "v2": "k3-fab",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "extended-fab",
+    "v1": "ButtonFab",
+    "v2": "k3-extended-fab",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "fab-menu",
+    "v1": "ButtonFabMenu",
+    "v2": "k3-fab-menu",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "fab-dial",
+    "v1": "ButtonFabDial",
+    "v2": "k3-fab-dial",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "fab-rail",
+    "v1": "ButtonFabRail",
+    "v2": "k3-fab-rail",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "button-group",
+    "v1": "ButtonGroups",
+    "v2": "k3-button-group",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "split-button",
+    "v1": "ButtonSplit",
+    "v2": "k3-split-button",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "button-segmented",
+    "v1": "ButtonSegmented",
+    "v2": "k3-button-segmented",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "text-field",
+    "v1": "Field",
+    "v2": "k3-text-field",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "textarea",
+    "v1": "Textarea",
+    "v2": "k3-textarea",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "checkbox",
+    "v1": "Checkbox",
+    "v2": "k3-checkbox",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "radio",
+    "v1": "Radio",
+    "v2": "k3-radio",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "switch",
+    "v1": "Switch",
+    "v2": "k3-switch",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "slider",
+    "v1": "Slider",
+    "v2": "k3-slider",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "select",
+    "v1": "Select",
+    "v2": "k3-select",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "chip",
+    "v1": "Chip",
+    "v2": "k3-chip",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "dialog",
+    "v1": "Dialog",
+    "v2": "k3-dialog",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "sheet",
+    "v1": "Sheet",
+    "v2": "k3-sheet",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "snackbar",
+    "v1": "Snackbar",
+    "v2": "k3-snackbar",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "tooltip",
+    "v1": "Tooltips",
+    "v2": "k3-tooltip",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "progress",
+    "v1": "ProgressIndicator",
+    "v2": "k3-progress",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "skeleton",
+    "v1": "Skeleton",
+    "v2": "k3-skeleton",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "badge",
+    "v1": "Badge",
+    "v2": "k3-badge",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "menu",
+    "v1": "Menu",
+    "v2": "k3-menu",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "list",
+    "v1": "List",
+    "v2": "k3-list",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "card",
+    "v1": "Card",
+    "v2": "k3-card",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "divider",
+    "v1": "Divider",
+    "v2": "k3-divider",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "tabs",
+    "v1": "Tabs",
+    "v2": "k3-tabs",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "nav-bar",
+    "v1": "NavigationBar",
+    "v2": "k3-nav-bar",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "nav-rail",
+    "v1": "NavigationRail",
+    "v2": "k3-nav-rail",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "nav-drawer",
+    "v1": "Drawer",
+    "v2": "k3-nav-drawer",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "top-app-bar",
+    "v1": "AppBar",
+    "v2": "k3-top-app-bar",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "toolbar",
+    "v1": "Toolbar",
+    "v2": "k3-toolbar",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "table",
+    "v1": "Table",
+    "v2": "k3-table",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "avatar",
+    "v1": "Avatar",
+    "v2": "k3-avatar",
+    "prio": "P0",
+    "status": "porte"
+  },
+  {
+    "id": "autocomplete",
+    "v1": "Autocomplete",
+    "v2": "k3-autocomplete",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "search",
+    "v1": "—",
+    "v2": "k3-search",
+    "prio": "P1",
+    "status": "v2-only"
+  },
+  {
+    "id": "pin-field",
+    "v1": "Pin",
+    "v2": "k3-pin-field",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "counter",
+    "v1": "Counter",
+    "v2": "k3-counter",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "date-picker",
+    "v1": "Datepicker",
+    "v2": "k3-date-picker",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "time-picker",
+    "v1": "Timepicker",
+    "v2": "k3-time-picker",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "wheel-picker",
+    "v1": "WheelPicker",
+    "v2": "k3-wheel-picker",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "breadcrumb",
+    "v1": "Breadcrumb",
+    "v2": "k3-breadcrumb",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "pagination",
+    "v1": "Pagination",
+    "v2": "k3-pagination",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "pagination-alpha",
+    "v1": "PaginationAlpha",
+    "v2": "k3-pagination-alpha",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "index-list",
+    "v1": "IndexList",
+    "v2": "k3-index-list",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "scroll-to-top",
+    "v1": "ScrollToTop",
+    "v2": "k3-scroll-to-top",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "bottom-app-bar",
+    "v1": "—",
+    "v2": "k3-bottom-app-bar",
+    "prio": "P1",
+    "status": "v2-only"
+  },
+  {
+    "id": "codeblock",
+    "v1": "CodeBlock",
+    "v2": "k3-codeblock",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "bubble",
+    "v1": "Bubble",
+    "v2": "k3-bubble",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "marquee",
+    "v1": "Marquee",
+    "v2": "k3-marquee",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "countdown",
+    "v1": "Countdown",
+    "v2": "k3-countdown",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "carousel",
+    "v1": "—",
+    "v2": "k3-carousel",
+    "prio": "P1",
+    "status": "v2-only"
+  },
+  {
+    "id": "button-arrow",
+    "v1": "ButtonArrow",
+    "v2": "k3-button-arrow",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "button-grid",
+    "v1": "ButtonGrid",
+    "v2": "k3-button-grid",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "button-pad",
+    "v1": "ButtonPad",
+    "v2": "k3-button-pad",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "button-smart",
+    "v1": "ButtonSmart",
+    "v2": "k3-button-smart",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "loading-indicator",
+    "v1": "Loader",
+    "v2": "k3-loading-indicator",
+    "prio": "P1",
+    "status": "porte"
+  },
+  {
+    "id": "chart",
+    "v1": "Chart",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "firework",
+    "v1": "Firework",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "snow",
+    "v1": "Snow",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "confetti",
+    "v1": "Confetti",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "qr",
+    "v1": "QrCode",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "barcode",
+    "v1": "BarCode",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "parallax",
+    "v1": "Parallax",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "holo",
+    "v1": "Holo",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "todo",
+    "v1": "Todo",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "pricing",
+    "v1": "Pricing",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "upload",
+    "v1": "Upload",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "color-picker",
+    "v1": "ColorPicker",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "signature",
+    "v1": "Signature",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "toast",
+    "v1": "Toast",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "alert",
+    "v1": "Alert",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "collapse",
+    "v1": "Collapse",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "hero",
+    "v1": "Hero",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "infinite-scroll",
+    "v1": "InfiniteScroll",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "scroll-spy",
+    "v1": "ScrollSpy",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  },
+  {
+    "id": "command",
+    "v1": "Command",
+    "v2": "—",
+    "prio": "P2",
+    "status": "hors-scope-effets"
+  }
+]

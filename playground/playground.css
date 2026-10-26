@@ -2853,3 +2853,21 @@ k3-avatar [slot='badge'].ms {
   font-size: var(--k3-sys-typescale-label-large-size, 0.875rem);
   font-weight: 500;
 }
+
+/* Audio player — sticky demo staged (not viewport-fixed) */
+.demo-audio-sticky-stage {
+  position: relative;
+  width: 100%;
+  min-height: 7.5rem;
+  overflow: hidden;
+  border-radius: var(--k3-sys-shape-corner-large, 1rem);
+  background: var(--k3-sys-color-surface-container-low);
+}
+.demo-audio-sticky-stage k3-audio-player[variant='sticky'],
+.demo-audio-sticky-stage .demo-audio-sticky {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: none;
+}
