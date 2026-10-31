@@ -237,6 +237,7 @@ export type ConfettiCannonOptions = ConfettiFireOptions;
  */
 export class ConfettiCannon {
   private canvas: HTMLCanvasElement | null = null;
+  private ctx: CanvasRenderingContext2D | null = null;
   private animationObj: AnimationObject | null = null;
   private initialized = false;
   private allowResize: boolean;
@@ -245,6 +246,11 @@ export class ConfettiCannon {
   private globalDisableForReducedMotion: boolean;
   private resizer: (canvas: HTMLCanvasElement) => void;
   private options: ConfettiFireOptions;
+  /** Shared size bag — mutated by the resize listener; kept across bursts. */
+  private size = { width: 0, height: 0 };
+  private readonly onResize = (): void => {
+    this.size.width = this.size.height = 0;
+  };
 
   constructor(
     host: HTMLElement | HTMLCanvasElement | null = null,
@@ -262,11 +268,66 @@ export class ConfettiCannon {
     this.resizer = this.isLibCanvas ? setCanvasWindowSize : setCanvasRectSize;
   }
 
-  private fireLocal(
-    options: ConfettiFireOptions,
-    size: { width: number; height: number },
-    done: () => void,
-  ): Promise<void> {
+  /**
+   * Create + size the fullscreen canvas and touch a 2d context once.
+   * Call early (e.g. on `k3-confetti` connect) so the first burst is not cold.
+   */
+  warm(): void {
+    if (typeof document === 'undefined') return;
+    if (this.globalDisableForReducedMotion && prefersReducedMotion()) return;
+    this.ensureCanvas();
+    this.ensureSized();
+    this.ensureResizeListener();
+  }
+
+  private ensureCanvas(zIndex?: number): boolean {
+    if (this.isLibCanvas && this.animationObj) {
+      this.canvas = this.animationObj.canvas;
+    } else if (this.isLibCanvas && !this.canvas) {
+      const z = zIndex ?? Number(prop(this.options, 'zIndex', Number));
+      this.canvas = getCanvas(z);
+      this.canvas.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(this.canvas);
+    }
+    if (!this.canvas) return false;
+    if (!this.ctx) {
+      try {
+        this.ctx = this.canvas.getContext('2d', {
+          desynchronized: true,
+          alpha: true,
+        });
+      } catch {
+        this.ctx = null;
+      }
+      if (!this.ctx) {
+        try {
+          this.ctx = this.canvas.getContext('2d');
+        } catch {
+          this.ctx = null;
+        }
+      }
+    }
+    return !!this.ctx;
+  }
+
+  private ensureSized(): void {
+    if (!this.canvas) return;
+    if (!this.initialized || this.canvas.width === 0 || this.canvas.height === 0) {
+      this.resizer(this.canvas);
+      this.initialized = true;
+    }
+    this.size.width = this.canvas.width;
+    this.size.height = this.canvas.height;
+  }
+
+  private ensureResizeListener(): void {
+    if (!this.allowResize || this.hasResizeEventRegistered) return;
+    if (typeof window === 'undefined') return;
+    this.hasResizeEventRegistered = true;
+    window.addEventListener('resize', this.onResize, false);
+  }
+
+  private fireLocal(options: ConfettiFireOptions): Promise<void> {
     const particleCount = prop(options, 'particleCount', (val) =>
       onlyPositiveInt(Number(val)),
     ) as number;
@@ -298,8 +359,8 @@ export class ConfettiCannon {
           angle,
           spread,
           startVelocity,
-          color: colors[temp % colors.length],
-          shape: shapes[randomInt(0, shapes.length)],
+          color: colors[temp % colors.length]!,
+          shape: shapes[randomInt(0, shapes.length)]!,
           ticks,
           decay,
           gravity,
@@ -314,7 +375,83 @@ export class ConfettiCannon {
       return this.animationObj.addFettis(fettis);
     }
 
-    this.animationObj = animate(this.canvas!, fettis, this.resizer, size, done);
+    const done = () => {
+      // Keep the lib canvas mounted — tearing it down every burst forces a
+      // costly GPU realloc on the next fire (visible hitch on the demo page).
+      this.animationObj = null;
+    };
+
+    this.animationObj = animate(this.canvas!, fettis, this.resizer, this.size, done);
+    return this.animationObj.promise;
+  }
+
+  /**
+   * Fire several independent origins in one animation tick (used by rain).
+   * Much cheaper than N separate `fire({ particleCount: 1 })` calls.
+   */
+  fireSpread(shots: ConfettiFireOptions[]): Promise<void> {
+    if (!shots.length) return Promise.resolve();
+    if (
+      this.globalDisableForReducedMotion &&
+      prefersReducedMotion()
+    ) {
+      return Promise.resolve();
+    }
+    if (!this.ensureCanvas() || !this.canvas) return Promise.resolve();
+    this.ensureSized();
+    this.ensureResizeListener();
+
+    const fettis: Fetti[] = [];
+    for (const options of shots) {
+      const particleCount = prop(options, 'particleCount', (val) =>
+        onlyPositiveInt(Number(val)),
+      ) as number;
+      const angle = Number(prop(options, 'angle', Number));
+      const spread = Number(prop(options, 'spread', Number));
+      const startVelocity = Number(prop(options, 'startVelocity', Number));
+      const decay = Number(prop(options, 'decay', Number));
+      const gravity = Number(prop(options, 'gravity', Number));
+      const drift = Number(prop(options, 'drift', Number));
+      const colors = prop(options, 'colors', (val) =>
+        colorsToRgb(val as string[]),
+      ) as { r: number; g: number; b: number }[];
+      const ticks = Number(prop(options, 'ticks', Number));
+      const shapes = (prop(options, 'shapes') as ConfettiFireShape[]) ?? ['square'];
+      const scalar = Number(prop(options, 'scalar'));
+      const flat = Boolean(prop(options, 'flat'));
+      const origin = getOrigin(options);
+      const startX = this.canvas.width * origin.x;
+      const startY = this.canvas.height * origin.y;
+      let temp = particleCount;
+      while (temp--) {
+        fettis.push(
+          randomPhysics({
+            x: startX,
+            y: startY,
+            angle,
+            spread,
+            startVelocity,
+            color: colors[temp % colors.length]!,
+            shape: shapes[randomInt(0, shapes.length)]!,
+            ticks,
+            decay,
+            gravity,
+            drift,
+            scalar,
+            flat,
+          }),
+        );
+      }
+    }
+
+    if (this.animationObj) {
+      return this.animationObj.addFettis(fettis);
+    }
+
+    const done = () => {
+      this.animationObj = null;
+    };
+    this.animationObj = animate(this.canvas, fettis, this.resizer, this.size, done);
     return this.animationObj.promise;
   }
 
@@ -328,69 +465,14 @@ export class ConfettiCannon {
       return Promise.resolve();
     }
 
-    if (this.isLibCanvas && this.animationObj) {
-      this.canvas = this.animationObj.canvas;
-    } else if (this.isLibCanvas && !this.canvas) {
-      this.canvas = getCanvas(zIndex);
-      document.body.appendChild(this.canvas);
-    }
-
-    try {
-      if (!this.canvas?.getContext?.('2d')) {
-        return Promise.resolve();
-      }
-    } catch {
+    if (!this.ensureCanvas(zIndex)) {
       return Promise.resolve();
     }
 
-    if (!this.isLibCanvas && !this.initialized) {
-      this.resizer(this.canvas!);
-    } else if (this.allowResize && !this.initialized) {
-      this.resizer(this.canvas!);
-    } else if (this.isLibCanvas && !this.initialized) {
-      setCanvasWindowSize(this.canvas!);
-    } else if (
-      this.isLibCanvas &&
-      this.canvas &&
-      (this.canvas.width === 0 || this.canvas.height === 0)
-    ) {
-      setCanvasWindowSize(this.canvas);
-    } else if (
-      !this.isLibCanvas &&
-      this.canvas &&
-      (this.canvas.width === 0 || this.canvas.height === 0)
-    ) {
-      this.resizer(this.canvas);
-    }
+    this.ensureSized();
+    this.ensureResizeListener();
 
-    const size = { width: this.canvas!.width, height: this.canvas!.height };
-    this.initialized = true;
-
-    const onResize = () => {
-      size.width = size.height = 0;
-    };
-
-    const done = () => {
-      this.animationObj = null;
-      if (this.allowResize) {
-        this.hasResizeEventRegistered = false;
-        window.removeEventListener('resize', onResize);
-      }
-      if (this.isLibCanvas && this.canvas) {
-        if (document.body.contains(this.canvas)) {
-          document.body.removeChild(this.canvas);
-        }
-        this.canvas = null;
-        this.initialized = false;
-      }
-    };
-
-    if (this.allowResize && !this.hasResizeEventRegistered) {
-      this.hasResizeEventRegistered = true;
-      window.addEventListener('resize', onResize, false);
-    }
-
-    return this.fireLocal(options, size, done);
+    return this.fireLocal(options);
   }
 
   reset(): void {
@@ -399,10 +481,17 @@ export class ConfettiCannon {
 
   destroy(): void {
     this.reset();
-    if (this.canvas && document.body.contains(this.canvas)) {
+    if (this.hasResizeEventRegistered && typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.onResize);
+      this.hasResizeEventRegistered = false;
+    }
+    if (this.isLibCanvas && this.canvas && document.body.contains(this.canvas)) {
       document.body.removeChild(this.canvas);
     }
     this.canvas = null;
+    this.ctx = null;
+    this.initialized = false;
+    this.size.width = this.size.height = 0;
     bitmapMapper.clear();
   }
 
@@ -710,8 +799,11 @@ function getOrigin(options: ConfettiFireOptions): { x: number; y: number } {
  * Identique à canvas-confetti setCanvasWindowSize
  */
 function setCanvasWindowSize(canvas: HTMLCanvasElement): void {
-    canvas.width = document.documentElement.clientWidth;
-    canvas.height = document.documentElement.clientHeight;
+    const w = document.documentElement.clientWidth;
+    const h = document.documentElement.clientHeight;
+    // Assigning canvas.width/height reallocates the GPU buffer — skip no-ops.
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
 }
 
 /**
@@ -720,8 +812,10 @@ function setCanvasWindowSize(canvas: HTMLCanvasElement): void {
  */
 function setCanvasRectSize(canvas: HTMLCanvasElement): void {
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+    const w = Math.max(0, Math.floor(rect.width));
+    const h = Math.max(0, Math.floor(rect.height));
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
 }
 
 /**

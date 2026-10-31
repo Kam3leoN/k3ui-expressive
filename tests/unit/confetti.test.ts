@@ -55,7 +55,23 @@ describe('k3-confetti', () => {
     expect(typeof ConfettiPresets.fireBasic).toBe('function');
     const c = new ConfettiCannon(null, { resize: false, disableForReducedMotion: false });
     expect(typeof c.fire).toBe('function');
+    expect(typeof c.warm).toBe('function');
+    expect(typeof c.fireSpread).toBe('function');
     c.destroy();
+  });
+
+  it('keeps the lib canvas mounted across bursts', async () => {
+    const c = new ConfettiCannon(null, { resize: false, disableForReducedMotion: false });
+    c.warm();
+    const canvases = () => document.body.querySelectorAll(':scope > canvas').length;
+    const warmed = canvases();
+    expect(warmed).toBeGreaterThan(0);
+    await c.fire({ particleCount: 1, ticks: 2, disableForReducedMotion: false });
+    expect(canvases()).toBe(warmed);
+    await c.fire({ particleCount: 1, ticks: 2, disableForReducedMotion: false });
+    expect(canvases()).toBe(warmed);
+    c.destroy();
+    expect(canvases()).toBe(0);
   });
 
   it('shapeFromPath throws or returns path shape when Path2D exists', () => {

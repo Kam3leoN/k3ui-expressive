@@ -81,7 +81,14 @@ export class K3Confetti extends K3Element {
       );
     }
     void this.updateComplete.then(() => {
-      this.ensureCannon();
+      // Warm the fullscreen canvas after first paint so the first burst
+      // does not hitch on GPU buffer allocation.
+      const warm = () => this.ensureCannon().warm();
+      if (typeof requestAnimationFrame === 'function') {
+        requestAnimationFrame(() => requestAnimationFrame(warm));
+      } else {
+        warm();
+      }
       if (this.autoFire) {
         if (this.preset) this.presetFire(this.preset);
         else void this.fire();

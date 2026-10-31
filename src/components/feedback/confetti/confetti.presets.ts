@@ -33,15 +33,21 @@ function randomInRange(min: number, max: number): number {
 
 function resolveCannon(target?: ConfettiPresetTarget): ConfettiCannon | null {
   if (typeof window === 'undefined') return null;
-  if (target instanceof ConfettiCannon) return target;
-  if (target instanceof HTMLElement) {
-    const host = target as HTMLElement & { cannon?: ConfettiCannon };
-    if (host.cannon instanceof ConfettiCannon) return host.cannon;
-    const c = new ConfettiCannon(null, { resize: true });
-    host.cannon = c;
-    return c;
+  let cannon: ConfettiCannon | null = null;
+  if (target instanceof ConfettiCannon) cannon = target;
+  else if (target instanceof HTMLElement) {
+    const host = target as HTMLElement & { getCannon?: () => ConfettiCannon; cannon?: ConfettiCannon };
+    if (typeof host.getCannon === 'function') cannon = host.getCannon();
+    else if (host.cannon instanceof ConfettiCannon) cannon = host.cannon;
+    else {
+      cannon = new ConfettiCannon(null, { resize: true });
+      host.cannon = cannon;
+    }
+  } else {
+    cannon = new ConfettiCannon(null, { resize: true });
   }
-  return new ConfettiCannon(null, { resize: true });
+  cannon.warm();
+  return cannon;
 }
 
 /** Basic cannon — default blast. */
@@ -242,7 +248,7 @@ export function fireEmoji(target?: ConfettiPresetTarget): void {
 
 /**
  * Confetti rain — particles spawn above the viewport and fall for `duration` seconds.
- * Launch window = 60 % of duration (rAF-paced, one particle per shot).
+ * Launch window = 60 % of duration (rAF-paced, batched via `fireSpread`).
  *
  * @example
  * rain({ count: 250, gravity: 0.9, duration: 3 });
@@ -270,8 +276,9 @@ export function fireRain(
       count,
       Math.round((count * (now - start)) / launchMs),
     );
+    const batch: ConfettiFireOptions[] = [];
     for (; fired < targetCount; fired++) {
-      void instance.fire({
+      batch.push({
         particleCount: 1,
         origin: { x: Math.random(), y: -0.05 - Math.random() * 0.2 },
         angle: 270,
@@ -285,6 +292,7 @@ export function fireRain(
         colors: [palette[Math.floor(Math.random() * palette.length)]!],
       });
     }
+    if (batch.length) void instance.fireSpread(batch);
     if (fired < count) requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
