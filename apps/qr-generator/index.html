@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR code generator · k3ui</title>
+    <meta
+      name="description"
+      content="QR code generator built with k3ui — content, design, download."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Material Symbols subset — ligatures used by the wizard + k3-qr-code empty state -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=arrow_drop_down,call,chat,check,close,contact_page,content_copy,download,event,link,mail,notes,qr_code_2,restart_alt,sms,upload,visibility,visibility_off,warning,wifi&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      html,
+      body {
+        margin: 0;
+        min-block-size: 100%;
+        background: var(--k3-sys-color-surface, #fef7ff);
+        color: var(--k3-sys-color-on-surface, #1d1b20);
+        font-family: 'Google Sans', 'Roboto', system-ui, sans-serif;
+      }
+      .app {
+        box-sizing: border-box;
+        max-inline-size: 72rem;
+        margin-inline: auto;
+        padding: clamp(1rem, 3vw, 2rem);
+      }
+      .app-head {
+        margin-block-end: 1.5rem;
+      }
+      .app-head h1 {
+        margin: 0 0 0.35rem;
+        font-size: clamp(1.5rem, 2.5vw, 2rem);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .app-head p {
+        margin: 0;
+        color: var(--k3-sys-color-on-surface-variant, #49454f);
+        max-inline-size: 40rem;
+      }
+      k3-qr-generator {
+        display: block;
+        inline-size: 100%;
+      }
+      .boot-hint {
+        display: none;
+        margin-block-start: 1.25rem;
+        padding: 1rem 1.25rem;
+        border-radius: 0.75rem;
+        background: #fff3e0;
+        color: #5d3b00;
+        border: 1px solid #ffcc80;
+        max-inline-size: 40rem;
+        line-height: 1.45;
+      }
+      .boot-hint code {
+        font-size: 0.95em;
+      }
+      .boot-hint[data-show='true'] {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="app-head">
+        <h1>QR code generator</h1>
+        <p>
+          Built with <code>k3ui</code> — pick content, style the code, download PNG / SVG / JPEG /
+          WebP.
+        </p>
+      </header>
+      <k3-qr-generator id="qr-gen" filename="k3ui-qr-code"></k3-qr-generator>
+      <p id="boot-hint" class="boot-hint" role="status">
+        This page must be served by Vite — opening the HTML file directly will not load the app.
+        From the repo root run <code>npm run dev:qr</code>, then open
+        <a href="http://localhost:5174/">http://localhost:5174/</a>.
+      </p>
+    </main>
+    <script>
+      (function () {
+        var hint = document.getElementById('boot-hint');
+        if (!hint) return;
+        if (location.protocol === 'file:') {
+          hint.dataset.show = 'true';
+          return;
+        }
+        window.addEventListener('error', function onBootErr(e) {
+          if (e.filename && /main\.ts|qr-generator/.test(e.filename)) {
+            hint.dataset.show = 'true';
+            window.removeEventListener('error', onBootErr);
+          }
+        });
+        customElements.whenDefined('k3-qr-generator').then(function () {
+          hint.dataset.show = '';
+        });
+        setTimeout(function () {
+          if (!customElements.get('k3-qr-generator')) hint.dataset.show = 'true';
+        }, 4000);
+      })();
+    </script>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

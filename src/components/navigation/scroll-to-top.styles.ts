@@ -85,6 +85,7 @@ export const scrollToTopStyles = css`
   /* Peer conceal — fab-menu expansion or sheet/dialog overlay. */
   :host([data-k3-fab-menu-concealed]),
   :host([data-k3-overlay-concealed]) {
+    z-index: 1 !important; /* under modal sheet band (1200+) while fading */
     opacity: 0 !important;
     pointer-events: none !important;
     visibility: hidden;

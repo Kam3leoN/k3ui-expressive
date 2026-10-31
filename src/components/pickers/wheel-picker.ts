@@ -2,6 +2,7 @@ import { html, nothing, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { K3Element, prefersReducedMotion } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { i18n } from '../../i18n/index.js';
 import { WheelPickerSpecs, type WheelPickerDirection } from './wheel-picker.specs.js';
 import { wheelPickerStyles } from './wheel-picker.styles.js';
 
@@ -192,7 +193,7 @@ export class K3WheelPicker extends K3Element {
         <button
           type="button"
           class="btn btn--up"
-          aria-label=${WheelPickerSpecs.accessibility.prevLabel}
+          aria-label=${i18n.t('wheelPicker.prev', WheelPickerSpecs.accessibility.prevLabel)}
           @click=${() => this.cycle(index, -1)}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -217,7 +218,7 @@ export class K3WheelPicker extends K3Element {
         <button
           type="button"
           class="btn btn--down"
-          aria-label=${WheelPickerSpecs.accessibility.nextLabel}
+          aria-label=${i18n.t('wheelPicker.next', WheelPickerSpecs.accessibility.nextLabel)}
           @click=${() => this.cycle(index, 1)}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -239,7 +240,7 @@ export class K3WheelPicker extends K3Element {
             </div>
           `
         : nothing}
-      <div class="wheels" part="wheels" aria-label=${WheelPickerSpecs.accessibility.wheelsLabel}>
+      <div class="wheels" part="wheels" aria-label=${i18n.t('wheelPicker.columns', WheelPickerSpecs.accessibility.wheelsLabel)}>
         ${this.values.map((_, i) => this.renderColumn(i))}
       </div>
       ${this.showSubmitButton

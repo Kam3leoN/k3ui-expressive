@@ -94,7 +94,6 @@ export function wireUtilityDemos(): void {
     detectGesture(
       panEl,
       pan(
-        { activationMode: 'move', minDisplacement: 2 },
         phase({
           onUpdate: (d) => {
             const p = d as PanGestureDetail;
@@ -107,6 +106,7 @@ export function wireUtilityDemos(): void {
             oy += p.totalDeltaY;
           },
         }),
+        { activationMode: 'move', minDisplacement: 2 },
       ),
     );
   }

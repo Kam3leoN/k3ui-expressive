@@ -47,7 +47,7 @@ describe('k3-date-picker', () => {
     const el = createPicker({ variant: 'modal', value: '2026-04-15' });
     await el.updateComplete;
     const changes: unknown[] = [];
-    el.addEventListener('k3-change', ((e: CustomEvent) => changes.push(e.detail)) as EventListener);
+    el.addEventListener('k3-change', ((e: CustomEvent) => void changes.push(e.detail)) as unknown as EventListener);
     await el.show();
     await el.hide(true);
     expect(changes).toHaveLength(1);

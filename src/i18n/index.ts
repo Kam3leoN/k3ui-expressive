@@ -66,4 +66,14 @@ export const i18n = {
     }
     return en;
   },
+  /**
+   * Merge extra keys into locale catalogs (apps / demos that ship their own strings).
+   * Existing keys are overwritten by the extension.
+   */
+  extend(partial: Partial<Record<LocaleCode, Dict>>): void {
+    for (const loc of ['en', 'fr'] as const) {
+      const dict = partial[loc];
+      if (dict) Object.assign(catalogs[loc], dict);
+    }
+  },
 };

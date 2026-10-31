@@ -70,7 +70,7 @@ export class K3Radio extends K3Element {
       this.closest('fieldset') ??
       this.closest('form') ??
       (this.parentElement as ParentNode | null) ??
-      this.getRootNode()
+      (this.getRootNode() as unknown as ParentNode)
     );
   }
 

@@ -85,6 +85,7 @@ export const fabMenuStyles = css`
       var(--k3-fab-menu-edge) + var(--k3-nav-chrome-inset-block-end, 0px)
     );
     top: auto;
+    /* Below modal sheet/dialog (1200+) — raised only while no overlay. */
     z-index: 1100;
     transition:
       bottom var(--k3-sys-motion-duration-medium2, 300ms)
@@ -93,6 +94,10 @@ export const fabMenuStyles = css`
         var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1)),
       visibility var(--k3-sys-motion-duration-short4, 200ms)
         var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1));
+  }
+  :host([fixed][data-k3-overlay-concealed]),
+  :host([fixed][data-k3-fab-menu-concealed]) {
+    z-index: 1;
   }
   :host([fixed][contained]) {
     position: absolute;

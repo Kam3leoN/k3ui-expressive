@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `k3-qr-code` — styled QR: zero-dependency encoder (ISO/IEC 18004, v1–40, ECC L–H), qr.io patterns / markers / centres, gradient, logo, CTA frames; PNG / SVG / JPEG / WebP export
+- `buildQrPayload()` / `validateQrPayload()` helpers
+- `i18n.extend()` — merge app/demo locale dictionaries into the runtime catalogs
+
+### Changed
+
+- Replaced `qr-code-styling`-based QR with in-house encoder + SVG renderer
+- QR generator wizard moved out of the published package to `apps/qr-generator` (`npm run dev:qr`)
+
 ## [0.1.0] — 2026-10-31
 
 Premier jalon pre-1.0 après le greenfield `0.0.1`. API encore évolutive (pas de promesse de stabilité 1.x).

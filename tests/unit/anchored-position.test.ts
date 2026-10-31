@@ -15,7 +15,8 @@ describe('placeVerticalDocked', () => {
 
   it('flips above and caps maxHeight near the bottom', () => {
     const tr = new DOMRect(20, 500, 40, 40);
-    const r = placeVerticalDocked(tr, 400, 600, false, { gap: 4, edge: 8, minH: 48 });
+    /* 520 > 488 available above → flip, pin to the edge and cap the height */
+    const r = placeVerticalDocked(tr, 520, 600, false, { gap: 4, edge: 8, minH: 48 });
     expect(r.above).toBe(true);
     expect(r.top).toBe(8);
     expect(r.maxHeight).toBeGreaterThan(0);
@@ -43,7 +44,7 @@ describe('computeDockedPosition', () => {
     const anchor = new DOMRect(40, 520, 120, 40);
     const r = computeDockedPosition(
       anchor,
-      { width: 280, height: 300 },
+      { width: 280, height: 560 },
       { width: 800, height: 600 },
       8,
       8,

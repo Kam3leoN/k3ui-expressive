@@ -166,6 +166,8 @@ export class K3Select extends K3Element {
   private itemLabel(item: HTMLElement): string {
     const parts: string[] = [];
     for (const n of item.childNodes) {
+      // Comments carry Lit part markers (<!--?lit$…$-->) when options are templated
+      if (n.nodeType === Node.COMMENT_NODE) continue;
       if (n instanceof HTMLElement && n.hasAttribute('slot')) continue;
       parts.push(n.textContent ?? '');
     }

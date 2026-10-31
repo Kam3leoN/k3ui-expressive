@@ -40,7 +40,7 @@ describe('k3-toolbar', () => {
     expect(el.getAttribute('color')).toBe('vibrant');
     expect(el.getAttribute('shape')).toBe('rounded');
 
-    (el as HTMLElement & { expanded: boolean }).expanded = true;
+    (el as unknown as HTMLElement & { expanded: boolean }).expanded = true;
     await el.updateComplete;
     expect(el.hasAttribute('expanded')).toBe(true);
 

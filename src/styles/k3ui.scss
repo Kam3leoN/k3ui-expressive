@@ -51,11 +51,13 @@
   }
 
   /*
-   * Fab-menu expansion / overlay conceal — peers without show/hide
-   * (k3-button, …). FABs animate via fab-visibility + `hidden`.
+   * Fab-menu expansion / overlay conceal — peers on the overlay trajectory.
+   * z-index sink keeps mid-fade chrome under the modal sheet (≥1200).
+   * Nav-rail / nav-bar FABs are never tagged (see fab-visibility).
    */
   [data-k3-fab-menu-concealed],
   [data-k3-overlay-concealed] {
+    z-index: 1 !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;

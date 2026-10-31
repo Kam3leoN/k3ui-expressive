@@ -3,6 +3,7 @@ import { property, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { K3Element } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { i18n } from '../../i18n/index.js';
 import { highlightCode, languageFromClassName, resolveCodeLanguage } from './codeblock-highlighter.js';
 import { CodeBlockSpecs } from './codeblock.specs.js';
 import { codeblockStyles } from './codeblock.styles.js';
@@ -39,7 +40,7 @@ export class K3CodeBlock extends K3Element {
     super.connectedCallback();
     this.setAttribute('role', CodeBlockSpecs.accessibility.role);
     if (!this.hasAttribute('aria-label')) {
-      this.setAttribute('aria-label', CodeBlockSpecs.accessibility.ariaLabel);
+      this.setAttribute('aria-label', i18n.t('codeblock.ariaLabel', CodeBlockSpecs.accessibility.ariaLabel));
     }
     this.style.setProperty('--k3-codeblock-collapsed-height', `${this.collapsedHeight}px`);
   }
@@ -157,7 +158,7 @@ export class K3CodeBlock extends K3Element {
                           type="button"
                           class="action"
                           part="copy"
-                          aria-label=${CodeBlockSpecs.accessibility.copyLabel}
+                          aria-label=${i18n.t('codeblock.copy', CodeBlockSpecs.accessibility.copyLabel)}
                           @click=${() => void this.copyText()}
                         >
                           <span
@@ -176,7 +177,7 @@ export class K3CodeBlock extends K3Element {
                           type="button"
                           class="action"
                           part="download"
-                          aria-label=${CodeBlockSpecs.accessibility.downloadLabel}
+                          aria-label=${i18n.t('codeblock.download', CodeBlockSpecs.accessibility.downloadLabel)}
                           @click=${() => this.downloadText()}
                         >
                           <span
@@ -206,8 +207,8 @@ export class K3CodeBlock extends K3Element {
                 @click=${() => this.toggleExpand()}
               >
                 ${this.expanded
-                  ? CodeBlockSpecs.accessibility.expandLess
-                  : CodeBlockSpecs.accessibility.expandMore}
+                  ? i18n.t('codeblock.showLess', CodeBlockSpecs.accessibility.expandLess)
+                  : i18n.t('codeblock.showMore', CodeBlockSpecs.accessibility.expandMore)}
               </button>
             `
           : nothing}

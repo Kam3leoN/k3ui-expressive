@@ -556,6 +556,41 @@ const COMPONENT_API: Record<
       ['action', 'CTA slot host'],
     ],
   },
+  'qr-code': {
+    properties: [
+      ['value', 'string', "''", 'Text to encode (see buildQrPayload)'],
+      ['ecc', "'L'|'M'|'Q'|'H'", 'M', 'Error correction 7 · 15 · 25 · 30 %'],
+      ['size', "'xs'|'sm'|'md'|'lg'|'xl'", 'md', 'XS 96 · SM 128 · MD 192 · LG 256 · XL 320'],
+      ['fluid', 'boolean', 'false', 'Fill the container width'],
+      ['margin', 'number', '2', 'Quiet zone (modules)'],
+      ['dot-style', "'square'|'rounded'|'extra-rounded'|'dots'|'classy'|'diamond'|'vertical'|'horizontal'|'tiny'", 'square', 'Pattern'],
+      ['eye-frame-style / eye-ball-style', "'square'|'rounded'|'extra-rounded'|'circle'|'leaf'|'diamond'", 'square', 'Finder shapes'],
+      ['color / background', 'string', '#000000 / #ffffff', 'Ink and background (transparent ok)'],
+      ['gradient · gradient-color · gradient-rotation', "'none'|'linear'|'radial' · string · number", 'none', 'Dots gradient'],
+      ['eye-frame-color / eye-ball-color', 'string', "''", 'Finder colours (empty = dots)'],
+      ['logo / logo-icon', 'string', "''", 'Image URL or preset vector icon'],
+      ['logo-size · logo-margin · logo-keep-dots', 'number · number · boolean', '0.22 · 1 · false', 'Clamped to the ECC budget'],
+      ['frame', "'none'|'box'|'box-top'|'bubble'|'pill'|'corners'|'clipboard'|'bag'|'phone'|'circle'|'banner'", 'none', 'CTA frame (qr.io + classic)'],
+      ['frame-text · frame-color · frame-font', "string · string · 'sans'|'serif'|'mono'", 'Scan me', 'Frame phrase'],
+      ['export-size · filename', 'number · string', '1024 · qr-code', 'Download defaults'],
+    ],
+    methods: [
+      ['toSvg', '(size?) => string', 'Standalone SVG markup'],
+      ['toBlob / toDataUrl', '(format?, size?) => Promise', 'png · svg · jpeg · webp'],
+      ['download', '(format?, { size, filename }) => Promise<boolean>', 'Fires k3-download first'],
+      ['copy', '(format?) => Promise<boolean>', 'PNG image or SVG text'],
+    ],
+    events: [
+      ['k3-render', '{ version, modules, ecc, mask, mode, length }', 'New code drawn'],
+      ['k3-error', "{ reason: 'overflow' }", 'Payload too long'],
+      ['k3-download', '{ format, filename, blob, width }', 'Cancelable — save it yourself'],
+      ['k3-copy', '{ format, ok }', 'After copy()'],
+    ],
+    'css-parts': [
+      ['code', 'Wrapper of the rendered SVG'],
+      ['state', 'Empty / overflow placeholder'],
+    ],
+  },
   codeblock: {
     properties: [
       ['label', 'string', 'Code', 'Toolbar title'],

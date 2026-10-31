@@ -142,12 +142,13 @@ export class K3Switch extends K3Element {
         part="track"
         role="switch"
         aria-checked=${String(this.selected)}
+        aria-labelledby="label"
         ?disabled=${this.disabled}
         @click=${this.toggle}
       >
         <span class="handle" part="handle"></span>
       </button>
-      <span part="label"><slot></slot></span>`;
+      <span part="label" id="label"><slot></slot></span>`;
   }
 }
 export default K3Switch;

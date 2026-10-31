@@ -191,9 +191,15 @@ export const textFieldStyles = css`
     box-sizing: border-box;
   }
 
+  /*
+   * Logical borders — physical TRBL border-style opens the wrong edge in RTL
+   * (flex puts .outline-start on the inline-end side).
+   */
   .outline-start::before,
   .outline-start::after {
-    border-style: solid none solid solid;
+    border-block-style: solid;
+    border-inline-start-style: solid;
+    border-inline-end-style: none;
     border-start-start-radius: inherit;
     border-end-start-radius: inherit;
     border-start-end-radius: 0;
@@ -206,7 +212,9 @@ export const textFieldStyles = css`
   }
   .outline-end::before,
   .outline-end::after {
-    border-style: solid solid solid none;
+    border-block-style: solid;
+    border-inline-start-style: none;
+    border-inline-end-style: solid;
     border-start-end-radius: inherit;
     border-end-end-radius: inherit;
     border-start-start-radius: 0;
@@ -309,6 +317,19 @@ export const textFieldStyles = css`
 
   .outline-panel-inactive {
     border-width: var(--k3-tf-outline-width);
+  }
+  /*
+   * The panels only paint their bottom border (top style is none), so their
+   * computed border-top-width is 0 and \`border: inherit\` copied that 0 into
+   * the pseudo-elements — the notch stayed open on every empty field.
+   */
+  .outline-panel-inactive::before,
+  .outline-panel-inactive::after {
+    border-top-width: var(--k3-tf-outline-width);
+  }
+  .outline-panel-active::before,
+  .outline-panel-active::after {
+    border-top-width: 2px;
   }
   .outline-panel-active {
     border-width: 2px;

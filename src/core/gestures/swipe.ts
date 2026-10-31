@@ -66,8 +66,6 @@ export function swipe(
       let pid: number | null = null;
       let sx = 0;
       let sy = 0;
-      let lx = 0;
-      let ly = 0;
       let t0 = 0;
       let lastT = 0;
       let lastX = 0;
@@ -77,8 +75,8 @@ export function swipe(
       const onDown = (e: PointerEvent) => {
         if (pid != null || !allowsPointer(options, e)) return;
         pid = e.pointerId;
-        sx = lx = lastX = e.clientX;
-        sy = ly = lastY = e.clientY;
+        sx = lastX = e.clientX;
+        sy = lastY = e.clientY;
         t0 = lastT = now(e);
         active = false;
         try {

@@ -20,6 +20,8 @@ import {
   registerSheetChromeHost,
   unregisterSheetChromeHost,
   recomputeSheetChromeShift,
+  markSheetChromeOpening,
+  clearSheetChromeOpening,
 } from './sheet-chrome-shift.js';
 
 /**
@@ -156,6 +158,19 @@ export class K3Dialog extends K3Element {
     return r.width >= 1 && r.height >= 1 ? r : null;
   }
 
+  /** Centered basic panel estimate while opening (not full viewport). */
+  getOpeningOverlayZone(): DOMRectReadOnly | null {
+    if (typeof window === 'undefined') return null;
+    const w = window.innerWidth || 1;
+    const h = window.innerHeight || 1;
+    if (this.isFullscreen()) {
+      return new DOMRect(0, 0, w, h);
+    }
+    const pw = Math.min(35 * 16, w - 3 * 16); /* max 560 · 24dp*2 */
+    const ph = Math.min(h * 0.8, 40 * 16);
+    return new DOMRect((w - pw) / 2, (h - ph) / 2, pw, ph);
+  }
+
   async show(): Promise<boolean> {
     const ok = await runOpenClose(
       this,
@@ -163,6 +178,8 @@ export class K3Dialog extends K3Element {
       async () => {
         this.syncSlots();
         this.open = true;
+        /* Kick FAB/STT hide before enter — fades during elevate/paint (no await). */
+        markSheetChromeOpening(this);
         await this.playEnter();
         requestAnimationFrame(() => this.syncScrollEdges());
         this.trap.activate(this.panelEl);
@@ -177,11 +194,15 @@ export class K3Dialog extends K3Element {
     );
     if (ok) {
       requestAnimationFrame(() => recomputeSheetChromeShift());
+    } else {
+      clearSheetChromeOpening(this);
+      recomputeSheetChromeShift();
     }
     return ok;
   }
 
   async hide(source: 'user' | 'api' | 'escape' | 'backdrop' = 'api'): Promise<boolean> {
+    clearSheetChromeOpening(this);
     const ok = await runOpenClose(
       this,
       'close',
@@ -258,10 +279,12 @@ export class K3Dialog extends K3Element {
     /* Attribute `open` without show() — enter path only (no 2nd open-start) */
     if (changed.has('open')) {
       if (this.open && !this.visible) {
+        markSheetChromeOpening(this);
         void this.playEnter().then(() => {
           requestAnimationFrame(() => recomputeSheetChromeShift());
         });
       } else if (!this.open && !this.visible) {
+        clearSheetChromeOpening(this);
         this.restoreLayer();
         recomputeSheetChromeShift();
       }

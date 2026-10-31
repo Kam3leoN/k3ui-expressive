@@ -11,7 +11,7 @@ import {
 import { i18n } from '../../i18n/index.js';
 import { hostReset } from '../_shared.js';
 import { textFieldStyles } from './text-field.styles.js';
-import type { TextFieldType, TextFieldVariant } from './field-types.js';
+import { TEMPORAL_FIELD_TYPES, type TextFieldType, type TextFieldVariant } from './field-types.js';
 
 export type { TextFieldType, TextFieldVariant } from './field-types.js';
 
@@ -88,7 +88,8 @@ export class K3TextField extends K3Element {
 
   private get floated(): boolean {
     if (this.isStandard) return false;
-    return this.focused || !!this.value;
+    // date / time / datetime-local render a native mask — never under the label
+    return this.focused || !!this.value || TEMPORAL_FIELD_TYPES.has(this.type);
   }
 
   private get showPasswordToggle(): boolean {

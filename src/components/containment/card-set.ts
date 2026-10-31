@@ -154,7 +154,7 @@ export class K3CardSet extends K3Element {
   private removeCard(card: K3Card, source: string): void {
     const list = this.cards();
     const idx = list.indexOf(card);
-    const ok = this.emit('k3-dismiss', { card, source, index: idx }, { cancelable: true });
+    const ok = this.emit('k3-dismiss', { card, source, index: idx }, true);
     if (!ok) return;
     card.remove();
     const next = list[idx] ?? list[idx - 1];
@@ -222,7 +222,7 @@ export class K3CardSet extends K3Element {
     });
     if (nav.handled) {
       e.preventDefault();
-      const next = hosts[nav.index];
+      const next = hosts[nav.itemIndex];
       const surface = next?.shadowRoot?.querySelector(
         '[part="container"]',
       ) as HTMLElement | null;

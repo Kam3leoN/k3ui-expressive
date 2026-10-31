@@ -8,6 +8,7 @@ import {
   focusRingStyles,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { i18n } from '../../i18n/index.js';
 import {
   CounterSpecs,
   resolveCounterSize,
@@ -274,7 +275,7 @@ export class K3Counter extends K3Element {
           type="button"
           class="btn btn--decrement k3-state-layer k3-focus-ring"
           part="decrement"
-          aria-label=${CounterSpecs.accessibility.ariaLabelDecrement}
+          aria-label=${i18n.t('counter.decrement', CounterSpecs.accessibility.ariaLabelDecrement)}
           ?disabled=${decDisabled}
           @click=${this.handleDecrement}
         >
@@ -292,7 +293,7 @@ export class K3Counter extends K3Element {
           part="value"
           role="spinbutton"
           tabindex=${this.canEdit() ? '0' : '-1'}
-          aria-label=${CounterSpecs.accessibility.ariaLabelValue}
+          aria-label=${i18n.t('counter.value', CounterSpecs.accessibility.ariaLabelValue)}
           aria-valuenow=${this.value}
           aria-valuetext=${display}
           aria-valuemin=${ifDefined(this.min)}
@@ -308,7 +309,7 @@ export class K3Counter extends K3Element {
           type="button"
           class="btn btn--increment k3-state-layer k3-focus-ring"
           part="increment"
-          aria-label=${CounterSpecs.accessibility.ariaLabelIncrement}
+          aria-label=${i18n.t('counter.increment', CounterSpecs.accessibility.ariaLabelIncrement)}
           ?disabled=${incDisabled}
           @click=${this.handleIncrement}
         >

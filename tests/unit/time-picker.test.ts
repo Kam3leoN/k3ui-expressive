@@ -53,7 +53,7 @@ describe('k3-time-picker', () => {
     const el = createPicker({ format: '24', value: '14:30' });
     await el.updateComplete;
     const changes: unknown[] = [];
-    el.addEventListener('k3-change', ((e: CustomEvent) => changes.push(e.detail)) as EventListener);
+    el.addEventListener('k3-change', ((e: CustomEvent) => void changes.push(e.detail)) as unknown as EventListener);
     await el.show();
     await el.hide(true);
     expect(changes).toHaveLength(1);
@@ -134,7 +134,7 @@ describe('k3-time-picker', () => {
     const el = createPicker({ format: '24', value: '10:00' });
     await el.updateComplete;
     const inputs: unknown[] = [];
-    el.addEventListener('k3-input', ((e: CustomEvent) => inputs.push(e.detail)) as EventListener);
+    el.addEventListener('k3-input', ((e: CustomEvent) => void inputs.push(e.detail)) as unknown as EventListener);
     await el.show();
     await el.updateComplete;
     const dial = el.shadowRoot?.querySelector('k3-time-picker-dial');
@@ -228,7 +228,7 @@ describe('k3-time-picker', () => {
     hour.value = '14';
     hour.dispatchEvent(new Event('input', { bubbles: true }));
     await el.updateComplete;
-    await new Promise((r) => queueMicrotask(r));
+    await new Promise<void>((r) => queueMicrotask(() => r()));
     expect(el.shadowRoot?.activeElement ?? document.activeElement).toBe(minute);
     await el.hide(false);
   });

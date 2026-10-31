@@ -141,8 +141,18 @@ export const codeblockStyles = css`
   }
 
   .icon {
+    font-family: var(
+      --k3-sys-icon-font-family,
+      'Material Symbols Rounded',
+      'Material Symbols Outlined',
+      sans-serif
+    );
+    font-weight: 400;
+    font-style: normal;
     font-size: 1.25rem;
     line-height: 1;
+    letter-spacing: normal;
+    font-feature-settings: 'liga';
   }
 
   ::slotted(pre),

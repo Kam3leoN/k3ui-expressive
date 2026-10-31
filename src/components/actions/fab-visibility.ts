@@ -66,6 +66,11 @@ export const fabVisibilityCss = `
     visibility: hidden;
     pointer-events: none;
   }
+  /* Sheet/dialog trajectory — stay under modal band (1200+) while fading. */
+  :host([data-k3-overlay-concealed]),
+  :host([data-k3-fab-menu-concealed]) {
+    z-index: 1 !important;
+  }
   @media (prefers-reduced-motion: reduce) {
     :host {
       transition: none;
@@ -206,9 +211,32 @@ export function concealPeersInZone(
   return out;
 }
 
+/** Shell nav chrome — never conceal (not on sheet/dialog trajectory). */
+const SHELL_NAV_SEL = 'k3-nav-rail, k3-nav-bar, k3-top-app-bar';
+
+/** Last on-screen box before hide — used to re-test intersection after `hidden`. */
+const lastOverlayPeerRect = new WeakMap<HTMLElement, DOMRectReadOnly>();
+
+export function overlayPeerHitsZone(
+  el: HTMLElement,
+  overlays: Array<{ host: HTMLElement; zone: DOMRectReadOnly }>,
+): boolean {
+  if (el.closest(SHELL_NAV_SEL)) return false;
+  let r: DOMRectReadOnly = el.getBoundingClientRect();
+  if (r.width < 1 || r.height < 1) {
+    r = lastOverlayPeerRect.get(el) ?? r;
+  }
+  if (r.width < 1 || r.height < 1) return false;
+  for (const { host, zone } of overlays) {
+    if (el === host || host.contains(el)) continue;
+    if (rectsIntersect(zone, r, 8)) return true;
+  }
+  return false;
+}
+
 /**
  * Hide FABs / fab-menus / scroll-to-top that intersect a modal sheet or dialog
- * surface. Skips chrome that lives inside the overlay host.
+ * surface (trajectory). Skips chrome inside the overlay or in the nav shell.
  */
 export function concealFloatingInOverlayZones(
   overlays: Array<{ host: HTMLElement; zone: DOMRectReadOnly }>,
@@ -222,20 +250,14 @@ export function concealFloatingInOverlayZones(
     if (!(node instanceof HTMLElement)) return;
     if (seen.has(node)) return;
     if (node.hasAttribute(OVERLAY_CONCEAL_ATTR)) return;
+    if (node.closest(SHELL_NAV_SEL)) return;
 
-    let hit = false;
-    for (const { host, zone } of overlays) {
-      if (node === host || host.contains(node)) continue;
-      const r = node.getBoundingClientRect();
-      if (r.width < 1 || r.height < 1) continue;
-      if (rectsIntersect(zone, r, 8)) {
-        hit = true;
-        break;
-      }
-    }
-    if (!hit) return;
+    const r = node.getBoundingClientRect();
+    if (r.width < 1 || r.height < 1) return;
+    if (!overlayPeerHitsZone(node, overlays)) return;
 
     seen.add(node);
+    lastOverlayPeerRect.set(node, DOMRect.fromRect(r));
     node.setAttribute(OVERLAY_CONCEAL_ATTR, '');
     void hideFloatingHost(node);
     out.push({

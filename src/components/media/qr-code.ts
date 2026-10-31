@@ -1,662 +1,453 @@
-import { html, type PropertyValues } from 'lit';
-import { property } from 'lit/decorators.js';
-import QRCodeStyling from 'qr-code-styling';
-import type { Options as QrStylingOptions } from 'qr-code-styling';
+import { html, nothing, type PropertyValues } from 'lit';
+import { property, state } from 'lit/decorators.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { K3Element } from '../../core/index.js';
-import { i18n } from '../../i18n/index.js';
 import { hostReset } from '../_shared.js';
+import { i18n } from '../../i18n/index.js';
 import {
-  isPatternBall,
-  isPatternBody,
-  isPatternEye,
+  encodeQr,
+  QrCapacityError,
+  type QrEcc,
+  type QrMatrix,
+  type QrMode,
+} from './qr-code.encoder.js';
+import {
+  renderQr,
+  type QrDotStyle,
+  type QrEyeBallStyle,
+  type QrEyeFrameStyle,
+  type QrFrameFont,
+  type QrFrameStyle,
+  type QrGradient,
+  type QrLogoIcon,
+  type QrRenderOptions,
+} from './qr-code.render.js';
+import {
   QrCodeSpecs,
-  resolveQrCornerDot,
-  resolveQrCornerSquare,
-  resolveQrDotType,
-  resolveQrDrawType,
-  resolveQrErrorCorrection,
-  resolveQrShape,
-  usesPatternRenderer,
-  type QrColorRole,
-  type QrCornerDotType,
-  type QrCornerSquareType,
-  type QrDotType,
-  type QrDrawType,
-  type QrErrorCorrection,
-  type QrShape,
+  clampExportSize,
+  qrFilename,
+  type QrCodeSize,
+  type QrExportFormat,
 } from './qr-code.specs.js';
-import {
-  parseQrFinderRotateMap,
-  QR_FINDER_ROTATE_DEFAULT,
-} from './qr-code.finder-rotate.js';
-import { mountPatternQr, renderPatternQrSvg } from './qr-code.render-pattern.js';
 import { qrCodeStyles } from './qr-code.styles.js';
 
-export type {
-  QrColorRole,
-  QrCornerDotType,
-  QrCornerSquareType,
-  QrDotType,
-  QrDrawType,
-  QrErrorCorrection,
-  QrShape,
-  QrBallStyle,
-  QrBodyStyle,
-  QrEyeStyle,
-} from './qr-code.specs.js';
-export type { QrFinderCorner, QrFinderRotate, QrFinderRotateMap } from './qr-code.finder-rotate.js';
+export { QrCodeSpecs, type QrCodeSize, type QrExportFormat } from './qr-code.specs.js';
 export {
-  QrCodeSpecs,
-  QR_DOT_TYPES,
-  QR_CORNER_SQUARE_TYPES,
-  QR_CORNER_DOT_TYPES,
-  QR_BODY_IDS,
-  QR_EYE_IDS,
-  QR_BALL_IDS,
-  resolveQrDotType,
-  resolveQrCornerSquare,
-  resolveQrCornerDot,
-} from './qr-code.specs.js';
+  encodeQr,
+  QrCapacityError,
+  qrDetectMode,
+  qrByteCapacity,
+  type QrEcc,
+  type QrMatrix,
+  type QrMode,
+  type QrEncodeOptions,
+} from './qr-code.encoder.js';
 export {
-  QR_FINDER_CORNERS,
-  QR_FINDER_ROTATE_DEFAULT,
-  QR_FINDER_ROTATE_IDS,
-  parseQrFinderRotateMap,
-  resolveQrFinderRotate,
-} from './qr-code.finder-rotate.js';
-export { QR_EYES, QR_BALLS } from './qr-code.patterns.js';
+  renderQr,
+  renderQrSvg,
+  contrastRatio,
+  QR_DOT_STYLES,
+  QR_EYE_FRAME_STYLES,
+  QR_EYE_BALL_STYLES,
+  QR_FRAME_STYLES,
+  QR_FRAME_FONTS,
+  QR_LOGO_ICONS,
+  type QrDotStyle,
+  type QrEyeFrameStyle,
+  type QrEyeBallStyle,
+  type QrGradient,
+  type QrFrameStyle,
+  type QrFrameFont,
+  type QrLogoIcon,
+  type QrRenderOptions,
+} from './qr-code.render.js';
+export {
+  QR_IO_PATTERNS,
+  QR_IO_MARKERS,
+  QR_IO_MARKER_IN,
+  type QrIoPattern,
+  type QrIoMarker,
+  type QrIoMarkerIn,
+} from './qr-code.qrio-shapes.js';
+
+/** Detail of `k3-render`. */
+export interface QrRenderDetail {
+  version: number;
+  /** Modules per side. */
+  modules: number;
+  ecc: QrEcc;
+  mask: number;
+  mode: QrMode;
+  /** Encoded length (bytes in byte mode). */
+  length: number;
+}
+
+/** Detail of the cancelable `k3-download` event. */
+export interface QrDownloadDetail {
+  format: QrExportFormat;
+  filename: string;
+  blob: Blob;
+  /** Exported width in px (SVG keeps its viewBox, this is the declared width). */
+  width: number;
+}
+
+export interface QrExportOptions {
+  /** Output width in px (height follows the frame ratio). */
+  size?: number;
+  filename?: string;
+}
+
+let uid = 0;
 
 /**
- * Styled QR code — [`qr-code-styling`](https://qr-code-styling.com) + hardcoded
- * body / eye-frame / eye-ball SVG patterns.
+ * Styled QR code — dots / eyes / gradient / logo / call-to-action frame.
+ * Zero-dependency encoder (ISO/IEC 18004, v1–40, ECC L–H) and SVG renderer;
+ * one SVG feeds the preview and every export.
  *
- * @example
- * ```html
- * <k3-qr-code value="https://example.com" dots="diamond" corners-square="frame14" corners-dot="ball5" corners-square-rotate="mirror"></k3-qr-code>
- * ```
+ * @fires k3-render — `{ version, modules, ecc, mask, mode, length }` after each new code
+ * @fires k3-error — `{ reason: 'overflow', message }` when the payload does not fit
+ * @fires k3-download — cancelable · `{ format, filename, blob, width }` — `preventDefault()` to save it yourself
+ * @fires k3-copy — `{ format, ok }` after `copy()`
  *
- * @fires k3-ready - after a successful render `{ value }`
- * @fires k3-error - when encoding fails `{ error }`
+ * @csspart code — wrapper of the rendered SVG
+ * @csspart state — empty / error placeholder
+ * @cssprop --k3-qr-code-size — display width (overrides `size`)
  */
 export class K3QrCode extends K3Element {
   static override styles = [hostReset, qrCodeStyles];
 
-  /** Payload encoded in the QR (URL, text, …). */
-  @property() value = QrCodeSpecs.defaultValue;
-
-  /** Outer size in CSS pixels (width = height). */
-  @property({ type: Number, reflect: true }) size = QrCodeSpecs.defaultSize;
-
-  /** Quiet-zone margin around the modules. */
+  /** Text to encode (use `buildQrPayload()` for Wi-Fi, vCard, events…). */
+  @property() value = '';
+  /** Error-correction level — L 7 % · M 15 % · Q 25 % · H 30 %. */
+  @property({ reflect: true }) ecc: QrEcc = QrCodeSpecs.defaultEcc;
+  /** Display size (convention A). Ignored with `fluid`. */
+  @property({ reflect: true }) size: QrCodeSize = QrCodeSpecs.defaultSize;
+  /** Fill the container width. */
+  @property({ type: Boolean, reflect: true }) fluid = false;
+  /** Quiet zone, in modules. */
   @property({ type: Number }) margin = QrCodeSpecs.defaultMargin;
 
-  /** Module (dot) style from qr-code-styling. */
-  @property({ reflect: true }) dots: QrDotType = QrCodeSpecs.defaultDots;
+  @property({ attribute: 'dot-style', reflect: true }) dotStyle: QrDotStyle = 'default';
+  @property({ attribute: 'eye-frame-style' }) eyeFrameStyle: QrEyeFrameStyle = 'default';
+  @property({ attribute: 'eye-ball-style' }) eyeBallStyle: QrEyeBallStyle = 'default';
 
-  /** Finder pattern outer square style. */
-  @property({ attribute: 'corners-square', reflect: true })
-  cornersSquare: QrCornerSquareType = QrCodeSpecs.defaultCornersSquare;
+  /** Dots colour (gradient start). */
+  @property() color = QrCodeSpecs.defaultColor;
+  @property() gradient: QrGradient = 'none';
+  /** Gradient end colour. */
+  @property({ attribute: 'gradient-color' }) gradientColor = '';
+  @property({ type: Number, attribute: 'gradient-rotation' }) gradientRotation = 45;
+  /** Finder frame colour (empty → dots paint). */
+  @property({ attribute: 'eye-frame-color' }) eyeFrameColor = '';
+  /** Finder centre colour (empty → dots paint). */
+  @property({ attribute: 'eye-ball-color' }) eyeBallColor = '';
+  /** Background colour or `transparent`. */
+  @property() background = QrCodeSpecs.defaultBackground;
+  /** Background corner radius in modules (no frame). */
+  @property({ type: Number }) radius = 0;
 
-  /** Finder pattern inner dot style. */
-  @property({ attribute: 'corners-dot', reflect: true })
-  cornersDot: QrCornerDotType = QrCodeSpecs.defaultCornersDot;
+  /** Logo image URL (data:, https:, blob:, relative). */
+  @property() logo = '';
+  /** Preset vector logo (`link`, `wifi`, `mail`…). */
+  @property({ attribute: 'logo-icon' }) logoIcon: QrLogoIcon | '' = '';
+  /** Logo width as a fraction of the code (clamped to the ECC budget). */
+  @property({ type: Number, attribute: 'logo-size' }) logoSize = 0.22;
+  /** Clear space around the logo, in modules. */
+  @property({ type: Number, attribute: 'logo-margin' }) logoMargin = 1;
+  /** Keep the dots under the logo (default clears them). */
+  @property({ type: Boolean, attribute: 'logo-keep-dots' }) logoKeepDots = false;
 
-  /**
-   * Per-corner eye-frame orientation: `mirror` (default) | `none` | `90` | `180` |
-   * `270` | `flip-h` | `flip-v` | `flip-both`.
-   * One value for all, or `tl,tr,bl` / space-separated.
-   */
-  @property({ attribute: 'corners-square-rotate', reflect: true })
-  cornersSquareRotate = 'mirror';
+  /** Call-to-action frame. */
+  @property({ reflect: true }) frame: QrFrameStyle = 'none';
+  /** Frame phrase (empty → localized “Scan me”). */
+  @property({ attribute: 'frame-text' }) frameText = '';
+  @property({ attribute: 'frame-color' }) frameColor = '';
+  @property({ attribute: 'frame-text-color' }) frameTextColor = '';
+  @property({ attribute: 'frame-font' }) frameFont: QrFrameFont = 'sans';
 
-  /**
-   * Per-corner eye-ball orientation (same tokens as `corners-square-rotate`).
-   * Empty / unset → inherits frame rotate.
-   */
-  @property({ attribute: 'corners-dot-rotate', reflect: true })
-  cornersDotRotate = '';
-
-  /** QR outline shape — square or decorative circle. */
-  @property({ reflect: true }) shape: QrShape = QrCodeSpecs.defaultShape;
-
-  /** Render backend. */
-  @property({ reflect: true }) type: QrDrawType = QrCodeSpecs.defaultType;
-
-  /** Error correction level. */
-  @property({ attribute: 'error-correction', reflect: true })
-  errorCorrection: QrErrorCorrection = QrCodeSpecs.defaultErrorCorrection;
-
-  /**
-   * Theme color role for dots + corners.
-   * Overridden by `dots-color` / corner color attrs when set.
-   */
-  @property({ reflect: true }) color: QrColorRole | string = QrCodeSpecs.defaultColor;
-
-  /** Explicit dots fill (any CSS color). */
-  @property({ attribute: 'dots-color' }) dotsColor: string | undefined;
-
-  /** Explicit corners-square fill. */
-  @property({ attribute: 'corners-square-color' }) cornersSquareColor: string | undefined;
-
-  /** Explicit corners-dot fill. */
-  @property({ attribute: 'corners-dot-color' }) cornersDotColor: string | undefined;
-
-  /** Background fill — `transparent` (default) or any CSS color. */
-  @property() background: string = QrCodeSpecs.defaultBackground;
-
-  /** Optional center logo URL. */
-  @property() image: string | undefined;
-
-  /** Logo size as a fraction of the QR (0–1). */
-  @property({ type: Number, attribute: 'image-size' }) imageSize = 0.4;
-
-  /**
-   * Padding around the logo in modules (pattern) / px (qr-code-styling).
-   * Keep small (1–3) for a clean square plate like Material QR samples.
-   */
-  @property({ type: Number, attribute: 'image-margin' }) imageMargin = 2;
-
-  /**
-   * Draw a stroke frame around the QR (CSS border on the host).
-   * Pair with `shape="circle"` for a ring like branded circular codes.
-   */
-  @property({ type: Boolean, reflect: true }) framed = QrCodeSpecs.defaultFramed;
-
-  /** Frame stroke width in CSS px. */
-  @property({ type: Number, attribute: 'frame-width' }) frameWidth =
-    QrCodeSpecs.defaultFrameWidth;
-
-  /** Gap between the QR and the frame stroke (CSS px). */
-  @property({ type: Number, attribute: 'frame-gap' }) frameGap = QrCodeSpecs.defaultFrameGap;
-
-  /** Frame stroke color — defaults to the dots / theme color. */
-  @property({ attribute: 'frame-color' }) frameColor: string | undefined;
-
-  /** Accessible name; defaults to a localized “QR code”. */
+  /** Smallest QR version allowed (1–40). */
+  @property({ type: Number, attribute: 'min-version' }) minVersion = 1;
+  /** Mask 0–7, or -1 for automatic selection. */
+  @property({ type: Number }) mask = -1;
+  /** Default export width in px. */
+  @property({ type: Number, attribute: 'export-size' }) exportSize: number = QrCodeSpecs.defaultExportSize;
+  /** Default download filename (extension added per format). */
+  @property() filename: string = QrCodeSpecs.defaultFilename;
+  /** Accessible name (defaults to “QR code”). */
   @property() label = '';
 
-  /**
-   * Stable mount node — interpolated as a Node so Lit never clears
-   * qr-code-styling’s SVG/canvas children on re-render.
-   */
-  private readonly frameEl: HTMLDivElement = Object.assign(document.createElement('div'), {
-    className: 'frame',
-  });
+  @state() private svg = '';
+  @state() private status: 'empty' | 'ready' | 'overflow' = 'empty';
 
-  private qr: QRCodeStyling | null = null;
-  /** Last pattern SVG markup (for download when not using qr-code-styling). */
-  private patternSvg: string | null = null;
-  private renderToken = 0;
+  private matrix: QrMatrix | null = null;
+  private aspect = 1;
+  private readonly idPrefix = `k3qr${++uid}`;
+  private renderedKey = '';
+  private announcedKey = '';
+  private wasReady = false;
+  private enter = false;
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-    this.setAttribute('role', QrCodeSpecs.accessibility.role);
-    this.frameEl.setAttribute('part', 'frame');
+  /** Encoding facts for the current code (`null` when empty or overflowing). */
+  get info(): QrRenderDetail | null {
+    const m = this.matrix;
+    if (!m || this.status !== 'ready') return null;
+    return { version: m.version, modules: m.size, ecc: m.ecc, mask: m.mask, mode: m.mode, length: m.length };
   }
 
-  override disconnectedCallback(): void {
-    this.qr = null;
-    super.disconnectedCallback();
+  /** The underlying module matrix (read-only use). */
+  get qrMatrix(): QrMatrix | null {
+    return this.status === 'ready' ? this.matrix : null;
   }
 
-  override firstUpdated(): void {
-    void this.rebuild();
+  override willUpdate(changed: PropertyValues): void {
+    super.willUpdate(changed);
+    this.compute();
   }
 
   override updated(changed: PropertyValues): void {
     super.updated(changed);
-    this.syncFrameChrome();
-    const keys = [
-      'value',
-      'size',
-      'margin',
-      'dots',
-      'cornersSquare',
-      'cornersDot',
-      'cornersSquareRotate',
-      'cornersDotRotate',
-      'shape',
-      'type',
-      'errorCorrection',
-      'color',
-      'dotsColor',
-      'cornersSquareColor',
-      'cornersDotColor',
-      'background',
-      'image',
-      'imageSize',
-      'imageMargin',
-      'framed',
-      'frameWidth',
-      'frameGap',
-      'frameColor',
-    ];
-    /* Frame chrome is CSS-only — no need to rebuild the matrix. */
-    const matrixKeys = keys.filter(
-      (k) => k !== 'framed' && k !== 'frameWidth' && k !== 'frameGap' && k !== 'frameColor',
-    );
-    if (matrixKeys.some((k) => changed.has(k))) {
-      void this.rebuild();
+    const key = `${this.status}|${this.value}|${this.ecc}|${this.minVersion}|${this.mask}`;
+    if (key === this.announcedKey) return;
+    this.announcedKey = key;
+    if (this.status === 'ready' && this.info) {
+      this.emit<QrRenderDetail>('k3-render', this.info);
+    } else if (this.status === 'overflow') {
+      this.emit('k3-error', { reason: 'overflow', message: i18n.t('qrCode.overflow', 'Too much content for one QR code') });
     }
   }
 
-  /** Download the QR as png / svg / jpeg / webp / pdf (logo composited). */
-  async download(
-    name = 'qr-code',
-    extension: 'png' | 'svg' | 'jpeg' | 'webp' | 'pdf' = 'png',
-  ): Promise<void> {
-    if (!this.value.trim()) return;
-    const blob = await this.getRawData(extension);
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${name}.${extension}`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  /** Raw blob — pattern path composites the center logo; PDF embeds a JPEG page. */
-  async getRawData(
-    extension: 'png' | 'svg' | 'jpeg' | 'webp' | 'pdf' = 'png',
-  ): Promise<Blob | Buffer | null> {
-    if (!this.value.trim()) return null;
-    if (extension === 'pdf') {
-      const jpeg = await this.getRawData('jpeg');
-      if (!(jpeg instanceof Blob)) return null;
-      return this.jpegToPdf(jpeg, Math.round(this.size), Math.round(this.size));
-    }
-    if (this.patternSvg) {
-      if (extension === 'svg') return this.compositePatternSvg();
-      return this.rasterizeComposite(extension);
-    }
-    if (!this.qr) return null;
-    if (extension === 'svg' || extension === 'png' || extension === 'jpeg' || extension === 'webp') {
-      return this.qr.getRawData(extension);
-    }
-    return null;
-  }
-
-  /** SVG string with optional embedded logo (base64). */
-  private async compositePatternSvg(): Promise<Blob | null> {
-    if (!this.patternSvg) return null;
-    const logo = this.image?.trim();
-    if (!logo) {
-      return new Blob([this.patternSvg], { type: 'image/svg+xml' });
-    }
-    try {
-      const dataUrl = await this.imageToDataUrl(logo);
-      const frac = Math.min(0.45, Math.max(0.1, this.imageSize || 0.3));
-      const inner = Math.max(1, this.size - 2 * this.margin);
-      const logoPx = Math.round(inner * frac);
-      const x = (this.size - logoPx) / 2;
-      const y = (this.size - logoPx) / 2;
-      const injected = this.patternSvg.replace(
-        '</svg>',
-        `<image href="${dataUrl}" x="${x}" y="${y}" width="${logoPx}" height="${logoPx}" preserveAspectRatio="xMidYMid meet"/></svg>`,
-      );
-      return new Blob([injected], { type: 'image/svg+xml' });
-    } catch {
-      return new Blob([this.patternSvg], { type: 'image/svg+xml' });
-    }
-  }
-
-  private rasterizeComposite(
-    extension: 'png' | 'jpeg' | 'webp',
-  ): Promise<Blob | null> {
-    return new Promise((resolve) => {
-      void (async () => {
-        const svgBlob = await this.compositePatternSvg();
-        if (!svgBlob) {
-          resolve(null);
-          return;
-        }
-        const img = new Image();
-        const url = URL.createObjectURL(svgBlob);
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = Math.round(this.size);
-          canvas.height = Math.round(this.size);
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            URL.revokeObjectURL(url);
-            resolve(null);
-            return;
-          }
-          /* JPEG has no alpha — fill white when background is transparent. */
-          if (extension === 'jpeg') {
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-          }
-          ctx.drawImage(img, 0, 0);
-          URL.revokeObjectURL(url);
-          const mime =
-            extension === 'jpeg' ? 'image/jpeg' : extension === 'webp' ? 'image/webp' : 'image/png';
-          canvas.toBlob((b) => resolve(b), mime, extension === 'jpeg' ? 0.92 : undefined);
-        };
-        img.onerror = () => {
-          URL.revokeObjectURL(url);
-          resolve(null);
-        };
-        img.src = url;
-      })();
-    });
-  }
-
-  private imageToDataUrl(src: string): Promise<string> {
-    if (src.startsWith('data:')) return Promise.resolve(src);
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('canvas'));
-          return;
-        }
-        ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
-      };
-      img.onerror = () => reject(new Error('image'));
-      img.src = src;
-    });
-  }
-
-  /** Minimal single-page PDF embedding a JPEG (no extra dependency). */
-  private async jpegToPdf(jpeg: Blob, width: number, height: number): Promise<Blob> {
-    const bytes = new Uint8Array(await jpeg.arrayBuffer());
-    const objects: string[] = [];
-    const add = (s: string) => {
-      objects.push(s);
-      return objects.length;
-    };
-    add('<< /Type /Catalog /Pages 2 0 R >>');
-    add('<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
-    add(
-      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${width} ${height}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`,
-    );
-    const imgDict = `<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${bytes.length} >>`;
-    const content = `q ${width} 0 0 ${height} 0 0 cm /Im0 Do Q`;
-    add(imgDict); /* 4 — stream appended below */
-    add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
-
-    const encoder = new TextEncoder();
-    const chunks: Uint8Array[] = [];
-    const pushStr = (s: string) => chunks.push(encoder.encode(s));
-    pushStr('%PDF-1.4\n');
-    const offsets: number[] = [0];
-    let offset = chunks.reduce((n, c) => n + c.length, 0);
-    for (let i = 0; i < objects.length; i++) {
-      offsets.push(offset);
-      if (i === 3) {
-        /* Image object with binary stream */
-        const header = `${i + 1} 0 obj\n${objects[i]}\nstream\n`;
-        const headerBytes = encoder.encode(header);
-        chunks.push(headerBytes);
-        chunks.push(bytes);
-        const end = encoder.encode('\nendstream\nendobj\n');
-        chunks.push(end);
-        offset += headerBytes.length + bytes.length + end.length;
-      } else {
-        const body = encoder.encode(`${i + 1} 0 obj\n${objects[i]}\nendobj\n`);
-        chunks.push(body);
-        offset += body.length;
-      }
-    }
-    const xrefStart = offset;
-    pushStr(`xref\n0 ${objects.length + 1}\n`);
-    pushStr('0000000000 65535 f \n');
-    for (let i = 1; i < offsets.length; i++) {
-      pushStr(`${String(offsets[i]).padStart(10, '0')} 00000 n \n`);
-    }
-    pushStr(
-      `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`,
-    );
-    const total = chunks.reduce((n, c) => n + c.length, 0);
-    const out = new Uint8Array(total);
-    let o = 0;
-    for (const c of chunks) {
-      out.set(c, o);
-      o += c.length;
-    }
-    return new Blob([out], { type: 'application/pdf' });
-  }
-
-  private normalizeEnums(): void {
-    this.dots = resolveQrDotType(this.dots);
-    this.cornersSquare = resolveQrCornerSquare(this.cornersSquare);
-    this.cornersDot = resolveQrCornerDot(this.cornersDot);
-    this.shape = resolveQrShape(this.shape);
-    this.type = resolveQrDrawType(this.type);
-    this.errorCorrection = resolveQrErrorCorrection(this.errorCorrection);
-    if (!Number.isFinite(this.size) || this.size <= 0) this.size = QrCodeSpecs.defaultSize;
-    if (!Number.isFinite(this.margin) || this.margin < 0) this.margin = QrCodeSpecs.defaultMargin;
-  }
-
-  /** Resolve a CSS color / theme token to a paint string for the library. */
-  private paint(explicit: string | undefined, cssVar: string): string {
-    if (explicit?.trim()) return explicit.trim();
-    const fromVar = getComputedStyle(this).getPropertyValue(cssVar).trim();
-    return fromVar || '#000000';
-  }
-
-  private isThemeRole(v: string): boolean {
-    return (
-      v === 'primary' ||
-      v === 'secondary' ||
-      v === 'tertiary' ||
-      v === 'error' ||
-      v === 'on-surface' ||
-      v === 'on-surface-variant'
-    );
-  }
-
-  private buildOptions(): QrStylingOptions {
-    this.normalizeEnums();
-    const size = Math.round(this.size);
-    /* `color` as a raw CSS color when it is not a theme role. */
-    const colorAsPaint =
-      this.color && !this.isThemeRole(this.color) ? this.color.trim() : undefined;
-    const dotsColor = this.paint(this.dotsColor ?? colorAsPaint, '--k3-qr-dots');
-    const cornerSq = this.paint(this.cornersSquareColor ?? colorAsPaint, '--k3-qr-corners-square');
-    const cornerDot = this.paint(this.cornersDotColor ?? colorAsPaint, '--k3-qr-corners-dot');
-    let bg = this.background?.trim() || 'transparent';
-    if (bg === 'surface') {
-      bg = this.paint(undefined, '--k3-sys-color-surface');
-    } else if (bg.startsWith('--')) {
-      bg = this.paint(undefined, bg);
-    } else if (bg === 'var(--k3-qr-background)' || !bg) {
-      bg = this.paint(undefined, '--k3-qr-background') || 'transparent';
-    }
-
-    const opts: QrStylingOptions = {
-      width: size,
-      height: size,
-      type: this.type,
-      shape: this.shape,
+  /** Render options handed to the SVG builder. */
+  protected svgOptions(): Partial<QrRenderOptions> {
+    return {
       margin: this.margin,
-      data: this.value.trim(),
-      qrOptions: {
-        errorCorrectionLevel: this.errorCorrection,
-      },
-      dotsOptions: {
-        type: this.dots,
-        color: dotsColor,
-        roundSize: true,
-      },
-      cornersSquareOptions: {
-        type: this.cornersSquare,
-        color: cornerSq,
-      },
-      cornersDotOptions: {
-        type: this.cornersDot,
-        color: cornerDot,
-      },
-      backgroundOptions: {
-        color: bg,
-      },
+      dotStyle: this.dotStyle,
+      eyeFrameStyle: this.eyeFrameStyle,
+      eyeBallStyle: this.eyeBallStyle,
+      color: this.color,
+      gradient: this.gradient,
+      gradientColor: this.gradientColor || this.color,
+      gradientRotation: this.gradientRotation,
+      eyeFrameColor: this.eyeFrameColor,
+      eyeBallColor: this.eyeBallColor,
+      background: this.background,
+      radius: this.radius,
+      logo: this.logo,
+      logoIcon: this.logoIcon,
+      logoSize: this.logoSize,
+      logoMargin: this.logoMargin,
+      logoKeepDots: this.logoKeepDots,
+      frame: this.frame,
+      frameText: this.frameText.trim() || i18n.t('qrCode.frameText', 'Scan me'),
+      frameColor: this.frameColor,
+      frameTextColor: this.frameTextColor,
+      frameFont: this.frameFont,
+      title: this.accessibleName(),
+      idPrefix: this.idPrefix,
     };
-
-    if (this.image?.trim()) {
-      opts.image = this.image.trim();
-      opts.imageOptions = {
-        crossOrigin: 'anonymous',
-        margin: this.imageMargin,
-        imageSize: this.imageSize,
-        hideBackgroundDots: true,
-      };
-      /* Logo occludes modules — prefer high ECC unless the user forced another level. */
-      if (!this.hasAttribute('error-correction')) {
-        opts.qrOptions = { ...opts.qrOptions, errorCorrectionLevel: 'H' };
-      }
-    }
-
-    return opts;
   }
 
-  private async rebuild(): Promise<void> {
-    const token = ++this.renderToken;
-    this.normalizeEnums();
-    const data = this.value.trim();
+  private accessibleName(): string {
+    return this.label.trim() || i18n.t('qrCode.ariaLabel', QrCodeSpecs.accessibility.ariaLabel);
+  }
 
-    await this.updateComplete;
-    if (token !== this.renderToken || !this.frameEl) return;
+  private compute(): void {
+    const opts = this.svgOptions();
+    const key = JSON.stringify([this.value, this.ecc, this.minVersion, this.mask, opts, i18n.locale]);
+    if (key === this.renderedKey) return;
+    this.renderedKey = key;
 
-    /* Frame content is owned by the active renderer — never Lit-templated. */
-    this.frameEl.replaceChildren();
-    this.qr = null;
-    this.patternSvg = null;
-
-    if (!data) {
-      const ph = document.createElement('span');
-      ph.className = 'placeholder';
-      ph.setAttribute('part', 'placeholder');
-      ph.textContent = i18n.t('qrcode.empty') || 'Enter a value';
-      this.frameEl.append(ph);
+    if (!this.value) {
+      this.matrix = null;
+      this.svg = '';
+      this.status = 'empty';
+      this.wasReady = false;
       return;
     }
-
     try {
-      if (usesPatternRenderer(this.dots, this.cornersSquare, this.cornersDot)) {
-        this.rebuildPattern(data);
-      } else {
-        const options = this.buildOptions();
-        this.qr = new QRCodeStyling(options);
-        this.qr.append(this.frameEl);
-      }
-      if (token !== this.renderToken) return;
-      this.emit('k3-ready', { value: data });
+      this.matrix = encodeQr(this.value, {
+        ecc: this.ecc,
+        minVersion: this.minVersion,
+        mask: this.mask,
+      });
+      const result = renderQr(this.matrix, opts);
+      this.svg = result.svg;
+      this.aspect = result.height / result.width;
+      this.enter = !this.wasReady;
+      this.wasReady = true;
+      this.status = 'ready';
     } catch (err) {
-      this.qr = null;
-      this.patternSvg = null;
-      this.emit('k3-error', { error: err instanceof Error ? err.message : String(err) });
+      if (!(err instanceof QrCapacityError)) throw err;
+      this.matrix = null;
+      this.svg = '';
+      this.status = 'overflow';
+      this.wasReady = false;
     }
   }
 
-  /** Render via hardcoded body / eye-frame / eye-ball SVG patterns. */
-  private rebuildPattern(data: string): void {
-    const body = isPatternBody(this.dots) ? this.dots : 'square';
-    const eye = isPatternEye(this.cornersSquare) ? this.cornersSquare : 'frame0';
-    const eyeBall = isPatternBall(this.cornersDot) ? this.cornersDot : 'ball0';
-    const colorAsPaint =
-      this.color && !this.isThemeRole(this.color) ? this.color.trim() : undefined;
-    const color = this.paint(this.dotsColor ?? colorAsPaint, '--k3-qr-dots');
-    const eyeColor = this.paint(
-      this.cornersSquareColor ?? colorAsPaint,
-      '--k3-qr-corners-square',
-    );
-    const eyeBallColor = this.paint(
-      this.cornersDotColor ?? colorAsPaint,
-      '--k3-qr-corners-dot',
-    );
-    let bg = this.background?.trim() || 'transparent';
-    if (bg === 'surface') bg = this.paint(undefined, '--k3-sys-color-surface');
-    else if (bg.startsWith('--')) bg = this.paint(undefined, bg);
+  /* ── Export API ─────────────────────────────────────────────────────── */
 
-    const hasLogo = !!this.image?.trim();
-    const frac = Math.min(0.45, Math.max(0.1, this.imageSize || 0.3));
-    /* 1–4 modules of pad → clean square plate (capture-2), not a huge void. */
-    const logoPadModules = hasLogo
-      ? Math.max(1, Math.min(4, Math.round(this.imageMargin || 2)))
-      : 0;
-    const eyeRotate = parseQrFinderRotateMap(
-      this.cornersSquareRotate,
-      QR_FINDER_ROTATE_DEFAULT,
-    );
-    const eyeBallRotate = this.cornersDotRotate?.trim()
-      ? parseQrFinderRotateMap(this.cornersDotRotate, eyeRotate)
-      : eyeRotate;
-    const opts = {
-      data,
-      size: Math.round(this.size),
-      margin: this.margin,
-      body,
-      eye,
-      eyeBall,
-      color,
-      eyeColor,
-      eyeBallColor,
-      background: bg,
-      ecc: this.errorCorrection,
-      logoSize: hasLogo ? frac : 0,
-      logoMarginModules: logoPadModules,
-      logoPlateColor: bg && bg !== 'transparent' ? bg : '#ffffff',
-      eyeRotate,
-      eyeBallRotate,
-    };
-    this.patternSvg = renderPatternQrSvg(opts);
-    mountPatternQr(this.frameEl, opts);
-    /* Logo sits inside the plate (inner size = frac of the QR content area). */
-    if (hasLogo) {
-      const img = document.createElement('img');
-      img.src = this.image!.trim();
-      img.alt = '';
-      img.setAttribute('part', 'logo');
-      const inner = Math.max(1, this.size - 2 * this.margin);
-      const px = Math.round(inner * frac);
-      img.style.cssText = `position:absolute;left:50%;top:50%;width:${px}px;height:${px}px;margin:-${px / 2}px 0 0 -${px / 2}px;object-fit:contain;pointer-events:none;`;
-      this.frameEl.style.position = 'relative';
-      this.frameEl.append(img);
-    }
+  /** Standalone SVG markup (optionally sized in px). */
+  toSvg(size?: number): string {
+    this.compute();
+    if (!this.matrix || this.status !== 'ready') return '';
+    const width = size ? clampExportSize(size) : undefined;
+    return renderQr(this.matrix, this.svgOptions(), width).svg;
   }
 
-  private ariaLabel(): string {
-    const custom = this.label.trim();
-    if (custom) return custom;
-    return i18n.t('qrcode.label') || 'QR code';
+  /** Encode the current code as a file blob. */
+  async toBlob(format: QrExportFormat = 'png', size?: number): Promise<Blob> {
+    const width = clampExportSize(size ?? this.exportSize);
+    const svg = this.toSvg(width);
+    if (!svg) throw new Error('k3-qr-code: nothing to export');
+    if (format === 'svg') {
+      return new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n${svg}`], {
+        type: QrCodeSpecs.mimeTypes.svg,
+      });
+    }
+    const height = Math.round(width * this.aspect);
+    return rasterize(svg, width, height, format, this.flatBackground(format));
   }
 
-  private syncFrameChrome(): void {
-    const sizePx = `${Math.max(1, Math.round(this.size))}px`;
-    this.frameEl.style.setProperty('--k3-qr-size', sizePx);
-    this.frameEl.style.width = sizePx;
-    this.frameEl.style.height = sizePx;
-    this.frameEl.setAttribute('aria-label', this.ariaLabel());
-
-    const fw = Number.isFinite(this.frameWidth) ? Math.max(0, this.frameWidth) : QrCodeSpecs.defaultFrameWidth;
-    const fg = Number.isFinite(this.frameGap) ? Math.max(0, this.frameGap) : QrCodeSpecs.defaultFrameGap;
-    this.style.setProperty('--k3-qr-frame-width', `${fw}px`);
-    this.style.setProperty('--k3-qr-frame-gap', `${fg}px`);
-    if (this.frameColor?.trim()) {
-      this.style.setProperty('--k3-qr-frame', this.frameColor.trim());
-    } else {
-      this.style.removeProperty('--k3-qr-frame');
-    }
-    if (this.background?.trim() && this.background !== 'transparent') {
-      let bg = this.background.trim();
-      if (bg === 'surface') bg = this.paint(undefined, '--k3-sys-color-surface');
-      this.style.setProperty('--k3-qr-background', bg);
-    } else {
-      this.style.setProperty('--k3-qr-background', 'transparent');
-    }
+  /** Data URL of the current code. */
+  async toDataUrl(format: QrExportFormat = 'png', size?: number): Promise<string> {
+    const blob = await this.toBlob(format, size);
+    return blobToDataUrl(blob);
   }
+
+  /**
+   * Download the code. Fires a cancelable `k3-download` first — call
+   * `preventDefault()` to route the blob elsewhere (share sheet, sandboxed hosts…).
+   * Resolves `true` when a file was produced.
+   */
+  async download(format: QrExportFormat = 'png', options: QrExportOptions = {}): Promise<boolean> {
+    if (this.status !== 'ready') return false;
+    const width = clampExportSize(options.size ?? this.exportSize);
+    const blob = await this.toBlob(format, width);
+    const filename = qrFilename(options.filename ?? this.filename, format);
+    const proceed = this.emit<QrDownloadDetail>('k3-download', { format, filename, blob, width }, true);
+    if (proceed) saveBlob(blob, filename);
+    return true;
+  }
+
+  /** Copy the code to the clipboard (PNG image, or SVG markup as text). */
+  async copy(format: 'png' | 'svg' = 'png'): Promise<boolean> {
+    let ok = false;
+    try {
+      if (this.status !== 'ready' || typeof navigator === 'undefined' || !navigator.clipboard) {
+        throw new Error('clipboard unavailable');
+      }
+      if (format === 'svg') {
+        await navigator.clipboard.writeText(this.toSvg());
+      } else {
+        if (typeof ClipboardItem === 'undefined') throw new Error('ClipboardItem unavailable');
+        // Pass the promise directly — Safari requires it inside the user gesture
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': this.toBlob('png', Math.min(this.exportSize, 1024)) }),
+        ]);
+      }
+      ok = true;
+    } catch {
+      ok = false;
+    }
+    this.emit('k3-copy', { format, ok });
+    return ok;
+  }
+
+  private flatBackground(format: QrExportFormat): string | undefined {
+    if (format !== 'jpeg') return undefined;
+    const bg = this.background.trim().toLowerCase();
+    return !bg || bg === 'transparent' ? '#ffffff' : this.background;
+  }
+
+  /* ── Render ─────────────────────────────────────────────────────────── */
 
   override render() {
-    return html`${this.frameEl}`;
+    if (this.status === 'ready') {
+      const enter = this.enter;
+      this.enter = false;
+      return html`<div class="code ${enter ? 'code--enter' : ''}" part="code">${unsafeHTML(this.svg)}</div>`;
+    }
+    const overflow = this.status === 'overflow';
+    const text = overflow
+      ? i18n.t('qrCode.overflow', 'Too much content for one QR code')
+      : i18n.t('qrCode.empty', 'Add content to generate the code');
+    return html`
+      <div
+        class="state ${overflow ? 'state--error' : 'state--empty'}"
+        part="state"
+        role=${overflow ? 'alert' : 'img'}
+        aria-label=${overflow ? nothing : text}
+      >
+        <span
+          class="state-icon notranslate"
+          translate="no"
+          lang="zxx"
+          data-k3-icon=${overflow ? 'error' : 'qr_code_2'}
+          aria-hidden="true"
+        ></span>
+        <span class="state-text" aria-hidden=${overflow ? 'false' : 'true'}>${text}</span>
+      </div>
+    `;
   }
+}
+
+/* ── Helpers (DOM) ─────────────────────────────────────────────────────── */
+
+async function rasterize(
+  svg: string,
+  width: number,
+  height: number,
+  format: Exclude<QrExportFormat, 'svg'>,
+  flatBackground?: string,
+): Promise<Blob> {
+  const img = new Image();
+  img.decoding = 'async';
+  // data: URL (not blob:) — works under strict CSPs that only allow data images
+  img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error('k3-qr-code: SVG rasterization failed'));
+  });
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('k3-qr-code: 2D canvas unavailable');
+  if (flatBackground) {
+    ctx.fillStyle = flatBackground;
+    ctx.fillRect(0, 0, width, height);
+  }
+  ctx.drawImage(img, 0, 0, width, height);
+  const type = QrCodeSpecs.mimeTypes[format];
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('k3-qr-code: canvas export failed'))),
+      type,
+      QrCodeSpecs.quality,
+    );
+  });
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error ?? new Error('read failed'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function saveBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.rel = 'noopener';
+  a.style.display = 'none';
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
 export default K3QrCode;

@@ -134,7 +134,6 @@ export class K3DatePicker extends K3Element {
   private portal = new LayerPortal();
   private mq?: MediaQueryList;
   private anchor: HTMLElement | null = null;
-  private forBound: HTMLElement | null = null;
   private readonly dockedFit: DockedFitController = attachDockedFit({
     isActive: () => this.open && this.resolvedVariant === 'docked',
     onReposition: () => this.positionDocked(),
@@ -348,7 +347,6 @@ export class K3DatePicker extends K3Element {
     );
     this.boundClearHosts = hosts;
     for (const el of hosts) el.addEventListener('k3-clear', this.onForCleared);
-    this.forBound = hosts[0] ?? null;
   }
 
   private unbindForField(): void {
@@ -356,7 +354,6 @@ export class K3DatePicker extends K3Element {
       el.removeEventListener('k3-clear', this.onForCleared);
     }
     this.boundClearHosts = [];
-    this.forBound = null;
   }
 
   private forEl(): HTMLElement | null {

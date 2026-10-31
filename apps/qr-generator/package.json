@@ -1,0 +1,12 @@
+{
+  "name": "k3ui-qr-generator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "QR code generator app built with k3ui (not part of the published library)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}

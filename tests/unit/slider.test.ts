@@ -68,7 +68,7 @@ describe('k3-slider', () => {
     await el.updateComplete;
     /* Force a known track length so inset math is deterministic. */
     (el as unknown as { trackLenPx: number }).trackLenPx = 200;
-    el.requestUpdate();
+    (el as unknown as { requestUpdate(): void }).requestUpdate();
     await el.updateComplete;
 
     const handle = el.shadowRoot!.querySelector('.handle') as HTMLElement;

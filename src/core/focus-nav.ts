@@ -128,7 +128,7 @@ export function isFocusOnTrigger(
   let node: Node | null = active;
   while (node) {
     if (node === trigger) return true;
-    const root = node.getRootNode();
+    const root: Node = node.getRootNode();
     if (root instanceof ShadowRoot) {
       if (root.host === trigger) return true;
       node = root.host;

@@ -161,9 +161,7 @@ export function fabMenuViewportChromeBounds(
   doc: Document | null = typeof document !== 'undefined' ? document : null,
   viewportTop = 0,
   viewportBottom =
-    typeof globalThis !== 'undefined' && 'innerHeight' in globalThis
-      ? (globalThis as Window).innerHeight
-      : 0,
+    typeof window !== 'undefined' ? window.innerHeight : 0,
 ): { top: number; bottom: number } {
   let top = viewportTop;
   let bottom = viewportBottom;
@@ -196,9 +194,7 @@ export function fabMenuClipBounds(
   el: HTMLElement | null,
   viewportTop = 0,
   viewportBottom =
-    typeof globalThis !== 'undefined' && 'innerHeight' in globalThis
-      ? (globalThis as Window).innerHeight
-      : 0,
+    typeof window !== 'undefined' ? window.innerHeight : 0,
   chrome: { top: number; bottom: number } | null = null,
 ): { top: number; bottom: number } {
   const band =

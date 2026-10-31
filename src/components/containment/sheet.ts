@@ -26,6 +26,8 @@ import {
   registerSheetChromeHost,
   unregisterSheetChromeHost,
   recomputeSheetChromeShift,
+  markSheetChromeOpening,
+  clearSheetChromeOpening,
 } from './sheet-chrome-shift.js';
 
 export type SheetPlacement = 'bottom' | 'side';
@@ -77,8 +79,11 @@ export class K3Sheet extends K3Element {
         background: rgb(0 0 0 / 0.32);
         opacity: 0;
         pointer-events: none;
-        /* Above shell chrome (rail ~30); menus/dialogs share this band */
-        z-index: 100;
+        /*
+         * Above fixed shell chrome (fab-menu 1100 · scroll-to-top 1090 ·
+         * dial/rail 1050) so FABs never paint over the enter animation.
+         */
+        z-index: 1200;
         transition: opacity var(--k3-sys-motion-duration-effects-fast, 150ms)
           var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects));
       }
@@ -93,7 +98,7 @@ export class K3Sheet extends K3Element {
       }
       .sheet {
         position: fixed;
-        z-index: 101;
+        z-index: 1201;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -446,19 +451,44 @@ export class K3Sheet extends K3Element {
     return r.width >= 1 && r.height >= 1 ? r : null;
   }
 
+  /**
+   * Placement trajectory before the panel paints — side/end strip or bottom
+   * band only (never the full viewport, so nav-rail FABs stay put).
+   */
+  getOpeningOverlayZone(): DOMRectReadOnly | null {
+    if (typeof window === 'undefined') return null;
+    const w = window.innerWidth || 1;
+    const h = window.innerHeight || 1;
+    if (this.placement === 'bottom') {
+      const band = Math.min(h, Math.max(h * 0.55, 20 * 16));
+      return new DOMRect(0, h - band, w, band);
+    }
+    /* Side — match default `.sheet.side` width (min(22rem, 100vw)). */
+    const strip = Math.min(22 * 16, w);
+    const fromInlineEnd = this.side === 'end' !== this.isRtl();
+    return fromInlineEnd
+      ? new DOMRect(w - strip, 0, strip, h)
+      : new DOMRect(0, 0, strip, h);
+  }
+
   async show(): Promise<boolean> {
     const ok = await runOpenClose(
       this,
       'open',
       async () => {
         this.open = true;
+        /* Kick FAB/STT hide before enter — fades during elevate/paint (no await). */
+        markSheetChromeOpening(this);
         await this.playEnter();
       },
       { source: 'api' },
     );
     if (ok) {
-      /* After enter paint so getBoundingClientRect matches open size. */
+      /* Refine zone to real panel bounds once painted. */
       requestAnimationFrame(() => recomputeSheetChromeShift());
+    } else {
+      clearSheetChromeOpening(this);
+      recomputeSheetChromeShift();
     }
     return ok;
   }
@@ -466,6 +496,7 @@ export class K3Sheet extends K3Element {
   async hide(
     source: 'user' | 'api' | 'backdrop' | 'escape' | 'drag' = 'api',
   ): Promise<boolean> {
+    clearSheetChromeOpening(this);
     const ok = await runOpenClose(
       this,
       'close',
@@ -491,7 +522,7 @@ export class K3Sheet extends K3Element {
   };
 
   private isRtl(): boolean {
-    return isRtl(this);
+    return readRtl(this);
   }
 
   /** Dismiss direction in CSS pixels (positive = away from rest) */
@@ -712,10 +743,12 @@ export class K3Sheet extends K3Element {
     /* Attribute `open` without show() — same enter path (slide, not pop) */
     if (changed.has('open')) {
       if (this.open && !this.visible) {
+        markSheetChromeOpening(this);
         void this.playEnter().then(() => {
           requestAnimationFrame(() => recomputeSheetChromeShift());
         });
       } else if (!this.open && !this.visible) {
+        clearSheetChromeOpening(this);
         this.restoreLayer();
         recomputeSheetChromeShift();
       }

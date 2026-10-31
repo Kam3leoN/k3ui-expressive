@@ -4,7 +4,8 @@ import type K3MoodCalendar from '../../src/components/pickers/mood-calendar.js';
 import type { MoodEntry } from '../../src/components/pickers/mood-calendar.types.js';
 import { defaultMoodYears } from '../../src/components/pickers/mood-calendar.types.js';
 
-type MoodCalEl = K3MoodCalendar & {
+/* Omit drops the private members that made the intersection `never`. */
+type MoodCalEl = Omit<K3MoodCalendar, '_selectYear' | '_toggleFilter' | '_selectDate' | '_filter' | '_selected'> & {
   _selectYear: (y: number) => void;
   _toggleFilter: (id: string) => void;
   _selectDate: (date: string) => Promise<void>;

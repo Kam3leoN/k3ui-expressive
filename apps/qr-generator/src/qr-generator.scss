@@ -1,0 +1,554 @@
+// k3-qr-generator — shadow DOM styles.
+// Compiled through Vite `?inline` (see qr-generator.styles.ts).
+//
+// Hierarchy: the form stays on the page surface; only the preview pane gets a
+// tonal surface, with an M3 Expressive shape morphing behind the code.
+
+$icon-font: var(
+  --k3-sys-icon-font-family,
+  'Material Symbols Rounded',
+  'Material Symbols Outlined',
+  sans-serif
+);
+
+$tile: 2.75rem; // denser pickers (19 patterns / 15 markers / 16 centres)
+
+// Layout modes come from a ResizeObserver (`data-layout` on the host):
+// compact (< 36rem) · medium (two-column fields) · wide (≥ 56rem, preview beside form).
+// Container queries are avoided on purpose: `container-type` applies layout
+// containment, which would trap position:fixed overlays (k3-select menus, peek).
+$wide: ':host([data-layout="wide"])';
+$roomy: ':host([data-layout="medium"]), :host([data-layout="wide"])';
+
+@mixin type($role) {
+  font-size: var(--k3-sys-typescale-#{$role}-size);
+  line-height: var(--k3-sys-typescale-#{$role}-line-height);
+  font-weight: var(--k3-sys-typescale-#{$role}-weight);
+  letter-spacing: var(--k3-sys-typescale-#{$role}-tracking);
+}
+
+@mixin visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:host {
+  display: block;
+  color: var(--k3-sys-color-on-surface);
+  font-family: var(--k3-ref-typeface-plain);
+}
+
+.ms {
+  font-family: $icon-font;
+  font-weight: 400;
+  font-style: normal;
+  font-size: var(--k3-sys-icon-size-medium, 1.5rem);
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none !important;
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1em;
+  block-size: 1em;
+  overflow: hidden;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────── */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--k3-sys-spacing-space400);
+  align-items: start;
+}
+
+.editor {
+  display: grid;
+  gap: var(--k3-sys-spacing-space500);
+  min-inline-size: 0;
+}
+
+#{$wide} {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+    gap: var(--k3-sys-spacing-space500);
+  }
+
+  .preview {
+    position: sticky;
+    top: var(--k3-qr-generator-sticky-top, var(--k3-sys-spacing-space200));
+  }
+
+  .peek {
+    display: none !important;
+  }
+}
+
+/* ── Steps ────────────────────────────────────────────────────────────── */
+
+.step {
+  display: grid;
+  gap: var(--k3-sys-spacing-space300);
+  min-inline-size: 0;
+}
+
+.step-head {
+  display: flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space150);
+  margin: 0;
+}
+
+.step-num {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-primary);
+  color: var(--k3-sys-color-on-primary);
+  font-family: var(--k3-ref-typeface-brand);
+  @include type(title-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.step-title {
+  margin: 0;
+  font-family: var(--k3-ref-typeface-brand);
+  @include type(title-large);
+  color: var(--k3-sys-color-on-surface);
+}
+
+.types {
+  display: block;
+}
+
+.fields,
+.panel {
+  display: grid;
+  gap: var(--k3-sys-spacing-space300);
+  min-inline-size: 0;
+}
+
+.fields k3-text-field,
+.fields k3-select,
+.panel k3-text-field {
+  display: block;
+  inline-size: 100%;
+  /* Fields follow the form grid, not the 22rem standalone M3 cap */
+  max-inline-size: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--k3-sys-spacing-space200);
+  align-items: start;
+}
+
+#{$roomy} {
+  .row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.group {
+  display: grid;
+  gap: var(--k3-sys-spacing-space200);
+}
+
+.group-title {
+  margin: 0;
+  @include type(title-small);
+  color: var(--k3-sys-color-on-surface-variant);
+}
+
+.design-tabs::part(panels) {
+  display: none;
+}
+
+/* ── Labelled controls ────────────────────────────────────────────────── */
+
+.control {
+  display: grid;
+  gap: var(--k3-sys-spacing-space150);
+  min-inline-size: 0;
+}
+
+.control-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--k3-sys-spacing-space100);
+}
+
+.control-label {
+  @include type(label-large);
+  color: var(--k3-sys-color-on-surface);
+}
+
+.control-value {
+  @include type(label-large);
+  color: var(--k3-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+.control k3-slider::part(label) {
+  /* Label is rendered in .control-head (with the live value); slider keeps it for a11y */
+  display: none;
+}
+
+.hint {
+  margin: 0;
+  @include type(body-small);
+  color: var(--k3-sys-color-on-surface-variant);
+}
+
+.hint--error {
+  color: var(--k3-sys-color-error);
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space150);
+  min-block-size: var(--k3-sys-touch-target, 3rem);
+}
+
+/* ── Picker tiles (radiogroup) ────────────────────────────────────────── */
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--k3-sys-spacing-space100);
+}
+
+.tile {
+  display: inline-grid;
+  place-items: center;
+  inline-size: $tile;
+  block-size: $tile;
+  padding: var(--k3-sys-spacing-space100);
+  border-radius: var(--k3-sys-shape-corner-medium);
+  background: var(--k3-sys-color-surface-container-high);
+  color: var(--k3-sys-color-on-surface-variant);
+  transition:
+    border-radius var(--k3-sys-motion-duration-medium2, 300ms)
+      var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.2, 0, 0, 1)),
+    background-color var(--k3-sys-motion-duration-short4, 200ms) ease,
+    color var(--k3-sys-motion-duration-short4, 200ms) ease;
+
+  &[aria-checked='true'] {
+    border-radius: var(--k3-sys-shape-corner-extra-large);
+    background: var(--k3-sys-color-secondary-container);
+    color: var(--k3-sys-color-on-secondary-container);
+    box-shadow: inset 0 0 0 2px var(--k3-sys-color-secondary);
+  }
+}
+
+.tile-art {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  line-height: 0;
+
+  svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+}
+
+/* ── Colour fields ────────────────────────────────────────────────────── */
+
+.colors {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--k3-sys-spacing-space150);
+}
+
+#{$roomy} {
+  .colors {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.color-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space50);
+  min-block-size: 3.5rem;
+  padding-inline-end: var(--k3-sys-spacing-space50);
+  border: 1px solid var(--k3-sys-color-outline-variant);
+  border-radius: var(--k3-sys-shape-corner-large);
+  background: var(--k3-sys-color-surface);
+
+  &[data-disabled] {
+    opacity: 0.38;
+    pointer-events: none;
+  }
+
+  &:has(input:focus-visible) {
+    outline: 3px solid var(--k3-sys-color-secondary);
+    outline-offset: 2px;
+  }
+}
+
+.color-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space150);
+  min-inline-size: 0;
+  align-self: stretch;
+  padding-inline: var(--k3-sys-spacing-space150) 0;
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.swatch {
+  position: relative;
+  flex-shrink: 0;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--swatch, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--k3-sys-color-on-surface) 24%, transparent);
+
+  input {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.is-auto .swatch {
+  background:
+    linear-gradient(135deg, transparent 46%, var(--k3-sys-color-outline) 46% 54%, transparent 54%),
+    var(--swatch, transparent);
+}
+
+.color-text {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.color-label {
+  @include type(body-small);
+  color: var(--k3-sys-color-on-surface-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-value {
+  @include type(body-large);
+  color: var(--k3-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--k3-sys-spacing-space100);
+}
+
+.swatch-btn {
+  position: relative;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--k3-sys-color-on-surface) 18%, transparent);
+  transition: border-radius var(--k3-sys-motion-duration-medium2, 300ms)
+    var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.2, 0, 0, 1));
+
+  &[aria-pressed='true'] {
+    border-radius: var(--k3-sys-shape-corner-medium);
+    box-shadow:
+      0 0 0 2px var(--k3-sys-color-surface),
+      0 0 0 4px var(--k3-sys-color-secondary);
+  }
+}
+
+/* ── Logo ─────────────────────────────────────────────────────────────── */
+
+.logo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space100);
+}
+
+.logo-thumb {
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: var(--k3-sys-shape-corner-medium);
+  object-fit: contain;
+  background: var(--k3-sys-color-surface-container-high);
+}
+
+.file-input {
+  @include visually-hidden;
+}
+
+/* ── Preview pane (step 3) ────────────────────────────────────────────── */
+
+.preview {
+  display: grid;
+  gap: var(--k3-sys-spacing-space200);
+  padding: var(--k3-sys-spacing-space300);
+  border-radius: var(--k3-sys-shape-corner-extra-large-increased);
+  background: var(--k3-sys-color-surface-container);
+  min-inline-size: 0;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  inline-size: 100%;
+  max-inline-size: 26rem;
+  justify-self: center;
+}
+
+.stage-code {
+  position: relative;
+  inline-size: 70%;
+}
+
+.meta {
+  margin: 0;
+  @include type(body-medium);
+  color: var(--k3-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.warning {
+  display: flex;
+  gap: var(--k3-sys-spacing-space100);
+  align-items: flex-start;
+  margin: 0;
+  padding: var(--k3-sys-spacing-space150);
+  border-radius: var(--k3-sys-shape-corner-medium);
+  background: var(--k3-sys-color-warning-container);
+  color: var(--k3-sys-color-on-warning-container);
+  @include type(body-medium);
+
+  .ms {
+    font-size: 1.25rem;
+  }
+}
+
+.actions {
+  display: grid;
+  gap: var(--k3-sys-spacing-space100);
+}
+
+.actions k3-button {
+  display: flex;
+}
+
+/* k3-button sizes to its label — stretch the inner container instead */
+.actions k3-button::part(container) {
+  flex: 1;
+  justify-content: center;
+}
+
+.secondary {
+  display: flex;
+  gap: var(--k3-sys-spacing-space100);
+  align-items: center;
+
+  k3-button {
+    flex: 1;
+    min-inline-size: 0;
+  }
+}
+
+/* ── Floating mini preview (narrow layouts) ───────────────────────────── */
+
+.peek {
+  position: fixed;
+  inset-inline-end: var(--k3-sys-spacing-space200);
+  inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--k3-sys-spacing-space200));
+  z-index: 30;
+  display: block;
+  inline-size: 5rem;
+  padding: var(--k3-sys-spacing-space100);
+  border-radius: var(--k3-sys-shape-corner-large);
+  background: var(--k3-sys-color-surface-container-highest);
+  box-shadow: var(--k3-sys-elevation-level3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0.5rem) scale(0.9);
+  transition:
+    opacity var(--k3-sys-motion-duration-short4, 200ms) ease,
+    transform var(--k3-sys-motion-duration-medium2, 300ms)
+      var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.2, 0, 0, 1)),
+    visibility 0s linear var(--k3-sys-motion-duration-short4, 200ms);
+
+  &[data-show] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  k3-qr-code {
+    --k3-qr-code-size: 100%;
+    inline-size: 100%;
+  }
+}
+
+/* ── Motion & contrast preferences ────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .swatch-btn,
+  .peek {
+    transition: none;
+  }
+}
+
+:host-context([data-k3-reduce-motion]) .tile,
+:host-context([data-k3-reduce-motion]) .swatch-btn,
+:host-context([data-k3-reduce-motion]) .peek {
+  transition: none;
+}
+
+@media (forced-colors: active) {
+  .tile[aria-checked='true'],
+  .swatch-btn[aria-pressed='true'] {
+    outline: 3px solid Highlight;
+  }
+
+  .color-field:has(input:focus-visible) {
+    outline-color: Highlight;
+  }
+}

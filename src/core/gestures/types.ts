@@ -39,8 +39,13 @@ export interface GestureController {
 export interface GestureRecognizer<T extends GestureDetail = GestureDetail> {
   readonly name: string;
   readonly priority: number;
-  readonly listener: GestureListener<T>;
-  bind(el: HTMLElement, emit: GestureListener<T>): () => void;
+  /*
+   * Method signatures (not function-typed properties) keep parameters
+   * bivariant, so a GestureRecognizer<TapGestureDetail> is accepted wherever
+   * a GestureRecognizer<GestureDetail> is expected (detectGesture, sequence…).
+   */
+  listener(detail: T): void;
+  bind(el: HTMLElement, emit: (detail: T) => void): () => void;
 }
 
 export type SwipeDirection = 'left' | 'right' | 'up' | 'down';

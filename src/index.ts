@@ -266,8 +266,55 @@ export {
   type AudioPlayerView,
   type AudioRepeatMode,
 } from './components/media/audio-player.js';
+export {
+  QrCodeSpecs,
+  encodeQr,
+  QrCapacityError,
+  qrDetectMode,
+  qrByteCapacity,
+  renderQr,
+  renderQrSvg,
+  contrastRatio,
+  QR_DOT_STYLES,
+  QR_EYE_FRAME_STYLES,
+  QR_EYE_BALL_STYLES,
+  QR_FRAME_STYLES,
+  QR_FRAME_FONTS,
+  QR_LOGO_ICONS,
+  type QrEcc,
+  type QrMatrix,
+  type QrMode,
+  type QrEncodeOptions,
+  type QrDotStyle,
+  type QrEyeFrameStyle,
+  type QrEyeBallStyle,
+  type QrGradient,
+  type QrFrameStyle,
+  type QrFrameFont,
+  type QrLogoIcon,
+  type QrRenderOptions,
+  type QrCodeSize,
+  type QrExportFormat,
+  type QrRenderDetail,
+  type QrDownloadDetail,
+  type QrExportOptions,
+} from './components/media/qr-code.js';
+export {
+  QR_CONTENT_TYPES,
+  buildQrPayload,
+  emptyQrPayloads,
+  validateQrPayload,
+  normalizeUrl,
+  normalizePhone,
+  type QrContentType,
+  type QrPayloadMap,
+  type QrFieldError,
+  type QrFieldErrors,
+  type QrWifiEncryption,
+} from './components/media/qr-code.payload.js';
 export type { K3SoundFx } from './components/feedback/sound-fx.js';
 export type { K3AudioPlayer } from './components/media/audio-player.js';
+export type { K3QrCode } from './components/media/qr-code.js';
 
 export const K3UI: K3UIGlobal = {
   version: VERSION,

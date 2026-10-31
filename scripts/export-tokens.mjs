@@ -1,7 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const root = path.resolve('D:/K3ui');
+import { fileURLToPath } from 'node:url';
+
+/* Repository root, wherever the clone lives (was hard-coded to D:/K3ui). */
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const tokensDir = path.join(root, 'src/tokens');
 const out = path.join(root, 'dist/tokens.json');
 

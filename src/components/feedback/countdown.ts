@@ -2,6 +2,7 @@ import { html, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { K3Element, prefersReducedMotion } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { i18n } from '../../i18n/index.js';
 import {
   CountdownSpecs,
   formatCountdownTime,
@@ -74,7 +75,7 @@ export class K3Countdown extends K3Element {
     this.setAttribute('role', CountdownSpecs.accessibility.role);
     this.setAttribute('aria-live', CountdownSpecs.accessibility.live);
     if (!this.hasAttribute('aria-label')) {
-      this.setAttribute('aria-label', CountdownSpecs.accessibility.ariaLabel);
+      this.setAttribute('aria-label', i18n.t('countdown.ariaLabel', CountdownSpecs.accessibility.ariaLabel));
     }
     this.resolveEndMode();
     this.syncRemainingFromClock(false);
@@ -282,7 +283,7 @@ export class K3Countdown extends K3Element {
   override render() {
     if (this.ended) {
       const message =
-        this.endMessage.trim() || CountdownSpecs.defaultEndMessage;
+        this.endMessage.trim() || i18n.t('countdown.end', CountdownSpecs.defaultEndMessage);
       return html`<span class="message" part="message">${message}</span>`;
     }
 

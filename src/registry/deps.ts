@@ -1,0 +1,38 @@
+/**
+ * Custom elements each component renders in its own template (shadow DOM or
+ * light-DOM children it manages). `registry.register(tag)` defines them first,
+ * so `K3UI.init({ components: ['k3-audio-player'] })` also upgrades its slider,
+ * buttons and progress. Kept in sync by tests/unit/registry-deps.test.ts.
+ */
+export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
+  'k3-audio-player': ['k3-card', 'k3-fab', 'k3-icon-button', 'k3-progress', 'k3-slider'],
+  'k3-autocomplete': ['k3-text-field'],
+  'k3-bubble': ['k3-avatar'],
+  'k3-button': ['k3-ripple'],
+  'k3-button-menu': ['k3-button'],
+  'k3-card': ['k3-chip'],
+  'k3-card-set': ['k3-card', 'k3-menu', 'k3-menu-item'],
+  'k3-carousel': ['k3-icon-button'],
+  'k3-chip-set': ['k3-chip'],
+  'k3-date-picker': ['k3-button', 'k3-calendar', 'k3-date-picker-toggle', 'k3-icon-button', 'k3-text-field'],
+  'k3-dialog': ['k3-button'],
+  'k3-fab-dial': ['k3-fab'],
+  'k3-fab-menu': ['k3-fab'],
+  'k3-fab-rail': ['k3-fab'],
+  'k3-field-group': ['k3-select', 'k3-text-field'],
+  'k3-icon-button': ['k3-ripple'],
+  'k3-list': ['k3-menu', 'k3-menu-item'],
+  'k3-list-item': ['k3-checkbox', 'k3-radio', 'k3-switch'],
+  'k3-menu': ['k3-menu-item'],
+  'k3-menu-group': ['k3-menu-item'],
+  'k3-mood-calendar': ['k3-button', 'k3-dialog', 'k3-shape-chip'],
+  'k3-nav-drawer': ['k3-sheet'],
+  'k3-select': ['k3-menu-item', 'k3-text-field'],
+  'k3-skeleton': ['k3-card'],
+  'k3-sound-fx': ['k3-button'],
+  'k3-split-button': ['k3-menu'],
+  'k3-table': ['k3-chip'],
+  'k3-time-picker': ['k3-button', 'k3-icon-button', 'k3-text-field', 'k3-time-picker-dial', 'k3-time-picker-toggle'],
+  'k3-time-picker-toggle': ['k3-icon-button', 'k3-time-picker'],
+  'k3-toolbar': ['k3-fab', 'k3-icon-button'],
+};

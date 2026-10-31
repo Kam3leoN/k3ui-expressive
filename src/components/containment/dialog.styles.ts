@@ -22,7 +22,8 @@ export const dialogStyles: CSSResultGroup = [
         background: rgb(0 0 0 / 0.32); /* M3 scrim 32% */
         opacity: 0;
         pointer-events: none;
-        z-index: 40;
+        /* Same band as k3-sheet — above fixed FAB chrome (≤1100). */
+        z-index: 1200;
         transition: opacity var(--k3-sys-motion-duration-effects-fast, 150ms)
           var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects));
       }
@@ -35,7 +36,7 @@ export const dialogStyles: CSSResultGroup = [
 
       .panel {
         position: fixed;
-        z-index: 41;
+        z-index: 1201;
         display: flex;
         flex-direction: column;
         box-sizing: border-box;
@@ -48,9 +49,14 @@ export const dialogStyles: CSSResultGroup = [
         pointer-events: auto;
       }
 
-      /* Layout only — opacity / scaleY owned by enterDialogMotion */
+      /*
+       * Layout only — opacity / scaleY owned by enterDialogMotion.
+       * Physical left + translate(-50%, -50%): logical inset-inline:50% breaks
+       * centering in RTL (over-constrained right wins → panel flies left).
+       */
       .panel.basic {
-        inset-inline: 50%;
+        left: 50%;
+        right: auto;
         top: 50%;
         width: min(35rem, calc(100vw - 3rem)); /* max 560 · 24dp*2 inset */
         min-width: min(17.5rem, calc(100vw - 3rem)); /* min 280 */

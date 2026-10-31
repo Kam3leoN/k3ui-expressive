@@ -1,4 +1,4 @@
-import { html, nothing } from 'lit';
+import { html, nothing, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -12,6 +12,7 @@ import {
   haptic,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { i18n } from '../../i18n/index.js';
 import {
   SLIDER_HANDLE_GAP,
   SLIDER_HANDLE_GAP_PRESSED,
@@ -526,7 +527,7 @@ export class K3Slider extends K3Element {
     this.syncLinkedFields();
   }
 
-  override updated(changed?: Map<string, unknown>): void {
+  override updated(changed: PropertyValues): void {
     this.syncHostMetrics();
     this.bindTrackObserver();
     /* Elevate host while the floating value bubble is visible (sibling stacking). */
@@ -1253,7 +1254,7 @@ export class K3Slider extends K3Element {
                     aria-valuenow=${Math.round(this.valueStart)}
                     aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
                     aria-disabled=${this.disabled ? 'true' : 'false'}
-                    aria-label=${label || 'Minimum'}
+                    aria-label=${label || i18n.t('slider.minimum', 'Minimum')}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'start')}
                   >
                     <span class="thumb" part="thumb" aria-hidden="true"></span>
@@ -1275,7 +1276,7 @@ export class K3Slider extends K3Element {
                     aria-valuenow=${Math.round(this.valueEnd)}
                     aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
                     aria-disabled=${this.disabled ? 'true' : 'false'}
-                    aria-label=${label || 'Maximum'}
+                    aria-label=${label || i18n.t('slider.maximum', 'Maximum')}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'end')}
                   >
                     <span class="thumb" part="thumb" aria-hidden="true"></span>

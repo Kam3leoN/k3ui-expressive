@@ -779,6 +779,33 @@ ConfettiPresets.fireFireworks();`,
   data-k3-sound-leave="leave"
 >Interactive</k3-button>`,
   },
+  'qr-code': {
+    components: ['k3-qr-code'],
+    html: `<k3-qr-code value="https://github.com/Kam3leoN/k3ui-expressive"></k3-qr-code>
+
+<!-- Styled: rounded dots · round eyes · gradient · logo · frame -->
+<k3-qr-code
+  value="https://k3ui.dev"
+  ecc="H"
+  size="lg"
+  dot-style="ellipse"
+  eye-frame-style="rounded"
+  eye-ball-style="circle"
+  color="#00639b"
+  gradient="linear"
+  gradient-color="#6750a4"
+  logo-icon="link"
+  frame="box"
+  frame-text="Scannez-moi"
+></k3-qr-code>`,
+    jsExtra: `const qr = document.querySelector("k3-qr-code");
+await qr.download("png", { size: 1024, filename: "k3ui" });
+// Sandboxed host? Handle the file yourself:
+qr.addEventListener("k3-download", (e) => {
+  e.preventDefault();
+  share(e.detail.blob, e.detail.filename);
+});`,
+  },
   'audio-player': {
     components: ['k3-audio-player'],
     html: `<k3-audio-player
@@ -799,45 +826,6 @@ ConfettiPresets.fireFireworks();`,
 <!-- Prefer phone on smartphone viewports -->
 <k3-audio-player variant="phone" tracks='[...]'></k3-audio-player>
 <k3-audio-player variant="full" tracks='[...]'></k3-audio-player>`,
-  },
-  'qr-code': {
-    components: ['k3-qr-code'],
-    html: `<!-- Pattern body / eye frame / eye ball -->
-<k3-qr-code
-  value="https://example.com"
-  size="240"
-  dots="diamond"
-  corners-square="frame14"
-  corners-dot="ball5"
-  corners-square-rotate="mirror"
-  corners-dot-rotate="mirror"
-  color="primary"
-  background="#ffffff"
-  framed
-></k3-qr-code>
-
-<!-- Classic qr-code-styling dots -->
-<k3-qr-code
-  value="https://example.com"
-  dots="rounded"
-  corners-square="extra-rounded"
-  corners-dot="dot"
-  color="secondary"
-></k3-qr-code>
-
-<!-- Center logo -->
-<k3-qr-code
-  value="https://example.com"
-  image="/logo.png"
-  image-size="0.3"
-  error-correction="H"
-  dots="star"
-  corners-square="frame0"
-  corners-dot="ball14"
-></k3-qr-code>`,
-    jsExtra: `
-const qr = document.querySelector("k3-qr-code");
-await qr?.download?.("my-qr", "png");`,
   },
   breadcrumb: {
     components: ['k3-breadcrumb'],

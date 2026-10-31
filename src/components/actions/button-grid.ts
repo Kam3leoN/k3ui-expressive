@@ -12,6 +12,7 @@ import {
   watchDevicePixelRatio,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { i18n } from '../../i18n/index.js';
 import {
   BUTTON_GRID_CELLS,
   BUTTON_GRID_DEFAULT_LABELS,
@@ -240,7 +241,7 @@ export class K3ButtonGrid extends K3Element {
               type="button"
               class="fab k3-state-layer k3-focus-ring"
               part="fab"
-              aria-label=${ButtonGridSpecs.accessibility.fabLabel}
+              aria-label=${i18n.t('buttonGrid.open', ButtonGridSpecs.accessibility.fabLabel)}
               aria-expanded=${this.expanded ? 'true' : 'false'}
               @click=${this.onFabClick}
             >
