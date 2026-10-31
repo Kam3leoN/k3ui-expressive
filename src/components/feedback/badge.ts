@@ -100,3 +100,7 @@ export class K3Badge extends K3Element {
 }
 
 export default K3Badge;
+
+if (!customElements.get('k3-badge')) {
+  customElements.define('k3-badge', K3Badge);
+}

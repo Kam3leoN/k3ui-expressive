@@ -31,9 +31,13 @@ describe('k3-nav-item badge', () => {
     expect(badge?.hasAttribute('hidden')).toBe(false);
     expect(badge?.textContent).toBe('42');
     expect(badge?.parentElement).toBe(shell);
-    expect(el.shadowRoot?.querySelector('.item')?.getAttribute('aria-label')).toBe(
-      'Components, 42',
-    );
+    /* Name comes from the visible content (badge + label), not an aria-label in
+       another order — WCAG 2.5.3 "label in name" (axe label-content-name-mismatch). */
+    const item = el.shadowRoot?.querySelector('.item');
+    expect(item?.hasAttribute('aria-label')).toBe(false);
+    const visible = (item?.textContent ?? '').replace(/\s+/g, ' ');
+    expect(visible).toContain('42');
+    expect(visible).toContain('Components');
     el.remove();
   });
 

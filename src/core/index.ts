@@ -201,3 +201,4 @@ export {
   type DockedFitOptions,
   type DockedFitController,
 } from './surface-variant.js';
+export { resolveIdRef } from './id-ref.js';

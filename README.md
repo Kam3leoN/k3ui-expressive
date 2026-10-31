@@ -60,6 +60,35 @@ Manual bootstrap (skip auto-init):
 | SCSS class `.btn` | `<k3-button variant="…">` |
 | Multi-chunk `dist/js` | Single `dist/k3ui.js` |
 
+## Registration
+
+Importing a component module defines its tag (guarded, like Material Web). With the
+registry, dependencies come along: `K3UI.init({ components: ['k3-audio-player'] })` also
+defines its slider, buttons and progress (`src/registry/deps.ts`, kept in sync by
+`tests/unit/registry-deps.test.ts`).
+
+## Theming
+
+`K3UI.init({ theme: { seed: '#00639B', variant } })` — `variant` defaults to `expressive`
+(hue-rotated, M3 Expressive). Use `tonalspot` to keep a brand colour recognisable.
+
+## Development
+
+```bash
+npm ci
+npm run dev           # playground
+npm run check         # lint (tsc) + tests + build — same as CI
+npm run build:playground
+```
+
+The playground self-hosts its Material Symbols subset. To use a new ligature, add it to
+`playground/icons.json`, then regenerate the font:
+
+```bash
+pip install fonttools brotli
+python3 scripts/subset-icons.py path/to/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].woff2
+```
+
 ## License
 
 MIT © Kam3leoN

@@ -152,3 +152,7 @@ export class K3Checkbox extends K3Element {
   }
 }
 export default K3Checkbox;
+
+if (!customElements.get('k3-checkbox')) {
+  customElements.define('k3-checkbox', K3Checkbox);
+}

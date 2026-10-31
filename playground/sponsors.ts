@@ -251,7 +251,7 @@ export function mountSponsors(): void {
 
   <div class="sponsors-contrib">
     <h3 class="sponsors-contrib-title" data-i18n="playground.sponsors.contrib.title">Contributions financières</h3>
-    <div class="sponsor-tiers" role="list">
+    <div class="sponsor-tiers">
       ${SPONSOR_TIER_CARDS.map(renderTierCard).join('')}
     </div>
   </div>

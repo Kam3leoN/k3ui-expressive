@@ -1,4 +1,5 @@
 import { html, nothing, type PropertyValues } from 'lit';
+import { resolveIdRef } from '../../core/id-ref.js';
 import { property, state, query } from 'lit/decorators.js';
 import {
   K3Element,
@@ -357,15 +358,15 @@ export class K3DatePicker extends K3Element {
   }
 
   private forEl(): HTMLElement | null {
-    return this.for ? document.getElementById(this.for) : null;
+    return resolveIdRef(this, this.for);
   }
 
   private forStartEl(): HTMLElement | null {
-    return this.forStart ? document.getElementById(this.forStart) : null;
+    return resolveIdRef(this, this.forStart);
   }
 
   private forEndEl(): HTMLElement | null {
-    return this.forEnd ? document.getElementById(this.forEnd) : null;
+    return resolveIdRef(this, this.forEnd);
   }
 
   private findAnchor(): HTMLElement | null {
@@ -626,3 +627,7 @@ export type {
   SpecialDatesFn,
 } from './calendar.types.js';
 export { K3Calendar } from './calendar.js';
+
+if (!customElements.get('k3-date-picker')) {
+  customElements.define('k3-date-picker', K3DatePicker);
+}

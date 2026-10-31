@@ -124,3 +124,7 @@ export class K3Skeleton extends K3Element {
 }
 
 export default K3Skeleton;
+
+if (!customElements.get('k3-skeleton')) {
+  customElements.define('k3-skeleton', K3Skeleton);
+}

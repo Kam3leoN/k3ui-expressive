@@ -317,3 +317,7 @@ export class K3CardSet extends K3Element {
 }
 
 export default K3CardSet;
+
+if (!customElements.get('k3-card-set')) {
+  customElements.define('k3-card-set', K3CardSet);
+}

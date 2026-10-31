@@ -211,3 +211,7 @@ export class K3ChipSet extends K3Element {
 }
 
 export default K3ChipSet;
+
+if (!customElements.get('k3-chip-set')) {
+  customElements.define('k3-chip-set', K3ChipSet);
+}

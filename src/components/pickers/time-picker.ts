@@ -1,4 +1,5 @@
 import { html, nothing, type PropertyValues, type TemplateResult } from 'lit';
+import { resolveIdRef } from '../../core/id-ref.js';
 import { property, state, query } from 'lit/decorators.js';
 import {
   K3Element,
@@ -339,7 +340,7 @@ export class K3TimePicker extends K3Element {
   }
 
   private forEl(): HTMLElement | null {
-    return this.for ? document.getElementById(this.for) : null;
+    return resolveIdRef(this, this.for);
   }
 
   private findAnchor(): HTMLElement | null {
@@ -740,3 +741,7 @@ export type {
   BlackoutTimesFn,
   TimePickerValueDetail,
 } from './time-picker.types.js';
+
+if (!customElements.get('k3-time-picker')) {
+  customElements.define('k3-time-picker', K3TimePicker);
+}

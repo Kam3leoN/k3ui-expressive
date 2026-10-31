@@ -119,3 +119,7 @@ export class K3NavBar extends K3Element {
   }
 }
 export default K3NavBar;
+
+if (!customElements.get('k3-nav-bar')) {
+  customElements.define('k3-nav-bar', K3NavBar);
+}

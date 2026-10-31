@@ -14,6 +14,7 @@ import {
   type BreadcrumbVariant,
 } from './breadcrumb.specs.js';
 import { breadcrumbStyles } from './breadcrumb.styles.js';
+import { i18n } from '../../i18n/index.js';
 
 export type {
   BreadcrumbItem,
@@ -78,7 +79,7 @@ export class K3Breadcrumb extends K3Element {
 
   /** Accessible name for the navigation landmark. */
   @property({ attribute: 'aria-label' })
-  ariaLabel = BreadcrumbSpecs.accessibility.defaultLabel;
+  ariaLabel = '';
 
   private onItemClick(item: BreadcrumbItem, index: number, e: Event): void {
     if (item.current) return;
@@ -154,7 +155,7 @@ export class K3Breadcrumb extends K3Element {
     const visible = buildVisibleBreadcrumbItems(this.items, this.collapseAfter);
 
     return html`
-      <nav aria-label=${this.ariaLabel || nothing}>
+      <nav aria-label=${this.ariaLabel || i18n.t('breadcrumb.ariaLabel', BreadcrumbSpecs.accessibility.defaultLabel)}>
         <ol class="breadcrumb__list">
           ${visible.map((entry, i) => {
             const sep =

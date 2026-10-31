@@ -109,3 +109,7 @@ export class K3Radio extends K3Element {
   }
 }
 export default K3Radio;
+
+if (!customElements.get('k3-radio')) {
+  customElements.define('k3-radio', K3Radio);
+}

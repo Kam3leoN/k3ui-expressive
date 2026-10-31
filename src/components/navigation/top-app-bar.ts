@@ -202,3 +202,7 @@ export class K3TopAppBar extends K3Element {
   }
 }
 export default K3TopAppBar;
+
+if (!customElements.get('k3-top-app-bar')) {
+  customElements.define('k3-top-app-bar', K3TopAppBar);
+}

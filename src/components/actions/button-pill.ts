@@ -215,3 +215,7 @@ export class K3ButtonPill extends K3Element {
 }
 
 export default K3ButtonPill;
+
+if (!customElements.get('k3-button-pill')) {
+  customElements.define('k3-button-pill', K3ButtonPill);
+}

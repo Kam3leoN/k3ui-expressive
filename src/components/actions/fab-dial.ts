@@ -504,3 +504,7 @@ export class K3FabDial extends K3Element {
 }
 
 export default K3FabDial;
+
+if (!customElements.get('k3-fab-dial')) {
+  customElements.define('k3-fab-dial', K3FabDial);
+}

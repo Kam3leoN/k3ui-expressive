@@ -31,3 +31,7 @@ export class K3NavDrawer extends K3Sheet {
   }
 }
 export default K3NavDrawer;
+
+if (!customElements.get('k3-nav-drawer')) {
+  customElements.define('k3-nav-drawer', K3NavDrawer);
+}

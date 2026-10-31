@@ -8,3 +8,7 @@ export class K3BottomSheet extends K3Sheet {
   }
 }
 export default K3BottomSheet;
+
+if (!customElements.get('k3-bottom-sheet')) {
+  customElements.define('k3-bottom-sheet', K3BottomSheet);
+}

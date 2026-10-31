@@ -221,3 +221,7 @@ export class K3ExtendedFab extends K3Element {
   }
 }
 export default K3ExtendedFab;
+
+if (!customElements.get('k3-extended-fab')) {
+  customElements.define('k3-extended-fab', K3ExtendedFab);
+}

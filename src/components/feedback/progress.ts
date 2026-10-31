@@ -941,3 +941,7 @@ export class K3Progress extends K3Element {
 }
 
 export default K3Progress;
+
+if (!customElements.get('k3-progress')) {
+  customElements.define('k3-progress', K3Progress);
+}

@@ -159,3 +159,7 @@ export class K3ShapeChip extends K3Element {
 }
 
 export default K3ShapeChip;
+
+if (!customElements.get('k3-shape-chip')) {
+  customElements.define('k3-shape-chip', K3ShapeChip);
+}

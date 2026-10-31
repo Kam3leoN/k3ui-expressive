@@ -496,7 +496,10 @@ export class K3NavItem extends K3Element {
     const current = this.active ? 'page' : nothing;
     const expanded = this.menuOpen ? 'true' : this.href ? nothing : 'false';
     const count = this.badgeLabel;
-    const ariaLabel = count ? `${this.label}, ${count}` : nothing;
+    /* Name comes from the visible content (badge + label) — an aria-label in another
+       order would not contain the visible text (WCAG 2.5.3 label in name). */
+    const ariaLabel = nothing;
+    void count;
     if (this.href) {
       return html`<a
         class="item"
@@ -523,3 +526,7 @@ export class K3NavItem extends K3Element {
   }
 }
 export default K3NavItem;
+
+if (!customElements.get('k3-nav-item')) {
+  customElements.define('k3-nav-item', K3NavItem);
+}

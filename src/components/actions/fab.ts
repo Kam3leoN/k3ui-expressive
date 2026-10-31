@@ -296,3 +296,7 @@ export class K3Fab extends K3Element {
 }
 
 export default K3Fab;
+
+if (!customElements.get('k3-fab')) {
+  customElements.define('k3-fab', K3Fab);
+}

@@ -111,3 +111,7 @@ export class K3AvatarGroup extends K3Element {
 }
 
 export default K3AvatarGroup;
+
+if (!customElements.get('k3-avatar-group')) {
+  customElements.define('k3-avatar-group', K3AvatarGroup);
+}

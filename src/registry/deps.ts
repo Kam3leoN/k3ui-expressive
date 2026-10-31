@@ -5,14 +5,14 @@
  * buttons and progress. Kept in sync by tests/unit/registry-deps.test.ts.
  */
 export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
-  'k3-audio-player': ['k3-card', 'k3-fab', 'k3-icon-button', 'k3-progress', 'k3-slider'],
+  'k3-audio-player': ['k3-button', 'k3-button-group', 'k3-button-segmented', 'k3-card', 'k3-icon-button', 'k3-list', 'k3-list-item', 'k3-loading-indicator', 'k3-slider', 'k3-tooltip'],
   'k3-autocomplete': ['k3-text-field'],
   'k3-bubble': ['k3-avatar'],
   'k3-button': ['k3-ripple'],
   'k3-button-menu': ['k3-button'],
   'k3-card': ['k3-chip'],
   'k3-card-set': ['k3-card', 'k3-menu', 'k3-menu-item'],
-  'k3-carousel': ['k3-icon-button'],
+  'k3-carousel': ['k3-carousel-item', 'k3-icon-button'],
   'k3-chip-set': ['k3-chip'],
   'k3-date-picker': ['k3-button', 'k3-calendar', 'k3-date-picker-toggle', 'k3-icon-button', 'k3-text-field'],
   'k3-dialog': ['k3-button'],
@@ -27,6 +27,7 @@ export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
   'k3-menu-group': ['k3-menu-item'],
   'k3-mood-calendar': ['k3-button', 'k3-dialog', 'k3-shape-chip'],
   'k3-nav-drawer': ['k3-sheet'],
+  'k3-quote': ['k3-avatar'],
   'k3-select': ['k3-menu-item', 'k3-text-field'],
   'k3-skeleton': ['k3-card'],
   'k3-sound-fx': ['k3-button'],

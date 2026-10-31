@@ -326,6 +326,8 @@ export const K3UI: K3UIGlobal = {
   haptic,
   dnd,
   gestures,
+  keyboard,
+  mouse,
   snackbar: { show: showSnackbar, queue: snackbarQueue },
 };
 

@@ -525,7 +525,7 @@ document.getElementById("dlg")?.show?.();`,
 
 <k3-card-set layout="grid" sortable dismissible label="Cards">
   <k3-card variant="outlined" interactive media-layout="inset">
-    <img slot="media" alt="" width="640" height="360" src="…" />
+    <img loading="lazy" decoding="async" slot="media" alt="" width="640" height="360" src="…" />
     <span slot="headline">Nimbus Financial</span>
   </k3-card>
 </k3-card-set>`,
@@ -721,15 +721,15 @@ document.getElementById("dlg")?.show?.();`,
   mode="loop"
 >
   <k3-carousel-item label="Mountains">
-    <img src="/landscapes/mountains.jpg" alt="" />
+    <img loading="lazy" decoding="async" src="/landscapes/mountains.jpg" alt="" />
     <span slot="label">Mountains</span>
   </k3-carousel-item>
   <k3-carousel-item label="Lake">
-    <img src="/landscapes/lake.jpg" alt="" />
+    <img loading="lazy" decoding="async" src="/landscapes/lake.jpg" alt="" />
     <span slot="label">Lake</span>
   </k3-carousel-item>
   <k3-carousel-item label="Forest">
-    <img src="/landscapes/forest.jpg" alt="" />
+    <img loading="lazy" decoding="async" src="/landscapes/forest.jpg" alt="" />
     <span slot="label">Forest</span>
   </k3-carousel-item>
 </k3-carousel>`,

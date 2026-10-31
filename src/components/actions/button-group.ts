@@ -492,3 +492,7 @@ export class K3ButtonGroup extends K3Element {
 }
 
 export default K3ButtonGroup;
+
+if (!customElements.get('k3-button-group')) {
+  customElements.define('k3-button-group', K3ButtonGroup);
+}

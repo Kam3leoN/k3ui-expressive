@@ -312,3 +312,7 @@ export class K3Ripple extends K3Element {
 }
 
 export default K3Ripple;
+
+if (!customElements.get('k3-ripple')) {
+  customElements.define('k3-ripple', K3Ripple);
+}

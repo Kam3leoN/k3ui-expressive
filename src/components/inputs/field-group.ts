@@ -75,3 +75,7 @@ export class K3FieldGroup extends K3Element {
 }
 
 export default K3FieldGroup;
+
+if (!customElements.get('k3-field-group')) {
+  customElements.define('k3-field-group', K3FieldGroup);
+}

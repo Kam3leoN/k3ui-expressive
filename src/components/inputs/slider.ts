@@ -1,4 +1,5 @@
 import { html, nothing, type PropertyValues } from 'lit';
+import { resolveIdRef } from '../../core/id-ref.js';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -604,7 +605,7 @@ export class K3Slider extends K3Element {
   private resolveField(id: string): (HTMLElement & { value?: string }) | null {
     const t = id.trim();
     if (!t) return null;
-    return document.getElementById(t) as (HTMLElement & { value?: string }) | null;
+    return resolveIdRef<HTMLElement & { value?: string }>(this, t);
   }
 
   private unlinkFields(): void {
@@ -1366,3 +1367,7 @@ export class K3Slider extends K3Element {
 }
 
 export default K3Slider;
+
+if (!customElements.get('k3-slider')) {
+  customElements.define('k3-slider', K3Slider);
+}

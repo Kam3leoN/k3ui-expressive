@@ -852,3 +852,7 @@ export class K3Sheet extends K3Element {
   }
 }
 export default K3Sheet;
+
+if (!customElements.get('k3-sheet')) {
+  customElements.define('k3-sheet', K3Sheet);
+}

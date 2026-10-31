@@ -466,3 +466,7 @@ export class K3NavRail extends K3Element {
   }
 }
 export default K3NavRail;
+
+if (!customElements.get('k3-nav-rail')) {
+  customElements.define('k3-nav-rail', K3NavRail);
+}

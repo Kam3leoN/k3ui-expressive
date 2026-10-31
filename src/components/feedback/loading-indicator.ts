@@ -186,3 +186,7 @@ export class K3LoadingIndicator extends K3Element {
   }
 }
 export default K3LoadingIndicator;
+
+if (!customElements.get('k3-loading-indicator')) {
+  customElements.define('k3-loading-indicator', K3LoadingIndicator);
+}

@@ -201,3 +201,7 @@ export class K3ButtonMenu extends K3Element {
   }
 }
 export default K3ButtonMenu;
+
+if (!customElements.get('k3-button-menu')) {
+  customElements.define('k3-button-menu', K3ButtonMenu);
+}

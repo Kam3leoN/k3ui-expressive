@@ -13,6 +13,7 @@ import {
   type ButtonSegmentedShape,
 } from './button-segmented.specs.js';
 import { buttonSegmentedStyles } from './button-segmented.styles.js';
+import { i18n } from '../../i18n/index.js';
 
 export type { ButtonSegmentedSegment, ButtonSegmentedShape } from './button-segmented.specs.js';
 export {
@@ -70,7 +71,7 @@ export class K3ButtonSegmented extends K3Element {
   defaultSelected: number[] = [...ButtonSegmentedSpecs.defaultSelectedIndices];
 
   @property({ attribute: 'aria-label' })
-  ariaLabel = ButtonSegmentedSpecs.accessibility.defaultLabel;
+  ariaLabel = '';
 
   @state() private _selected: number[] = [];
 
@@ -80,8 +81,14 @@ export class K3ButtonSegmented extends K3Element {
     this.syncHostRole();
   }
 
-  override updated(changed: PropertyValues): void {
-    super.updated(changed);
+  override willUpdate(changed: PropertyValues): void {
+    super.willUpdate(changed);
+    /* External `selectedIndices` writes (property or attribute) drive the selection */
+    if (changed.has('selectedIndices') && changed.get('selectedIndices') !== undefined) {
+      let next = clampSelectedIndices(this.selectedIndices, this.segments.length);
+      if (!this.multiSelect) next = next.slice(0, 1);
+      if (next.join(',') !== this._selected.join(',')) this._selected = next;
+    }
     if (changed.has('segments')) {
       this._selected = clampSelectedIndices(this._selected, this.segments.length);
       if (
@@ -213,7 +220,7 @@ export class K3ButtonSegmented extends K3Element {
       <div
         class="button-segmented"
         part="root"
-        aria-label=${this.ariaLabel || nothing}
+        aria-label=${this.ariaLabel || i18n.t('segmented.ariaLabel', ButtonSegmentedSpecs.accessibility.defaultLabel)}
       >
         ${this.segments.map((seg, i) => this.renderSegment(seg, i))}
       </div>

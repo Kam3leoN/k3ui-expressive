@@ -342,3 +342,7 @@ export class K3Select extends K3Element {
 }
 
 export default K3Select;
+
+if (!customElements.get('k3-select')) {
+  customElements.define('k3-select', K3Select);
+}

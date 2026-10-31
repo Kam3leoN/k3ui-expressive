@@ -274,3 +274,7 @@ export class K3Tabs extends K3Element {
   }
 }
 export default K3Tabs;
+
+if (!customElements.get('k3-tabs')) {
+  customElements.define('k3-tabs', K3Tabs);
+}

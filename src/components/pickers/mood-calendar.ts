@@ -381,3 +381,7 @@ export {
   MOOD_ORDER,
 } from './mood-calendar.types.js';
 export { generateDemoYear, countByMood } from './mood-calendar.demo-data.js';
+
+if (!customElements.get('k3-mood-calendar')) {
+  customElements.define('k3-mood-calendar', K3MoodCalendar);
+}

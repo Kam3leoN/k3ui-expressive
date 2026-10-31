@@ -372,3 +372,7 @@ export class K3PinField extends K3Element {
 }
 
 export default K3PinField;
+
+if (!customElements.get('k3-pin-field')) {
+  customElements.define('k3-pin-field', K3PinField);
+}

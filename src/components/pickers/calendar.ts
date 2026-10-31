@@ -612,3 +612,7 @@ function daysEnd(d: CivilDate): number {
 }
 
 export default K3Calendar;
+
+if (!customElements.get('k3-calendar')) {
+  customElements.define('k3-calendar', K3Calendar);
+}

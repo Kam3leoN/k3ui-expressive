@@ -281,3 +281,7 @@ export class K3SplitButton extends K3Element {
 }
 
 export default K3SplitButton;
+
+if (!customElements.get('k3-split-button')) {
+  customElements.define('k3-split-button', K3SplitButton);
+}

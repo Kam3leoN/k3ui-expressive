@@ -16,3 +16,7 @@ export class K3Divider extends K3Element {
   override render() { return html`<hr part="line" />`; }
 }
 export default K3Divider;
+
+if (!customElements.get('k3-divider')) {
+  customElements.define('k3-divider', K3Divider);
+}

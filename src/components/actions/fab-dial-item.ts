@@ -33,3 +33,7 @@ export class K3FabDialItem extends K3Element {
 }
 
 export default K3FabDialItem;
+
+if (!customElements.get('k3-fab-dial-item')) {
+  customElements.define('k3-fab-dial-item', K3FabDialItem);
+}

@@ -8,3 +8,7 @@ export class K3SideSheet extends K3Sheet {
   }
 }
 export default K3SideSheet;
+
+if (!customElements.get('k3-side-sheet')) {
+  customElements.define('k3-side-sheet', K3SideSheet);
+}

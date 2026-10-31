@@ -565,3 +565,7 @@ export class K3FabRail extends K3Element {
 }
 
 export default K3FabRail;
+
+if (!customElements.get('k3-fab-rail')) {
+  customElements.define('k3-fab-rail', K3FabRail);
+}

@@ -113,17 +113,15 @@ export class K3Toolbar extends K3Element {
     this.syncSlots();
   }
 
-  override updated(changed: PropertyValues): void {
-    super.updated(changed);
-    /* Vertical only makes sense on floating — coerce docked to horizontal */
+  override willUpdate(changed: PropertyValues): void {
+    super.willUpdate(changed);
+    /* Vertical only makes sense on floating — coerce docked to horizontal before render */
     if (
-      changed.has('variant') &&
+      (changed.has('variant') || changed.has('orientation')) &&
       this.variant === 'docked' &&
       this.orientation === 'vertical'
     ) {
-      queueMicrotask(() => {
-        this.orientation = 'horizontal';
-      });
+      this.orientation = 'horizontal';
     }
   }
 
@@ -174,3 +172,7 @@ export class K3Toolbar extends K3Element {
   }
 }
 export default K3Toolbar;
+
+if (!customElements.get('k3-toolbar')) {
+  customElements.define('k3-toolbar', K3Toolbar);
+}

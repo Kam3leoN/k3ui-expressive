@@ -249,11 +249,12 @@ export class K3Countdown extends K3Element {
     const key = unit as keyof typeof CountdownSpecs.unitLabels;
     if (this.shortLabels) {
       const short = CountdownSpecs.unitLabelsShort[key as keyof typeof CountdownSpecs.unitLabelsShort];
-      if (short) return short;
+      if (short) return i18n.t(`countdown.unit.${key}.short`, short);
     }
     const labels = CountdownSpecs.unitLabels[key];
     if (!labels) return unit;
-    return value === 1 ? labels.one : labels.other;
+    const form = value === 1 ? 'one' : 'other';
+    return i18n.t(`countdown.unit.${key}.${form}`, labels[form]);
   }
 
   private renderSegments(timeData: CountdownTimeData) {

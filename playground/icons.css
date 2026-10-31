@@ -1,0 +1,12 @@
+/*
+ * Material Symbols Rounded — self-hosted subset (Apache-2.0).
+ * Source of truth: playground/icons.json → `python3 scripts/subset-icons.py <full-font>`.
+ * No request to fonts.googleapis.com (privacy / GDPR, no render-blocking CSS).
+ */
+@font-face {
+  font-family: 'Material Symbols Rounded';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: block;
+  src: url('./fonts/material-symbols-rounded-subset.woff2') format('woff2');
+}

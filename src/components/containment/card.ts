@@ -519,3 +519,7 @@ export class K3Card extends K3Element {
 }
 
 export default K3Card;
+
+if (!customElements.get('k3-card')) {
+  customElements.define('k3-card', K3Card);
+}

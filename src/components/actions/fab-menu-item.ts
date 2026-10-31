@@ -88,3 +88,7 @@ export class K3FabMenuItem extends K3Element {
 }
 
 export default K3FabMenuItem;
+
+if (!customElements.get('k3-fab-menu-item')) {
+  customElements.define('k3-fab-menu-item', K3FabMenuItem);
+}

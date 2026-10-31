@@ -46,10 +46,10 @@ let fontsPromise: Promise<void> | null = null;
 
 let mounted = false;
 let style: MsStyle = 'rounded';
-let fill = DEFAULT_AXES.fill;
-let wght = DEFAULT_AXES.wght;
-let grad = DEFAULT_AXES.grad;
-let opsz = DEFAULT_AXES.opsz;
+let fill: 0 | 1 = DEFAULT_AXES.fill;
+let wght: number = DEFAULT_AXES.wght;
+let grad: number = DEFAULT_AXES.grad;
+let opsz: number = DEFAULT_AXES.opsz;
 let groupIndex = 0;
 let query = '';
 let searchTimer = 0;
@@ -236,7 +236,7 @@ function syncChips(root: HTMLElement, data: MsCatalog): void {
   if (!host) return;
   host.replaceChildren();
   data.groups.forEach((group, i) => {
-    const chip = document.createElement('k3-chip');
+    const chip = document.createElement('k3-chip') as HTMLElement & { value: string; selected: boolean };
     chip.setAttribute('variant', 'filter');
     chip.value = String(i);
     chip.selected = i === groupIndex;

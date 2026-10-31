@@ -407,3 +407,7 @@ export class K3Dialog extends K3Element {
   }
 }
 export default K3Dialog;
+
+if (!customElements.get('k3-dialog')) {
+  customElements.define('k3-dialog', K3Dialog);
+}

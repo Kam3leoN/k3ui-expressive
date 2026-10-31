@@ -168,3 +168,7 @@ export class K3Search extends K3Element {
 }
 
 export default K3Search;
+
+if (!customElements.get('k3-search')) {
+  customElements.define('k3-search', K3Search);
+}

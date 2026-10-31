@@ -120,7 +120,6 @@ export function attachMouse(
   let dragOriginY = 0;
   let dragging = false;
   let dragArmed = false;
-  let activeButton: MouseButton | null = null;
   let pointerId: number | null = null;
 
   const emit = (
@@ -177,7 +176,6 @@ export function attachMouse(
     }
     const btn = normalizeMouseButton(e.button);
     if (btn) buttons.add(btn);
-    activeButton = btn;
     trackPos(e);
     dragArmed = true;
     dragging = false;
@@ -226,7 +224,6 @@ export function attachMouse(
     emit('up', e, { button: btn });
     dragging = false;
     dragArmed = false;
-    activeButton = null;
     if (
       pointerId != null &&
       'pointerId' in e &&

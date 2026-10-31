@@ -75,3 +75,7 @@ export class K3FooterBar extends K3Element {
   }
 }
 export default K3FooterBar;
+
+if (!customElements.get('k3-footer-bar')) {
+  customElements.define('k3-footer-bar', K3FooterBar);
+}

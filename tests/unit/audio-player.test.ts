@@ -389,7 +389,7 @@ describe('k3-audio-player', () => {
     el.addEventListener('k3-download', download);
     el.seek(40);
     el.skipBy(-15);
-    expect(el.currentTime).toBeLessThanOrEqual(40);
+    expect(el['currentTime']).toBeLessThanOrEqual(40);
 
     await el.shareTrack();
     el.downloadTrack();

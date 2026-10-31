@@ -208,3 +208,7 @@ export class K3IconButton extends K3Element {
 }
 
 export default K3IconButton;
+
+if (!customElements.get('k3-icon-button')) {
+  customElements.define('k3-icon-button', K3IconButton);
+}

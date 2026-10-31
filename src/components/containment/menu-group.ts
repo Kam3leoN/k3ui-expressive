@@ -35,3 +35,7 @@ export class K3MenuGroup extends K3Element {
 }
 
 export default K3MenuGroup;
+
+if (!customElements.get('k3-menu-group')) {
+  customElements.define('k3-menu-group', K3MenuGroup);
+}

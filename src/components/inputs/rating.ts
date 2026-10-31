@@ -45,7 +45,7 @@ export class K3Rating extends K3Element {
   static formAssociated = true;
   static override styles = [hostReset, ratingStyles];
 
-  private internals = attachInternals(this);
+  private internals = attachInternals(this as unknown as HTMLElement);
 
   @property({ type: Number }) value: number = RatingSpecs.defaultValue;
   @property({ type: Number }) min: number = RatingSpecs.defaultMin;

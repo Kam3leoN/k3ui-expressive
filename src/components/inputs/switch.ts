@@ -1,5 +1,5 @@
-import { html, css } from 'lit';
-import { property } from 'lit/decorators.js';
+import { html, css, nothing } from 'lit';
+import { property, state } from 'lit/decorators.js';
 import {
   K3Element,
   attachInternals,
@@ -125,6 +125,16 @@ export class K3Switch extends K3Element {
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property() name = '';
   @property() value = 'on';
+  /** Accessible name when no visible label is slotted (host `aria-label`). */
+  @property({ attribute: 'aria-label' }) accessibleLabel = '';
+  @state() private hasLabel = false;
+
+  private onLabelSlot = (e: Event): void => {
+    const slot = e.target as HTMLSlotElement;
+    this.hasLabel = slot
+      .assignedNodes({ flatten: true })
+      .some((n) => (n.textContent ?? '').trim() !== '');
+  };
 
   private toggle = (): void => {
     if (this.disabled) return;
@@ -142,13 +152,18 @@ export class K3Switch extends K3Element {
         part="track"
         role="switch"
         aria-checked=${String(this.selected)}
-        aria-labelledby="label"
+        aria-labelledby=${this.hasLabel ? 'label' : nothing}
+        aria-label=${!this.hasLabel && this.accessibleLabel ? this.accessibleLabel : nothing}
         ?disabled=${this.disabled}
         @click=${this.toggle}
       >
         <span class="handle" part="handle"></span>
       </button>
-      <span part="label" id="label"><slot></slot></span>`;
+      <span part="label" id="label"><slot @slotchange=${this.onLabelSlot}></slot></span>`;
   }
 }
 export default K3Switch;
+
+if (!customElements.get('k3-switch')) {
+  customElements.define('k3-switch', K3Switch);
+}

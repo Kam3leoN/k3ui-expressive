@@ -46,3 +46,7 @@ export class K3Theme extends K3Element {
   }
 }
 export default K3Theme;
+
+if (!customElements.get('k3-theme')) {
+  customElements.define('k3-theme', K3Theme);
+}

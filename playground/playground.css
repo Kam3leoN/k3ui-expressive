@@ -238,11 +238,43 @@ k3-doc-nav {
   grid-template-columns: auto 1fr;
   grid-template-rows: 1fr;
   min-height: 100vh;
-  opacity: 0;
-  transition: opacity 180ms ease;
 }
-.app.is-ready {
-  opacity: 1;
+
+/*
+ * No whole-app fade-in: static content (hero, headings) paints at first frame
+ * and is the LCP. Only custom elements that are not upgraded yet stay hidden,
+ * keeping their box so nothing shifts when they upgrade.
+ */
+:not(:defined) {
+  visibility: hidden;
+}
+
+/* Reserve the upgraded size of shell chrome so booting never shifts content (CLS). */
+.shell-appbar:not(:defined),
+.shell-appbar:has(:not(:defined)) {
+  /* also while its children (search, buttons) are still upgrading */
+  visibility: hidden;
+  display: block;
+  block-size: 4rem; /* small top app bar — 64dp */
+  overflow: hidden;
+}
+k3-nav-rail:not(:defined) {
+  display: block;
+  inline-size: 6.5rem; /* --k3-nav-rail-width — 104dp */
+  overflow: hidden;
+}
+.app[data-nav='bar'] k3-nav-bar:not(:defined) {
+  display: block;
+  block-size: 4rem;
+  overflow: hidden;
+}
+
+/*
+ * The catalog grid is filled by JS: until then it holds a screen of space so
+ * the cards never push the footer while it is visible (CLS).
+ */
+#catalog-grid:empty {
+  min-block-size: 100dvh;
 }
 
 /* Phone: content + bottom bar — secondary nav via modal bottom sheet (M3E) */

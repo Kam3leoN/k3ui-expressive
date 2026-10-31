@@ -6,3 +6,7 @@ import { K3FooterBar } from './footer-bar.js';
  */
 export class K3BottomAppBar extends K3FooterBar {}
 export default K3BottomAppBar;
+
+if (!customElements.get('k3-bottom-app-bar')) {
+  customElements.define('k3-bottom-app-bar', K3BottomAppBar);
+}

@@ -773,3 +773,7 @@ export class K3Tooltip extends K3Element {
 }
 
 export default K3Tooltip;
+
+if (!customElements.get('k3-tooltip')) {
+  customElements.define('k3-tooltip', K3Tooltip);
+}

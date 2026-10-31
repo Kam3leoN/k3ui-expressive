@@ -476,3 +476,7 @@ export class K3Snackbar extends K3Element {
 export { showSnackbar, snackbarQueue } from './snackbar-queue.js';
 export type { ShowSnackbarOptions, SnackbarQueueBehavior } from './snackbar-queue.js';
 export default K3Snackbar;
+
+if (!customElements.get('k3-snackbar')) {
+  customElements.define('k3-snackbar', K3Snackbar);
+}

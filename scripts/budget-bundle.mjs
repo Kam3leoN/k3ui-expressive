@@ -10,10 +10,10 @@ const jsPath = path.join(root, 'dist/k3ui.js');
 const cssPath = path.join(root, 'dist/k3ui.css');
 
 // Soft budgets for early 0.0.x — CSS excludes self-hosted fonts (dist/fonts)
-/* Measured at 0.0.1: ~356 kB JS / ~13 kB CSS (one inlined bundle).
+/* Measured after 0.1.0: ~453 kB JS (one inlined bundle) / ~13 kB CSS.
  * Raise only on purpose — and tighten again once components ship as chunks. */
 const LIMITS = {
-  jsGzipKb: Number(process.env.K3UI_BUDGET_JS_KB ?? 420),
+  jsGzipKb: Number(process.env.K3UI_BUDGET_JS_KB ?? 500),
   cssGzipKb: Number(process.env.K3UI_BUDGET_CSS_KB ?? 24),
 };
 

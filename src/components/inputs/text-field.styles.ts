@@ -14,7 +14,7 @@ export const textFieldStyles = css`
   :host {
     display: block;
     width: 100%;
-    max-width: 22rem; /* 352 — M3 form field */
+    max-width: var(--k3-text-field-max-width, 22rem); /* 352 — M3 form field */
     overflow: visible;
     --k3-tf-h: 3.5rem; /* 56 */
     --k3-tf-icon: 1.5rem; /* 24 */

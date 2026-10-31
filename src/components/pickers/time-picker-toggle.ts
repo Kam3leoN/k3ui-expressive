@@ -1,6 +1,6 @@
 import { html, css } from 'lit';
 import { property } from 'lit/decorators.js';
-import { K3Element } from '../../core/index.js';
+import { K3Element, resolveIdRef } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import type K3TimePicker from './time-picker.js';
 import { TOGGLE_HOST_SELECTOR, syncTriggerAria } from './time-picker.utils.js';
@@ -68,7 +68,7 @@ export class K3TimePickerToggle extends K3Element {
   private async openPicker(): Promise<void> {
     if (!this.for) return;
     await customElements.whenDefined('k3-time-picker');
-    const picker = document.getElementById(this.for) as K3TimePicker | null;
+    const picker = resolveIdRef<K3TimePicker>(this, this.for);
     if (!picker || typeof picker.show !== 'function' || picker.disabled) return;
     await picker.show(this.hostEl ?? this.parentElement);
   }
@@ -79,3 +79,7 @@ export class K3TimePickerToggle extends K3Element {
 }
 
 export default K3TimePickerToggle;
+
+if (!customElements.get('k3-time-picker-toggle')) {
+  customElements.define('k3-time-picker-toggle', K3TimePickerToggle);
+}

@@ -668,6 +668,7 @@ export class K3FabMenu extends K3Element {
           variant=${this.variant}
           ?round=${triggerExpanded}
           ?disabled=${this.disabled}
+          aria-label=${this.getAttribute('aria-label') || i18n.t('fabMenu.toggle', 'Menu')}
           aria-expanded=${String(menuOpen)}
           aria-haspopup="menu"
           @k3-click=${this.toggle}
@@ -710,3 +711,7 @@ export class K3FabMenu extends K3Element {
 }
 
 export default K3FabMenu;
+
+if (!customElements.get('k3-fab-menu')) {
+  customElements.define('k3-fab-menu', K3FabMenu);
+}

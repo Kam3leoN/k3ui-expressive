@@ -1,6 +1,6 @@
 import { html, css } from 'lit';
 import { property } from 'lit/decorators.js';
-import { K3Element } from '../../core/index.js';
+import { K3Element, resolveIdRef } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import type K3DatePicker from './date-picker.js';
 import type { CalendarSelectionTarget } from './calendar.types.js';
@@ -60,7 +60,7 @@ export class K3DatePickerToggle extends K3Element {
   private async openPicker(): Promise<void> {
     if (!this.for) return;
     await customElements.whenDefined('k3-date-picker');
-    const picker = document.getElementById(this.for) as K3DatePicker | null;
+    const picker = resolveIdRef<K3DatePicker>(this, this.for);
     if (!picker || typeof picker.show !== 'function' || picker.disabled) return;
     const edge =
       this.edge === 'start' || this.edge === 'end'
@@ -75,3 +75,7 @@ export class K3DatePickerToggle extends K3Element {
 }
 
 export default K3DatePickerToggle;
+
+if (!customElements.get('k3-date-picker-toggle')) {
+  customElements.define('k3-date-picker-toggle', K3DatePickerToggle);
+}

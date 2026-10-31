@@ -62,9 +62,14 @@ export class K3WheelPicker extends K3Element {
     }
     if (changed.has('value')) {
       this.normalizeValues(this.value);
-      this.saved = false;
       this.removeAttribute('saved');
     }
+  }
+
+  override willUpdate(changed: PropertyValues): void {
+    super.willUpdate(changed);
+    /* A new value is never "saved" — reset before render (no extra cycle) */
+    if (changed.has('value')) this.saved = false;
   }
 
   getValue(): string {

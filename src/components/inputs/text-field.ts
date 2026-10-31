@@ -292,6 +292,8 @@ export class K3TextField extends K3Element {
   }
 
   override willUpdate(changed: PropertyValues): void {
+    /* Derived before render — no second update cycle */
+    if (changed.has('type') && this.type !== 'password') this.revealPassword = false;
     if (
       !(changed.has('focused') || changed.has('value') || changed.has('variant')) ||
       this.isStandard ||
@@ -336,10 +338,6 @@ export class K3TextField extends K3Element {
     if (changed.has('value') || changed.has('noForm')) {
       this.writeFormValue(this.noForm ? null : this.value || null);
     }
-    if (changed.has('type') && this.type !== 'password') {
-      this.revealPassword = false;
-    }
-
     if (this.pendingKeyframes) {
       const frames = this.pendingKeyframes;
       this.pendingKeyframes = undefined;
@@ -631,3 +629,7 @@ export class K3TextField extends K3Element {
 }
 
 export default K3TextField;
+
+if (!customElements.get('k3-text-field')) {
+  customElements.define('k3-text-field', K3TextField);
+}

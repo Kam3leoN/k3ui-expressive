@@ -101,3 +101,7 @@ export class K3FieldRow extends K3Element {
 }
 
 export default K3FieldRow;
+
+if (!customElements.get('k3-field-row')) {
+  customElements.define('k3-field-row', K3FieldRow);
+}

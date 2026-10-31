@@ -33,3 +33,7 @@ export class K3FabRailItem extends K3Element {
 }
 
 export default K3FabRailItem;
+
+if (!customElements.get('k3-fab-rail-item')) {
+  customElements.define('k3-fab-rail-item', K3FabRailItem);
+}

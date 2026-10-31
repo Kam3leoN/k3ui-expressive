@@ -16,3 +16,7 @@ export class K3TextArea extends K3TextField {
 }
 
 export default K3TextArea;
+
+if (!customElements.get('k3-textarea')) {
+  customElements.define('k3-textarea', K3TextArea);
+}

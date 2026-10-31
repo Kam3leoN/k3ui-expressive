@@ -3398,13 +3398,6 @@ export class K3AudioPlayer extends K3Element {
     </div>`;
   }
 
-  private openLyricsPanel(): void {
-    this.tab = 'lyrics';
-    this.panelOpen = true;
-    this.lyricIdx = -2;
-    this.updateLyrics();
-  }
-
   private openQueuePanel(): void {
     this.tab = 'queue';
     this.panelOpen = true;

@@ -477,3 +477,7 @@ export class K3MenuItem extends K3Element {
 }
 
 export default K3MenuItem;
+
+if (!customElements.get('k3-menu-item')) {
+  customElements.define('k3-menu-item', K3MenuItem);
+}

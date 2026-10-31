@@ -210,3 +210,7 @@ export class K3Avatar extends K3Element {
 }
 
 export default K3Avatar;
+
+if (!customElements.get('k3-avatar')) {
+  customElements.define('k3-avatar', K3Avatar);
+}

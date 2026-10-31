@@ -85,3 +85,7 @@ export class K3AvatarGroupCount extends K3Element {
 }
 
 export default K3AvatarGroupCount;
+
+if (!customElements.get('k3-avatar-group-count')) {
+  customElements.define('k3-avatar-group-count', K3AvatarGroupCount);
+}

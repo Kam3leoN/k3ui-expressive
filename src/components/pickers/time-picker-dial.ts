@@ -364,3 +364,7 @@ export class K3TimePickerDial extends K3Element {
 }
 
 export default K3TimePickerDial;
+
+if (!customElements.get('k3-time-picker-dial')) {
+  customElements.define('k3-time-picker-dial', K3TimePickerDial);
+}

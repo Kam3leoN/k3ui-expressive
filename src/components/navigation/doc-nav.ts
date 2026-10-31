@@ -225,3 +225,7 @@ export class K3DocNav extends K3Element {
   }
 }
 export default K3DocNav;
+
+if (!customElements.get('k3-doc-nav')) {
+  customElements.define('k3-doc-nav', K3DocNav);
+}

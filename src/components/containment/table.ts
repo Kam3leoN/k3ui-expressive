@@ -248,3 +248,7 @@ export class K3Table extends K3Element {
   }
 }
 export default K3Table;
+
+if (!customElements.get('k3-table')) {
+  customElements.define('k3-table', K3Table);
+}
