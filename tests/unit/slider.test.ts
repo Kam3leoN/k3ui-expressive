@@ -133,6 +133,18 @@ describe('k3-slider', () => {
     expect(el.hasAttribute('disabled')).toBe(true);
   });
 
+  it('uses a ≥48dp state-layer target with an inner painted thumb', async () => {
+    host.innerHTML = `<k3-slider value="40"></k3-slider>`;
+    const el = host.querySelector('k3-slider') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+    };
+    await el.updateComplete;
+    const handle = el.shadowRoot!.querySelector('.handle') as HTMLElement;
+    expect(handle.classList.contains('k3-state-layer')).toBe(true);
+    expect(handle.querySelector('.thumb')).toBeTruthy();
+    expect(handle.getAttribute('part')).toBe('handle');
+  });
+
   it('snaps drag fractions to step so ends stay flush (no near-max stub)', async () => {
     host.innerHTML = `<k3-slider value="50" min="0" max="100" step="1" value-indicator></k3-slider>`;
     const el = host.querySelector('k3-slider') as HTMLElement & {
@@ -213,6 +225,22 @@ describe('k3-slider', () => {
     await el.updateComplete;
     /* End handle covers the tip — hide like standard at max. */
     expect(el.shadowRoot!.querySelector('.stop[part="end-stop"]')).toBeNull();
+  });
+
+  it('elevates host with data-vi-active while the value bubble is shown', async () => {
+    host.innerHTML = `<k3-slider value="37" min="0" max="100" step="1" value-indicator></k3-slider>`;
+    const el = host.querySelector('k3-slider') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+      showIndicator?: boolean;
+    };
+    await el.updateComplete;
+    expect(el.hasAttribute('data-vi-active')).toBe(false);
+    (el as unknown as { showIndicator: boolean }).showIndicator = true;
+    await el.updateComplete;
+    expect(el.hasAttribute('data-vi-active')).toBe(true);
+    (el as unknown as { showIndicator: boolean }).showIndicator = false;
+    await el.updateComplete;
+    expect(el.hasAttribute('data-vi-active')).toBe(false);
   });
 
   it('range keeps two VI nodes but only the active handle shows one', async () => {

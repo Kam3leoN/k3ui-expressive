@@ -1,17 +1,21 @@
-import { html, css } from 'lit';
+import { html, css, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { K3Element, stateLayerStyles, emitLifecycle } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { fabHide, fabShow, fabVisibilityCss } from './fab-visibility.js';
 
 /**
  * Extended FAB — icon + label (always expanded).
  * Separate from `k3-fab` (icon-only sizes).
+ *
+ * Visibility: {@link show} / {@link hide} (scale + fade).
  */
 export class K3ExtendedFab extends K3Element {
   static override styles = [
     hostReset,
     stateLayerStyles,
+    unsafeCSS(fabVisibilityCss),
     css`
       :host {
         --k3-efab-h: 3.5rem;
@@ -34,7 +38,13 @@ export class K3ExtendedFab extends K3Element {
           box-shadow var(--k3-sys-motion-duration-short4)
             var(--k3-sys-motion-easing-expressive-effects),
           border-radius var(--k3-sys-motion-duration-spatial-fast)
-            var(--k3-sys-motion-easing-emphasized-decelerate, cubic-bezier(0.05, 0.7, 0.1, 1));
+            var(--k3-sys-motion-easing-emphasized-decelerate, cubic-bezier(0.05, 0.7, 0.1, 1)),
+          opacity var(--k3-sys-motion-duration-short4, 200ms)
+            var(--k3-sys-motion-easing-expressive-effects),
+          transform var(--k3-sys-motion-duration-short4, 200ms)
+            var(--k3-sys-motion-easing-expressive-effects),
+          visibility var(--k3-sys-motion-duration-short4, 200ms)
+            var(--k3-sys-motion-easing-expressive-effects);
       }
       :host([size='small']) {
         --k3-efab-h: 2.5rem;
@@ -164,6 +174,22 @@ export class K3ExtendedFab extends K3Element {
   @property({ reflect: true }) variant: 'primary' | 'surface' | 'secondary' | 'tertiary' =
     'primary';
   @property({ type: Boolean, reflect: true }) disabled = false;
+
+  private visibilityGen = 0;
+
+  /** Animate in (M3 FAB show). */
+  async show(): Promise<boolean> {
+    const gen = ++this.visibilityGen;
+    await fabShow(this);
+    return gen === this.visibilityGen;
+  }
+
+  /** Animate out then `hidden` (M3 FAB hide). */
+  async hide(): Promise<boolean> {
+    const gen = ++this.visibilityGen;
+    await fabHide(this);
+    return gen === this.visibilityGen;
+  }
 
   override render() {
     return html`

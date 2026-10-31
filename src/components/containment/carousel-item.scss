@@ -1,0 +1,206 @@
+// =============================================================================
+// k3-carousel-item — M3 Expressive
+//
+// The host is the *mask*: its inline-size follows the keyline engine
+// (large → medium → small) while the content keeps the large width and stays
+// centred, producing the M3 "mask + parallax" effect without resizing media.
+//
+// Inputs (set by k3-carousel on each item):
+//   --_k3-ci-x         masked inline offset (px, signed for RTL)
+//   --_k3-ci-size      masked inline size (px)
+//   --_k3-ci-large     unmasked / large size (px)
+//   --_k3-ci-progress  0 (small) → 1 (large)
+// =============================================================================
+
+@use 'sass:math';
+
+$label-fade-from: 0.55; // label starts appearing past 55 % of large size
+
+@mixin state-layer($hover: 0.08, $pressed: 0.1) {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: var(--k3-carousel-item-state-color, var(--k3-sys-color-on-surface));
+    opacity: 0;
+    transition: opacity var(--k3-sys-motion-duration-effects-fast)
+      var(--k3-sys-motion-easing-effects);
+  }
+
+  @media (hover: hover) {
+    &:hover::after {
+      opacity: var(--k3-sys-state-hover-opacity, #{$hover});
+    }
+  }
+
+  &:active::after {
+    opacity: var(--k3-sys-state-pressed-opacity, #{$pressed});
+  }
+}
+
+:host {
+  // Keyline-driven placement (multi-browse / hero)
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--_k3-ci-size, 100%);
+  transform: translateX(var(--_k3-ci-x, 0px));
+  display: block;
+  box-sizing: border-box;
+  border-radius: var(--_k3-carousel-corner, var(--k3-sys-shape-corner-extra-large));
+  outline: none;
+  will-change: transform, inline-size;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:host([hidden]) {
+  display: none !important;
+}
+
+// Items fully outside the viewport are skipped by the engine
+// (opacity, not visibility, so they stay focusable for keyboard users)
+:host([data-offscreen]:not(:focus)) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+// ---- Uncontained: same-size flowing items ----------------------------------
+:host([data-layout='uncontained']) {
+  position: relative;
+  flex: none;
+  transform: none;
+  inline-size: var(--k3-carousel-item-width, 11.625rem);
+  block-size: 100%;
+  --_k3-ci-large: var(--k3-carousel-item-width, 11.625rem);
+  --_k3-ci-progress: 1;
+}
+
+// ---- Full-screen: edge-to-edge, vertical snap -----------------------------
+:host([data-layout='full-screen']) {
+  position: relative;
+  flex: none;
+  transform: none;
+  inline-size: 100%;
+  block-size: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  --_k3-ci-large: 100%;
+  --_k3-ci-progress: 1;
+}
+
+// ---- Mask surface ----------------------------------------------------------
+.mask {
+  @include state-layer;
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: inherit;
+  background: var(
+    --k3-carousel-item-container-color,
+    var(--k3-sys-color-surface-container-highest)
+  );
+  color: var(--k3-sys-color-on-surface);
+  cursor: pointer;
+  // Expressive press: the mask squeezes slightly (spatial-fast spring)
+  transition: scale var(--k3-sys-motion-duration-spatial-fast)
+    var(--k3-sys-motion-easing-spatial-fast);
+}
+
+:host(:not([data-layout='full-screen'])) .mask:active {
+  scale: 0.97;
+}
+
+// Content keeps the *large* width and stays centred inside the mask (parallax)
+.content {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: var(--_k3-ci-large, 100%);
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+:host(:dir(rtl)) .content {
+  translate: 50% 0;
+}
+
+::slotted(img),
+::slotted(video),
+::slotted(picture) {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+// ---- Label (large items only — fades as the item shrinks) -----------------
+.label {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-end;
+  min-block-size: 40%;
+  color: var(--k3-carousel-item-label-color, #fff);
+  font-family: var(--k3-ref-typeface-brand);
+  font-size: var(--k3-sys-typescale-title-medium-size);
+  line-height: var(--k3-sys-typescale-title-medium-line-height);
+  font-weight: var(--k3-sys-typescale-title-medium-weight);
+  letter-spacing: var(--k3-sys-typescale-title-medium-tracking);
+  background: linear-gradient(to top, rgb(0 0 0 / 0.55), transparent);
+  opacity: clamp(
+    0,
+    calc((var(--_k3-ci-progress, 1) - #{$label-fade-from}) / #{1 - $label-fade-from}),
+    1
+  );
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.label:not(.has-label) {
+  display: none;
+}
+
+// ---- Focus ring (M3 Expressive grow-shrink, outward) ----------------------
+:host(:focus-visible) .mask {
+  outline: 3px solid var(--k3-sys-color-secondary);
+  outline-offset: 2px;
+  animation: k3-ci-focus-ring var(--k3-sys-motion-duration-long2, 500ms) ease-out;
+  overflow: hidden;
+}
+
+// The outward ring would be clipped by the scroller → draw it inside on mask
+:host(:focus-visible) {
+  z-index: 1;
+}
+
+@keyframes k3-ci-focus-ring {
+  50% {
+    outline-width: 6px;
+  }
+}
+
+@media (forced-colors: active) {
+  :host(:focus-visible) .mask {
+    outline-color: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mask {
+    transition: none;
+  }
+  :host(:focus-visible) .mask {
+    animation: none;
+  }
+}

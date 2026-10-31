@@ -140,32 +140,54 @@ export const buttonGroupStyles = css`
     flex: 1 1 0;
   }
 
-  /* ── Connected — 2dp · no width morph ── */
-  :host([variant='connected']) {
+  /* ── Connected / segmented alias — 2dp · no width morph ── */
+  :host([variant='connected']),
+  :host([variant='segmented']) {
     display: inline-flex;
     width: auto;
     max-width: 100%;
   }
-  :host([variant='connected'][equal-width]) {
+  :host([variant='connected'][equal-width]),
+  :host([variant='segmented'][equal-width]) {
     display: flex;
     width: 100%;
   }
-  :host([variant='connected']) .group {
-    gap: ${connectedGap};
+  :host([variant='connected']) .group,
+  :host([variant='segmented']) .group {
+    /* Fallback rem(2); runtime snaps via --k3-btn-group-connected-gap (DPI) */
+    gap: var(--k3-btn-group-connected-gap, ${connectedGap});
     align-items: stretch;
   }
-  :host([variant='connected'][equal-width]) .group {
+  :host([variant='connected'][equal-width]) .group,
+  :host([variant='segmented'][equal-width]) .group {
     width: 100%;
     flex: 1 1 auto;
   }
 
   :host([variant='connected']) ::slotted(k3-button),
-  :host([variant='connected']) ::slotted(k3-icon-button) {
+  :host([variant='connected']) ::slotted(k3-icon-button),
+  :host([variant='connected']) ::slotted(k3-tooltip),
+  :host([variant='segmented']) ::slotted(k3-button),
+  :host([variant='segmented']) ::slotted(k3-icon-button),
+  :host([variant='segmented']) ::slotted(k3-tooltip) {
     flex: 0 0 auto;
     min-width: ${connectedMinW};
   }
+  :host([variant='connected']) ::slotted(k3-tooltip),
+  :host([variant='segmented']) ::slotted(k3-tooltip) {
+    /* Fill segment — tip host mirrors button chrome via inherited radius tokens */
+    display: flex;
+    align-self: stretch;
+    vertical-align: middle;
+    min-width: 0;
+    box-sizing: border-box;
+  }
   :host([variant='connected'][equal-width]) ::slotted(k3-button),
-  :host([variant='connected'][equal-width]) ::slotted(k3-icon-button) {
+  :host([variant='connected'][equal-width]) ::slotted(k3-icon-button),
+  :host([variant='connected'][equal-width]) ::slotted(k3-tooltip),
+  :host([variant='segmented'][equal-width]) ::slotted(k3-button),
+  :host([variant='segmented'][equal-width]) ::slotted(k3-icon-button),
+  :host([variant='segmented'][equal-width]) ::slotted(k3-tooltip) {
     flex: 1 1 0;
     width: 0;
     min-width: ${connectedMinW};
@@ -187,7 +209,8 @@ export const buttonGroupStyles = css`
 
   /* Default: all corners = inner (middle segments / facing edges) */
   :host([variant='connected']) ::slotted(k3-button),
-  :host([variant='connected']) ::slotted(k3-icon-button) {
+  :host([variant='connected']) ::slotted(k3-icon-button),
+  :host([variant='connected']) ::slotted(k3-tooltip) {
     --k3-btn-rss: var(--k3-btn-group-inner);
     --k3-btn-rse: var(--k3-btn-group-inner);
     --k3-btn-ree: var(--k3-btn-group-inner);
@@ -236,27 +259,34 @@ export const buttonGroupStyles = css`
   /*
    * Selected — shape of *this* button only (no neighbor width change).
    * Round: stadium (50%). Square: keep outer pronounced + inner 4dp (color only).
+   * Skip when selection="none" (independent toggles, e.g. audio extras) so the
+   * connected bar stays flush — color alone signals active.
    */
-  :host([variant='connected'][shape='round']) ::slotted([selected]),
-  :host([variant='connected']:not([shape])) ::slotted([selected]) {
+  :host([variant='connected'][shape='round']:not([selection='none'])) ::slotted([selected]),
+  :host([variant='connected']:not([shape]):not([selection='none'])) ::slotted([selected]),
+  :host([variant='segmented'][shape='round']:not([selection='none'])) ::slotted([selected]),
+  :host([variant='segmented']:not([shape]):not([selection='none'])) ::slotted([selected]) {
     --k3-btn-rss: var(--k3-btn-corner);
     --k3-btn-rse: var(--k3-btn-corner);
     --k3-btn-ree: var(--k3-btn-corner);
     --k3-btn-res: var(--k3-btn-corner);
   }
-  :host([variant='connected'][shape='square']) ::slotted([selected]) {
+  :host([variant='connected'][shape='square']:not([selection='none'])) ::slotted([selected]),
+  :host([variant='segmented'][shape='square']:not([selection='none'])) ::slotted([selected]) {
     --k3-btn-rss: var(--k3-btn-group-inner);
     --k3-btn-rse: var(--k3-btn-group-inner);
     --k3-btn-ree: var(--k3-btn-group-inner);
     --k3-btn-res: var(--k3-btn-group-inner);
   }
-  :host([variant='connected'][shape='square']) ::slotted([selected][data-bg='first']) {
+  :host([variant='connected'][shape='square']:not([selection='none'])) ::slotted([selected][data-bg='first']),
+  :host([variant='segmented'][shape='square']:not([selection='none'])) ::slotted([selected][data-bg='first']) {
     --k3-btn-rss: var(--k3-btn-group-outer);
     --k3-btn-res: var(--k3-btn-group-outer);
     --k3-btn-rse: var(--k3-btn-group-inner);
     --k3-btn-ree: var(--k3-btn-group-inner);
   }
-  :host([variant='connected'][shape='square']) ::slotted([selected][data-bg='last']) {
+  :host([variant='connected'][shape='square']:not([selection='none'])) ::slotted([selected][data-bg='last']),
+  :host([variant='segmented'][shape='square']:not([selection='none'])) ::slotted([selected][data-bg='last']) {
     --k3-btn-rse: var(--k3-btn-group-outer);
     --k3-btn-ree: var(--k3-btn-group-outer);
     --k3-btn-rss: var(--k3-btn-group-inner);

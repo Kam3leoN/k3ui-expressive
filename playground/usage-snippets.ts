@@ -82,6 +82,23 @@ fav?.addEventListener("k3-change", (e) => {
 </k3-split-button>`,
     css: defaultCss,
   },
+  'buttons-card': {
+    components: ['k3-button-card'],
+    html: `<k3-button-card
+  label="Alpha"
+  subtitle="@handle"
+  icon="share"
+  href="#"
+></k3-button-card>`,
+    css: `${defaultCss}
+
+k3-button-card {
+  --k3-button-card-icon-bg: var(--k3-sys-color-primary-container);
+  --k3-button-card-icon-fg: var(--k3-sys-color-on-primary-container);
+  /* Hover fills the card with brand */
+  --k3-button-card-brand: var(--k3-sys-color-primary);
+}`,
+  },
   'buttons-arrow': {
     components: ['k3-button-arrow'],
     html: `<k3-button-arrow
@@ -275,6 +292,38 @@ document.querySelector("k3-button-pad")?.addEventListener("k3-navigate", (e) => 
 <k3-counter value="0" min="-20" max="20" allow-negative></k3-counter>
 <k3-counter value="3" disabled></k3-counter>`,
   },
+  signature: {
+    components: ['k3-signature'],
+    html: `<k3-signature></k3-signature>
+<k3-signature pen-color="#6750a4" initials="JD"></k3-signature>
+<k3-signature disabled></k3-signature>`,
+  },
+  rating: {
+    components: ['k3-rating'],
+    html: `<!-- Default · 5 stars -->
+<k3-rating value="3" label="Score"></k3-rating>
+
+<!-- Half steps · size -->
+<k3-rating value="3.5" step="0.5" size="lg" label="Review"></k3-rating>
+
+<!-- Theme color roles -->
+<k3-rating value="4" color="secondary"></k3-rating>
+<k3-rating value="2" color="error"></k3-rating>
+
+<!-- Custom colors -->
+<k3-rating value="5" active-color="#f59e0b" inactive-color="#e5e7eb"></k3-rating>
+
+<!-- Readonly · disabled -->
+<k3-rating value="4" readonly></k3-rating>
+<k3-rating value="2" disabled></k3-rating>
+
+<!-- Custom icons (Material Symbol or SVG slot) -->
+<k3-rating value="3" icon="favorite" color="error"></k3-rating>
+<k3-rating value="4" max="5">
+  <span slot="unchecked" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="star" aria-hidden="true"></span>
+  <span slot="checked" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="star" aria-hidden="true"></span>
+</k3-rating>`,
+  },
   slider: {
     components: ['k3-slider', 'k3-icon-button'],
     html: `<!-- Standard · XS -->
@@ -378,6 +427,12 @@ cal.addEventListener("k3-change", (e) => console.log(e.detail));`,
 <k3-progress value="0.65" label="Downloading" show-percent layout="default"
   supporting-text="About 2 minutes left"></k3-progress>
 
+<!-- Shapes: flat · wavy · oscillation (PCM) -->
+<k3-progress shape="flat" value="0.65" show-percent></k3-progress>
+<k3-progress shape="wavy" value="0.65" show-percent></k3-progress>
+<k3-progress shape="oscillation" src="/sounds/hello.mp3" value="0.42" show-percent
+  ></k3-progress>
+
 <!-- Linear top / bottom -->
 <k3-progress value="0.65" label="Uploading" show-percent layout="top"></k3-progress>
 <k3-progress value="0.65" label="Syncing" show-percent layout="bottom"></k3-progress>
@@ -405,6 +460,31 @@ cal.addEventListener("k3-change", (e) => console.log(e.detail));`,
 <k3-snackbar id="toast" duration="2000" dismissible></k3-snackbar>`,
     jsExtra: `
 await window.K3UI.snackbar.show({ message: "Saved", duration: 2000 });`,
+  },
+  alert: {
+    components: ['k3-alert', 'k3-button'],
+    html: `<!-- Default · secondary -->
+<k3-alert label="Secondary">
+  Supplemental information stays in the body.
+</k3-alert>
+
+<!-- Semantic tones -->
+<k3-alert variant="success" label="Success">Saved successfully.</k3-alert>
+<k3-alert variant="warning" label="Warning">Check your connection.</k3-alert>
+<k3-alert variant="error" label="Error">Something went wrong.</k3-alert>
+<k3-alert variant="info" label="Info">New features are available.</k3-alert>
+
+<!-- Shape · dismissible · action -->
+<k3-alert variant="primary" shape="square" dismissible label="Update">
+  A new version is ready.
+  <k3-button slot="action" variant="text" size="sm">Undo</k3-button>
+</k3-alert>
+
+<!-- Custom icon -->
+<k3-alert variant="tertiary" label="Tip">
+  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="bolt" aria-hidden="true"></span>
+  Keyboard shortcuts speed up your workflow.
+</k3-alert>`,
   },
   dialog: {
     components: ['k3-dialog', 'k3-button'],
@@ -614,15 +694,63 @@ document.getElementById("dlg")?.show?.();`,
   Hello from K3ui
 </k3-bubble>`,
   },
+  quote: {
+    components: ['k3-quote', 'k3-avatar', 'k3-button'],
+    html: `<k3-quote author="Alex" role="Product designer" layout="author-start" tilt>
+  <k3-avatar slot="avatar" initials="AL"></k3-avatar>
+  K3ui tokens make themed testimonial cards effortless.
+  <k3-button slot="action" variant="text" size="sm">
+    Read more
+    <span slot="trailing-icon" class="ms" data-k3-icon="arrow_forward" aria-hidden="true"></span>
+  </k3-button>
+</k3-quote>`,
+  },
   codeblock: {
     components: ['k3-codeblock'],
     html: `<k3-codeblock label="Usage" language="html">
 <pre><code>&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
 </k3-codeblock>`,
   },
+  carousel: {
+    components: ['k3-carousel', 'k3-carousel-item'],
+    html: `<k3-carousel
+  layout="multi-browse"
+  label="Landscapes"
+  controls
+  indicators="bottom"
+  mode="loop"
+>
+  <k3-carousel-item label="Mountains">
+    <img src="/landscapes/mountains.jpg" alt="" />
+    <span slot="label">Mountains</span>
+  </k3-carousel-item>
+  <k3-carousel-item label="Lake">
+    <img src="/landscapes/lake.jpg" alt="" />
+    <span slot="label">Lake</span>
+  </k3-carousel-item>
+  <k3-carousel-item label="Forest">
+    <img src="/landscapes/forest.jpg" alt="" />
+    <span slot="label">Forest</span>
+  </k3-carousel-item>
+</k3-carousel>`,
+  },
   countdown: {
-    components: ['k3-countdown'],
-    html: `<k3-countdown time="3600000" format="HH : mm : ss" segments with-labels></k3-countdown>`,
+    components: ['k3-countdown', 'k3-text-field'],
+    html: `<!-- Duration (ms) -->
+<k3-countdown time="3600000" format="HH : mm : ss" segments with-labels></k3-countdown>
+
+<!-- Absolute end (ISO) -->
+<k3-countdown end-date="2030-01-01T00:00:00.000Z" format="DD : HH : mm : ss" segments with-labels></k3-countdown>
+
+<!-- Pair with a datetime field -->
+<k3-text-field id="end" type="datetime-local" label="End"></k3-text-field>
+<k3-countdown id="cd" format="DD : HH : mm : ss" segments with-labels></k3-countdown>`,
+    jsExtra: `
+const end = document.getElementById("end");
+const cd = document.getElementById("cd");
+end?.addEventListener("k3-change", () => {
+  if (end.value) cd.endDate = new Date(end.value).toISOString();
+});`,
   },
   marquee: {
     components: ['k3-marquee'],
@@ -655,21 +783,61 @@ ConfettiPresets.fireFireworks();`,
     components: ['k3-audio-player'],
     html: `<k3-audio-player
   variant="card"
+  expandable
+  hotkeys
+  dynamic-color="on"
   loop-playlist
   tracks='[
-    {"src":"/sounds/cashcash.mp3","title":"Cash Cash","artist":"PhysicHall"},
-    {"src":"/sounds/hello.mp3","title":"Hello","artist":"PhysicHall"}
+    {"src":"/track.mp3","title":"Néon Caramel","artist":"Les Faux Jumeaux","duration":214,"seed":"#E8A0BF"}
   ]'
 ></k3-audio-player>
 
-<!-- Compact mini card -->
+<!-- Compact · Toolbar (click → sticky · playlist upward) · Phone · Full -->
 <k3-audio-player variant="compact" tracks='[...]'></k3-audio-player>
+<!-- dock-toggle = demo undock only; sticky respects --k3-shell-rail-inline-size -->
+<k3-audio-player variant="toolbar" dock-toggle tracks='[...]'></k3-audio-player>
+<!-- Prefer phone on smartphone viewports -->
+<k3-audio-player variant="phone" tracks='[...]'></k3-audio-player>
+<k3-audio-player variant="full" tracks='[...]'></k3-audio-player>`,
+  },
+  'qr-code': {
+    components: ['k3-qr-code'],
+    html: `<!-- Pattern body / eye frame / eye ball -->
+<k3-qr-code
+  value="https://example.com"
+  size="240"
+  dots="diamond"
+  corners-square="frame14"
+  corners-dot="ball5"
+  corners-square-rotate="mirror"
+  corners-dot-rotate="mirror"
+  color="primary"
+  background="#ffffff"
+  framed
+></k3-qr-code>
 
-<!-- Toolbar — FAB cover · icon-button transport -->
-<k3-audio-player variant="toolbar" tracks='[...]'></k3-audio-player>
+<!-- Classic qr-code-styling dots -->
+<k3-qr-code
+  value="https://example.com"
+  dots="rounded"
+  corners-square="extra-rounded"
+  corners-dot="dot"
+  color="secondary"
+></k3-qr-code>
 
-<!-- Sticky = toolbar fixed to the bottom -->
-<k3-audio-player variant="sticky" tracks='[...]'></k3-audio-player>`,
+<!-- Center logo -->
+<k3-qr-code
+  value="https://example.com"
+  image="/logo.png"
+  image-size="0.3"
+  error-correction="H"
+  dots="star"
+  corners-square="frame0"
+  corners-dot="ball14"
+></k3-qr-code>`,
+    jsExtra: `
+const qr = document.querySelector("k3-qr-code");
+await qr?.download?.("my-qr", "png");`,
   },
   breadcrumb: {
     components: ['k3-breadcrumb'],
@@ -704,6 +872,28 @@ ConfettiPresets.fireFireworks();`,
     components: [],
     html: `<!-- See Gestures utility demos — attach via K3UI.gestures -->`,
     jsExtra: `// import { attachGestures } from "k3ui";`,
+  },
+  keyboard: {
+    components: [],
+    html: `<!-- Focus target + attachKeyboard / bindChords — see Keyboard demos -->`,
+    jsExtra: `import { bindChords, attachKeyboard } from "k3ui";
+const off = bindChords(document, {
+  "control+k": () => console.log("chord"),
+}, { ignoreFields: true });
+// off();`,
+  },
+  'keyboard-media': {
+    components: ['k3-audio-player'],
+    html: `<k3-audio-player hotkeys tracks='[{"src":"/track.mp3","title":"Demo"}]'></k3-audio-player>`,
+    jsExtra: `import { bindMediaHotkeys } from "k3ui";
+// Or rely on k3-audio-player hotkeys attribute (uses bindMediaHotkeys).`,
+  },
+  mouse: {
+    components: [],
+    html: `<!-- attachMouse on a surface — see Mouse demos -->`,
+    jsExtra: `import { attachMouse } from "k3ui";
+const m = attachMouse(el, { dragThreshold: 4 });
+m.on("drag", (d) => console.log(d.totalX, d.totalY));`,
   },
   dnd: {
     components: [],

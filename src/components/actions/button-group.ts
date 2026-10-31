@@ -3,13 +3,16 @@ import { property } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import {
   K3Element,
+  devicePixelSnapCss,
   emitLifecycle,
   handleFocusNavKey,
   isRtl,
   normalizeLabel,
+  watchDevicePixelRatio,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import {
+  ButtonGroupConnectedGapDp,
   ButtonGroupSpecs,
   type ButtonGroupLabels,
   type ButtonGroupOrientation,
@@ -66,7 +69,17 @@ type GroupChild = HTMLElement & {
 export class K3ButtonGroup extends K3Element {
   static override styles = [hostReset, buttonGroupStyles];
 
-  @property({ reflect: true }) variant: ButtonGroupVariant = 'standard';
+  @property({
+    reflect: true,
+    converter: {
+      fromAttribute: (v: string | null): ButtonGroupVariant => {
+        if (v === 'connected' || v === 'segmented') return 'connected';
+        return 'standard';
+      },
+      toAttribute: (v: ButtonGroupVariant) => (v === 'segmented' ? 'connected' : v),
+    },
+  })
+  variant: ButtonGroupVariant = 'standard';
   @property({ reflect: true }) selection: ButtonGroupSelection = 'single';
   @property({ reflect: true }) size: ButtonGroupSize = 'sm';
   @property({ reflect: true }) shape: ButtonGroupShape = 'round';
@@ -87,11 +100,38 @@ export class K3ButtonGroup extends K3Element {
   private releaseTimer: ReturnType<typeof setTimeout> | null = null;
   /** Skip observer re-entrancy while we apply selection ourselves. */
   private syncingSelection = false;
+  private _unwatchDpr: (() => void) | null = null;
+
+  /**
+   * Snap connected 2dp joins to integer device pixels (Windows 125% hairline).
+   * Same helper as split-button / list / button-grid.
+   */
+  private applyGapToken = (): void => {
+    if (this.variant === 'connected') {
+      this.style.setProperty(
+        '--k3-btn-group-connected-gap',
+        devicePixelSnapCss(ButtonGroupConnectedGapDp),
+      );
+    } else {
+      this.style.removeProperty('--k3-btn-group-connected-gap');
+    }
+  };
 
   private childrenOf(): GroupChild[] {
-    return [...this.querySelectorAll(`:scope > ${ButtonGroupSpecs.childSelector}`)].filter(
-      (el): el is GroupChild => el instanceof HTMLElement,
-    );
+    /* Direct buttons, or the same nested in a light-DOM tip wrapper. */
+    const sel = ButtonGroupSpecs.childSelector;
+    const tip = ButtonGroupSpecs.tooltipWrapSelector;
+    return [
+      ...this.querySelectorAll(`:scope > ${sel}, :scope > ${tip} > ${sel}`),
+    ].filter((el): el is GroupChild => el instanceof HTMLElement);
+  }
+
+  /** Slotted root for connected chrome (`data-bg` / ::slotted) — tip wrap or button. */
+  private slotRootOf(el: GroupChild): HTMLElement {
+    const p = el.parentElement;
+    const tip = ButtonGroupSpecs.tooltipWrapSelector;
+    if (p && p !== this && p.localName === tip) return p;
+    return el;
   }
 
   private selectedChildren(): GroupChild[] {
@@ -124,8 +164,29 @@ export class K3ButtonGroup extends K3Element {
       if (n === 1) pos = 'only';
       else if (i === 0) pos = 'first';
       else if (i === n - 1) pos = 'last';
-      el.setAttribute('data-bg', pos);
+      const root = this.slotRootOf(el);
+      root.setAttribute('data-bg', pos);
+      if (root !== el) el.setAttribute('data-bg', pos);
+      this.syncTipMirror(el);
     });
+  }
+
+  /**
+   * Mirror selection / connected / press chrome onto a wrapping `k3-tooltip`
+   * so ::slotted([selected]) radius tokens and tip fill layout stay in sync.
+   */
+  private syncTipMirror(el: GroupChild): void {
+    const root = this.slotRootOf(el);
+    if (root === el) return;
+    const connected = this.variant === 'connected';
+    root.toggleAttribute('data-connected', connected);
+    root.toggleAttribute('selected', this.isSelected(el));
+    root.toggleAttribute('data-pressed', el.hasAttribute('data-pressed'));
+    if (this.disabled || el.disabled || el.hasAttribute('disabled')) {
+      root.setAttribute('disabled', '');
+    } else {
+      root.removeAttribute('disabled');
+    }
   }
 
   /* ── Press morph (standard · k3-button only) ── */
@@ -264,6 +325,7 @@ export class K3ButtonGroup extends K3Element {
         el.setAttribute('disabled', '');
       }
       el.toggleAttribute('data-hide-label', hideLabels && !this.isSelected(el));
+      this.syncTipMirror(el);
     }
 
     this.syncPositions();
@@ -354,6 +416,9 @@ export class K3ButtonGroup extends K3Element {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    this.applyGapToken();
+    this._unwatchDpr?.();
+    this._unwatchDpr = watchDevicePixelRatio(this.applyGapToken);
     this.addEventListener('keydown', this.onKeydown);
     this.slotObserver = new MutationObserver((records) => {
       if (this.syncingSelection) {
@@ -377,6 +442,8 @@ export class K3ButtonGroup extends K3Element {
   }
 
   override disconnectedCallback(): void {
+    this._unwatchDpr?.();
+    this._unwatchDpr = null;
     this.removeEventListener('keydown', this.onKeydown);
     this.slotObserver?.disconnect();
     this.slotObserver = undefined;
@@ -385,6 +452,7 @@ export class K3ButtonGroup extends K3Element {
   }
 
   override firstUpdated(): void {
+    this.applyGapToken();
     this.syncChildChrome();
   }
 
@@ -401,7 +469,10 @@ export class K3ButtonGroup extends K3Element {
       changed.has('required') ||
       changed.has('sync')
     ) {
-      if (changed.has('variant')) this.clearPressWidths(true);
+      if (changed.has('variant')) {
+        this.clearPressWidths(true);
+        this.applyGapToken();
+      }
       this.syncChildChrome();
     }
   }

@@ -20,7 +20,11 @@
 
 import type { ButtonShape, ButtonSize } from './button.js';
 
-export type ButtonGroupVariant = 'standard' | 'connected';
+/**
+ * `segmented` is an accepted alias of `connected` (joined pill look).
+ * Prefer `connected` in new code — matches M3 “connected button group”.
+ */
+export type ButtonGroupVariant = 'standard' | 'connected' | 'segmented';
 export type ButtonGroupSelection = 'none' | 'single' | 'multi';
 export type ButtonGroupSize = ButtonSize;
 export type ButtonGroupShape = ButtonShape;
@@ -108,4 +112,6 @@ export const ButtonGroupSpecs = {
   compressionLimitFallbackDp: ButtonGroupCompressionLimitFallbackDp,
   pressReleaseMs: ButtonGroupPressReleaseMs,
   childSelector: 'k3-button, k3-icon-button',
+  /** Optional light-DOM tip wrap around a group child (audio extras, labs). */
+  tooltipWrapSelector: 'k3-tooltip',
 } as const;

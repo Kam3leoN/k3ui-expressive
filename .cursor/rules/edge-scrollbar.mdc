@@ -1,10 +1,13 @@
 ---
-description: Scrollbar discrète au bord (.k3-scroll / edgeScrollbarStyles) — obligatoire pour surfaces scrollables
-globs: src/components/**/*.{ts,scss,css}
-alwaysApply: false
+description: PRIORITÉ HAUTE — .k3-scroll obligatoire ; track-inset ≥ border-radius (jamais dépasser la courbe)
+globs: "**/*.{ts,tsx,js,jsx,scss,css,html,vue,svelte}"
+alwaysApply: true
 ---
 
-# Edge scrollbar — obligatoire sur surfaces scrollables
+# Edge scrollbar — PRIORITÉ HAUTE (obligatoire)
+
+**Ne jamais laisser la scrollbar native Windows (flèches + track gris).**  
+À chaque panel / list / sheet / menu / queue / démo scrollable → **`.k3-scroll`**.
 
 ## Source de vérité
 
@@ -13,46 +16,50 @@ alwaysApply: false
 | Shadow (Lit CE) | `edgeScrollbarStyles` ← `src/core/scrollbar.ts` |
 | Light DOM / docs | `src/tokens/_scrollbar.scss` (via `k3ui.scss`) |
 
-Les deux doivent rester **alignés** (mêmes tokens / mêmes règles WebKit).
-
 ## Règles dures
 
-1. Tout **overflow-y: auto** sur un panel (dialog, sheet, menu, list, rail destinations…) → classe **`k3-scroll`** + importer `edgeScrollbarStyles` dans `static styles` si shadow.
-2. Scrollbar **collée au bord** du scrollport (pas inset dans le padding) :
-   - padding sur un **inner** (`.body-inner`) ; overflow sur le parent `.k3-scroll`
-3. **Interdit** sur WebKit : `scrollbar-width` / `scrollbar-color` sur le même élément que `::-webkit-scrollbar-*` — Chromium 121+ garde alors les flèches Windows.
-4. Tokens :
-   - `--k3-scroll-size` — défaut **6dp** (`0.375rem`) ; side sheet = `0.5rem`
-   - `--k3-scroll-track-inset` — marges track (coins arrondis, ex. dialog basic `0.5rem`)
+1. Tout `overflow-y: auto|scroll` → classe **`k3-scroll`** (+ `edgeScrollbarStyles` dans `static styles` si shadow).
+2. Scrollbar **collée au bord** du scrollport :
+   - overflow sur le parent `.k3-scroll`
+   - padding sur un **inner** (pas sur le scrollport)
+3. **Courbes / `border-radius` — OBLIGATOIRE**  
+   Le gutter WebKit est **rectangulaire** : sans inset, le thumb **traverse le coin arrondi**.  
+   → Poser **`--k3-scroll-track-inset` ≥ `border-radius`** du même élément (même token de shape).
 
-```ts
-// ✅ GOOD — shadow CE
-import { edgeScrollbarStyles } from '../../core/index.js';
-static styles = [hostReset, edgeScrollbarStyles, css`
-  .body { /* flex child */ }
-  .body-inner { padding-inline: 1.5rem; }
-`];
-// render: <div class="body k3-scroll"><div class="body-inner">…
+```css
+/* ✅ GOOD — thumb s’arrête avant la courbe */
+.panel.k3-scroll {
+  border-radius: var(--k3-sys-shape-corner-extra-large, 1.75rem);
+  --k3-scroll-track-inset: var(--k3-sys-shape-corner-extra-large, 1.75rem);
+}
 
-// ✅ GOOD — light DOM
-<div class="k3-scroll" style="max-height: 12rem">…</div>
-
-// ❌ BAD — flèches Windows + double API
-.k3-scroll {
-  scrollbar-width: thin; /* casse ::-webkit-scrollbar-* */
-  overflow-y: auto;
+/* ❌ BAD — thumb qui dépasse / coupe le radius */
+.panel.k3-scroll {
+  border-radius: 1.75rem;
+  /* pas de --k3-scroll-track-inset */
 }
 ```
 
-## Déjà branché
+4. **Interdit** sur WebKit : `scrollbar-width` / `scrollbar-color` sur le même nœud que `::-webkit-scrollbar-*`.
+5. Tokens : `--k3-scroll-size` (défaut **6dp**) · `--k3-scroll-track-inset` (0 si coins carrés).
 
-- `k3-dialog` — `.body.k3-scroll`
-- `k3-sheet` side — `.content.k3-scroll`
+```ts
+// ✅ GOOD — shadow
+import { edgeScrollbarStyles } from '../../core/index.js';
+static styles = [hostReset, edgeScrollbarStyles, css`…`];
+// <div class="body k3-scroll"><div class="body-inner">…
+```
 
-## Checklist nouveau composant scrollable
+## Playground / shell
 
-- [ ] `edgeScrollbarStyles` dans `static styles` (shadow)
-- [ ] Classe `k3-scroll` sur le nœud qui overflow
-- [ ] Padding sur un enfant, pas sur le scrollport (bord flush)
-- [ ] Pas de `scrollbar-width` / `scrollbar-color` sur WebKit
-- [ ] Doc playground Utilitaires → Scrollbar à jour si API / tokens changent
+- Scroll **document** (`html`/`body`) → `overflow: hidden` ; le scroll vit dans `.shell-scroll.k3-scroll`.
+- Les règles `.k3-scroll` doivent être dans le **CSS lié dès le premier paint** (`playground.css`), pas seulement via `main.ts` / `k3ui.scss` (sinon scrollbar native Windows jusqu’au boot JS).
+
+## Checklist (avant de quitter une tâche UI)
+
+- [ ] Aucun `overflow-y: auto` nu sans `.k3-scroll`
+- [ ] Shadow : `edgeScrollbarStyles` importé
+- [ ] Padding sur l’inner, thumb au bord
+- [ ] Si `border-radius` > 0 → `--k3-scroll-track-inset` ≥ ce radius
+- [ ] Shell / page : pas de scrollbar native sur `html`/`body`
+- [ ] Smoke : pas de flèches Windows · thumb **ne coupe pas** les coins arrondis

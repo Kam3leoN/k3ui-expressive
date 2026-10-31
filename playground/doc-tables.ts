@@ -331,6 +331,28 @@ const COMPONENT_API: Record<
       ['setList', '(list, reset?) => void', 'Replace values'],
     ],
   },
+  'buttons-card': {
+    properties: [
+      ['label', 'string', "''", 'Primary line (uppercase)'],
+      ['subtitle', 'string', "''", 'Secondary line (@handle)'],
+      ['icon', 'string', "''", 'Material ligature if no slot'],
+      ['href', 'string', "''", 'Anchor when set'],
+      ['external', 'boolean', 'false', 'target=_blank'],
+      ['stretch', 'boolean', 'false', 'Full width'],
+      ['disabled', 'boolean', 'false', 'Non-interactive'],
+      ['--k3-button-card-icon-bg', 'CSS var', 'primary-container', 'Icon well background'],
+      ['--k3-button-card-icon-fg', 'CSS var', 'on-primary-container', 'Icon / glyph color'],
+      ['--k3-button-card-brand', 'CSS var', 'primary', 'Hover fill (brand)'],
+    ],
+    slots: [['icon', 'SVG or .ms glyph']],
+    events: [['k3-activate', '{ label, subtitle, href }', 'Click / activate']],
+    'css-parts': [
+      ['card', 'Surface control'],
+      ['icon', 'Tonal icon well'],
+      ['label', 'Primary text'],
+      ['subtitle', 'Secondary text'],
+    ],
+  },
   'buttons-grid': {
     properties: [
       ['variant', "'filled'|'tonal'|'outlined'", 'filled', 'Cell / FAB style'],
@@ -416,6 +438,32 @@ const COMPONENT_API: Record<
       ['setValue', '(next) => void', 'Clamp + emit'],
     ],
   },
+  signature: {
+    properties: [
+      ['pen-color', 'string', 'on-surface', 'Stroke color (CSS color)'],
+      ['background-color', 'string', 'transparent', 'Canvas fill'],
+      ['min-width / max-width', 'number', '0.5 / 2.5', 'Stroke width range'],
+      ['show-clear', 'boolean', 'true', 'Clear action under pad'],
+      ['show-initials', 'boolean', 'true', 'Initials input + apply'],
+      ['initials', 'string', "''", 'Controlled initials (max 4)'],
+      ['show-hint', 'boolean', 'true', 'Placeholder when empty'],
+      ['disabled', 'boolean', 'false', 'Non-interactive · faded'],
+      ['readonly', 'boolean', 'false', 'View only · no actions'],
+    ],
+    events: [
+      ['k3-begin-stroke / k3-end-stroke', '—', 'Stroke lifecycle'],
+      ['k3-clear', '—', 'Pad cleared'],
+      ['k3-initials', '{ initials }', 'Initials stamped'],
+      ['k3-change', '{ empty, dataUrl? }', 'After stroke end, clear, or initials'],
+    ],
+    methods: [
+      ['isEmpty', '() => boolean', 'No strokes / stamp'],
+      ['clear', '() => void', 'Wipe + emit'],
+      ['applyInitials', '(text?) => void', 'Stamp initials'],
+      ['toDataURL / toSVG / toData', '…', 'Export'],
+      ['fromData / fromDataURL', '…', 'Restore'],
+    ],
+  },
   autocomplete: {
     properties: [
       ['label', 'string', "''", 'Field label'],
@@ -481,6 +529,33 @@ const COMPONENT_API: Record<
       ['body', 'Bubble surface'],
     ],
   },
+  quote: {
+    properties: [
+      ['author', 'string', "''", 'Name (or slot author)'],
+      ['job (attr: role)', 'string', "''", 'Subtitle (or slot role)'],
+      ['layout', "'author-start'|'author-end'", 'author-start', 'Avatar left or right'],
+      ['tilt', 'boolean', 'true', 'Resting tilt; hover deepens it'],
+      ['tilt-dir', "'auto'|'ccw'|'cw'", 'auto', 'Sense (±3°); auto = random once'],
+    ],
+    slots: [
+      ['avatar', 'k3-avatar or image'],
+      ['author', 'Overrides author prop'],
+      ['role', 'Overrides job prop'],
+      ['(default)', 'Citation body'],
+      ['action', 'CTA — prefer k3-button text'],
+    ],
+    'css-parts': [
+      ['root', 'Outer wrapper'],
+      ['motion', 'Hover tilt layer'],
+      ['offset', 'Colored back layer'],
+      ['card', 'Surface card'],
+      ['mark', 'Top-right quote mark'],
+      ['author', 'Author column'],
+      ['quote', 'Citation column'],
+      ['body', 'blockquote'],
+      ['action', 'CTA slot host'],
+    ],
+  },
   codeblock: {
     properties: [
       ['label', 'string', 'Code', 'Toolbar title'],
@@ -491,6 +566,46 @@ const COMPONENT_API: Record<
     ],
     events: [['k3-copy', '{ text }', 'Copy succeeded']],
     slots: [['(default)', '<pre><code>…</code></pre>']],
+  },
+  carousel: {
+    properties: [
+      [
+        'layout',
+        "'multi-browse'|'uncontained'|'hero'|'full-screen'",
+        'multi-browse',
+        'M3 layout',
+      ],
+      ['align', "'start'|'center'", 'start', 'Hero only'],
+      ['item-width', 'number', '186', 'Preferred large width (px)'],
+      ['label', 'string', "''", 'Region accessible name'],
+      ['controls', 'boolean', 'false', 'Prev / next icon buttons'],
+      [
+        'indicators',
+        "'none'|'top'|'bottom'|'left'|'right'",
+        'none',
+        'Page dots position',
+      ],
+      ['mode', "'continuous'|'loop'", 'continuous', 'End stop vs wrap'],
+      ['mouse-drag', 'boolean', 'true', 'Click-drag scroll'],
+      ['index', 'number', '0', 'Focal item (set to navigate)'],
+    ],
+    events: [
+      ['k3-change-start', '{ source }', 'Before settle (cancelable)'],
+      ['k3-change-end', '{ source, index }', 'After settle'],
+      ['k3-change', '{ index }', 'Focal item settled'],
+    ],
+    slots: [['(default)', 'k3-carousel-item children']],
+    'css-parts': [
+      ['viewport', 'Padded clipping box'],
+      ['scroller', 'Native scroll container'],
+      ['controls', 'Prev / next wrapper'],
+      ['indicators', 'Page dots wrapper'],
+      ['dot', 'One page dot'],
+    ],
+    methods: [
+      ['prev / next', '() => void', 'Step by one'],
+      ['goTo', '(index) => void', 'Jump to item'],
+    ],
   },
   countdown: {
     properties: [

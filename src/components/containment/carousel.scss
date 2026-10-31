@@ -1,0 +1,352 @@
+// =============================================================================
+// k3-carousel — M3 Expressive
+// https://m3.material.io/components/carousel/specs
+//
+// Compiled by Vite (`?inline`) and injected in the shadow root through
+// `carousel.styles.ts`. Every value maps to a `--k3-sys-*` token so theming,
+// density and dark mode follow the rest of K3ui.
+// =============================================================================
+
+@use 'sass:map';
+
+// ---- Component tokens ------------------------------------------------------
+$tokens: (
+  'height': 13.8125rem,
+  // ≈ 221dp — multi-browse reference height
+  'gap': 0.5rem,
+  // 8dp between items
+  'padding-inline': 1rem,
+  // 16dp leading / trailing margin
+  'padding-block': 0.5rem,
+  // 8dp
+  'item-width': 11.625rem,
+  // 186dp — preferred large item (uncontained)
+  'corner': var(--k3-sys-shape-corner-extra-large),
+  // 28dp
+  'full-screen-corner': var(--k3-sys-shape-corner-none),
+  'controls-offset': 0.75rem,
+  'dot-size': 0.5rem,
+  // 8dp — active dot = 3×
+  'dot-gap': 0.5rem,
+  'dot-color': var(--k3-sys-color-outline-variant),
+  'dot-active-color': var(--k3-sys-color-primary),
+);
+
+$dot-active-ratio: 3;
+
+@function token($name) {
+  @return var(--k3-carousel-#{$name}, map.get($tokens, $name));
+}
+
+@mixin hide-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// ---- Host -----------------------------------------------------------------
+:host {
+  display: block;
+  position: relative;
+  inline-size: 100%;
+  // Read by k3-carousel-item (inherits through the slot)
+  --_k3-carousel-corner: #{token('corner')};
+  --_k3-carousel-gap: #{token('gap')};
+  --_k3-carousel-height: #{token('height')};
+  contain: layout;
+}
+
+:host([layout='full-screen']) {
+  --_k3-carousel-height: var(--k3-carousel-height, 100dvh);
+  --_k3-carousel-corner: #{token('full-screen-corner')};
+}
+
+// ---- Frame: viewport + optional indicator rail -----------------------------
+.frame {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+:host([indicators='top']) .frame {
+  flex-direction: column-reverse;
+}
+
+:host([indicators='left']) .frame,
+:host([indicators='right']) .frame {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+:host([indicators='left']) .frame {
+  flex-direction: row-reverse;
+}
+
+// Padding lives in the shadow tree: light-DOM resets (Tailwind preflight)
+// would otherwise override `:host { padding }`.
+.viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  block-size: var(--_k3-carousel-height);
+  padding-block: token('padding-block');
+  padding-inline: token('padding-inline');
+}
+
+:host([layout='full-screen']) .viewport {
+  padding: 0;
+}
+
+// ---- Scroller --------------------------------------------------------------
+.scroller {
+  @include hide-scrollbar;
+  position: relative;
+  block-size: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  outline: none;
+}
+
+:host([dragging]) .scroller {
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+  cursor: grabbing;
+  user-select: none;
+}
+
+:host([mouse-drag]:not([dragging])) .scroller {
+  cursor: grab;
+}
+
+// ---- Keyline track (multi-browse / hero) -----------------------------------
+.track {
+  position: relative;
+  block-size: 100%;
+  // inline-size is set in JS: viewport + scroll runway
+}
+
+.snap {
+  position: absolute;
+  inset-block-start: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  scroll-snap-align: start;
+  pointer-events: none;
+}
+
+.stage {
+  position: sticky;
+  inset-inline-start: 0;
+  inset-block: 0;
+  block-size: 100%;
+  inline-size: var(--_k3-carousel-viewport, 100%);
+}
+
+// ---- Uncontained: same size, cut off at the edge, free scroll --------------
+:host([layout='uncontained']) {
+  .scroller {
+    scroll-snap-type: none;
+  }
+
+  .track {
+    display: flex;
+    gap: token('gap');
+    inline-size: max-content;
+  }
+
+  .stage {
+    display: contents;
+  }
+}
+
+// ---- Full-screen: vertical, one edge-to-edge item --------------------------
+:host([layout='full-screen']) {
+  .scroller {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-snap-type: y mandatory;
+  }
+
+  .track {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stage {
+    display: contents;
+  }
+}
+
+// ---- Controls (prev / next) ------------------------------------------------
+.controls {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: token('controls-offset');
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 2;
+}
+
+// Vertical (full-screen): stacked at the inline end, centred
+:host([layout='full-screen']) .controls {
+  inset-inline-start: auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.controls k3-icon-button {
+  pointer-events: auto;
+  // Readable over any media
+  filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.25));
+  transition:
+    opacity var(--k3-sys-motion-duration-effects-default) var(--k3-sys-motion-easing-effects),
+    scale var(--k3-sys-motion-duration-spatial-fast) var(--k3-sys-motion-easing-spatial-fast);
+
+  &[disabled] {
+    opacity: 0;
+    scale: 0.6;
+    pointer-events: none;
+  }
+}
+
+// Material Symbols inside slotted icon buttons (shadow scope)
+.ms {
+  font-family: var(--k3-sys-icon-font-family, 'Material Symbols Rounded', sans-serif);
+  font-size: 1.5rem;
+  line-height: 1;
+  font-weight: var(--k3-sys-icon-weight, 400);
+  font-style: normal;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' var(--k3-sys-icon-weight, 400);
+}
+
+:host(:dir(rtl):not([layout='full-screen'])) .ms {
+  transform: scaleX(-1);
+}
+
+// ---- Indicators (page dots) ------------------------------------------------
+// The active dot is 3× longer. `--_k3-dot-w` (0 → 1) is written every frame by
+// the component, so the morph follows the finger / scroll position, and the
+// spatial-fast spring smooths discrete jumps (click, keyboard).
+.indicators {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  padding: 0.25rem token('padding-inline');
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+:host([indicators='left']) .indicators,
+:host([indicators='right']) .indicators {
+  flex-direction: column;
+  padding: token('padding-block') 0.25rem;
+}
+
+.dot {
+  --_w: var(--_k3-dot-w, 0);
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-inline-size: 1.5rem; // 24dp hit target
+  min-block-size: 1.5rem;
+  padding: 0 calc(#{token('dot-gap')} / 2);
+  border: 0;
+  background: none;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &::before {
+    content: '';
+    display: block;
+    inline-size: calc(#{token('dot-size')} * (1 + #{$dot-active-ratio - 1} * var(--_w)));
+    block-size: token('dot-size');
+    border-radius: var(--k3-sys-shape-corner-full);
+    background: color-mix(
+      in srgb,
+      #{token('dot-active-color')} calc(var(--_w) * 100%),
+      #{token('dot-color')}
+    );
+    transition:
+      inline-size var(--k3-sys-motion-duration-spatial-fast)
+        var(--k3-sys-motion-easing-spatial-fast),
+      block-size var(--k3-sys-motion-duration-spatial-fast) var(--k3-sys-motion-easing-spatial-fast),
+      background-color var(--k3-sys-motion-duration-effects-fast)
+        var(--k3-sys-motion-easing-effects);
+  }
+
+  @media (hover: hover) {
+    &:hover::before {
+      background: color-mix(
+        in srgb,
+        #{token('dot-active-color')} calc(var(--_w) * 100% + 30%),
+        #{token('dot-color')}
+      );
+    }
+  }
+
+  &:focus-visible::before {
+    outline: 3px solid var(--k3-sys-color-secondary);
+    outline-offset: 2px;
+  }
+}
+
+:host([indicators='left']) .dot,
+:host([indicators='right']) .dot {
+  padding: calc(#{token('dot-gap')} / 2) 0;
+
+  &::before {
+    inline-size: token('dot-size');
+    block-size: calc(#{token('dot-size')} * (1 + #{$dot-active-ratio - 1} * var(--_w)));
+  }
+}
+
+// Live region (visually hidden)
+.sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroller {
+    scroll-behavior: auto;
+  }
+  .dot::before {
+    transition: none;
+  }
+}
+
+:host-context([data-k3-reduce-motion]) .scroller {
+  scroll-behavior: auto;
+}
+
+@media (forced-colors: active) {
+  .dot::before {
+    background: ButtonText;
+  }
+  .dot[aria-current]::before {
+    background: Highlight;
+  }
+}

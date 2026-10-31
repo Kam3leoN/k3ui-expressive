@@ -5,6 +5,10 @@ import { K3Element, prefersReducedMotion } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
 import {
+  FAB_MENU_CONCEAL_ATTR,
+  FAB_OVERLAY_CONCEAL_ATTR,
+} from '../actions/fab-visibility.js';
+import {
   ScrollToTopSpecs,
   resolveScrollToTopVariant,
   type ScrollToTopVariant,
@@ -154,11 +158,41 @@ export class K3ScrollToTop extends K3Element {
     const { top, max } = this.getScrollState();
     const progress = max > 0 ? Math.min(1, Math.max(0, top / max)) : 0;
     this.progressOffset = this.circumference * (1 - progress);
+    /* Fab-menu / sheet-dialog peer conceal wins over scroll threshold. */
+    if (
+      this.hasAttribute(FAB_MENU_CONCEAL_ATTR) ||
+      this.hasAttribute(FAB_OVERLAY_CONCEAL_ATTR)
+    ) {
+      if (this.visible) {
+        this.visible = false;
+        this.toggleAttribute('data-visible', false);
+      }
+      return;
+    }
     const shouldShow = top > this.threshold;
     if (shouldShow !== this.visible) {
       this.visible = shouldShow;
       this.toggleAttribute('data-visible', shouldShow);
     }
+  }
+
+  /** Animate / reveal (M3 FAB show) — respects scroll threshold after peer restore. */
+  async show(): Promise<boolean> {
+    if (
+      this.hasAttribute(FAB_MENU_CONCEAL_ATTR) ||
+      this.hasAttribute(FAB_OVERLAY_CONCEAL_ATTR)
+    ) {
+      return true;
+    }
+    this.updateFromScroll();
+    return true;
+  }
+
+  /** Conceal for fab-menu / overlay zone (M3 FAB hide). Attr set by caller. */
+  async hide(): Promise<boolean> {
+    this.visible = false;
+    this.toggleAttribute('data-visible', false);
+    return true;
   }
 
   /** Smooth-scrolls the active scroll root to the top. */

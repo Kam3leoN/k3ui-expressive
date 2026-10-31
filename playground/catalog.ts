@@ -18,6 +18,7 @@ export const DOC_CATEGORIES = [
   'Navigation',
   'Utilities',
   'Styles',
+  'Resources',
 ] as const;
 
 /**
@@ -73,6 +74,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Buttons Arrow',
     titleKey: 'doc.button-arrow.title',
     blurbKey: 'doc.button-arrow.blurb',
+  },
+  {
+    id: 'buttons-card',
+    category: 'Buttons',
+    title: 'Buttons Card',
+    titleKey: 'doc.button-card.title',
+    blurbKey: 'doc.button-card.blurb',
   },
   {
     id: 'buttons-grid',
@@ -266,11 +274,25 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.counter.blurb',
   },
   {
+    id: 'signature',
+    category: 'Inputs',
+    title: 'Signature',
+    titleKey: 'doc.signature.title',
+    blurbKey: 'doc.signature.blurb',
+  },
+  {
     id: 'slider',
     category: 'Inputs',
     title: 'Slider',
     titleKey: 'doc.slider.title',
     blurbKey: 'doc.slider.blurb',
+  },
+  {
+    id: 'rating',
+    category: 'Inputs',
+    title: 'Rating',
+    titleKey: 'doc.rating.title',
+    blurbKey: 'doc.rating.blurb',
   },
   {
     id: 'date-picker',
@@ -330,6 +352,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.snackbar.blurb',
   },
   {
+    id: 'alert',
+    category: 'Feedback',
+    title: 'Alert',
+    titleKey: 'doc.alert.title',
+    blurbKey: 'doc.alert.blurb',
+  },
+  {
     id: 'dialog',
     category: 'Feedback',
     title: 'Dialog',
@@ -385,6 +414,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     titleKey: 'doc.audio-player.title',
     blurbKey: 'doc.audio-player.blurb',
   },
+  {
+    id: 'qr-code',
+    category: 'Feedback',
+    title: 'QR code',
+    titleKey: 'doc.qr-code.title',
+    blurbKey: 'doc.qr-code.blurb',
+  },
   // Containment
   {
     id: 'avatar',
@@ -401,11 +437,25 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.bubble.blurb',
   },
   {
+    id: 'quote',
+    category: 'Containment',
+    title: 'Quote',
+    titleKey: 'doc.quote.title',
+    blurbKey: 'doc.quote.blurb',
+  },
+  {
     id: 'codeblock',
     category: 'Containment',
     title: 'Code block',
     titleKey: 'doc.codeblock.title',
     blurbKey: 'doc.codeblock.blurb',
+  },
+  {
+    id: 'carousel',
+    category: 'Containment',
+    title: 'Carousel',
+    titleKey: 'doc.carousel.title',
+    blurbKey: 'doc.carousel.blurb',
   },
   {
     id: 'card',
@@ -536,6 +586,27 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.gestures.blurb',
   },
   {
+    id: 'keyboard',
+    category: 'Utilities',
+    title: 'Keyboard',
+    titleKey: 'doc.keyboard.title',
+    blurbKey: 'doc.keyboard.blurb',
+  },
+  {
+    id: 'keyboard-media',
+    category: 'Utilities',
+    title: 'Media hotkeys',
+    titleKey: 'doc.keyboard-media.title',
+    blurbKey: 'doc.keyboard-media.blurb',
+  },
+  {
+    id: 'mouse',
+    category: 'Utilities',
+    title: 'Mouse',
+    titleKey: 'doc.mouse.title',
+    blurbKey: 'doc.mouse.blurb',
+  },
+  {
     id: 'dnd',
     category: 'Utilities',
     title: 'Drag & drop',
@@ -584,6 +655,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Icons',
     titleKey: 'doc.icons.title',
     blurbKey: 'doc.icons.blurb',
+  },
+  {
+    id: 'material-symbols',
+    category: 'Resources',
+    title: 'Material Symbols',
+    titleKey: 'doc.material-symbols.title',
+    blurbKey: 'doc.material-symbols.blurb',
   },
   {
     id: 'motion',

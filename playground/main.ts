@@ -42,9 +42,16 @@ import {
 import {
   NAV_DESTINATIONS,
   COMPONENT_MENU_GROUPS,
+  RESOURCE_PAGES,
   destinationForPage,
 } from './nav-destinations.js';
+import {
+  ensureVariableFonts,
+  mountMaterialSymbols,
+  prefetchMaterialSymbols,
+} from './material-symbols.js';
 import { docStore, DocKeys } from './doc-store.js';
+import { mountSponsors } from './sponsors.js';
 import {
   mountDocTables,
   mountTableIn,
@@ -63,6 +70,16 @@ import { armNavActive, navItemFromEvent } from '../src/components/navigation/nav
 import type { K3NavItem } from '../src/components/navigation/nav-item.js';
 import type { DocComponent } from './catalog.js';
 import { getSoundFx } from '../src/core/sound-fx.js';
+import {
+  QR_BALL_IDS,
+  QR_BALLS,
+  QR_BODY_IDS,
+  QR_EYE_IDS,
+  QR_EYES,
+  type QrPattern,
+} from '../src/components/media/qr-code.patterns.js';
+import { bodyPreviewImgHtml } from '../src/components/media/qr-code.body-previews.js';
+import { renderBodyPreviewSvg } from '../src/components/media/qr-code.body-draw.js';
 
 /**
  * Shell-critical custom elements — enough for first paint (home + chrome).
@@ -91,6 +108,7 @@ const SHELL_COMPONENTS = [
   'k3-button',
   'k3-button-group',
   'k3-switch',
+  'k3-loading-indicator',
 ] as const;
 
 /** Registered right after first paint — not needed for LCP text. */
@@ -257,6 +275,14 @@ const COLOR_SUBPAGES = [
 
 const COLOR_CHILD_IDS = new Set<string>(COLOR_SUBPAGES.map(([id]) => id));
 
+/** Keyboard family — Utilities → Keyboard submenu (Basics + Media). */
+const KEYBOARD_SUBPAGES = [
+  ['keyboard', 'doc.keyboard.nav.basics'],
+  ['keyboard-media', 'doc.keyboard.nav.media'],
+] as const;
+
+const KEYBOARD_CHILD_IDS = new Set<string>(KEYBOARD_SUBPAGES.map(([id]) => id));
+
 /** Resolve legacy hashes → title-aligned slugs (Family-Type). */
 function articlePageId(hashId: string): string {
   return resolvePageId(hashId);
@@ -264,6 +290,10 @@ function articlePageId(hashId: string): string {
 
 function isColorFamilyPage(hashId: string): boolean {
   return COLOR_CHILD_IDS.has(articlePageId(hashId));
+}
+
+function isKeyboardFamilyPage(hashId: string): boolean {
+  return KEYBOARD_CHILD_IDS.has(articlePageId(hashId));
 }
 
 function setCeProp(el: HTMLElement, prop: string, attr: string, value: string): void {
@@ -294,6 +324,8 @@ function wirePinSuccessDemo(): void {
 }
 
 function applyPlaygroundI18n(): void {
+  /* Ensure sponsors DOM exists before translating data-i18n nodes */
+  mountSponsors();
   document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
     const key = el.getAttribute('data-i18n');
     if (!key || el.children.length > 0) return;
@@ -313,6 +345,16 @@ function applyPlaygroundI18n(): void {
     const key = el.getAttribute('data-i18n-aria-label');
     if (!key) return;
     el.setAttribute('aria-label', t(key));
+  });
+  document.querySelectorAll<HTMLElement>('[data-i18n-content]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-content');
+    if (!key) return;
+    setCeProp(el, 'content', 'content', t(key));
+  });
+  document.querySelectorAll<HTMLElement>('[data-i18n-title]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-title');
+    if (!key) return;
+    el.setAttribute('title', t(key));
   });
   document.querySelectorAll<HTMLElement>('[data-i18n-supporting-text]').forEach((el) => {
     const key = el.getAttribute('data-i18n-supporting-text');
@@ -490,18 +532,6 @@ function syncSettingsDialog(): void {
   applyContainerLayout();
 
   const seed = seeds[seedIdx] ?? seeds[0]!;
-  const seedHex = document.getElementById('settings-seed-hex');
-  if (seedHex) seedHex.textContent = seed;
-  const swatch = document.getElementById('settings-seed');
-  if (swatch) {
-    swatch.style.background = seed;
-    swatch.setAttribute('title', seed);
-  }
-  const picker = document.getElementById('settings-seed-picker') as HTMLInputElement | null;
-  if (picker && document.activeElement !== picker) {
-    picker.value = normalizeHex(seed) ?? seed;
-    picker.setAttribute('aria-label', `${t('playground.ctrl.seed')} ${seed}`);
-  }
   const seedNorm = (normalizeHex(seed) ?? seed).toUpperCase();
   document.querySelectorAll<HTMLElement>('[data-settings-seed]').forEach((el) => {
     const hex = normalizeHex(el.getAttribute('data-settings-seed') ?? '') ?? '';
@@ -511,12 +541,32 @@ function syncSettingsDialog(): void {
   });
 }
 
+/** MD2 hue ladder — each family at tone 500 (Material Design 2014 order). */
+function mountSettingsMd2SeedPresets(): void {
+  const host = document.getElementById('settings-seed-presets');
+  if (!host || host.dataset.md2Mounted === '1') return;
+  host.dataset.md2Mounted = '1';
+  host.innerHTML = M2_PALETTE_NAMES.map((name) => {
+    const hex = M2_PALETTES[name]['500'];
+    if (!hex) return '';
+    const label = name
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+    return `<k3-tooltip position="top" content="${label}"><button type="button" class="settings-seed-preset k3-focus-ring" data-settings-seed="${hex}" style="--preset:${hex}" aria-label="${label}" aria-pressed="false"></button></k3-tooltip>`;
+  }).join('');
+}
+
 async function openSettingsSheet(): Promise<void> {
   await registry.register('k3-sheet');
+  await registry.register('k3-card');
   await registry.register('k3-button');
   await registry.register('k3-button-group');
+  await registry.register('k3-tooltip');
   await registry.register('k3-switch');
+  mountSettingsMd2SeedPresets();
   syncSettingsDialog();
+  applyPlaygroundI18n();
   const sheet = settingsSheet();
   if (sheet && typeof sheet.show === 'function') await sheet.show();
 }
@@ -603,6 +653,15 @@ function applyAdaptiveShell(): void {
   } else {
     root.style.setProperty('--k3-nav-chrome-inset-block-end', '0px');
   }
+  syncShellRailInlineSize();
+
+  /* Phone: only smartphone variant — undock demo sticky toolbar if pinned. */
+  if (mode === 'bar') {
+    document.querySelectorAll('k3-audio-player[dock-toggle]').forEach((node) => {
+      const player = node as HTMLElement & { variant?: string };
+      if (player.variant === 'sticky') player.variant = 'toolbar';
+    });
+  }
 
   const bar = document.getElementById('nav-bar') as HTMLElement & { layout?: string } | null;
   // Compact phone: vertical items; medium tablet with bar fallback would be horizontal —
@@ -611,16 +670,41 @@ function applyAdaptiveShell(): void {
   syncShellSecondarySurface(mode);
 }
 
+/**
+ * Publish rail width on <html> so fixed sticky players stay in the content band
+ * (compact 104dp · expanded 256dp) — never over the navigation-rail.
+ */
+function syncShellRailInlineSize(): void {
+  const root = document.documentElement;
+  if (navMode() === 'bar') {
+    root.style.setProperty('--k3-shell-rail-inline-size', '0px');
+    return;
+  }
+  const rail = document.getElementById('nav-rail');
+  const w = rail?.getBoundingClientRect().width ?? 0;
+  root.style.setProperty('--k3-shell-rail-inline-size', `${Math.round(w)}px`);
+}
+
 type ShellNavItem = HTMLElement & {
   icon: string;
   label: string;
   href: string;
+  /** M3 badge label on the icon (e.g. component count). */
+  badge: string;
   active: boolean;
   /** Secondary menu/sheet open — hover pill without stealing selected. */
   menuOpen: boolean;
   layout: string;
   updateComplete: Promise<boolean>;
 };
+
+/** Catalog leaf count under Components (Buttons…Navigation) — rail/bar badge. */
+function componentCatalogCount(): number {
+  return COMPONENT_MENU_GROUPS.reduce(
+    (n, g) => n + componentsInCategory(g.category).length,
+    0,
+  );
+}
 
 /** Rail expanded → horizontal pills · compact rail / bar → vertical. */
 function layoutForNavHost(host: HTMLElement): 'vertical' | 'horizontal' {
@@ -659,12 +743,14 @@ function syncPrimaryItems(host: HTMLElement): ShellNavItem[] {
     items.push(el);
   }
 
+  const componentCount = String(componentCatalogCount());
   NAV_DESTINATIONS.forEach((dest, i) => {
     const el = items[i]!;
     el.icon = dest.icon;
     el.label = t(dest.labelKey);
     /* Direct pages keep href; menu destinations stay empty (open secondary menu) */
     el.href = dest.href || '';
+    el.badge = dest.id === 'components' ? componentCount : '';
     el.layout = layout;
   });
   return items;
@@ -972,12 +1058,69 @@ function buildNavSheet(destId: string): void {
   } else if (openDest.id === 'utilities') {
     const flatIcons: Record<string, string> = {
       gestures: 'gesture',
+      mouse: 'mouse',
       dnd: 'drag_indicator',
       scrollbar: 'swap_vert',
     };
     const ul = document.createElement('ul');
     ul.className = 'shell-sheet-nav';
+    let keyboardGroupDone = false;
     for (const c of componentsInCategory('Utilities')) {
+      if (KEYBOARD_CHILD_IDS.has(c.id)) {
+        if (keyboardGroupDone) continue;
+        keyboardGroupDone = true;
+        const groupEl = document.createElement('div');
+        groupEl.className = 'shell-sheet-group';
+        if (selectCurrent && isKeyboardFamilyPage(pageId)) {
+          groupEl.classList.add('is-open');
+        }
+
+        const panelId = 'shell-sheet-panel-keyboard';
+        const panel = document.createElement('ul');
+        panel.id = panelId;
+        panel.hidden = !(selectCurrent && isKeyboardFamilyPage(pageId));
+        const resolved = articlePageId(pageId);
+        for (const [hash, labelKey] of KEYBOARD_SUBPAGES) {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.className = 'shell-sheet-link';
+          a.href = `#/${hash}`;
+          a.append(sheetLabel(labelKey));
+          if (selectCurrent && resolved === hash) {
+            a.classList.add('is-active');
+            a.setAttribute('aria-current', 'page');
+          }
+          li.append(a);
+          panel.append(li);
+        }
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'shell-sheet-group-btn';
+        btn.setAttribute(
+          'aria-expanded',
+          selectCurrent && isKeyboardFamilyPage(pageId) ? 'true' : 'false',
+        );
+        btn.setAttribute('aria-controls', panelId);
+        const icon = document.createElement('span');
+        icon.className = 'ms';
+        setMsIcon(icon, 'keyboard');
+        const name = sheetLabel('doc.keyboard.title');
+        const chevron = document.createElement('span');
+        chevron.className = 'ms chevron';
+        setMsIcon(chevron, 'expand_more');
+        btn.append(icon, name, chevron);
+        btn.addEventListener('click', () => {
+          const open = !groupEl.classList.contains('is-open');
+          groupEl.classList.toggle('is-open', open);
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          panel.hidden = !open;
+        });
+
+        groupEl.append(btn, panel);
+        nav.append(groupEl);
+        continue;
+      }
       const li = document.createElement('li');
       const link = sheetNavLink(c, selectCurrent ? pageId : '');
       const icon = document.createElement('span');
@@ -987,7 +1130,28 @@ function buildNavSheet(destId: string): void {
       li.append(link);
       ul.append(li);
     }
-    nav.append(ul);
+    if (ul.childElementCount) nav.append(ul);
+  } else if (openDest.id === 'resources') {
+    const ul = document.createElement('ul');
+    ul.className = 'shell-sheet-nav';
+    for (const page of RESOURCE_PAGES) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.className = 'shell-sheet-link';
+      a.href = `#/${page.id}`;
+      a.dataset.value = page.id;
+      if (selectCurrent && pageId === page.id) {
+        a.classList.add('is-active');
+        a.setAttribute('aria-current', 'page');
+      }
+      const icon = document.createElement('span');
+      icon.className = 'ms';
+      setMsIcon(icon, page.icon);
+      a.append(icon, sheetLabel(page.labelKey));
+      li.append(a);
+      ul.append(li);
+    }
+    if (ul.childElementCount) nav.append(ul);
   } else {
     /* Styles — Color expands to Roles / Palettes / Additional */
     const flatIcons: Record<string, string> = {
@@ -1108,14 +1272,48 @@ function fillNavMenu(destId?: string | null): {
   } else if (openDest.id === 'utilities') {
     const utilIcons: Record<string, string> = {
       gestures: 'gesture',
+      mouse: 'mouse',
       dnd: 'drag_indicator',
       scrollbar: 'swap_vert',
     };
     const links = componentsInCategory('Utilities');
+    const resolved = articlePageId(pageId);
+    const nodes: HTMLElement[] = [];
+    let keyboardGroupDone = false;
+    for (const c of links) {
+      if (KEYBOARD_CHILD_IDS.has(c.id)) {
+        if (keyboardGroupDone) continue;
+        keyboardGroupDone = true;
+        const parent = document.createElement('k3-menu-item');
+        parent.setAttribute('value', 'keyboard');
+        parent.setAttribute('has-submenu', '');
+        parent.append(menuItemIcon('keyboard'), t('doc.keyboard.title'));
+        appendEnSupporting(parent, 'doc.keyboard.title');
+        for (const [value, labelKey] of KEYBOARD_SUBPAGES) {
+          const child = document.createElement('k3-menu-item');
+          child.setAttribute('value', value);
+          child.slot = 'submenu';
+          child.append(t(labelKey));
+          appendEnSupporting(child, labelKey);
+          if (selectCurrent && resolved === value) child.setAttribute('selected', '');
+          parent.appendChild(child);
+        }
+        nodes.push(parent);
+        continue;
+      }
+      const item = leafMenuItem(c, pageId, { selectCurrent });
+      item.prepend(menuItemIcon(utilIcons[c.id] ?? 'tune'));
+      nodes.push(item);
+    }
+    menu.replaceChildren(...nodes);
+  } else if (openDest.id === 'resources') {
     menu.replaceChildren(
-      ...links.map((c) => {
-        const item = leafMenuItem(c, pageId, { selectCurrent });
-        item.prepend(menuItemIcon(utilIcons[c.id] ?? 'tune'));
+      ...RESOURCE_PAGES.map((page) => {
+        const item = document.createElement('k3-menu-item');
+        item.setAttribute('value', page.id);
+        item.append(menuItemIcon(page.icon), t(page.labelKey));
+        appendEnSupporting(item, page.labelKey);
+        if (selectCurrent && pageId === page.id) item.setAttribute('selected', '');
         return item;
       }),
     );
@@ -1156,7 +1354,8 @@ function fillNavMenu(destId?: string | null): {
 /**
  * Secondary destinations in an M3E menu (rail / tablet+):
  * - Components → parent categories with child pages as submenu
- * - Utilities → flat list (gestures, dnd, scrollbar)
+ * - Utilities → flat list; Keyboard expands to Basics / Media
+ * - Resources → Material Symbols browser page
  * - Styles → flat list; Color expands to Roles / Palettes / Additional
  */
 function buildNavMenu(
@@ -1279,6 +1478,22 @@ function wireShellGithubMenu(): void {
   });
 }
 
+function setDocPageLoading(on: boolean): void {
+  const el = document.getElementById('doc-page-loading');
+  if (!el) return;
+  el.hidden = !on;
+  el.classList.toggle('is-on', on);
+  el.setAttribute('aria-hidden', on ? 'false' : 'true');
+  el.setAttribute('aria-busy', on ? 'true' : 'false');
+}
+
+/** Wait two frames so the loading veil paints before heavy work. */
+function waitNextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+}
+
 function showPage(id: string): void {
   const articleId = articlePageId(id);
   /* Canonicalize URL when alias / legacy hash was used */
@@ -1310,6 +1525,34 @@ function showPage(id: string): void {
   const scroll = document.querySelector('.shell-scroll');
   if (scroll) scroll.scrollTop = 0;
   else window.scrollTo(0, 0);
+}
+
+/**
+ * Switch page under the loading veil.
+ * Duration tracks real `ensure` work, with a short floor so a warm cache
+ * still shows the k3-loading-indicator (otherwise it vanishes in 1 frame).
+ * HTML starts with `.is-on` so F5 / cold boot also show the veil before modules finish.
+ */
+async function navigateDocPage(
+  pageId: string,
+  ensure: (id: string) => Promise<void>,
+): Promise<void> {
+  setDocPageLoading(true);
+  await waitNextPaint();
+  const started = performance.now();
+  try {
+    showPage(pageId);
+    await ensure(pageId);
+  } finally {
+    const minVisibleMs = 320;
+    const elapsed = performance.now() - started;
+    if (elapsed < minVisibleMs) {
+      await new Promise<void>((r) => {
+        window.setTimeout(r, minVisibleMs - elapsed);
+      });
+    }
+    setDocPageLoading(false);
+  }
 }
 
 function syncDocNav(pageId: string): void {
@@ -1370,6 +1613,64 @@ function afterFirstPaint(task: () => void): void {
   requestAnimationFrame(() => requestAnimationFrame(run));
 }
 
+/** Styles → Icons — live FILL / wght / GRAD / opsz (Material Symbols New). */
+let iconsAxesWired = false;
+async function wireIconsAxesDemo(): Promise<void> {
+  const demo = document.getElementById('icons-axes-demo');
+  if (!demo || iconsAxesWired) return;
+  iconsAxesWired = true;
+  await registry.registerAll(['k3-switch', 'k3-slider']);
+  void ensureVariableFonts();
+
+  const preview = demo.querySelector<HTMLElement>('.icons-axes-preview');
+  const apply = (fill: number, wght: number, grad: number, opsz: number) => {
+    if (!preview) return;
+    preview.style.setProperty('--icons-demo-fill', String(fill));
+    preview.style.setProperty('--icons-demo-wght', String(wght));
+    preview.style.setProperty('--icons-demo-grad', String(grad));
+    preview.style.setProperty('--icons-demo-opsz', String(opsz));
+    preview.style.setProperty('--k3-sys-icon-fill', String(fill));
+    preview.style.setProperty('--k3-sys-icon-weight', String(wght));
+    preview.style.setProperty('--k3-sys-icon-grade', String(grad));
+    preview.style.setProperty('--k3-sys-icon-optical-size', String(opsz));
+    preview.style.fontWeight = String(wght);
+    preview.style.fontVariationSettings = `'FILL' ${fill}, 'wght' ${wght}, 'GRAD' ${grad}, 'opsz' ${opsz}`;
+  };
+
+  let fill = 0;
+  let wght = 400;
+  let grad = 0;
+  let opsz = 48;
+  apply(fill, wght, grad, opsz);
+
+  demo.querySelector('#icons-fill-switch')?.addEventListener('k3-change', ((
+    e: CustomEvent<{ selected?: boolean }>,
+  ) => {
+    fill = e.detail?.selected ? 1 : 0;
+    apply(fill, wght, grad, opsz);
+  }) as EventListener);
+
+  const bind = (id: string, set: (n: number) => void) => {
+    const on = ((e: CustomEvent<{ value?: number }>) => {
+      const v = Number(e.detail?.value);
+      if (!Number.isFinite(v)) return;
+      set(v);
+      apply(fill, wght, grad, opsz);
+    }) as EventListener;
+    demo.querySelector(id)?.addEventListener('k3-input', on);
+    demo.querySelector(id)?.addEventListener('k3-change', on);
+  };
+  bind('#icons-wght', (v) => {
+    wght = v;
+  });
+  bind('#icons-grad', (v) => {
+    grad = v;
+  });
+  bind('#icons-opsz', (v) => {
+    opsz = v;
+  });
+}
+
 /** Styles token pages — `<k3-table>` Specs (Token / Value / Notes). */
 function fillStyleTokenDemos(): void {
   const spacing = document.getElementById('spacing-scale');
@@ -1395,6 +1696,8 @@ function fillStyleTokenDemos(): void {
       ]),
     });
   }
+
+  void wireIconsAxesDemo();
 
   const icons = document.getElementById('icons-scale');
   if (icons && !icons.querySelector('k3-table')) {
@@ -1762,6 +2065,7 @@ async function boot(): Promise<void> {
         void import('../src/fonts/fonts-code.css');
       }
       if (articleId === 'shapes') await fillShapes();
+      if (articleId === 'material-symbols') await mountMaterialSymbols();
       if (
         articleId === 'spacing' ||
         articleId === 'elevation' ||
@@ -1785,29 +2089,31 @@ async function boot(): Promise<void> {
         renderColorPalettes(seed);
       }
       if (articleId === 'color-extras') renderExtraPalettes();
-      if (articleId !== 'home' && articleId !== 'quick-start') {
+      if (
+        articleId !== 'home' &&
+        articleId !== 'quick-start' &&
+        articleId !== 'material-symbols'
+      ) {
         await ensureDocTables(articleId);
         wirePinSuccessDemo();
       }
+      /* Labs that need upgraded CEs — wire after registerAll for this page. */
+      if (articleId === 'qr-code') wireQrCodeLab();
+      if (articleId === 'countdown') wireCountdownLab();
+      if (articleId === 'carousel') wireCarouselLab();
     };
 
     const initialPage = currentPageId();
-    showPage(initialPage);
-    /* Home has no demo CE — skip. Other deep-links register only that page. */
-    if (initialPage !== 'home') {
-      await ensurePageComponents(initialPage);
-    }
+    /* Veil for real CE registration — home is near-instant; deep links show the loader */
+    await navigateDocPage(initialPage, ensurePageComponents);
 
     window.addEventListener('hashchange', () => {
-      void (async () => {
-        const page = currentPageId();
-        await ensurePageComponents(page);
-        showPage(page);
-      })();
+      void navigateDocPage(currentPageId(), ensurePageComponents);
     });
 
     afterFirstPaint(() => {
       void registry.registerAll([...SHELL_DEFERRED]);
+      prefetchMaterialSymbols();
       /* Warm the rest of the catalog well after Lighthouse's quiet window */
       window.setTimeout(() => {
         void registry.registerAll('all');
@@ -1835,8 +2141,7 @@ async function boot(): Promise<void> {
       if (dest.href) {
         closeShellNavMenu();
         if (location.hash === dest.href || location.hash === dest.href.replace(/^#/, '#')) {
-          showPage(dest.id);
-          buildPrimaryNav();
+          void navigateDocPage(dest.id, ensurePageComponents).then(() => buildPrimaryNav());
         } else {
           location.hash = dest.href;
         }
@@ -1859,6 +2164,16 @@ async function boot(): Promise<void> {
     };
     document.getElementById('nav-rail')?.addEventListener('click', onPrimaryClick, true);
     document.getElementById('nav-bar')?.addEventListener('click', onPrimaryClick, true);
+
+    /* Keep sticky audio dock inset in sync with rail compact ↔ expanded. */
+    const shellRail = document.getElementById('nav-rail');
+    shellRail?.addEventListener('k3-expand', () => {
+      requestAnimationFrame(() => syncShellRailInlineSize());
+    });
+    if (shellRail && typeof ResizeObserver === 'function') {
+      const railRo = new ResizeObserver(() => syncShellRailInlineSize());
+      railRo.observe(shellRail);
+    }
 
     /* Outside dismiss / Escape — keep toggle state in sync */
     document.getElementById('shell-nav-menu')?.addEventListener('k3-close-end', () => {
@@ -1905,7 +2220,7 @@ async function boot(): Promise<void> {
       e.preventDefault();
       const next = `#/${value}`;
       closeShellNavMenu();
-      if (location.hash === next) showPage(value);
+      if (location.hash === next) void navigateDocPage(value, ensurePageComponents);
       else location.hash = next;
     });
 
@@ -1913,7 +2228,7 @@ async function boot(): Promise<void> {
     const goHome = (): void => {
       closeShellNavMenu();
       if (location.hash === '#/' || location.hash === '' || location.hash === '#') {
-        showPage('home');
+        void navigateDocPage('home', ensurePageComponents);
       } else {
         location.hash = '#/';
       }
@@ -1928,7 +2243,7 @@ async function boot(): Promise<void> {
       const next = `#/${value}`;
       closeShellNavMenu();
       if (location.hash === next) {
-        showPage(value);
+        void navigateDocPage(value, ensurePageComponents);
       } else {
         location.hash = next;
       }
@@ -2065,11 +2380,23 @@ function wireShellChrome(): void {
   };
   document.getElementById('btn-settings')?.addEventListener('k3-click', openSettings);
 
+  const flashToggle = (labelKey: string, on: boolean): void => {
+    void showFlash(
+      t('playground.settings.flash.toggle', {
+        label: t(labelKey),
+        state: t(on ? 'playground.settings.flash.on' : 'playground.settings.flash.off'),
+      }),
+    );
+  };
+
   document.getElementById('settings-theme-group')?.addEventListener('k3-change', (e) => {
     const btn = (e as CustomEvent<{ selected?: HTMLElement }>).detail?.selected;
     const mode = btn?.getAttribute('data-settings-theme');
     if (mode === 'light' || mode === 'dark' || mode === 'auto' || mode === 'system') {
       setThemeMode(mode);
+      void showFlash(
+        t('playground.settings.flash.theme', { value: t(`playground.ctrl.theme.${mode}`) }),
+      );
     }
   });
 
@@ -2079,12 +2406,22 @@ function wireShellChrome(): void {
     colorVariant = v;
     syncColorVariantButtons();
     applyThemePersist();
+    void showFlash(
+      t('playground.settings.flash.variant', {
+        value: t(`playground.ctrl.variant.${v}`),
+      }),
+    );
   });
 
   document.getElementById('settings-contrast-group')?.addEventListener('k3-change', (e) => {
     const btn = (e as CustomEvent<{ selected?: HTMLElement }>).detail?.selected;
     contrastLevel = parseContrast(btn?.getAttribute('data-settings-contrast'));
     applyThemePersist();
+    void showFlash(
+      t('playground.settings.flash.contrast', {
+        value: t(`playground.ctrl.contrast.${contrastLevel}`),
+      }),
+    );
   });
 
   document.getElementById('settings-motion-group')?.addEventListener('k3-change', (e) => {
@@ -2092,16 +2429,23 @@ function wireShellChrome(): void {
     const scheme = btn?.getAttribute('data-settings-motion');
     if (scheme === 'expressive' || scheme === 'standard') {
       setMotionScheme(scheme);
+      void showFlash(
+        t('playground.settings.flash.motion', {
+          value: t(`playground.ctrl.motion.${scheme}`),
+        }),
+      );
     }
   });
 
-  document.getElementById('settings-dir-group')?.addEventListener('k3-click', (e) => {
-    const t = e.target as HTMLElement | null;
-    const btn =
-      t?.closest?.('[data-settings-dir]') ??
-      (t?.hasAttribute?.('data-settings-dir') ? t : null);
-    const dir = btn?.getAttribute('data-settings-dir');
-    if (dir === 'ltr' || dir === 'rtl') setDocumentDir(dir);
+  document.getElementById('settings-dir-group')?.addEventListener('k3-change', (e) => {
+    const btn = (e as CustomEvent<{ selected?: HTMLElement }>).detail?.selected;
+    const next = btn?.getAttribute('data-settings-dir');
+    if (next === 'ltr' || next === 'rtl') {
+      setDocumentDir(next);
+      void showFlash(
+        t('playground.settings.flash.dir', { value: t(`playground.ctrl.dir.${next}`) }),
+      );
+    }
   });
 
   document.getElementById('settings-animations')?.addEventListener('k3-change', (e) => {
@@ -2109,6 +2453,7 @@ function wireShellChrome(): void {
     if (typeof selected !== 'boolean') return;
     animationsOn = selected;
     applyAnimationsPreference();
+    void showFlash(t(selected ? 'playground.ctrl.motion.on' : 'playground.ctrl.motion.off'));
   });
 
   document.getElementById('settings-container')?.addEventListener('k3-change', (e) => {
@@ -2120,6 +2465,7 @@ function wireShellChrome(): void {
     applyContainerLayout();
     rebuildGridOverlay();
     syncSettingsDialog();
+    flashToggle('playground.ctrl.container', selected);
   });
 
   document.getElementById('settings-grid')?.addEventListener('k3-change', (e) => {
@@ -2132,6 +2478,7 @@ function wireShellChrome(): void {
       if (gridOn) rebuildGridOverlay();
     }
     syncSettingsDialog();
+    flashToggle('playground.ctrl.grid', selected);
   });
 
   document.getElementById('settings-audio')?.addEventListener('k3-change', (e) => {
@@ -2139,6 +2486,7 @@ function wireShellChrome(): void {
     if (typeof selected !== 'boolean') return;
     setAudioEnabled(selected);
     syncSettingsDialog();
+    flashToggle('playground.ctrl.audio', selected);
   });
 
   document.getElementById('settings-music')?.addEventListener('k3-change', (e) => {
@@ -2146,21 +2494,12 @@ function wireShellChrome(): void {
     if (typeof selected !== 'boolean') return;
     setMusicEnabled(selected);
     syncSettingsDialog();
+    flashToggle('playground.ctrl.music', selected);
   });
 
-  const seedPicker = document.getElementById('settings-seed-picker') as HTMLInputElement | null;
-  /** Big bubble = custom picker only. */
-  const onSeedPick = (): void => {
-    if (!seedPicker) return;
-    const next = normalizeHex(seedPicker.value);
-    if (!next) return;
-    applySeedHex(next);
-    syncSettingsDialog();
-  };
-  seedPicker?.addEventListener('input', onSeedPick);
-  seedPicker?.addEventListener('change', onSeedPick);
+  mountSettingsMd2SeedPresets();
 
-  /** 6 presets — apply + persist (same localStorage as custom seed). */
+  /** MD2 500 presets — apply + persist. */
   document.getElementById('settings-seed-presets')?.addEventListener(
     'click',
     (e) => {
@@ -2174,6 +2513,12 @@ function wireShellChrome(): void {
       if (!hex) return;
       applySeedHex(hex);
       syncSettingsDialog();
+      const tip = btn.closest('k3-tooltip') as HTMLElement & { content?: string } | null;
+      const label =
+        (typeof tip?.content === 'string' && tip.content.trim()) ||
+        btn.getAttribute('aria-label') ||
+        hex;
+      void showFlash(t('playground.settings.flash.color', { value: label }));
     },
     true,
   );
@@ -2432,7 +2777,484 @@ function wireDemoPages(): void {
   wireToggle('btn-toggle-square');
   wireSliderLab();
   wireProgressLab();
+  wireCountdownLab();
+  wireCarouselLab();
+  wireQrCodeLab();
   wireConfettiDemo();
+  wireAudioPlayerDemoRights();
+}
+
+/**
+ * Carousel multi-browse demo — selector sets how many items are visible at once
+ * (3 / 4 / 5 / 6 / all) by tuning `item-width`. All slides stay in the pool so
+ * loop / arrows / indicators keep working.
+ */
+function wireCarouselLab(): void {
+  const page = document.getElementById('page-carousel');
+  if (!page || page.dataset.carouselWired) return;
+
+  type SelectEl = HTMLElement & { value: string };
+  type CarouselEl = HTMLElement & { itemWidth: number; index: number };
+  const select = document.getElementById('carousel-count-select') as SelectEl | null;
+  const carousel = document.getElementById('carousel-multi-demo') as CarouselEl | null;
+  if (!select || !carousel) return;
+  page.dataset.carouselWired = '1';
+
+  const DEFAULT_ITEM_WIDTH = 186;
+  const GAP = 8;
+
+  const viewportWidth = (): number => {
+    const scroller = carousel.shadowRoot?.querySelector('.scroller') as HTMLElement | null;
+    const w = scroller?.clientWidth || carousel.clientWidth;
+    return Math.max(1, w);
+  };
+
+  /** Preferred large width so ~`slots` keyline items fill the multi-browse viewport. */
+  const itemWidthForSlots = (slots: number): number => {
+    const vw = viewportWidth();
+    /* multi-browse ≈ N-2 larges + 1 medium + 1 small (fallback: N-1 larges + 1 small). */
+    const small = 48;
+    const largeCount = Math.max(1, slots - 2);
+    const width = (vw - small - largeCount * GAP) / largeCount;
+    return Math.round(Math.max(72, Math.min(vw * 0.9, width)));
+  };
+
+  const apply = (): void => {
+    const raw = select.value || 'all';
+    if (raw === 'all') {
+      carousel.itemWidth = DEFAULT_ITEM_WIDTH;
+    } else {
+      const slots = Math.max(3, Math.min(6, Number(raw) || 3));
+      carousel.itemWidth = itemWidthForSlots(slots);
+    }
+    carousel.index = 0;
+  };
+
+  select.addEventListener('k3-change', apply);
+  window.addEventListener('resize', () => {
+    if ((select.value || 'all') !== 'all') apply();
+  });
+}
+
+/** Humanize a pattern id for tooltips (`circle-zebra` → `Circle zebra`, `frame14` → `Frame 14`). */
+function formatQrPatternLabel(id: string): string {
+  return id
+    .replace(/([a-z])(\d)/gi, '$1 $2')
+    .split('-')
+    .map((w, i) => (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+    .join(' ');
+}
+
+/** MD2 family label (`deep-purple` → `Deep purple`). */
+function formatMd2Label(name: string): string {
+  return name
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+/** Build a pattern picker grid (body / eye / ball) with k3-tooltip labels. */
+function fillQrPatternGrid(
+  host: HTMLElement,
+  ids: readonly string[],
+  selected: string,
+  onPick: (id: string) => void,
+  kind: 'body' | 'eye' | 'ball',
+): void {
+  host.replaceChildren();
+  for (const id of ids) {
+    const label = formatQrPatternLabel(id);
+    const tip = document.createElement('k3-tooltip');
+    tip.setAttribute('position', 'top');
+    tip.setAttribute('content', label);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'qr-pattern-btn k3-focus-ring';
+    btn.setAttribute('role', 'option');
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('aria-selected', id === selected ? 'true' : 'false');
+    btn.dataset.value = id;
+    if (kind === 'body') {
+      btn.innerHTML = bodyPreviewImgHtml(id, 44) || renderBodyPreviewSvg(id, 44, 'currentColor');
+    } else {
+      const catalog = kind === 'eye' ? QR_EYES : QR_BALLS;
+      const pat = catalog[id as keyof typeof catalog] as QrPattern | undefined;
+      if (!pat) continue;
+      const vb = pat.cell;
+      btn.innerHTML = `<svg viewBox="0 0 ${vb} ${vb}" aria-hidden="true"><g fill="currentColor" fill-rule="evenodd">${pat.markup}</g></svg>`;
+    }
+    btn.addEventListener('click', () => {
+      host.querySelectorAll('.qr-pattern-btn').forEach((el) => {
+        el.setAttribute('aria-selected', el === btn ? 'true' : 'false');
+      });
+      onPick(id);
+    });
+    tip.append(btn);
+    host.append(tip);
+  }
+}
+
+/** MD2 tone-500 swatch row for body / eye / ball colors. */
+function fillQrMd2Swatches(
+  host: HTMLElement,
+  selectedHex: string | undefined,
+  onPick: (hex: string) => void,
+): void {
+  host.replaceChildren();
+  const selected = (selectedHex || '').toLowerCase();
+  for (const name of M2_PALETTE_NAMES) {
+    const hex = M2_PALETTES[name]['500'];
+    if (!hex) continue;
+    const label = `${formatMd2Label(name)} 500`;
+    const tip = document.createElement('k3-tooltip');
+    tip.setAttribute('position', 'top');
+    tip.setAttribute('content', label);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'qr-md2-swatch k3-focus-ring';
+    btn.style.setProperty('--swatch', hex);
+    btn.dataset.hex = hex;
+    btn.setAttribute('role', 'option');
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute(
+      'aria-selected',
+      selected === hex.toLowerCase() ? 'true' : 'false',
+    );
+    btn.addEventListener('click', () => {
+      host.querySelectorAll('.qr-md2-swatch').forEach((el) => {
+        el.setAttribute('aria-selected', el === btn ? 'true' : 'false');
+      });
+      onPick(hex);
+    });
+    tip.append(btn);
+    host.append(tip);
+  }
+}
+
+/** QR code page — full generator (patterns · ECC · MD2 colors · logo). */
+function wireQrCodeLab(): void {
+  const page = document.getElementById('page-qr-code');
+  if (!page || page.dataset.qrWired) return;
+
+  type FieldEl = HTMLElement & { value: string; disabled?: boolean };
+  type SwitchEl = HTMLElement & { selected: boolean };
+  type GroupEl = HTMLElement & { selectedValues: () => string[] };
+  type SliderEl = HTMLElement & { value: number };
+  type QrEl = HTMLElement & {
+    value: string;
+    size: number;
+    margin: number;
+    shape: string;
+    dots: string;
+    cornersSquare: string;
+    cornersDot: string;
+    cornersSquareRotate: string;
+    cornersDotRotate: string;
+    color: string;
+    dotsColor: string | undefined;
+    cornersSquareColor: string | undefined;
+    cornersDotColor: string | undefined;
+    background: string;
+    image: string | undefined;
+    imageSize: number;
+    imageMargin: number;
+    errorCorrection: string;
+    download: (
+      name?: string,
+      extension?: 'png' | 'svg' | 'jpeg' | 'webp' | 'pdf',
+    ) => Promise<void>;
+  };
+
+  const qr = document.getElementById('qr-lab-code') as QrEl | null;
+  if (!qr) return;
+
+  /* Must wait for CE upgrade — writing props before define() wipes HTML attrs. */
+  if (!customElements.get('k3-qr-code')) return;
+
+  page.dataset.qrWired = '1';
+  void registry.register('k3-tooltip');
+
+  const valueField = document.getElementById('qr-lab-value') as FieldEl | null;
+  const shapeGroup = document.getElementById('qr-lab-shape') as GroupEl | null;
+  const eccGroup = document.getElementById('qr-lab-ecc') as GroupEl | null;
+  const bodyGrid = document.getElementById('qr-lab-body-grid');
+  const eyeGrid = document.getElementById('qr-lab-eye-grid');
+  const ballGrid = document.getElementById('qr-lab-ball-grid');
+  const bodyColors = document.getElementById('qr-lab-body-colors');
+  const eyeColors = document.getElementById('qr-lab-eye-colors');
+  const ballColors = document.getElementById('qr-lab-ball-colors');
+  const eyeRotTl = document.getElementById('qr-lab-eye-rotate-tl') as FieldEl | null;
+  const eyeRotTr = document.getElementById('qr-lab-eye-rotate-tr') as FieldEl | null;
+  const eyeRotBl = document.getElementById('qr-lab-eye-rotate-bl') as FieldEl | null;
+  const ballRotTl = document.getElementById('qr-lab-ball-rotate-tl') as FieldEl | null;
+  const ballRotTr = document.getElementById('qr-lab-ball-rotate-tr') as FieldEl | null;
+  const ballRotBl = document.getElementById('qr-lab-ball-rotate-bl') as FieldEl | null;
+  const bgField = document.getElementById('qr-lab-bg') as FieldEl | null;
+  const bgTransparent = document.getElementById('qr-lab-bg-transparent') as SwitchEl | null;
+  const sizeSlider = document.getElementById('qr-lab-size') as SliderEl | null;
+  const imageSizeSlider = document.getElementById('qr-lab-image-size') as SliderEl | null;
+  const imageMarginSlider = document.getElementById('qr-lab-image-margin') as SliderEl | null;
+  const logoFile = document.getElementById('qr-lab-logo-file') as HTMLInputElement | null;
+  const logoPick = document.getElementById('qr-lab-logo-pick');
+  const logoClear = document.getElementById('qr-lab-logo-clear');
+  const logoName = document.getElementById('qr-lab-logo-name');
+  const dlPng = document.getElementById('qr-lab-download-png');
+  const dlSvg = document.getElementById('qr-lab-download-svg');
+  const dlPdf = document.getElementById('qr-lab-download-pdf');
+
+  let logoObjectUrl: string | null = null;
+  let bodyId = qr.dots || 'diamond';
+  let eyeId = qr.cornersSquare || 'frame14';
+  let ballId = qr.cornersDot || 'ball5';
+  let bodyHex: string | undefined;
+  let eyeHex: string | undefined;
+  let ballHex: string | undefined;
+  let lastOpaqueBg = bgField?.value?.trim() || '#ffffff';
+
+  const revokeLogo = (): void => {
+    if (logoObjectUrl) {
+      URL.revokeObjectURL(logoObjectUrl);
+      logoObjectUrl = null;
+    }
+  };
+
+  const groupValue = (group: GroupEl | null): string | undefined => {
+    try {
+      return group?.selectedValues()?.[0];
+    } catch {
+      return undefined;
+    }
+  };
+
+  const syncEccButtons = (level: string): void => {
+    eccGroup?.querySelectorAll('k3-button').forEach((btn) => {
+      const v = btn.getAttribute('value');
+      if (v === level) btn.setAttribute('selected', '');
+      else btn.removeAttribute('selected');
+    });
+  };
+
+  const syncBgField = (): void => {
+    const transparent = !!bgTransparent?.selected;
+    if (bgField) {
+      bgField.disabled = transparent;
+      if (transparent) bgField.setAttribute('disabled', '');
+      else bgField.removeAttribute('disabled');
+    }
+  };
+
+  const apply = (): void => {
+    const nextValue = valueField?.value?.trim();
+    if (typeof nextValue === 'string') qr.value = nextValue;
+    const shape = groupValue(shapeGroup);
+    if (shape) qr.shape = shape;
+    const ecc = groupValue(eccGroup);
+    if (ecc) qr.errorCorrection = ecc;
+    qr.dots = bodyId;
+    qr.cornersSquare = eyeId;
+    qr.cornersDot = ballId;
+    const eyeRot = [
+      eyeRotTl?.value || 'mirror',
+      eyeRotTr?.value || 'mirror',
+      eyeRotBl?.value || 'mirror',
+    ].join(',');
+    const ballRot = [
+      ballRotTl?.value || 'mirror',
+      ballRotTr?.value || 'mirror',
+      ballRotBl?.value || 'mirror',
+    ].join(',');
+    qr.cornersSquareRotate = eyeRot;
+    qr.cornersDotRotate = ballRot;
+    qr.dotsColor = bodyHex;
+    qr.cornersSquareColor = eyeHex;
+    qr.cornersDotColor = ballHex;
+    if (bgTransparent?.selected) {
+      qr.background = 'transparent';
+    } else {
+      const bg = bgField?.value?.trim();
+      if (typeof bg === 'string' && bg) {
+        lastOpaqueBg = bg;
+        qr.background = bg;
+      } else {
+        qr.background = lastOpaqueBg || '#ffffff';
+      }
+    }
+    if (sizeSlider && Number.isFinite(sizeSlider.value)) qr.size = sizeSlider.value;
+    if (imageSizeSlider && Number.isFinite(imageSizeSlider.value)) {
+      qr.imageSize = imageSizeSlider.value;
+    }
+    if (imageMarginSlider && Number.isFinite(imageMarginSlider.value)) {
+      qr.imageMargin = imageMarginSlider.value;
+    }
+  };
+
+  const onControl = (): void => apply();
+
+  if (bodyGrid) {
+    fillQrPatternGrid(bodyGrid, QR_BODY_IDS, bodyId, (id) => {
+      bodyId = id;
+      apply();
+    }, 'body');
+  }
+  if (eyeGrid) {
+    fillQrPatternGrid(eyeGrid, QR_EYE_IDS, eyeId, (id) => {
+      eyeId = id;
+      apply();
+    }, 'eye');
+  }
+  if (ballGrid) {
+    fillQrPatternGrid(ballGrid, QR_BALL_IDS, ballId, (id) => {
+      ballId = id;
+      apply();
+    }, 'ball');
+  }
+  if (bodyColors) {
+    fillQrMd2Swatches(bodyColors, bodyHex, (hex) => {
+      bodyHex = hex;
+      apply();
+    });
+  }
+  if (eyeColors) {
+    fillQrMd2Swatches(eyeColors, eyeHex, (hex) => {
+      eyeHex = hex;
+      apply();
+    });
+  }
+  if (ballColors) {
+    fillQrMd2Swatches(ballColors, ballHex, (hex) => {
+      ballHex = hex;
+      apply();
+    });
+  }
+
+  for (const el of [eyeRotTl, eyeRotTr, eyeRotBl, ballRotTl, ballRotTr, ballRotBl]) {
+    el?.addEventListener('k3-change', onControl);
+  }
+
+  valueField?.addEventListener('k3-input', onControl);
+  valueField?.addEventListener('k3-change', onControl);
+  shapeGroup?.addEventListener('k3-change', onControl);
+  eccGroup?.addEventListener('k3-change', onControl);
+  bgField?.addEventListener('k3-input', onControl);
+  bgField?.addEventListener('k3-change', onControl);
+  bgTransparent?.addEventListener('k3-change', () => {
+    syncBgField();
+    if (!bgTransparent.selected && bgField && !bgField.value?.trim()) {
+      bgField.value = lastOpaqueBg;
+    }
+    apply();
+  });
+  sizeSlider?.addEventListener('k3-input', onControl);
+  sizeSlider?.addEventListener('k3-change', onControl);
+  imageSizeSlider?.addEventListener('k3-input', onControl);
+  imageSizeSlider?.addEventListener('k3-change', onControl);
+  imageMarginSlider?.addEventListener('k3-input', onControl);
+  imageMarginSlider?.addEventListener('k3-change', onControl);
+
+  logoPick?.addEventListener('k3-click', () => logoFile?.click());
+  logoFile?.addEventListener('change', () => {
+    const file = logoFile.files?.[0];
+    revokeLogo();
+    if (!file) {
+      qr.image = undefined;
+      if (logoName) logoName.textContent = '';
+      return;
+    }
+    logoObjectUrl = URL.createObjectURL(file);
+    qr.image = logoObjectUrl;
+    qr.errorCorrection = 'H';
+    syncEccButtons('H');
+    if (logoName) logoName.textContent = file.name;
+    apply();
+  });
+  logoClear?.addEventListener('k3-click', () => {
+    revokeLogo();
+    if (logoFile) logoFile.value = '';
+    qr.image = undefined;
+    if (logoName) logoName.textContent = '';
+    apply();
+  });
+
+  dlPng?.addEventListener('k3-click', () => {
+    void qr.download('k3ui-qr', 'png');
+  });
+  dlSvg?.addEventListener('k3-click', () => {
+    void qr.download('k3ui-qr', 'svg');
+  });
+  dlPdf?.addEventListener('k3-click', () => {
+    void qr.download('k3ui-qr', 'pdf');
+  });
+
+  syncBgField();
+  apply();
+}
+
+/** Countdown page — datetime-local field drives `end-date`. */
+function wireCountdownLab(): void {
+  const page = document.getElementById('page-countdown');
+  if (!page || page.dataset.countdownWired) return;
+  page.dataset.countdownWired = '1';
+
+  type FieldEl = HTMLElement & { value: string };
+  type CountdownEl = HTMLElement & {
+    endDate: string | null;
+    reset: () => void;
+    start: () => void;
+  };
+
+  const field = document.getElementById('countdown-end-input') as FieldEl | null;
+  const countdown = document.getElementById('countdown-lab') as CountdownEl | null;
+  if (!field || !countdown) return;
+
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  const toLocalValue = (d: Date): string =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+  const applyEnd = (localValue: string, start = true): void => {
+    if (!localValue) return;
+    const ts = new Date(localValue).getTime();
+    if (!Number.isFinite(ts)) return;
+    countdown.endDate = new Date(ts).toISOString();
+    if (start) countdown.start();
+  };
+
+  /* Default target: +2 hours from now */
+  const initial = new Date(Date.now() + 2 * 60 * 60 * 1000);
+  field.value = toLocalValue(initial);
+  applyEnd(field.value, true);
+
+  const onField = (): void => applyEnd(field.value, true);
+  field.addEventListener('k3-input', onField);
+  field.addEventListener('k3-change', onField);
+  field.addEventListener('input', onField);
+  field.addEventListener('change', onField);
+}
+
+/**
+ * Demo-only: block share / download (copyright) and flash a snackbar instead.
+ * Component still emits cancelable `k3-share` / `k3-download`.
+ */
+function wireAudioPlayerDemoRights(): void {
+  const page = document.getElementById('page-audio-player');
+  if (!page || page.dataset.audioRightsWired) return;
+  page.dataset.audioRightsWired = '1';
+
+  const block = (kind: 'share' | 'download') => (e: Event) => {
+    e.preventDefault();
+    void showFlash(
+      kind === 'share'
+        ? t('doc.audio-player.demo.shareDisabled')
+        : t('doc.audio-player.demo.downloadDisabled'),
+      2800,
+    );
+  };
+
+  page.querySelectorAll('k3-audio-player').forEach((player) => {
+    player.addEventListener('k3-share', block('share'));
+    player.addEventListener('k3-download', block('download'));
+  });
 }
 
 /** Confetti playground — preset buttons → `k3-confetti#demo-confetti`. */
@@ -2502,6 +3324,7 @@ function wireProgressLab(): void {
         value: number;
         size: number;
         wavy: boolean;
+        src: string;
       })
     | null;
   if (!lab || !el || lab.dataset.progressWired) return;
@@ -2525,6 +3348,7 @@ function wireProgressLab(): void {
   const layoutField = document.getElementById('progress-lab-layout-field');
   const pctPosField = document.getElementById('progress-lab-pct-pos-field');
   const sizeField = document.getElementById('progress-lab-size-field');
+  const srcField = document.getElementById('progress-lab-src-field');
   const pctLabel = document.getElementById('progress-lab-value-pct');
   const slider = document.getElementById('progress-lab-slider') as
     | (HTMLElement & { value: number; disabled: boolean })
@@ -2543,15 +3367,18 @@ function wireProgressLab(): void {
     const labelOn = switchOn('prog-sw-label');
     const percentOn = switchOn('prog-sw-percent');
     const supportingOn = switchOn('prog-sw-supporting');
+    const pcmSrcOn = switchOn('prog-sw-src');
     const indeterminate = behavior === 'indeterminate';
+    const oscillation = shape === 'oscillation' && variant === 'linear';
 
     el.variant = variant;
     el.shape = shape;
     el.wavy = shape === 'wavy';
+    el.src = oscillation && pcmSrcOn ? '/sounds/hello.mp3' : '';
     el.indeterminate = indeterminate;
     el.thickness = thickness;
     el.size = Number.isFinite(sizeRaw) ? sizeRaw : 0;
-    el.showStop = stopOn && variant === 'linear' && !indeterminate;
+    el.showStop = stopOn && variant === 'linear' && !indeterminate && !oscillation;
     el.layout = layout;
     el.percentPosition = pctPos;
     /*
@@ -2572,6 +3399,8 @@ function wireProgressLab(): void {
     el.toggleAttribute('show-stop', el.showStop);
     el.toggleAttribute('show-percent', el.showPercent);
     el.removeAttribute('show-label');
+    if (el.src) el.setAttribute('src', el.src);
+    else el.setAttribute('src', '');
     if (el.size > 0) el.setAttribute('size', String(el.size));
     else el.removeAttribute('size');
     /* Keep attributes in sync without remove→null (use empty string). */
@@ -2580,9 +3409,13 @@ function wireProgressLab(): void {
     if (supportingOn) el.setAttribute('supporting-text', el.supportingText);
     else el.setAttribute('supporting-text', '');
 
-    if (stopField) (stopField as HTMLElement).hidden = variant !== 'linear' || indeterminate;
+    if (stopField) {
+      (stopField as HTMLElement).hidden =
+        variant !== 'linear' || indeterminate || oscillation;
+    }
     if (layoutField) (layoutField as HTMLElement).hidden = variant !== 'linear';
     if (sizeField) (sizeField as HTMLElement).hidden = variant !== 'circular';
+    if (srcField) (srcField as HTMLElement).hidden = !oscillation;
     if (pctPosField) {
       (pctPosField as HTMLElement).hidden = variant !== 'circular' || !percentOn || indeterminate;
     }
@@ -2615,7 +3448,7 @@ function wireProgressLab(): void {
   sync();
 }
 
-/** Slider page — H | V frames + size / stops / inset / label / VI / ±. */
+/** Slider page — H | V frames + size / stops / inset / label / VI / ± / toolbar. */
 function wireSliderLab(): void {
   const lab = document.getElementById('slider-lab');
   if (!lab) return;
@@ -2640,6 +3473,7 @@ function wireSliderLab(): void {
   };
   type SwitchEl = HTMLElement & { selected: boolean };
   type GroupEl = HTMLElement & { selectedValues: () => string[] };
+  type MuteBtn = HTMLElement & { selected: boolean; disabled: boolean; label: string };
 
   const sliderH = document.getElementById('slider-lab-h') as SliderEl | null;
   const sliderV = document.getElementById('slider-lab-v') as SliderEl | null;
@@ -2647,6 +3481,15 @@ function wireSliderLab(): void {
   const sizeGroup = document.getElementById('sl-size') as GroupEl | null;
   const variantGroup = document.getElementById('sl-variant') as GroupEl | null;
   const colorGroup = document.getElementById('sl-color') as GroupEl | null;
+  const stageH = document.getElementById('slider-lab-stage-h');
+  const caseV = document.getElementById('slider-lab-case-v');
+  const guideHLabel = document.getElementById('slider-lab-guide-h-label');
+  const guideV = document.getElementById('slider-lab-guide-v');
+  const muteBtn = document.getElementById('slider-lab-mute') as MuteBtn | null;
+  const muteIcon = muteBtn?.querySelector<HTMLElement>('[data-k3-icon]');
+
+  let toolbarMuted = false;
+  let toolbarVolBeforeMute = 40;
 
   const switchOn = (id: string): boolean => {
     const sw = document.getElementById(id) as SwitchEl | null;
@@ -2654,6 +3497,50 @@ function wireSliderLab(): void {
   };
 
   const iconField = document.getElementById('slider-lab-icon-field');
+  const labelField = document.getElementById('slider-lab-label-field');
+
+  const setMuteChrome = (): void => {
+    if (!muteBtn || !sliderH) return;
+    const v = toolbarMuted ? 0 : sliderH.value;
+    const glyph = v === 0 ? 'volume_off' : v < 45 ? 'volume_down' : 'volume_up';
+    muteBtn.selected = toolbarMuted;
+    muteBtn.toggleAttribute('selected', toolbarMuted);
+    muteBtn.label = toolbarMuted
+      ? t('doc.slider.control.unmute')
+      : t('doc.slider.control.mute');
+    if (muteIcon) muteIcon.setAttribute('data-k3-icon', glyph);
+  };
+
+  muteBtn?.addEventListener('k3-click', () => {
+    if (!sliderH) return;
+    if (toolbarMuted) {
+      toolbarMuted = false;
+      sliderH.value = toolbarVolBeforeMute;
+    } else {
+      toolbarVolBeforeMute = sliderH.value > 0 ? sliderH.value : 40;
+      toolbarMuted = true;
+      sliderH.value = 0;
+    }
+    sliderH.dispatchEvent(
+      new CustomEvent('k3-change', {
+        bubbles: true,
+        composed: true,
+        detail: { value: sliderH.value },
+      }),
+    );
+    setMuteChrome();
+  });
+
+  sliderH?.addEventListener('k3-input', () => {
+    if (!sliderH) return;
+    if (sliderH.value > 0) toolbarMuted = false;
+    setMuteChrome();
+  });
+  sliderH?.addEventListener('k3-change', () => {
+    if (!sliderH) return;
+    if (sliderH.value > 0) toolbarMuted = false;
+    setMuteChrome();
+  });
 
   const nudge = (slider: SliderEl, dir: -1 | 1): void => {
     if (slider.variant === 'range') return;
@@ -2692,26 +3579,51 @@ function wireSliderLab(): void {
     const size = sizeGroup?.selectedValues()?.[0] || 'xs';
     const variant = variantGroup?.selectedValues()?.[0] || 'standard';
     const color = colorGroup?.selectedValues()?.[0] || 'primary';
+    const isToolbar = variant === 'toolbar';
     const isRange = variant === 'range';
     const isCentered = variant === 'centered';
+    const sliderVariant = isToolbar ? 'standard' : variant;
     const stopsOn = switchOn('sl-sw-stops');
     const iconOn = switchOn('sl-sw-icon');
-    const labelOn = switchOn('sl-sw-label');
+    /* Toolbar chrome never shows a label — option is unavailable. */
+    const labelOn = !isToolbar && switchOn('sl-sw-label');
     const viOn = switchOn('sl-sw-vi');
-    const pmOn = switchOn('sl-sw-pm');
+    const pmOn = switchOn('sl-sw-pm') && !isToolbar;
     const disabledOn = switchOn('sl-sw-disabled');
     const ttbOn = switchOn('sl-sw-ttb');
-    /* Inset icon: standard · md+ only (M3 — not centered / range). */
+    /* Inset icon: standard · md+ only (M3 — not centered / range / toolbar). */
     const canIcon =
-      variant === 'standard' && (size === 'md' || size === 'lg' || size === 'xl');
+      sliderVariant === 'standard' &&
+      !isToolbar &&
+      (size === 'md' || size === 'lg' || size === 'xl');
 
     if (iconField) iconField.hidden = !canIcon;
+    if (labelField) labelField.hidden = isToolbar;
+    stageH?.classList.toggle('slider-lab-stage--toolbar', isToolbar);
+    if (muteBtn) {
+      muteBtn.hidden = !isToolbar;
+      muteBtn.disabled = disabledOn;
+      muteBtn.toggleAttribute('disabled', disabledOn);
+    }
+    if (caseV) caseV.hidden = isToolbar;
+    if (guideV) guideV.hidden = isToolbar;
+    if (guideHLabel) {
+      guideHLabel.setAttribute(
+        'data-i18n',
+        isToolbar ? 'doc.slider.variant.toolbar' : 'doc.slider.demo.horizontal',
+      );
+      guideHLabel.textContent = isToolbar
+        ? t('doc.slider.variant.toolbar')
+        : t('doc.slider.demo.horizontal');
+    }
+    if (isToolbar) setMuteChrome();
 
     sliders.forEach((el) => {
       const isVertical = el.id === 'slider-lab-v';
       /* Range = horizontal only — disable the vertical demo. */
-      const forceDisabled = disabledOn || (isRange && isVertical);
-      const elVariant = isRange && isVertical ? 'standard' : variant;
+      const forceDisabled = disabledOn || (isRange && isVertical) || (isToolbar && isVertical);
+      const elVariant =
+        isToolbar || (isRange && isVertical) ? 'standard' : sliderVariant;
       const prevVariant = el.variant;
 
       el.size = size;
@@ -2733,13 +3645,13 @@ function wireSliderLab(): void {
       el.toggleAttribute('disabled', forceDisabled);
       el.label = labelOn ? 'Volume' : '';
 
-      if (isCentered) {
+      if (isCentered && !isToolbar) {
         if (prevVariant !== 'centered' || el.min !== -50 || el.max !== 50) {
           el.min = -50;
           el.max = 50;
           el.value = 0;
         }
-      } else if (isRange && !isVertical) {
+      } else if (isRange && !isVertical && !isToolbar) {
         if (prevVariant !== 'range' || el.min !== 0 || el.max !== 100) {
           el.min = 0;
           el.max = 100;
@@ -2748,10 +3660,19 @@ function wireSliderLab(): void {
           el.setAttribute('value-start', '20');
           el.setAttribute('value-end', '70');
         }
-      } else if (prevVariant === 'centered' || prevVariant === 'range' || el.min !== 0 || el.max !== 100) {
+      } else if (
+        prevVariant === 'centered' ||
+        prevVariant === 'range' ||
+        el.min !== 0 ||
+        el.max !== 100
+      ) {
         el.min = 0;
         el.max = 100;
-        el.value = 40;
+        if (!isToolbar || el.id !== 'slider-lab-h' || toolbarMuted) {
+          el.value = isToolbar && toolbarMuted ? 0 : 40;
+        } else if (el.value < 0 || el.value > 100) {
+          el.value = 40;
+        }
       }
 
       el.querySelectorAll<HTMLElement>('.sl-inset-icon').forEach((node) => {

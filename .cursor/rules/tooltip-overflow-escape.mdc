@@ -1,0 +1,41 @@
+---
+description: k3-tooltip must escape overflow (dialogs, cards, sheets) via top-layer / fixed
+globs: src/components/**/*.{ts,css,scss}
+alwaysApply: true
+---
+
+# Tooltips — ne jamais clipper (dialogs / cards / overflow)
+
+## Incident (ne jamais reproduire)
+
+`k3-tooltip` en `position: absolute` dans un ancêtre `overflow: hidden|auto|clip`
+(dialog sheet, card body, `.now` scrollable, demo frame) → tip **coupé** ou invisible.
+Même bug pour tout float (volume toolbar, value-indicator) ancré en absolute.
+
+## Règles dures
+
+1. **Tip ouvert** → top-layer (`popover="manual"` + `showPopover`) **ou** `position: fixed`
+   ancré via `getBoundingClientRect` — **jamais** seulement `absolute` dans un scrollport.
+2. Ancêtres UI (sheet / card / panel / demo-stage) : **`overflow: visible`** si le float
+   reste en absolute ; sinon le tip **doit** quitter le stacking (popover / fixed).
+3. Playground demos avec tips : stages / frames en `overflow: visible` (déjà pour toolbar).
+4. Ne pas « corriger » en baissant le z-index ou en forçant `overflow: hidden` sur le host.
+
+```ts
+// ❌ BAD — tip clipé par .sheet / .now overflow
+.tip { position: absolute; bottom: calc(100% + 8px); }
+
+// ❌ BAD — inset:!important écrase left/top inline → tip en 0,0 (haut-gauche)
+.tip[data-floating] { inset: auto !important; }
+
+// ✅ GOOD — top-layer (tooltip.ts) ou fixed + sync au open / scroll / resize
+openPopoverLayer(tip);
+syncFloatingTip(); // left/top depuis getBoundingClientRect du trigger
+// data-floating: right/bottom auto sans !important sur inset
+```
+
+## Checklist
+
+- [ ] Tip visible au-dessus d’un contrôle en bas de dialog / sheet
+- [ ] Page audio-player : tous les tips (transport, volume, extras) OK en carte + sheet
+- [ ] Volume toolbar (si absolute) : hors clip **ou** same escape que le tip

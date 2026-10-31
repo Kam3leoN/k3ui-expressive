@@ -36,7 +36,24 @@ export class K3Countdown extends K3Element {
   @property({ attribute: 'end-date' }) endDate: string | null = null;
   @property() format = CountdownSpecs.defaultFormat;
   @property({ attribute: 'end-message' }) endMessage = '';
-  @property({ type: Boolean, attribute: 'auto-start' }) autoStart = CountdownSpecs.defaultAutoStart;
+  /**
+   * Start ticking on connect (default true).
+   * Lit Boolean attributes normally treat absence as false — custom converter
+   * keeps the default true unless `auto-start="false"` or the prop is set false.
+   */
+  @property({
+    attribute: 'auto-start',
+    reflect: true,
+    converter: {
+      fromAttribute: (value: string | null): boolean => {
+        if (value === null) return true;
+        if (value === 'false' || value === '0') return false;
+        return true;
+      },
+      toAttribute: (value: boolean): string | null => (value ? '' : 'false'),
+    },
+  })
+  autoStart = CountdownSpecs.defaultAutoStart;
   @property({ type: Boolean, attribute: 'short-labels' }) shortLabels = CountdownSpecs.defaultShortLabels;
   /** Render HH / mm / ss as separate cells (parsed from `format`). */
   @property({ type: Boolean, reflect: true }) segments = false;
@@ -72,10 +89,44 @@ export class K3Countdown extends K3Element {
   override updated(changed: PropertyValues): void {
     super.updated(changed);
     if (changed.has('endDate') || changed.has('time')) {
-      this.resolveEndMode();
-      if (!this.running) this.syncRemainingFromClock(false);
+      this.applyTargetChange(changed.has('endDate'));
     }
     if (changed.has('format') && this.segments) this.requestUpdate();
+  }
+
+  /**
+   * Re-bind duration / end-date after a prop change.
+   * Restarts when the clock was running or auto-start is on.
+   */
+  private applyTargetChange(endDateChanged: boolean): void {
+    const shouldRun = this.running || this.autoStart;
+    this.running = false;
+    this.stopTick();
+    this.ended = false;
+    this.removeAttribute('ended');
+    this.resolveEndMode();
+    if (!this.useEndDate) {
+      this.remainingMs = Math.max(0, this.time);
+      this.durationAnchor = 0;
+      this.endTimestamp = 0;
+    } else {
+      this.syncRemainingFromClock(false);
+    }
+    if (endDateChanged && this.useEndDate && this.remainingMs <= 0) {
+      this.applyEndedState();
+      this.emit('k3-change', { remaining: 0 });
+      this.emit('k3-end');
+      return;
+    }
+    this.emit('k3-change', { remaining: this.remainingMs });
+    if (shouldRun && !this.ended) {
+      /* Defer start — avoid Lit change-in-update when props flip mid-cycle. */
+      queueMicrotask(() => {
+        if (!this.ended) this.start();
+      });
+    } else {
+      this.requestUpdate();
+    }
   }
 
   /** Start or resume the countdown. */
@@ -84,6 +135,9 @@ export class K3Countdown extends K3Element {
     if (!this.useEndDate && !this.running) {
       this.durationAnchor = performance.now();
       this.endTimestamp = this.durationAnchor + (this.remainingMs || Math.max(0, this.time));
+    } else if (this.useEndDate) {
+      this.syncRemainingFromClock(false);
+      if (this.ended) return;
     }
     this.running = true;
     this.scheduleTick();

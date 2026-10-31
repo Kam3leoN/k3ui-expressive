@@ -47,7 +47,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Material Symbols subset (~22 KB) — full variable font is ~5 MB -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility,account_circle,add,airplanemode_active,alarm,anchor,android,animation,apps,archive,arrow_back,arrow_drop_down,arrow_forward,arrow_upward,article,back_hand,beach_access,bedtime,bluetooth,bluetooth_disabled,bolt,bookmark,brightness_auto,calendar_today,call_end,camera,celebration,change_history,check,checkroom,chevron_left,chevron_right,clear,close,closed_caption,cloud_download,cloud_off,code,computer,content_copy,content_cut,content_paste,create_new_folder,dark_mode,dashboard,delete,design_services,desktop_windows,devices,directions_car,directions_walk,do_not_disturb_on,download,drafts,drag_handle,drag_indicator,drive_file_move,drive_file_rename_outline,east,edit,error,expand_less,expand_more,explore,favorite,filter_alt,first_page,flare,flashlight_on,flight,flight_takeoff,folder,format_align_center,format_align_left,format_align_right,format_bold,format_italic,format_textdirection_l_to_r,format_textdirection_r_to_l,format_underlined,forward,gesture,grid_on,hearing_disabled,help,home,image,inbox,info,input,inventory_2,keyboard,keyboard_arrow_up,language,laptop_mac,last_page,layers,library_music,light_mode,link,list,local_cafe,local_fire_department,location_off,logout,luggage,mail,map,match_case,menu,menu_book,menu_open,mic,mic_off,monitor,mood,more_horiz,more_vert,music_note,navigation,north,north_east,north_west,notifications,notifications_off,palette,pause,person,pets,play_arrow,present_to_all,question_mark,radio,rainy,redo,remove,repeat,reply,reply_all,restaurant,rocket_launch,route,schedule,search,select_all,send,sensors_off,sentiment_satisfied,settings,shapes,share,signal_cellular_off,skip_next,skip_previous,south,south_east,south_west,spa,space_bar,sports_esports,star,steps,stop,straighten,sunny,swap_horiz,swap_vert,timer,title,touch_app,train,tune,two_wheeler,undo,videocam,videocam_off,view_column,view_list,visibility,visibility_off,volume_off,volume_up,watch,water_drop,west,widgets,wifi,wifi_off&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility,account_circle,add,airplanemode_active,alarm,anchor,android,animation,apps,archive,arrow_back,arrow_drop_down,arrow_forward,arrow_upward,article,back_hand,beach_access,bedtime,bluetooth,bluetooth_disabled,bolt,bookmark,brightness_auto,calendar_today,call_end,camera,celebration,change_history,check,check_circle,checkroom,chevron_left,chevron_right,clear,close,closed_caption,cloud_download,cloud_off,code,computer,content_copy,content_cut,content_paste,create_new_folder,dark_mode,dashboard,delete,design_services,desktop_windows,devices,directions_car,directions_walk,do_not_disturb_on,download,drafts,drag_handle,drag_indicator,drive_file_move,drive_file_rename_outline,east,edit,error,expand_less,expand_more,explore,favorite,filter_alt,first_page,flare,flashlight_on,flight,flight_takeoff,folder,format_align_center,format_align_left,format_align_right,format_bold,format_italic,format_textdirection_l_to_r,format_textdirection_r_to_l,format_underlined,forward,gesture,grid_on,hearing_disabled,help,home,image,inbox,info,input,inventory_2,keyboard,keyboard_arrow_down,keyboard_arrow_up,language,laptop_mac,last_page,layers,library_music,light_mode,link,list,local_cafe,local_fire_department,location_off,logout,luggage,lyrics,mail,map,match_case,menu,menu_book,menu_open,mic,mic_off,monitor,mood,more_horiz,more_vert,mouse,music_note,navigation,north,north_east,north_west,notifications,notifications_off,open_in_full,palette,pause,person,pets,play_arrow,present_to_all,question_mark,queue_music,radio,rainy,redo,remove,repeat,repeat_one,reply,reply_all,restaurant,rocket_launch,route,schedule,search,select_all,send,sensors_off,sentiment_satisfied,settings,shapes,share,shuffle,signal_cellular_off,skip_next,skip_previous,south,south_east,south_west,spa,space_bar,sports_esports,star,steps,stop,straighten,sunny,swap_horiz,swap_vert,timer,title,touch_app,train,tune,two_wheeler,undo,videocam,videocam_off,view_column,view_list,visibility,visibility_off,volume_down,volume_off,volume_up,warning,watch,water_drop,west,widgets,wifi,wifi_off&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./playground.css" />
@@ -164,6 +164,17 @@
 
         <!-- Scrollport only — keeps app bar above sheet/scrim (fixed) -->
         <div class="shell-scroll k3-scroll">
+        <!-- Page load — visible from first paint (incl. F5) until navigateDocPage finishes -->
+        <div
+          id="doc-page-loading"
+          class="doc-page-loading is-on"
+          aria-hidden="false"
+          aria-busy="true"
+          role="status"
+        >
+          <k3-loading-indicator contained></k3-loading-indicator>
+          <span class="doc-page-loading-label" data-i18n="playground.page.loading">Loading…</span>
+        </div>
         <main class="main k3-container" id="doc-main">
         <div id="grid-overlay" class="k3-layout-grid-overlay" hidden aria-hidden="true"></div>
 
@@ -181,6 +192,146 @@
             Browse components — one page per component, like m3.material.io.
           </p>
           <div id="catalog-grid" class="catalog-grid"></div>
+
+          <!-- Sponsors — Chakra-style tiers (prices ÷2) + logo walls + Don min 5€ -->
+          <div id="sponsors-root" class="sponsors-root"></div>
+
+          <section class="home-social" aria-labelledby="home-social-title">
+            <header class="section-head sub">
+              <h2 id="home-social-title" data-i18n="playground.social.title">Find K3ui</h2>
+              <p data-i18n="playground.social.blurb">Follow along on your favorite platforms.</p>
+            </header>
+            <div class="home-social-grid k3-layout-grid">
+              <k3-button-card
+                stretch
+                class="home-social-card"
+                label="Instagram"
+                subtitle="@K3ui"
+                href="https://www.instagram.com/"
+                external
+                style="--k3-button-card-brand: #e1306c; --k3-button-card-icon-bg: color-mix(in srgb, #e1306c 16%, transparent); --k3-button-card-icon-fg: #e1306c"
+              >
+                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2zM12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"
+                  />
+                </svg>
+              </k3-button-card>
+              <k3-button-card
+                stretch
+                class="home-social-card"
+                label="TikTok"
+                subtitle="@K3ui"
+                href="https://www.tiktok.com/"
+                external
+                style="--k3-button-card-brand: #111111; --k3-button-card-icon-bg: color-mix(in srgb, #111111 12%, transparent); --k3-button-card-icon-fg: #111111"
+              >
+                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M19.6 7.1a5.7 5.7 0 0 1-3.4-1.1v7.7a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.8a2.9 2.9 0 1 0 2 2.7V2h2.8c.2 1.6 1.3 3 2.8 3.7.7.3 1.4.5 2.1.5v2.9c-.5 0-1-.1-1.5-.2z"
+                  />
+                </svg>
+              </k3-button-card>
+              <k3-button-card
+                stretch
+                class="home-social-card"
+                label="YouTube"
+                subtitle="@K3ui"
+                href="https://www.youtube.com/"
+                external
+                style="--k3-button-card-brand: #ff0000; --k3-button-card-icon-bg: color-mix(in srgb, #ff0000 14%, transparent); --k3-button-card-icon-fg: #ff0000"
+              >
+                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.8 15.5v-7l6.3 3.5-6.3 3.5z"
+                  />
+                </svg>
+              </k3-button-card>
+              <k3-button-card
+                stretch
+                class="home-social-card"
+                label="Facebook"
+                subtitle="@K3ui"
+                href="https://www.facebook.com/"
+                external
+                style="--k3-button-card-brand: #1877f2; --k3-button-card-icon-bg: color-mix(in srgb, #1877f2 16%, transparent); --k3-button-card-icon-fg: #1877f2"
+              >
+                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M14 8.2h2.7V5H14c-2.5 0-4.2 1.7-4.2 4.3V12H7.2v3.2h2.6V22h3.3v-6.8h2.6l.5-3.2h-3.1V9.5c0-.8.4-1.3 1.3-1.3z"
+                  />
+                </svg>
+              </k3-button-card>
+              <k3-button-card
+                stretch
+                class="home-social-card"
+                label="Twitch"
+                subtitle="@K3ui"
+                href="https://www.twitch.tv/"
+                external
+                style="--k3-button-card-brand: #9146ff; --k3-button-card-icon-bg: color-mix(in srgb, #9146ff 16%, transparent); --k3-button-card-icon-fg: #9146ff"
+              >
+                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M4.3 2 2 4.3v15.4h5.1V22l2.3-2.3h3.7L20.6 12V2H4.3zm14.3 9.1-2.9 2.9h-2.9l-2.5 2.5v-2.5H7.4V4.3h11.2v6.8zM14.3 6.6h1.7v5.1h-1.7V6.6zm-4.6 0H11v5.1H9.7V6.6z"
+                  />
+                </svg>
+              </k3-button-card>
+              <k3-button-card
+                stretch
+                class="home-social-card"
+                label="DeviantArt"
+                subtitle="@K3ui"
+                href="https://www.deviantart.com/"
+                external
+                style="--k3-button-card-brand: #05cc47; --k3-button-card-icon-bg: color-mix(in srgb, #05cc47 16%, transparent); --k3-button-card-icon-fg: #05cc47"
+              >
+                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M17.6 2H13l-.9 1.7-1.1 2.1H6.3v4.3h3.1L8 13.1v4.6h4.6l.9-1.7 1.1-2.1h4.7V9.6h-3.1L17.6 6.6V2z"
+                  />
+                </svg>
+              </k3-button-card>
+              <k3-button-card
+                stretch
+                class="home-social-card"
+                label="LinkedIn"
+                subtitle="@K3ui"
+                href="https://www.linkedin.com/"
+                external
+                style="--k3-button-card-brand: #0a66c2; --k3-button-card-icon-bg: color-mix(in srgb, #0a66c2 16%, transparent); --k3-button-card-icon-fg: #0a66c2"
+              >
+                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5zM3.5 9.5h3V20.5h-3V9.5zM9.5 9.5h2.9v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V20.5h-3v-4.9c0-1.17-.02-2.67-1.63-2.67-1.63 0-1.88 1.27-1.88 2.58V20.5h-3V9.5z"
+                  />
+                </svg>
+              </k3-button-card>
+              <k3-button-card
+                stretch
+                class="home-social-card"
+                label="X"
+                subtitle="@K3ui"
+                href="https://x.com/"
+                external
+                style="--k3-button-card-brand: #111111; --k3-button-card-icon-bg: color-mix(in srgb, #111111 12%, transparent); --k3-button-card-icon-fg: #111111"
+              >
+                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M18.9 2H22l-6.8 7.8L23 22h-6.5l-5.1-6.6L5.6 22H2.5l7.3-8.3L1 2h6.7l4.6 6.1L18.9 2zm-1.1 18h1.8L6.3 3.9H4.4L17.8 20z"
+                  />
+                </svg>
+              </k3-button-card>
+            </div>
+          </section>
         </article>
 
         <!-- QUICK START -->
@@ -1856,6 +2007,93 @@ fav?.addEventListener("k3-change", (e) => {
           </div>
         </article>
 
+        <!-- BUTTONS CARD -->
+        <article class="comp-page" data-page="buttons-card" id="page-buttons-card" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.buttons">Buttons</p>
+            <h1 data-i18n="doc.button-card.title">Buttons Card</h1>
+            <p data-i18n="doc.button-card.blurb">
+              Compact link row — tonal icon well · label · subtitle · optional href.
+            </p>
+            <p class="doc-intro" data-i18n="doc.button-card.intro">
+              Button cards present a short destination with an icon, a primary label, and an
+              optional subtitle. Use them in grids for peer links. Tint the icon well with
+              --k3-button-card-icon-bg and --k3-button-card-icon-fg; pass href for navigation.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases grid-2" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-button-card
+                    stretch
+                    label="Alpha"
+                    subtitle="@handle"
+                    icon="share"
+                  ></k3-button-card>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-button-card
+                    stretch
+                    label="Beta"
+                    subtitle="@demo"
+                    icon="link"
+                    style="--k3-button-card-icon-bg: var(--k3-sys-color-secondary-container); --k3-button-card-icon-fg: var(--k3-sys-color-on-secondary-container)"
+                  ></k3-button-card>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-button-card
+                    stretch
+                    label="Gamma"
+                    subtitle="@sample"
+                    icon="language"
+                    href="#"
+                    style="--k3-button-card-icon-bg: var(--k3-sys-color-tertiary-container); --k3-button-card-icon-fg: var(--k3-sys-color-on-tertiary-container)"
+                  ></k3-button-card>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-button-card stretch label="Delta" subtitle="@user" disabled icon="share"></k3-button-card>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">4</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.button-card.guide.default"
+                  >Default · primary</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.button-card.guide.secondary"
+                  >Secondary tint</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">3</span
+                ><span class="variant-label" data-i18n="doc.button-card.guide.link"
+                  >With href</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">4</span
+                ><span class="variant-label" data-i18n="doc.button-card.guide.disabled"
+                  >Disabled</span
+                >
+              </li>
+            </ol>
+          </div>
+        </article>
 
         <!-- BUTTONS GRID -->
         <article class="comp-page" data-page="buttons-grid" id="page-buttons-grid" hidden>
@@ -3626,6 +3864,72 @@ fav?.addEventListener("k3-change", (e) => {
         </article>
 
 
+        <!-- SIGNATURE -->
+        <article class="comp-page" data-page="signature" id="page-signature" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.inputs">Inputs</p>
+            <h1 data-i18n="doc.signature.title">Signature</h1>
+            <p data-i18n="doc.signature.blurb">
+              Canvas pad — pen · initials · PNG / SVG · clear · touch.
+            </p>
+            <p class="doc-intro" data-i18n="doc.signature.intro">
+              The signature pad captures strokes with pointer or touch. Line width follows
+              velocity (SignaturePad). Type initials and confirm to stamp them; Clear resets.
+              Export as a data URL or SVG; disable or set readonly to freeze the result.
+            </p>
+          </header>
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.signature.section.examples">Examples</h2>
+              <p data-i18n="doc.signature.section.examples.blurb">
+                Default · primary ink · disabled — initials + Clear under each pad.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: min(100%, 16rem)">
+                    <k3-signature></k3-signature>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: min(100%, 16rem)">
+                    <k3-signature pen-color="#6750a4"></k3-signature>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: min(100%, 16rem)">
+                    <k3-signature disabled></k3-signature>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.signature.demo.default"
+                    >Default</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.signature.demo.ink"
+                    >Primary ink</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.signature.demo.disabled"
+                    >Disabled</span
+                  >
+                </li>
+              </ol>
+            </div>
+          </div>
+        </article>
+
         <!-- COUNTER -->
         <article class="comp-page" data-page="counter" id="page-counter" hidden>
           <header class="section-head">
@@ -4102,7 +4406,8 @@ fav?.addEventListener("k3-change", (e) => {
           <header class="section-head sub">
             <h2 data-i18n="doc.slider.section.playground">Playground</h2>
             <p data-i18n="doc.slider.section.playground.blurb">
-              Horizontal and vertical side by side · size · stops · inset icon · label · indicator · ±.
+              Horizontal and vertical side by side · size · stops · inset icon · label · indicator · ± ·
+              toolbar.
             </p>
           </header>
           <div class="demo-block" id="slider-lab">
@@ -4112,7 +4417,27 @@ fav?.addEventListener("k3-change", (e) => {
               id="slider-lab-frames"
             >
               <div class="demo-case">
-                <div class="demo-case-stage slider-lab-stage slider-lab-stage--h">
+                <div
+                  class="demo-case-stage slider-lab-stage slider-lab-stage--h"
+                  id="slider-lab-stage-h"
+                >
+                  <k3-icon-button
+                    id="slider-lab-mute"
+                    class="slider-lab-mute"
+                    variant="standard"
+                    size="xs"
+                    toggle
+                    label="Mute"
+                    hidden
+                  >
+                    <span
+                      class="ms notranslate"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="volume_up"
+                      aria-hidden="true"
+                    ></span>
+                  </k3-icon-button>
                   <k3-slider
                     id="slider-lab-h"
                     value="40"
@@ -4177,7 +4502,7 @@ fav?.addEventListener("k3-change", (e) => {
                 </div>
                 <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
-              <div class="demo-case">
+              <div class="demo-case" id="slider-lab-case-v">
                 <div class="demo-case-stage slider-lab-stage slider-lab-stage--v">
                   <k3-slider
                     id="slider-lab-v"
@@ -4244,14 +4569,17 @@ fav?.addEventListener("k3-change", (e) => {
                 <span class="demo-case-num" aria-hidden="true">2</span>
               </div>
             </div>
-            <ol class="variant-guide" aria-hidden="true">
-              <li>
+            <ol class="variant-guide" aria-hidden="true" id="slider-lab-guide">
+              <li id="slider-lab-guide-h">
                 <span class="pill-num">1</span>
-                <span class="variant-label" data-i18n="doc.slider.demo.horizontal"
+                <span
+                  class="variant-label"
+                  id="slider-lab-guide-h-label"
+                  data-i18n="doc.slider.demo.horizontal"
                   >Horizontal</span
                 >
               </li>
-              <li>
+              <li id="slider-lab-guide-v">
                 <span class="pill-num">2</span>
                 <span class="variant-label" data-i18n="doc.slider.demo.vertical"
                   >Vertical</span
@@ -4290,6 +4618,12 @@ fav?.addEventListener("k3-change", (e) => {
                     data-i18n="doc.slider.variant.range"
                     >Range</k3-button
                   >
+                  <k3-button
+                    variant="outlined"
+                    value="toolbar"
+                    data-i18n="doc.slider.variant.toolbar"
+                    >Toolbar</k3-button
+                  >
                 </k3-button-group>
               </fieldset>
               <fieldset class="slider-lab-field slider-lab-field--size">
@@ -4323,7 +4657,7 @@ fav?.addEventListener("k3-change", (e) => {
                 <legend data-i18n="doc.slider.control.insetIcon">Inset icon</legend>
                 <k3-switch id="sl-sw-icon" aria-label="Inset icon"></k3-switch>
               </fieldset>
-              <fieldset class="slider-lab-field">
+              <fieldset class="slider-lab-field" id="slider-lab-label-field">
                 <legend data-i18n="doc.slider.control.label">Label</legend>
                 <k3-switch id="sl-sw-label" selected aria-label="Label"></k3-switch>
               </fieldset>
@@ -4357,6 +4691,260 @@ fav?.addEventListener("k3-change", (e) => {
                 <legend data-i18n="doc.slider.control.topToBottom">Top → bottom</legend>
                 <k3-switch id="sl-sw-ttb" aria-label="Top to bottom"></k3-switch>
               </fieldset>
+            </div>
+          </div>
+        </article>
+
+        <!-- RATING -->
+        <article class="comp-page" data-page="rating" id="page-rating" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.inputs">Inputs</p>
+            <h1 data-i18n="doc.rating.title">Rating</h1>
+            <p data-i18n="doc.rating.blurb">
+              Stars · half steps · sizes · theme or custom colors · readonly.
+            </p>
+            <p class="doc-intro" data-i18n="doc.rating.intro">
+              Ratings collect a score on a discrete scale (usually 1–5 stars). Use half steps when
+              finer grain helps. Prefer theme color roles for brand consistency, or set
+              active-color / inactive-color (and CSS vars) when the product needs a fixed accent.
+              Mark reviews as readonly when the value is display-only.
+            </p>
+          </header>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.rating.section.basic">Basic</h2>
+              <p data-i18n="doc.rating.section.basic.blurb">Interactive · default 5 stars.</p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating value="3" label="Score"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating value="4" readonly label="Average"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating value="2" disabled label="Locked"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.rating.legend.interactive"
+                    >Interactive</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label" data-i18n="doc.rating.legend.readonly"
+                    >Readonly</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span>
+                  <span class="variant-label" data-i18n="doc.rating.legend.disabled"
+                    >Disabled</span
+                  >
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.rating.section.sizes">Sizes</h2>
+              <p data-i18n="doc.rating.section.sizes.blurb">
+                XS · SM · MD · LG · XL — icon optical size.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating size="xs" value="3" label="XS"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating size="sm" value="3" label="SM"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating size="md" value="3" label="MD"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating size="lg" value="3" label="LG"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">4</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating size="xl" value="3" label="XL"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">5</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.xs">Extra small</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.sm">Small</span>
+                </li>
+                <li>
+                  <span class="pill-num">3</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.md">Medium</span>
+                </li>
+                <li>
+                  <span class="pill-num">4</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.lg">Large</span>
+                </li>
+                <li>
+                  <span class="pill-num">5</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.xl">Extra large</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.rating.section.half">Half steps</h2>
+              <p data-i18n="doc.rating.section.half.blurb">
+                step="0.5" for half-star precision.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating value="3.5" step="0.5" size="lg" label="Half steps"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.rating.section.colors">Colors</h2>
+              <p data-i18n="doc.rating.section.colors.blurb">
+                Theme roles or any CSS color via active-color / inactive-color.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating value="4" color="primary" label="Primary"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating value="4" color="secondary" label="Secondary"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating value="4" color="tertiary" label="Tertiary"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating value="4" color="error" label="Error"></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">4</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating
+                      value="5"
+                      active-color="#f59e0b"
+                      inactive-color="#e5e7eb"
+                      label="Custom"
+                    ></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">5</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label">primary</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label">secondary</span>
+                </li>
+                <li>
+                  <span class="pill-num">3</span>
+                  <span class="variant-label">tertiary</span>
+                </li>
+                <li>
+                  <span class="pill-num">4</span>
+                  <span class="variant-label">error</span>
+                </li>
+                <li>
+                  <span class="pill-num">5</span>
+                  <span class="variant-label" data-i18n="doc.rating.legend.custom"
+                    >Custom colors</span
+                  >
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.rating.section.icons">Icons</h2>
+              <p data-i18n="doc.rating.section.icons.blurb">
+                icon / icon-active ligatures, or unchecked / checked slots.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-rating
+                      value="3"
+                      icon="favorite"
+                      color="error"
+                      label="Favorite"
+                    ></k3-rating>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.rating.legend.favorite"
+                    >Favorite icon</span
+                  >
+                </li>
+              </ol>
             </div>
           </div>
         </article>
@@ -4746,17 +5334,85 @@ fav?.addEventListener("k3-change", (e) => {
             <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
             <h1 data-i18n="doc.progress.title">Progress</h1>
             <p data-i18n="doc.progress.blurb">
-              Linear · circular · déterminé / indéterminé · flat / wavy · 4dp+.
+              Determinate · wavy · oscillation (PCM).
             </p>
             <p class="doc-intro" data-i18n="doc.progress.intro">
-              Progress indicators communicate ongoing work. Prefer determinate bars when you know completion percentage; use indeterminate or wavy expressive motion when duration is unknown. Keep them near the content they describe and announce status changes to assistive tech.
+              Progress indicators communicate ongoing work. Prefer determinate bars when you know
+              completion percentage; use indeterminate or wavy expressive motion when duration is
+              unknown. Oscillation (linear) decodes real PCM from src — same peaks cache as the audio
+              seek. Keep them near the content they describe and announce status changes to assistive
+              tech.
             </p>
           </header>
 
           <header class="section-head sub">
+            <h2 data-i18n="doc.progress.section.shapes">Shapes</h2>
+            <p data-i18n="doc.progress.section.shapes.blurb">
+              Flat · wavy (M3 Expressive) · oscillation (real PCM via src).
+            </p>
+          </header>
+          <div class="demo-block" id="progress-shapes">
+            <div class="demo-frame demo-frame--cases grid-3">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-progress
+                    class="progress-shape-demo"
+                    shape="flat"
+                    value="0.65"
+                    show-percent
+                    label="Flat"
+                  ></k3-progress>
+                </div>
+                <span class="demo-case-num">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-progress
+                    class="progress-shape-demo"
+                    shape="wavy"
+                    value="0.65"
+                    show-percent
+                    label="Wavy"
+                  ></k3-progress>
+                </div>
+                <span class="demo-case-num">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-progress
+                    class="progress-shape-demo"
+                    shape="oscillation"
+                    src="/sounds/hello.mp3"
+                    value="0.42"
+                    show-percent
+                    label="Oscillation"
+                  ></k3-progress>
+                </div>
+                <span class="demo-case-num">3</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span>
+                <span class="variant-label" data-i18n="doc.progress.shape.flat">Flat</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span>
+                <span class="variant-label" data-i18n="doc.progress.shape.wavy">Wavy</span>
+              </li>
+              <li>
+                <span class="pill-num">3</span>
+                <span class="variant-label" data-i18n="doc.progress.shape.oscillation"
+                  >Oscillation</span
+                >
+              </li>
+            </ol>
+          </div>
+
+          <header class="section-head sub">
             <h2 data-i18n="doc.progress.section.playground">Playground</h2>
             <p data-i18n="doc.progress.section.playground.blurb">
-              Tune variant, shape, size, percent, label, and value live.
+              Tune variant, shape (incl. oscillation + PCM src), size, percent, label, and value live.
             </p>
           </header>
           <div class="demo-block" id="progress-lab">
@@ -4785,9 +5441,27 @@ fav?.addEventListener("k3-change", (e) => {
               <fieldset class="progress-lab-field">
                 <legend data-i18n="doc.progress.control.shape">Shape</legend>
                 <div class="progress-lab-radios">
-                  <k3-radio name="prog-shape" value="flat" checked>Flat</k3-radio>
-                  <k3-radio name="prog-shape" value="wavy">Wavy</k3-radio>
+                  <k3-radio name="prog-shape" value="flat" checked
+                    ><span data-i18n="doc.progress.shape.flat">Flat</span></k3-radio
+                  >
+                  <k3-radio name="prog-shape" value="wavy"
+                    ><span data-i18n="doc.progress.shape.wavy">Wavy</span></k3-radio
+                  >
+                  <k3-radio name="prog-shape" value="oscillation"
+                    ><span data-i18n="doc.progress.shape.oscillation">Oscillation</span></k3-radio
+                  >
                 </div>
+              </fieldset>
+              <fieldset class="progress-lab-field" id="progress-lab-src-field" hidden>
+                <legend data-i18n="doc.progress.control.src">Waveform src</legend>
+                <k3-switch
+                  id="prog-sw-src"
+                  selected
+                  aria-label="Use demo audio for PCM"
+                ></k3-switch>
+                <p class="progress-lab-hint" data-i18n="doc.progress.control.src.hint">
+                  Decode /sounds/hello.mp3 peaks (same cache as audio seek).
+                </p>
               </fieldset>
               <fieldset class="progress-lab-field">
                 <legend data-i18n="doc.progress.control.behavior">Behavior</legend>
@@ -5089,6 +5763,166 @@ fav?.addEventListener("k3-change", (e) => {
               <k3-button id="btn-snack-api" variant="text">
                 <span data-i18n="doc.snackbar.open.api">showSnackbar()</span>
               </k3-button>
+            </div>
+          </div>
+        </article>
+
+        <!-- ALERT -->
+        <article class="comp-page" data-page="alert" id="page-alert" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
+            <h1 data-i18n="doc.alert.title">Alert</h1>
+            <p data-i18n="doc.alert.blurb">
+              Callout-style · accent bar · variants · shapes · dismissible.
+            </p>
+            <p class="doc-intro" data-i18n="doc.alert.intro">
+              Alerts are supporting containers for contextual or supplemental information — icon,
+              label, and body with a leading accent bar (M3E Callout model). Use theme variants for
+              brand emphasis and semantic tones (success · warning · info · error · note) for
+              status. Prefer rounded shapes; square when the layout needs flush edges. Add
+              dismissible when the message can be cleared.
+            </p>
+          </header>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.alert.section.variants">Variants</h2>
+              <p data-i18n="doc.alert.section.variants.blurb">
+                Theme roles and semantic tones — container + accent bar.
+              </p>
+            </header>
+            <div class="stack gap-sm" style="max-width: 40rem">
+              <k3-alert variant="secondary" label="Secondary">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+              <k3-alert variant="primary" label="Primary">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+              <k3-alert variant="tertiary" label="Tertiary">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+              <k3-alert variant="error" label="Error">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+              <k3-alert variant="surface" label="Surface">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+              <k3-alert variant="success" label="Success">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+              <k3-alert variant="warning" label="Warning">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+              <k3-alert variant="info" label="Info">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+              <k3-alert variant="note" label="Note">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.alert.section.shapes">Shapes</h2>
+              <p data-i18n="doc.alert.section.shapes.blurb">Rounded (default) or square.</p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="min-width: 16rem">
+                    <k3-alert shape="rounded" variant="secondary" label="Rounded">
+                      <span data-i18n="doc.alert.demo.body"
+                        >Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span
+                      >
+                    </k3-alert>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="min-width: 16rem">
+                    <k3-alert shape="square" variant="secondary" label="Square">
+                      <span data-i18n="doc.alert.demo.body"
+                        >Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span
+                      >
+                    </k3-alert>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.alert.legend.rounded">Rounded</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label" data-i18n="doc.alert.legend.square">Square</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.alert.section.dismiss">Dismissible</h2>
+              <p data-i18n="doc.alert.section.dismiss.blurb">
+                Optional close control — emits k3-dismiss.
+              </p>
+            </header>
+            <div class="stack gap-sm" style="max-width: 40rem">
+              <k3-alert variant="info" dismissible label="Info">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Supplemental details
+                  stay in the body.</span
+                >
+              </k3-alert>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.alert.section.actions">With action</h2>
+              <p data-i18n="doc.alert.section.actions.blurb">
+                Trailing action slot next to the body.
+              </p>
+            </header>
+            <div class="stack gap-sm" style="max-width: 40rem">
+              <k3-alert variant="primary" dismissible label="Update available">
+                <span data-i18n="doc.alert.demo.body"
+                  >Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span
+                >
+                <k3-button slot="action" variant="text" size="sm">
+                  <span data-i18n="doc.alert.demo.action">Undo</span>
+                </k3-button>
+              </k3-alert>
             </div>
           </div>
         </article>
@@ -7850,6 +8684,86 @@ fav?.addEventListener("k3-change", (e) => {
           </div>
         </article>
 
+        <!-- CONTAINMENT: QUOTE -->
+        <article class="comp-page" data-page="quote" id="page-quote" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.quote.title">Quote</h1>
+            <p data-i18n="doc.quote.blurb">
+              Testimonial card — tilted surface · primary offset · author | citation split.
+            </p>
+            <p class="doc-intro" data-i18n="doc.quote.intro">
+              Quotes present a short citation beside the author (avatar, name, role) on a tilted
+              surface with a colored offset layer. Flip columns with layout author-end; motion
+              deepens the tilt on hover only. Add an optional action link for “Read more”.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases grid-2" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; padding: 0.75rem">
+                  <k3-quote author="Alex" role="Product designer" layout="author-start" tilt>
+                    <k3-avatar slot="avatar" initials="AL" size="lg"></k3-avatar>
+                    <span data-i18n="doc.quote.demo.body1"
+                      >Dynamic theme tokens keep this testimonial card on-brand without hard-coded
+                      accents.</span
+                    >
+                    <k3-button slot="action" variant="text" size="sm">
+                      <span data-i18n="doc.quote.demo.action">Read more</span>
+                      <span
+                        slot="trailing-icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="arrow_forward"
+                        aria-hidden="true"
+                      ></span>
+                    </k3-button>
+                  </k3-quote>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; padding: 0.75rem">
+                  <k3-quote author="Sam" role="Frontend engineer" layout="author-end" tilt>
+                    <k3-avatar slot="avatar" initials="SM" size="lg"></k3-avatar>
+                    <span data-i18n="doc.quote.demo.body2"
+                      >Invert the columns with layout author-end — citation first, avatar on the
+                      right.</span
+                    >
+                    <k3-button slot="action" variant="text" size="sm">
+                      <span data-i18n="doc.quote.demo.action">Read more</span>
+                      <span
+                        slot="trailing-icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="arrow_forward"
+                        aria-hidden="true"
+                      ></span>
+                    </k3-button>
+                  </k3-quote>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.quote.guide.start"
+                  >Author start · CTA</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.quote.guide.end"
+                  >Author end · CTA</span
+                >
+              </li>
+            </ol>
+          </div>
+        </article>
+
         <!-- CONTAINMENT: CODE BLOCK -->
         <article class="comp-page" data-page="codeblock" id="page-codeblock" hidden>
           <header class="section-head">
@@ -7887,6 +8801,284 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
             <ol class="variant-guide">
               <li><span class="pill-num">1</span><span class="variant-label">Toolbar · copy</span></li>
               <li><span class="pill-num">2</span><span class="variant-label">Collapsible</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- CONTAINMENT: CAROUSEL -->
+        <article class="comp-page" data-page="carousel" id="page-carousel" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.carousel.title">Carousel</h1>
+            <p data-i18n="doc.carousel.blurb">
+              M3 Expressive — multi-browse · hero · uncontained · full-screen · loop + indicators.
+            </p>
+            <p class="doc-intro" data-i18n="doc.carousel.intro">
+              Carousels scroll a set of items with Material keyline sizes: large, medium, and small
+              masks keep media at full width for a parallax effect. Prefer multi-browse for browsing,
+              hero for a focal feature, uncontained for same-size free scroll, and full-screen for
+              vertical paging. Optional controls, page indicators, and loop wrap complete the
+              pattern — no autoplay.
+            </p>
+          </header>
+
+          <div class="demo-block" id="carousel-multi-lab">
+            <div
+              class="carousel-lab-controls"
+              style="margin-block-end: var(--k3-sys-spacing-space200); max-width: 14rem"
+            >
+              <k3-select
+                id="carousel-count-select"
+                variant="outlined"
+                value="all"
+                data-i18n-label="doc.carousel.control.count"
+              >
+                <k3-menu-item value="3">3</k3-menu-item>
+                <k3-menu-item value="4">4</k3-menu-item>
+                <k3-menu-item value="5">5</k3-menu-item>
+                <k3-menu-item value="6">6</k3-menu-item>
+                <k3-menu-item value="all" data-i18n="doc.carousel.control.count.all">All</k3-menu-item>
+              </k3-select>
+            </div>
+            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-carousel
+                    id="carousel-multi-demo"
+                    layout="multi-browse"
+                    label="Landscapes"
+                    data-i18n-label="doc.carousel.demo.label"
+                    controls
+                    indicators="bottom"
+                    mode="loop"
+                  >
+                    <k3-carousel-item label="Mountains">
+                      <img src="/landscapes/mountains.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.mountains">Mountains</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Lake">
+                      <img src="/landscapes/lake.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.lake">Lake</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Forest">
+                      <img src="/landscapes/forest.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.forest">Forest</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Hills">
+                      <img src="/landscapes/hills.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.hills">Hills</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Coast">
+                      <img src="/landscapes/coast.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.coast">Coast</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Meadow">
+                      <img src="/landscapes/meadow.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.meadow">Meadow</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Mountains">
+                      <img src="/landscapes/mountains.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.mountains">Mountains</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Lake">
+                      <img src="/landscapes/lake.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.lake">Lake</span>
+                    </k3-carousel-item>
+                  </k3-carousel>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.carousel.guide.multi"
+                  >Multi-browse · loop · indicators</span
+                >
+              </li>
+            </ol>
+          </div>
+
+          <header class="section-head sub">
+            <h2 data-i18n="doc.carousel.section.hero">Hero</h2>
+            <p data-i18n="doc.carousel.section.hero.blurb">
+              One large item with small peeks — align start or center.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-carousel layout="hero" align="start" label="Hero start" controls>
+                    <k3-carousel-item label="Mountains">
+                      <img src="/landscapes/mountains.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.mountains">Mountains</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Lake">
+                      <img src="/landscapes/lake.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.lake">Lake</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Forest">
+                      <img src="/landscapes/forest.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.forest">Forest</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Hills">
+                      <img src="/landscapes/hills.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.hills">Hills</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Coast">
+                      <img src="/landscapes/coast.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.coast">Coast</span>
+                    </k3-carousel-item>
+                  </k3-carousel>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-carousel
+                    layout="hero"
+                    align="center"
+                    label="Hero center"
+                    controls
+                    indicators="bottom"
+                  >
+                    <k3-carousel-item label="Lake">
+                      <img src="/landscapes/lake.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.lake">Lake</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Forest">
+                      <img src="/landscapes/forest.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.forest">Forest</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Hills">
+                      <img src="/landscapes/hills.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.hills">Hills</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Coast">
+                      <img src="/landscapes/coast.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.coast">Coast</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Meadow">
+                      <img src="/landscapes/meadow.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.meadow">Meadow</span>
+                    </k3-carousel-item>
+                  </k3-carousel>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.carousel.guide.hero.start"
+                  >Hero · start</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.carousel.guide.hero.center"
+                  >Hero · center</span
+                >
+              </li>
+            </ol>
+          </div>
+
+          <header class="section-head sub">
+            <h2 data-i18n="doc.carousel.section.uncontained">Uncontained</h2>
+            <p data-i18n="doc.carousel.section.uncontained.blurb">
+              Same-size items cut off at the edge — free scroll, no snap.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-carousel layout="uncontained" label="Uncontained" controls>
+                    <k3-carousel-item label="Mountains">
+                      <img src="/landscapes/mountains.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.mountains">Mountains</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Lake">
+                      <img src="/landscapes/lake.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.lake">Lake</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Forest">
+                      <img src="/landscapes/forest.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.forest">Forest</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Hills">
+                      <img src="/landscapes/hills.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.hills">Hills</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Coast">
+                      <img src="/landscapes/coast.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.coast">Coast</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Meadow">
+                      <img src="/landscapes/meadow.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.meadow">Meadow</span>
+                    </k3-carousel-item>
+                  </k3-carousel>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.carousel.guide.uncontained"
+                  >Uncontained · free scroll</span
+                >
+              </li>
+            </ol>
+          </div>
+
+          <header class="section-head sub">
+            <h2 data-i18n="doc.carousel.section.fullscreen">Full-screen</h2>
+            <p data-i18n="doc.carousel.section.fullscreen.blurb">
+              One edge-to-edge item at a time — vertical snap.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; max-width: 22rem; margin-inline: auto">
+                  <k3-carousel
+                    layout="full-screen"
+                    label="Full-screen"
+                    controls
+                    indicators="right"
+                    style="--k3-carousel-height: 20rem; border-radius: var(--k3-sys-shape-corner-extra-large); overflow: hidden"
+                  >
+                    <k3-carousel-item label="Mountains">
+                      <img src="/landscapes/mountains.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.mountains">Mountains</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Lake">
+                      <img src="/landscapes/lake.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.lake">Lake</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Forest">
+                      <img src="/landscapes/forest.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.forest">Forest</span>
+                    </k3-carousel-item>
+                    <k3-carousel-item label="Coast">
+                      <img src="/landscapes/coast.jpg" alt="" />
+                      <span slot="label" data-i18n="doc.carousel.demo.coast">Coast</span>
+                    </k3-carousel-item>
+                  </k3-carousel>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.carousel.guide.fullscreen"
+                  >Full-screen · vertical</span
+                >
+              </li>
             </ol>
           </div>
         </article>
@@ -8035,30 +9227,75 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
               cells with optional unit labels. Control playback with start, pause, and reset methods.
             </p>
           </header>
-          <div class="demo-block">
-            <div class="demo-frame demo-frame--cases items-end" data-demo-enhance="off">
-              <div class="demo-case">
-                <div class="demo-case-stage">
-                  <k3-countdown time="90061000" format="HH : mm : ss"></k3-countdown>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">1</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage">
-                  <k3-countdown
-                    time="3661000"
-                    format="HH : mm : ss"
-                    segments
-                    with-labels
-                  ></k3-countdown>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">2</span>
-              </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.countdown.section.endDate">End date &amp; time</h2>
+              <p data-i18n="doc.countdown.section.endDate.blurb">
+                Pick a target — the countdown ticks to that moment.
+              </p>
+            </header>
+            <div class="stack gap-md" style="max-width: 28rem">
+              <k3-text-field
+                id="countdown-end-input"
+                type="datetime-local"
+                label="End"
+                data-i18n-label="doc.countdown.control.endDate"
+                variant="outlined"
+              ></k3-text-field>
+              <k3-countdown
+                id="countdown-lab"
+                auto-start="false"
+                format="DD : HH : mm : ss"
+                segments
+                with-labels
+                end-message="Time's up"
+              ></k3-countdown>
             </div>
-            <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">Inline format</span></li>
-              <li><span class="pill-num">2</span><span class="variant-label">Segments · labels</span></li>
-            </ol>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.countdown.section.duration">Duration</h2>
+              <p data-i18n="doc.countdown.section.duration.blurb">
+                Fixed ms via time — inline format or segment cells.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end" data-demo-enhance="off">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-countdown time="90061000" format="HH : mm : ss"></k3-countdown>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-countdown
+                      time="3661000"
+                      format="HH : mm : ss"
+                      segments
+                      with-labels
+                    ></k3-countdown>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.countdown.legend.inline"
+                    >Inline format</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label" data-i18n="doc.countdown.legend.segments"
+                    >Segments · labels</span
+                  >
+                </li>
+              </ol>
+            </div>
           </div>
         </article>
 
@@ -8309,40 +9546,54 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
             <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
             <h1 data-i18n="doc.audio-player.title">Audio player</h1>
             <p data-i18n="doc.audio-player.blurb">
-              Playlist player — play · pause · stop · prev · next · mute music.
+              Playlist — card · compact · toolbar · sticky · phone · full · seek · shapes · hotkeys.
             </p>
             <p class="doc-intro" data-i18n="doc.audio-player.intro">
-              Real media controls for mp3/ogg playlists, independent of interaction Sound FX.
+              Media player for mp3/ogg playlists. Six variants: card, compact, toolbar, sticky,
+              phone, and full (queue + lyrics). Prefer the phone variant on smartphones. Wavy seek,
+              Material shape morph, dynamic color from cover seed, expandable sheet, and
+              Space/←→/N/P/M hotkeys when enabled.
+            </p>
+          </header>
+
+          <header class="section-head sub">
+            <h2 data-i18n="doc.audio-player.section.card">Card · Compact</h2>
+            <p data-i18n="doc.audio-player.section.card.blurb">
+              Morph cover · wavy seek · like / expand. Hotkeys on the card demo only.
             </p>
           </header>
           <div class="demo-block">
-            <div class="demo-frame demo-frame--cases items-end" data-demo-enhance="off">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
               <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 28rem">
+                <div class="demo-case-stage" style="width: 100%; max-width: 24rem">
                   <k3-audio-player
                     id="demo-audio-player"
                     variant="card"
-                    loop-playlist
+                    expandable
+                    hotkeys
+                    dynamic-color="on"
+                    skip-back="15"
+                    skip-forward="30"
+                    show-share
+                    show-download
                     tracks='[
-                      {"src":"/sounds/cashcash.mp3","title":"Cash Cash","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/hello.mp3","title":"Hello","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/snowflake.mp3","title":"Snowflake","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/watch.mp3","title":"Watch","artist":"PhysicHall","type":"audio/mpeg"}
+                      {"src":"/sounds/cashcash.mp3","duration":232,"title":"Michael Jackson (The Beat Goes On)","artist":"Cash Cash","album":"The Beat Goes On - EP","artwork":"/covers/cashcash.jpg","seed":"#6B4EFF","shape":"SoftBurst","lyrics":"[00:00.00]Even though the king is gone\n[00:08.00]The beat goes on and on\n[00:16.00]Michael Jackson"},
+                      {"src":"/sounds/hello.mp3","duration":242,"title":"Hello","artist":"Porter Robinson & Lazy Rich feat. Sue Cho","album":"Hello Remixes","artwork":"/covers/hello.jpg","seed":"#00B4E4","shape":"Sunny"},
+                      {"src":"/sounds/snowflake.mp3","duration":216,"title":"Snowflakes","artist":"White Apple Tree","album":"Velvet Mustache","artwork":"/covers/snowflake.jpg","seed":"#7EB8DA","shape":"Clover4Leaf"}
                     ]'
                   ></k3-audio-player>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
               <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 20rem">
+                <div class="demo-case-stage" style="width: 100%; max-width: 18rem">
                   <k3-audio-player
+                    id="demo-audio-compact"
                     variant="compact"
-                    loop-playlist
+                    dynamic-color="on"
                     tracks='[
-                      {"src":"/sounds/cashcash.mp3","title":"Cash Cash","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/hello.mp3","title":"Hello","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/snowflake.mp3","title":"Snowflake","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/watch.mp3","title":"Watch","artist":"PhysicHall","type":"audio/mpeg"}
+                      {"src":"/sounds/hello.mp3","duration":242,"title":"Hello","artist":"Porter Robinson & Lazy Rich feat. Sue Cho","artwork":"/covers/hello.jpg","seed":"#00B4E4","shape":"Sunny"},
+                      {"src":"/sounds/cashcash.mp3","duration":232,"title":"Michael Jackson (The Beat Goes On)","artist":"Cash Cash","artwork":"/covers/cashcash.jpg","seed":"#6B4EFF"}
                     ]'
                   ></k3-audio-player>
                 </div>
@@ -8364,10 +9615,10 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.audio-player.section.toolbar">Toolbar</h2>
+            <h2 data-i18n="doc.audio-player.section.toolbar">Toolbar → Sticky</h2>
             <p data-i18n="doc.audio-player.section.toolbar.blurb">
-              Horizontal bar — FAB cover · narrow prev/next · default play · wavy progress ·
-              volume.
+              Click cover / title to dock in the content area (never over the rail). Click again to
+              return here (demo only). Shuffle · repeat · playlist (list expands upward).
             </p>
           </header>
           <div class="demo-block">
@@ -8377,12 +9628,12 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
                   <k3-audio-player
                     id="demo-audio-toolbar"
                     variant="toolbar"
-                    loop-playlist
+                    dock-toggle
+                    dynamic-color="on"
                     tracks='[
-                      {"src":"/sounds/cashcash.mp3","title":"Cash Cash","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/hello.mp3","title":"Hello","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/snowflake.mp3","title":"Snowflake","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/watch.mp3","title":"Watch","artist":"PhysicHall","type":"audio/mpeg"}
+                      {"src":"/sounds/snowflake.mp3","duration":216,"title":"Snowflakes","artist":"White Apple Tree","artwork":"/covers/snowflake.jpg","seed":"#7EB8DA","shape":"Clover4Leaf"},
+                      {"src":"/sounds/cashcash.mp3","duration":232,"title":"Michael Jackson (The Beat Goes On)","artist":"Cash Cash","artwork":"/covers/cashcash.jpg","seed":"#6B4EFF"},
+                      {"src":"/sounds/hello.mp3","duration":242,"title":"Hello","artist":"Porter Robinson & Lazy Rich feat. Sue Cho","artwork":"/covers/hello.jpg","seed":"#00B4E4"}
                     ]'
                   ></k3-audio-player>
                 </div>
@@ -8393,32 +9644,31 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
               <li>
                 <span class="pill-num">1</span
                 ><span class="variant-label" data-i18n="audioPlayer.variant.toolbar"
-                  >Toolbar</span
+                  >Toolbar → Sticky</span
                 >
               </li>
             </ol>
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.audio-player.section.sticky">Sticky bar</h2>
-            <p data-i18n="doc.audio-player.section.sticky.blurb">
-              Same toolbar chrome, fixed to the bottom — preview staged in the demo.
+            <h2 data-i18n="doc.audio-player.section.phone">Phone</h2>
+            <p data-i18n="doc.audio-player.section.phone.blurb">
+              Vertical template · queue / lyrics in a bottom sheet. On smartphone, prefer this variant
+              over card / toolbar / full.
             </p>
           </header>
           <div class="demo-block">
-            <div class="demo-frame demo-frame--stack" data-demo-enhance="off">
+            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
               <div class="demo-case">
-                <div class="demo-case-stage demo-audio-sticky-stage">
+                <div class="demo-case-stage demo-audio-phone-stage">
                   <k3-audio-player
-                    id="demo-audio-sticky"
-                    class="demo-audio-sticky"
-                    variant="sticky"
-                    loop-playlist
+                    id="demo-audio-phone"
+                    variant="phone"
+                    dynamic-color="on"
                     tracks='[
-                      {"src":"/sounds/cashcash.mp3","title":"Cash Cash","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/hello.mp3","title":"Hello","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/snowflake.mp3","title":"Snowflake","artist":"PhysicHall","type":"audio/mpeg"},
-                      {"src":"/sounds/watch.mp3","title":"Watch","artist":"PhysicHall","type":"audio/mpeg"}
+                      {"src":"/sounds/hello.mp3","duration":242,"title":"Hello","artist":"Porter Robinson & Lazy Rich feat. Sue Cho","album":"Hello Remixes","artwork":"/covers/hello.jpg","seed":"#00B4E4","shape":"Sunny","lyrics":"[00:00.00]Hello, hello, hello\n[00:08.00]I came to say hello\n[00:16.00]Just enjoy the party"},
+                      {"src":"/sounds/cashcash.mp3","duration":232,"title":"Michael Jackson (The Beat Goes On)","artist":"Cash Cash","artwork":"/covers/cashcash.jpg","seed":"#6B4EFF","shape":"SoftBurst"},
+                      {"src":"/sounds/snowflake.mp3","duration":216,"title":"Snowflakes","artist":"White Apple Tree","artwork":"/covers/snowflake.jpg","seed":"#7EB8DA","shape":"Clover4Leaf"}
                     ]'
                   ></k3-audio-player>
                 </div>
@@ -8428,11 +9678,363 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
-                ><span class="variant-label" data-i18n="audioPlayer.variant.sticky"
-                  >Sticky · bottom</span
-                >
+                ><span class="variant-label" data-i18n="audioPlayer.variant.phone">Phone</span>
               </li>
             </ol>
+          </div>
+
+          <header class="section-head sub">
+            <h2 data-i18n="doc.audio-player.section.full">Full</h2>
+            <p data-i18n="doc.audio-player.section.full.blurb">
+              Two columns — now playing + Up next / Lyrics. Opt-in skip ±15/30 · share ·
+              download · oscillation seek.
+            </p>
+          </header>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage demo-audio-full-stage">
+                  <k3-audio-player
+                    id="demo-audio-full"
+                    variant="full"
+                    dynamic-color="on"
+                    skip-back="15"
+                    skip-forward="30"
+                    show-share
+                    show-download
+                    seek-style="oscillation"
+                    tracks='[
+                      {"src":"/sounds/snowflake.mp3","duration":216,"title":"Snowflakes","artist":"White Apple Tree","album":"Velvet Mustache","artwork":"/covers/snowflake.jpg","seed":"#7EB8DA","shape":"Clover4Leaf","lyrics":"[00:00.00]Snowflakes falling\n[00:07.00]Quiet night\n[00:14.00]Velvet mustache"},
+                      {"src":"/sounds/cashcash.mp3","duration":232,"title":"Michael Jackson (The Beat Goes On)","artist":"Cash Cash","artwork":"/covers/cashcash.jpg","seed":"#6B4EFF"},
+                      {"src":"/sounds/hello.mp3","duration":242,"title":"Hello","artist":"Porter Robinson & Lazy Rich feat. Sue Cho","artwork":"/covers/hello.jpg","seed":"#00B4E4"}
+                    ]'
+                  ></k3-audio-player>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="audioPlayer.variant.full">Full</span>
+              </li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- FEEDBACK: QR CODE -->
+        <article class="comp-page" data-page="qr-code" id="page-qr-code" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
+            <h1 data-i18n="doc.qr-code.title">QR code</h1>
+            <p data-i18n="doc.qr-code.blurb">
+              Styled QR — dots · corners · colors · logo · SVG via qr-code-styling.
+            </p>
+            <p class="doc-intro" data-i18n="doc.qr-code.intro">
+              QR codes encode a URL or short payload as a scannable matrix. Style modules and finder
+              patterns with qr-code-styling (rounded, dots, classy, …), tint with theme roles or
+              custom colors, and optionally place a center logo. Prefer SVG for crisp scaling;
+              download PNG when you need a raster asset.
+            </p>
+          </header>
+
+          <div class="surface stack gap-lg" id="qr-lab" data-demo-enhance="off">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.qr-code.section.generator">Generator</h2>
+              <p data-i18n="doc.qr-code.section.generator.blurb">
+                Live preview — shape · dots · eyes · logo PNG · colors.
+              </p>
+            </header>
+
+            <div class="qr-lab-layout">
+              <div class="qr-lab-preview stack gap-md items-center">
+                <k3-qr-code
+                  id="qr-lab-code"
+                  value="https://github.com/Kam3leoN/K3ui"
+                  size="240"
+                  margin="12"
+                  shape="square"
+                  dots="diamond"
+                  corners-square="frame14"
+                  corners-dot="ball5"
+                  corners-square-rotate="mirror"
+                  corners-dot-rotate="mirror"
+                  color="primary"
+                  background="#ffffff"
+                  error-correction="H"
+                ></k3-qr-code>
+                <div class="row wrap gap-sm items-center justify-center">
+                  <k3-button id="qr-lab-download-png" variant="tonal" size="sm">
+                    <span data-i18n="doc.qr-code.control.downloadPng">Download PNG</span>
+                  </k3-button>
+                  <k3-button id="qr-lab-download-svg" variant="outlined" size="sm">
+                    <span data-i18n="doc.qr-code.control.downloadSvg">Download SVG</span>
+                  </k3-button>
+                  <k3-button id="qr-lab-download-pdf" variant="outlined" size="sm">
+                    <span data-i18n="doc.qr-code.control.downloadPdf">Download PDF</span>
+                  </k3-button>
+                </div>
+              </div>
+
+              <div class="qr-lab-controls k3-layout-grid">
+                <fieldset class="slider-lab-field qr-lab-field--wide">
+                  <legend data-i18n="doc.qr-code.control.value">Value</legend>
+                  <k3-text-field
+                    id="qr-lab-value"
+                    label="Value"
+                    data-i18n-label="doc.qr-code.control.value"
+                    variant="outlined"
+                    value="https://github.com/Kam3leoN/K3ui"
+                  ></k3-text-field>
+                </fieldset>
+
+                <fieldset class="slider-lab-field">
+                  <legend data-i18n="doc.qr-code.control.shape">Shape</legend>
+                  <k3-button-group id="qr-lab-shape" selection="single">
+                    <k3-button variant="outlined" value="square" size="sm">Square</k3-button>
+                    <k3-button variant="outlined" value="circle" size="sm" selected
+                      >Circle</k3-button
+                    >
+                  </k3-button-group>
+                </fieldset>
+
+                <fieldset class="slider-lab-field">
+                  <legend data-i18n="doc.qr-code.control.ecc">Error correction</legend>
+                  <k3-button-group id="qr-lab-ecc" selection="single">
+                    <k3-button variant="outlined" value="L" size="sm">L · 7%</k3-button>
+                    <k3-button variant="outlined" value="M" size="sm">M · 15%</k3-button>
+                    <k3-button variant="outlined" value="Q" size="sm">Q · 25%</k3-button>
+                    <k3-button variant="outlined" value="H" size="sm" selected>H · 30%</k3-button>
+                  </k3-button-group>
+                </fieldset>
+
+                <fieldset class="slider-lab-field">
+                  <legend data-i18n="doc.qr-code.control.background">Background</legend>
+                  <div class="stack gap-sm">
+                    <k3-switch id="qr-lab-bg-transparent">
+                      <span data-i18n="doc.qr-code.control.backgroundTransparent"
+                        >Transparent</span
+                      >
+                    </k3-switch>
+                    <k3-text-field
+                      id="qr-lab-bg"
+                      label="Background"
+                      data-i18n-label="doc.qr-code.control.background"
+                      variant="outlined"
+                      value="#ffffff"
+                    ></k3-text-field>
+                  </div>
+                </fieldset>
+
+                <fieldset class="slider-lab-field qr-lab-field--wide">
+                  <legend data-i18n="doc.qr-code.control.body">Body shape</legend>
+                  <div
+                    id="qr-lab-body-grid"
+                    class="qr-pattern-grid k3-scroll"
+                    role="listbox"
+                    aria-label="Body shape"
+                  ></div>
+                  <div
+                    id="qr-lab-body-colors"
+                    class="qr-md2-swatches"
+                    role="listbox"
+                    aria-label="Body color"
+                  ></div>
+                </fieldset>
+
+                <fieldset class="slider-lab-field qr-lab-field--wide">
+                  <legend data-i18n="doc.qr-code.control.eyesOuter">Eye frame</legend>
+                  <div
+                    id="qr-lab-eye-grid"
+                    class="qr-pattern-grid k3-scroll"
+                    role="listbox"
+                    aria-label="Eye frame"
+                  ></div>
+                  <div
+                    id="qr-lab-eye-colors"
+                    class="qr-md2-swatches"
+                    role="listbox"
+                    aria-label="Eye frame color"
+                  ></div>
+                  <div class="qr-lab-rotate-row" role="group" aria-label="Eye frame rotation">
+                    <span class="qr-lab-rotate-label" data-i18n="doc.qr-code.control.rotate"
+                      >Rotation</span
+                    >
+                    <k3-select
+                      id="qr-lab-eye-rotate-tl"
+                      data-i18n-label="doc.qr-code.control.rotateTl"
+                      label="TL"
+                      variant="outlined"
+                      value="mirror"
+                    >
+                      <k3-menu-item value="mirror" data-i18n="doc.qr-code.rotate.mirror">Mirror</k3-menu-item>
+                      <k3-menu-item value="none" data-i18n="doc.qr-code.rotate.none">None</k3-menu-item>
+                      <k3-menu-item value="90">90°</k3-menu-item>
+                      <k3-menu-item value="180">180°</k3-menu-item>
+                      <k3-menu-item value="270">270°</k3-menu-item>
+                      <k3-menu-item value="flip-h" data-i18n="doc.qr-code.rotate.flipH">Flip H</k3-menu-item>
+                      <k3-menu-item value="flip-v" data-i18n="doc.qr-code.rotate.flipV">Flip V</k3-menu-item>
+                      <k3-menu-item value="flip-both" data-i18n="doc.qr-code.rotate.flipBoth">Flip both</k3-menu-item>
+                    </k3-select>
+                    <k3-select
+                      id="qr-lab-eye-rotate-tr"
+                      data-i18n-label="doc.qr-code.control.rotateTr"
+                      label="TR"
+                      variant="outlined"
+                      value="mirror"
+                    >
+                      <k3-menu-item value="mirror" data-i18n="doc.qr-code.rotate.mirror">Mirror</k3-menu-item>
+                      <k3-menu-item value="none" data-i18n="doc.qr-code.rotate.none">None</k3-menu-item>
+                      <k3-menu-item value="90">90°</k3-menu-item>
+                      <k3-menu-item value="180">180°</k3-menu-item>
+                      <k3-menu-item value="270">270°</k3-menu-item>
+                      <k3-menu-item value="flip-h" data-i18n="doc.qr-code.rotate.flipH">Flip H</k3-menu-item>
+                      <k3-menu-item value="flip-v" data-i18n="doc.qr-code.rotate.flipV">Flip V</k3-menu-item>
+                      <k3-menu-item value="flip-both" data-i18n="doc.qr-code.rotate.flipBoth">Flip both</k3-menu-item>
+                    </k3-select>
+                    <k3-select
+                      id="qr-lab-eye-rotate-bl"
+                      data-i18n-label="doc.qr-code.control.rotateBl"
+                      label="BL"
+                      variant="outlined"
+                      value="mirror"
+                    >
+                      <k3-menu-item value="mirror" data-i18n="doc.qr-code.rotate.mirror">Mirror</k3-menu-item>
+                      <k3-menu-item value="none" data-i18n="doc.qr-code.rotate.none">None</k3-menu-item>
+                      <k3-menu-item value="90">90°</k3-menu-item>
+                      <k3-menu-item value="180">180°</k3-menu-item>
+                      <k3-menu-item value="270">270°</k3-menu-item>
+                      <k3-menu-item value="flip-h" data-i18n="doc.qr-code.rotate.flipH">Flip H</k3-menu-item>
+                      <k3-menu-item value="flip-v" data-i18n="doc.qr-code.rotate.flipV">Flip V</k3-menu-item>
+                      <k3-menu-item value="flip-both" data-i18n="doc.qr-code.rotate.flipBoth">Flip both</k3-menu-item>
+                    </k3-select>
+                  </div>
+                </fieldset>
+
+                <fieldset class="slider-lab-field qr-lab-field--wide">
+                  <legend data-i18n="doc.qr-code.control.eyesInner">Eye ball</legend>
+                  <div
+                    id="qr-lab-ball-grid"
+                    class="qr-pattern-grid k3-scroll"
+                    role="listbox"
+                    aria-label="Eye ball"
+                  ></div>
+                  <div
+                    id="qr-lab-ball-colors"
+                    class="qr-md2-swatches"
+                    role="listbox"
+                    aria-label="Eye ball color"
+                  ></div>
+                  <div class="qr-lab-rotate-row" role="group" aria-label="Eye ball rotation">
+                    <span class="qr-lab-rotate-label" data-i18n="doc.qr-code.control.rotate"
+                      >Rotation</span
+                    >
+                    <k3-select
+                      id="qr-lab-ball-rotate-tl"
+                      data-i18n-label="doc.qr-code.control.rotateTl"
+                      label="TL"
+                      variant="outlined"
+                      value="mirror"
+                    >
+                      <k3-menu-item value="mirror" data-i18n="doc.qr-code.rotate.mirror">Mirror</k3-menu-item>
+                      <k3-menu-item value="none" data-i18n="doc.qr-code.rotate.none">None</k3-menu-item>
+                      <k3-menu-item value="90">90°</k3-menu-item>
+                      <k3-menu-item value="180">180°</k3-menu-item>
+                      <k3-menu-item value="270">270°</k3-menu-item>
+                      <k3-menu-item value="flip-h" data-i18n="doc.qr-code.rotate.flipH">Flip H</k3-menu-item>
+                      <k3-menu-item value="flip-v" data-i18n="doc.qr-code.rotate.flipV">Flip V</k3-menu-item>
+                      <k3-menu-item value="flip-both" data-i18n="doc.qr-code.rotate.flipBoth">Flip both</k3-menu-item>
+                    </k3-select>
+                    <k3-select
+                      id="qr-lab-ball-rotate-tr"
+                      data-i18n-label="doc.qr-code.control.rotateTr"
+                      label="TR"
+                      variant="outlined"
+                      value="mirror"
+                    >
+                      <k3-menu-item value="mirror" data-i18n="doc.qr-code.rotate.mirror">Mirror</k3-menu-item>
+                      <k3-menu-item value="none" data-i18n="doc.qr-code.rotate.none">None</k3-menu-item>
+                      <k3-menu-item value="90">90°</k3-menu-item>
+                      <k3-menu-item value="180">180°</k3-menu-item>
+                      <k3-menu-item value="270">270°</k3-menu-item>
+                      <k3-menu-item value="flip-h" data-i18n="doc.qr-code.rotate.flipH">Flip H</k3-menu-item>
+                      <k3-menu-item value="flip-v" data-i18n="doc.qr-code.rotate.flipV">Flip V</k3-menu-item>
+                      <k3-menu-item value="flip-both" data-i18n="doc.qr-code.rotate.flipBoth">Flip both</k3-menu-item>
+                    </k3-select>
+                    <k3-select
+                      id="qr-lab-ball-rotate-bl"
+                      data-i18n-label="doc.qr-code.control.rotateBl"
+                      label="BL"
+                      variant="outlined"
+                      value="mirror"
+                    >
+                      <k3-menu-item value="mirror" data-i18n="doc.qr-code.rotate.mirror">Mirror</k3-menu-item>
+                      <k3-menu-item value="none" data-i18n="doc.qr-code.rotate.none">None</k3-menu-item>
+                      <k3-menu-item value="90">90°</k3-menu-item>
+                      <k3-menu-item value="180">180°</k3-menu-item>
+                      <k3-menu-item value="270">270°</k3-menu-item>
+                      <k3-menu-item value="flip-h" data-i18n="doc.qr-code.rotate.flipH">Flip H</k3-menu-item>
+                      <k3-menu-item value="flip-v" data-i18n="doc.qr-code.rotate.flipV">Flip V</k3-menu-item>
+                      <k3-menu-item value="flip-both" data-i18n="doc.qr-code.rotate.flipBoth">Flip both</k3-menu-item>
+                    </k3-select>
+                  </div>
+                </fieldset>
+
+                <fieldset class="slider-lab-field">
+                  <legend data-i18n="doc.qr-code.control.size">Size</legend>
+                  <k3-slider
+                    id="qr-lab-size"
+                    min="120"
+                    max="360"
+                    step="8"
+                    value="240"
+                    label="Size"
+                  ></k3-slider>
+                </fieldset>
+
+                <fieldset class="slider-lab-field qr-lab-field--logo">
+                  <legend data-i18n="doc.qr-code.control.logo">Center logo (PNG)</legend>
+                  <div class="row wrap gap-sm items-center">
+                    <input
+                      id="qr-lab-logo-file"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      hidden
+                    />
+                    <k3-button id="qr-lab-logo-pick" variant="outlined" size="sm">
+                      <span data-i18n="doc.qr-code.control.logoPick">Choose image</span>
+                    </k3-button>
+                    <k3-button id="qr-lab-logo-clear" variant="text" size="sm">
+                      <span data-i18n="doc.qr-code.control.logoClear">Clear</span>
+                    </k3-button>
+                    <span id="qr-lab-logo-name" class="hint" aria-live="polite"></span>
+                  </div>
+                  <k3-slider
+                    id="qr-lab-image-size"
+                    min="0.15"
+                    max="0.45"
+                    step="0.05"
+                    value="0.3"
+                    label="Logo size"
+                    data-i18n-label="doc.qr-code.control.logoSize"
+                  ></k3-slider>
+                  <k3-slider
+                    id="qr-lab-image-margin"
+                    min="1"
+                    max="4"
+                    step="1"
+                    value="2"
+                    label="Logo padding"
+                    data-i18n-label="doc.qr-code.control.logoPadding"
+                  ></k3-slider>
+                </fieldset>
+              </div>
+            </div>
+
+            <p class="hint" data-i18n="doc.qr-code.hint.circle">
+              Circle = decorative QR (qr-code-styling shape="circle") — not Messenger / App Clip /
+              Kik radial codes. Eyes = corners-square / corners-dot.
+            </p>
           </div>
         </article>
 
@@ -8612,6 +10214,175 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
             </p>
           </div>
         </article>
+        <!-- UTILITIES: KEYBOARD -->
+        <article class="comp-page" data-page="keyboard" id="page-keyboard" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.utilities">Utilities</p>
+            <h1 data-i18n="doc.keyboard.title">Keyboard</h1>
+            <p data-i18n="doc.keyboard.blurb">
+              Press · release · chords (2–3+ keys) —
+              <code>attachKeyboard</code> · <code>bindChord</code> · <code>K3UI.keyboard</code>.
+            </p>
+            <p class="doc-intro" data-i18n="doc.keyboard.intro">
+              Track key down/up, held sets, and multi-key chords via attachKeyboard or bindChord /
+              bindChords (K3UI.keyboard). Normalize keys to stable ids, ignore fields when binding
+              shortcuts, and prefer chord strings like control+shift+k over raw KeyboardEvent checks.
+            </p>
+          </header>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.keyboard.section.downup">Press &amp; release</h2>
+              <p data-i18n="doc.keyboard.section.downup.blurb">
+                Focus the pad · hold keys — log shows down / up and the pressed set.
+              </p>
+            </header>
+            <div id="kb-pad" class="gesture-pad kb-pad" tabindex="0">Focus · press keys</div>
+            <p class="hint" id="kb-pad-log">—</p>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.keyboard.section.chords">Chords</h2>
+              <p data-i18n="doc.keyboard.section.chords.blurb">
+                Try Control+K or Control+Shift+K — fires once when the last key completes the chord.
+              </p>
+            </header>
+            <div id="kb-chord-pad" class="gesture-pad kb-pad" tabindex="0">
+              Ctrl+K · Ctrl+Shift+K
+            </div>
+            <p class="hint" id="kb-chord-log">—</p>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.keyboard.section.bind">bindChord / bindChords</h2>
+              <p data-i18n="doc.keyboard.section.bind.blurb">
+                One-shot helpers for shortcut maps — ignoreFields skips inputs.
+              </p>
+            </header>
+            <pre class="code-block"><code>import { bindChords, attachKeyboard } from 'k3ui';
+
+const off = bindChords(document, {
+  'control+k': () => console.log('chord'),
+  'control+shift+k': () => console.log('chord×3'),
+}, { ignoreFields: true });
+
+const kb = attachKeyboard(document);
+kb.on('down', (d) => console.log('down', d.key, [...d.pressed]));
+kb.on('up', (d) => console.log('up', d.key));</code></pre>
+          </div>
+        </article>
+
+        <!-- UTILITIES: KEYBOARD → MEDIA -->
+        <article class="comp-page" data-page="keyboard-media" id="page-keyboard-media" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.utilities">Utilities</p>
+            <h1 data-i18n="doc.keyboard-media.title">Media hotkeys</h1>
+            <p data-i18n="doc.keyboard-media.blurb">
+              Space/K · ←/→ · N/P · M — <code>bindMediaHotkeys</code> on top of
+              <code>K3UI.keyboard</code> (powers <code>k3-audio-player</code>).
+            </p>
+            <p class="doc-intro" data-i18n="doc.keyboard-media.intro">
+              Media shortcuts reuse the keyboard utility: Space/K toggle, arrows seek, N/P next/prev,
+              M mute. bindMediaHotkeys skips focused fields and is what k3-audio-player enables with
+              the hotkeys attribute.
+            </p>
+          </header>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.keyboard-media.section.map">Shortcut map</h2>
+              <p data-i18n="doc.keyboard-media.section.map.blurb">
+                Default seek step ±5 s — override with seekStepSec.
+              </p>
+            </header>
+            <pre class="code-block"><code>import { bindMediaHotkeys } from 'k3ui';
+
+bindMediaHotkeys({
+  toggle: () => player.toggle(),
+  seekBy: (d) => player.seek(player.currentTime + d),
+  next: () => player.next(),
+  prev: () => player.prev(),
+  mute: () => player.setMusicMuted(!player.muted),
+}, { seekStepSec: 5, enabled: () => player.hotkeys });</code></pre>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.keyboard-media.section.player">With audio player</h2>
+              <p data-i18n="doc.keyboard-media.section.player.blurb">
+                Focus the page (not a field) · Space pauses · arrows seek · M mutes.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: 100%; max-width: 22rem">
+                    <k3-audio-player
+                      id="kb-media-player"
+                      variant="card"
+                      hotkeys
+                      tracks='[
+                        {"src":"/sounds/cashcash.mp3","duration":232,"title":"Michael Jackson (The Beat Goes On)","artist":"Cash Cash","artwork":"/covers/cashcash.jpg","type":"audio/mpeg"},
+                        {"src":"/sounds/hello.mp3","duration":242,"title":"Hello","artist":"Porter Robinson & Lazy Rich feat. Sue Cho","artwork":"/covers/hello.jpg","type":"audio/mpeg"}
+                      ]'
+                    ></k3-audio-player>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+            </div>
+            <p class="hint" id="kb-media-log">Space · ← → · N P · M</p>
+          </div>
+        </article>
+
+        <!-- UTILITIES: MOUSE -->
+        <article class="comp-page" data-page="mouse" id="page-mouse" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.utilities">Utilities</p>
+            <h1 data-i18n="doc.mouse.title">Mouse</h1>
+            <p data-i18n="doc.mouse.blurb">
+              Buttons · move · drag · wheel · click —
+              <code>attachMouse</code> · <code>K3UI.mouse</code>.
+            </p>
+            <p class="doc-intro" data-i18n="doc.mouse.intro">
+              attachMouse tracks button down/up, move, click, double-click, wheel, enter/leave, and
+              dragstart/drag/dragend with thresholds. Prefer Pointer Events when available; use
+              button ids left · middle · right · back · forward.
+            </p>
+          </header>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.mouse.section.pad">Live pad</h2>
+              <p data-i18n="doc.mouse.section.pad.blurb">
+                Move, click, drag, and scroll over the pad — phases stream below.
+              </p>
+            </header>
+            <div id="mouse-pad" class="gesture-pad mouse-pad" tabindex="0">
+              <span id="mouse-pad-dot" class="gesture-dot"></span>
+              Hover · click · drag · wheel
+            </div>
+            <p class="hint" id="mouse-pad-log">—</p>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.mouse.section.buttons">Buttons</h2>
+              <p data-i18n="doc.mouse.section.buttons.blurb">
+                left · middle · right · back · forward — buttons bitfield helpers included.
+              </p>
+            </header>
+            <pre class="code-block"><code>import { attachMouse } from 'k3ui';
+
+const m = attachMouse(el, { dragThreshold: 4, preventContextMenu: true });
+m.on('down', (d) => console.log(d.button, [...d.buttons]));
+m.on('drag', (d) => console.log(d.totalX, d.totalY));
+m.on('wheel', (d) => console.log(d.deltaY));</code></pre>
+          </div>
+        </article>
+
         <!-- UTILITIES: GESTURES -->
         <article class="comp-page" data-page="gestures" id="page-gestures" hidden>
           <header class="section-head">
@@ -9180,7 +10951,287 @@ static styles = [
             </p>
           </header>
           <div class="surface surface-flush stack gap-lg">
+            <div
+              id="icons-axes-demo"
+              class="icons-axes-demo demo-block"
+              data-demo-enhance="off"
+            >
+              <div class="icons-axes-preview" aria-hidden="true">
+                <span
+                  class="ms notranslate icons-axes-glyph"
+                  translate="no"
+                  lang="zxx"
+                  data-k3-icon="home"
+                ></span>
+                <span
+                  class="ms notranslate icons-axes-glyph"
+                  translate="no"
+                  lang="zxx"
+                  data-k3-icon="favorite"
+                ></span>
+                <span
+                  class="ms notranslate icons-axes-glyph"
+                  translate="no"
+                  lang="zxx"
+                  data-k3-icon="settings"
+                ></span>
+                <span
+                  class="ms notranslate icons-axes-glyph"
+                  translate="no"
+                  lang="zxx"
+                  data-k3-icon="palette"
+                ></span>
+              </div>
+              <div class="ms-axes icons-axes-controls">
+                <div class="ms-axis-row ms-axis-row--switch">
+                  <div class="ms-axis-head">
+                    <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.fill"
+                      >Fill</span
+                    >
+                  </div>
+                  <k3-switch id="icons-fill-switch" aria-label="Fill"></k3-switch>
+                </div>
+                <div class="ms-axes-sliders">
+                  <div class="ms-axis-row">
+                    <div class="ms-axis-head">
+                      <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.weight"
+                        >Weight</span
+                      >
+                    </div>
+                    <k3-slider
+                      id="icons-wght"
+                      min="100"
+                      max="700"
+                      step="100"
+                      value="400"
+                      stops
+                      value-indicator
+                      size="sm"
+                      aria-label="Weight"
+                    ></k3-slider>
+                    <div class="ms-axis-range" aria-hidden="true">
+                      <span>100</span>
+                      <span>700</span>
+                    </div>
+                  </div>
+                  <div class="ms-axis-row">
+                    <div class="ms-axis-head">
+                      <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.grade"
+                        >Grade</span
+                      >
+                    </div>
+                    <k3-slider
+                      id="icons-grad"
+                      min="-50"
+                      max="200"
+                      step="25"
+                      value="0"
+                      stops
+                      value-indicator
+                      size="sm"
+                      aria-label="Grade"
+                    ></k3-slider>
+                    <div class="ms-axis-range" aria-hidden="true">
+                      <span data-i18n="doc.material-symbols.axis.grade.low">−25 (low)</span>
+                      <span data-i18n="doc.material-symbols.axis.grade.high"
+                        >200 (high emphasis)</span
+                      >
+                    </div>
+                  </div>
+                  <div class="ms-axis-row">
+                    <div class="ms-axis-head">
+                      <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.optical"
+                        >Optical Size</span
+                      >
+                    </div>
+                    <k3-slider
+                      id="icons-opsz"
+                      min="20"
+                      max="48"
+                      step="4"
+                      value="48"
+                      stops
+                      value-indicator
+                      size="sm"
+                      aria-label="Optical Size"
+                    ></k3-slider>
+                    <div class="ms-axis-range" aria-hidden="true">
+                      <span>20px</span>
+                      <span>48px</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div id="icons-scale" class="token-scale" aria-label="Icon sizes"></div>
+          </div>
+        </article>
+
+        <!-- RESOURCES: MATERIAL SYMBOLS -->
+        <article class="comp-page" data-page="material-symbols" id="page-material-symbols" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.resources">Resources</p>
+            <h1 data-i18n="doc.material-symbols.title">Material Symbols</h1>
+            <p data-i18n="doc.material-symbols.blurb">
+              Browse the Material Symbols catalog — search, categories, Outlined · Rounded · Sharp, FILL / Weight / Grade / Optical Size. Click an icon to copy a K3ui ligature snippet.
+            </p>
+            <p class="doc-intro" data-i18n="doc.material-symbols.intro">
+              K3ui uses Material Symbols ligatures via data-k3-icon (no ms-icon package). This browser loads the variable fonts (Material Symbols New) so you can tune FILL, wght, GRAD, and opsz live — click an icon to copy a Translate-safe snippet.
+            </p>
+          </header>
+          <div class="ms-browser surface surface-flush stack gap-lg">
+            <k3-text-field
+              id="ms-search"
+              variant="outlined"
+              clearable
+              no-form
+              data-i18n-placeholder="doc.material-symbols.search"
+              placeholder="Search…"
+            >
+              <span
+                slot="leading-icon"
+                class="ms notranslate"
+                translate="no"
+                lang="zxx"
+                data-k3-icon="search"
+                aria-hidden="true"
+              ></span>
+            </k3-text-field>
+            <div id="ms-groups" class="ms-groups k3-scroll" role="listbox" aria-label="Categories"></div>
+            <!-- Axes above style tabs — Weight · Grade · Optical (Fill = FAB) -->
+            <div class="ms-axes" id="ms-axes" aria-label="Variable font axes">
+              <div class="ms-axes-sliders">
+                <div class="ms-axis-row">
+                  <div class="ms-axis-head">
+                    <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.weight"
+                      >Weight</span
+                    >
+                    <span
+                      class="ms notranslate ms-axis-info"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="info"
+                      aria-hidden="true"
+                      title="wght 100–700"
+                    ></span>
+                  </div>
+                  <k3-slider
+                    id="ms-wght"
+                    min="100"
+                    max="700"
+                    step="100"
+                    value="400"
+                    stops
+                    value-indicator
+                    size="sm"
+                    aria-label="Weight"
+                  ></k3-slider>
+                  <div class="ms-axis-range" aria-hidden="true">
+                    <span>100</span>
+                    <span>700</span>
+                  </div>
+                </div>
+                <div class="ms-axis-row">
+                  <div class="ms-axis-head">
+                    <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.grade"
+                      >Grade</span
+                    >
+                    <span
+                      class="ms notranslate ms-axis-info"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="info"
+                      aria-hidden="true"
+                      title="GRAD −50–200"
+                    ></span>
+                  </div>
+                  <k3-slider
+                    id="ms-grad"
+                    min="-50"
+                    max="200"
+                    step="25"
+                    value="0"
+                    stops
+                    value-indicator
+                    size="sm"
+                    aria-label="Grade"
+                  ></k3-slider>
+                  <div class="ms-axis-range" aria-hidden="true">
+                    <span data-i18n="doc.material-symbols.axis.grade.low">−25 (low)</span>
+                    <span data-i18n="doc.material-symbols.axis.grade.high"
+                      >200 (high emphasis)</span
+                    >
+                  </div>
+                </div>
+                <div class="ms-axis-row">
+                  <div class="ms-axis-head">
+                    <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.optical"
+                      >Optical Size</span
+                    >
+                    <span
+                      class="ms notranslate ms-axis-info"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="info"
+                      aria-hidden="true"
+                      title="opsz 20–48"
+                    ></span>
+                  </div>
+                    <k3-slider
+                      id="ms-opsz"
+                      min="20"
+                      max="48"
+                      step="4"
+                      value="48"
+                      stops
+                      value-indicator
+                      size="sm"
+                      aria-label="Optical Size"
+                    ></k3-slider>
+                  <div class="ms-axis-range" aria-hidden="true">
+                    <span>20px</span>
+                    <span>48px</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <k3-tabs
+              id="ms-style-tabs"
+              variant="primary"
+              labels="Outlined,Rounded,Sharp"
+              icons="change_history,mood,apps"
+              index="1"
+            ></k3-tabs>
+            <div id="ms-icon-loading" class="ms-icon-loading" hidden>
+              <k3-loading-indicator indeterminate aria-label="Loading"></k3-loading-indicator>
+            </div>
+            <p id="ms-icon-empty" class="ms-icon-empty" hidden data-i18n="doc.material-symbols.empty">
+              Icon not found
+            </p>
+            <div id="ms-icon-grid" class="ms-icon-grid" role="list"></div>
+            <!-- Fixed above shell GitHub fab-menu (scroll-to-top already covers “back to top”) -->
+            <k3-fab
+              id="ms-fill-fab"
+              class="ms-fill-fab"
+              size="default"
+              variant="surface"
+              aria-label="Outlined icons"
+            >
+              <svg
+                slot="icon"
+                class="ms-fill-icon"
+                viewBox="0 -960 960 960"
+                width="24"
+                height="24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  fill="currentColor"
+                  d="M200-320q-66 0-113-47T40-480q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm56.5-103.5Q280-447 280-480t-23.5-56.5Q233-560 200-560t-56.5 23.5Q120-513 120-480t23.5 56.5Q167-400 200-400t56.5-23.5ZM510-310q-70-70-70-170t70-170q70-70 170-70t170 70q70 70 70 170t-70 170q-70 70-170 70t-170-70Z"
+                />
+              </svg>
+            </k3-fab>
           </div>
         </article>
 
@@ -9255,17 +11306,6 @@ static styles = [
         </article>
 
         <k3-doc-nav id="doc-nav"></k3-doc-nav>
-
-        <footer class="foot">
-          <p>
-            <span data-i18n="playground.foot"
-              >Not affiliated with Google. Specs aligned with m3.material.io.</span
-            >
-            <a href="https://m3.material.io/components" target="_blank" rel="noreferrer"
-              >m3.material.io/components</a
-            >
-          </p>
-        </footer>
         </main>
         </div>
       </div>
@@ -9319,77 +11359,16 @@ static styles = [
           >
             Color
           </h3>
-          <div class="settings-row settings-row--seed">
-            <label
-              id="settings-seed"
-              class="settings-seed-swatch"
-              title="#6750A4"
-            >
-              <input
-                type="color"
-                id="settings-seed-picker"
-                class="settings-seed-picker"
-                value="#6750A4"
-                aria-label="Color seed"
-              />
-              <span id="settings-seed-hex" class="visually-hidden">#6750A4</span>
-            </label>
-            <div
-              id="settings-seed-presets"
-              class="settings-seed-presets"
-              role="group"
-              aria-label="Color presets"
-            >
-              <button
-                type="button"
-                class="settings-seed-preset"
-                data-settings-seed="#BA1A1A"
-                style="--preset: #ba1a1a"
-                title="Rouge"
-                aria-label="Rouge"
-              ></button>
-              <button
-                type="button"
-                class="settings-seed-preset"
-                data-settings-seed="#C2185B"
-                style="--preset: #c2185b"
-                title="Rose"
-                aria-label="Rose"
-              ></button>
-              <button
-                type="button"
-                class="settings-seed-preset"
-                data-settings-seed="#6750A4"
-                style="--preset: #6750a4"
-                title="Violet"
-                aria-label="Violet"
-              ></button>
-              <button
-                type="button"
-                class="settings-seed-preset"
-                data-settings-seed="#E65100"
-                style="--preset: #e65100"
-                title="Orange"
-                aria-label="Orange"
-              ></button>
-              <button
-                type="button"
-                class="settings-seed-preset"
-                data-settings-seed="#2E7D32"
-                style="--preset: #2e7d32"
-                title="Vert"
-                aria-label="Vert"
-              ></button>
-              <button
-                type="button"
-                class="settings-seed-preset"
-                data-settings-seed="#1565C0"
-                style="--preset: #1565c0"
-                title="Bleu"
-                aria-label="Bleu"
-              ></button>
+          <k3-card variant="filled" class="settings-card">
+            <div class="settings-card-body">
+              <div
+                id="settings-seed-presets"
+                class="settings-seed-presets"
+                role="group"
+                aria-label="MD2 500 color presets"
+              ></div>
             </div>
-          </div>
+          </k3-card>
         </section>
 
         <section class="settings-section" aria-labelledby="settings-variant-title">
@@ -9400,37 +11379,41 @@ static styles = [
           >
             Color variant
           </h3>
-          <k3-button-group
-            id="settings-variant-group"
-            class="settings-group settings-group--cols-3"
-            selection="single"
-            aria-label="Color variant"
-          >
-            <k3-button data-settings-variant="tonalspot" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.variant.tonalspot">Tonal Spot</span>
-            </k3-button>
-            <k3-button data-settings-variant="vibrant" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.variant.vibrant">Vibrant</span>
-            </k3-button>
-            <k3-button data-settings-variant="fidelity" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.variant.fidelity">Fidelity</span>
-            </k3-button>
-            <k3-button data-settings-variant="expressive" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.variant.expressive">Expressive</span>
-            </k3-button>
-            <k3-button data-settings-variant="monochrome" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.variant.monochrome">Monochrome</span>
-            </k3-button>
-            <k3-button data-settings-variant="neutral" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.variant.neutral">Neutral</span>
-            </k3-button>
-            <k3-button data-settings-variant="rainbow" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.variant.rainbow">Rainbow</span>
-            </k3-button>
-            <k3-button data-settings-variant="fruitsalad" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.variant.fruitsalad">Fruit Salad</span>
-            </k3-button>
-          </k3-button-group>
+          <k3-card variant="filled" class="settings-card">
+            <div class="settings-card-body">
+              <k3-button-group
+                id="settings-variant-group"
+                class="settings-group settings-group--cols-2"
+                selection="single"
+                aria-label="Color variant"
+              >
+                <k3-button data-settings-variant="tonalspot" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.tonalspot">Tonal Spot</span>
+                </k3-button>
+                <k3-button data-settings-variant="vibrant" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.vibrant">Vibrant</span>
+                </k3-button>
+                <k3-button data-settings-variant="fidelity" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.fidelity">Fidelity</span>
+                </k3-button>
+                <k3-button data-settings-variant="expressive" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.expressive">Expressive</span>
+                </k3-button>
+                <k3-button data-settings-variant="monochrome" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.monochrome">Monochrome</span>
+                </k3-button>
+                <k3-button data-settings-variant="neutral" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.neutral">Neutral</span>
+                </k3-button>
+                <k3-button data-settings-variant="rainbow" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.rainbow">Rainbow</span>
+                </k3-button>
+                <k3-button data-settings-variant="fruitsalad" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.fruitsalad">Fruit Salad</span>
+                </k3-button>
+              </k3-button-group>
+            </div>
+          </k3-card>
         </section>
 
         <section class="settings-section" aria-labelledby="settings-scheme-title">
@@ -9441,57 +11424,114 @@ static styles = [
           >
             Color scheme
           </h3>
-          <k3-button-group
-            id="settings-theme-group"
-            class="settings-group settings-group--cols-2"
-            selection="single"
-            aria-label="Color scheme"
-          >
-            <k3-button data-settings-theme="light" size="xs" variant="tonal">
-              <span
-                slot="icon"
-                class="ms notranslate"
-                translate="no"
-                lang="zxx"
-                data-k3-icon="light_mode"
-                aria-hidden="true"
-              ></span>
-              <span data-i18n="playground.ctrl.theme.light">Light</span>
-            </k3-button>
-            <k3-button data-settings-theme="dark" size="xs" variant="tonal">
-              <span
-                slot="icon"
-                class="ms notranslate"
-                translate="no"
-                lang="zxx"
-                data-k3-icon="dark_mode"
-                aria-hidden="true"
-              ></span>
-              <span data-i18n="playground.ctrl.theme.dark">Dark</span>
-            </k3-button>
-            <k3-button data-settings-theme="system" size="xs" variant="tonal">
-              <span
-                slot="icon"
-                class="ms notranslate"
-                translate="no"
-                lang="zxx"
-                data-k3-icon="computer"
-                aria-hidden="true"
-              ></span>
-              <span data-i18n="playground.ctrl.theme.system">System</span>
-            </k3-button>
-            <k3-button data-settings-theme="auto" size="xs" variant="tonal">
-              <span
-                slot="icon"
-                class="ms notranslate"
-                translate="no"
-                lang="zxx"
-                data-k3-icon="brightness_auto"
-                aria-hidden="true"
-              ></span>
-              <span data-i18n="playground.ctrl.theme.auto">Auto</span>
-            </k3-button>
-          </k3-button-group>
+          <k3-card variant="filled" class="settings-card">
+            <div class="settings-card-body">
+              <k3-button-group
+                id="settings-theme-group"
+                class="settings-group settings-group--connected settings-group--theme-icons"
+                variant="connected"
+                shape="round"
+                equal-width
+                size="xs"
+                sync
+                selection="single"
+                aria-label="Color scheme"
+              >
+                <k3-tooltip
+                  position="top"
+                  content="Light"
+                  data-i18n-content="playground.ctrl.theme.light"
+                >
+                  <k3-button
+                    data-settings-theme="light"
+                    size="xs"
+                    variant="tonal"
+                    shape="round"
+                    aria-label="Light"
+                    data-i18n-aria-label="playground.ctrl.theme.light"
+                  >
+                    <span
+                      slot="icon"
+                      class="ms notranslate"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="light_mode"
+                      aria-hidden="true"
+                    ></span>
+                  </k3-button>
+                </k3-tooltip>
+                <k3-tooltip
+                  position="top"
+                  content="Dark"
+                  data-i18n-content="playground.ctrl.theme.dark"
+                >
+                  <k3-button
+                    data-settings-theme="dark"
+                    size="xs"
+                    variant="tonal"
+                    shape="round"
+                    aria-label="Dark"
+                    data-i18n-aria-label="playground.ctrl.theme.dark"
+                  >
+                    <span
+                      slot="icon"
+                      class="ms notranslate"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="dark_mode"
+                      aria-hidden="true"
+                    ></span>
+                  </k3-button>
+                </k3-tooltip>
+                <k3-tooltip
+                  position="top"
+                  content="System"
+                  data-i18n-content="playground.ctrl.theme.system"
+                >
+                  <k3-button
+                    data-settings-theme="system"
+                    size="xs"
+                    variant="tonal"
+                    shape="round"
+                    aria-label="System"
+                    data-i18n-aria-label="playground.ctrl.theme.system"
+                  >
+                    <span
+                      slot="icon"
+                      class="ms notranslate"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="computer"
+                      aria-hidden="true"
+                    ></span>
+                  </k3-button>
+                </k3-tooltip>
+                <k3-tooltip
+                  position="top"
+                  content="Auto"
+                  data-i18n-content="playground.ctrl.theme.auto"
+                >
+                  <k3-button
+                    data-settings-theme="auto"
+                    size="xs"
+                    variant="tonal"
+                    shape="round"
+                    aria-label="Auto"
+                    data-i18n-aria-label="playground.ctrl.theme.auto"
+                  >
+                    <span
+                      slot="icon"
+                      class="ms notranslate"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="brightness_auto"
+                      aria-hidden="true"
+                    ></span>
+                  </k3-button>
+                </k3-tooltip>
+              </k3-button-group>
+            </div>
+          </k3-card>
         </section>
 
         <section class="settings-section" aria-labelledby="settings-contrast-title">
@@ -9502,22 +11542,29 @@ static styles = [
           >
             Contrast
           </h3>
-          <k3-button-group
-            id="settings-contrast-group"
-            class="settings-group settings-group--cols-3"
-            selection="single"
-            aria-label="Contrast"
-          >
-            <k3-button data-settings-contrast="default" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.contrast.default">Default</span>
-            </k3-button>
-            <k3-button data-settings-contrast="medium" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.contrast.medium">Medium</span>
-            </k3-button>
-            <k3-button data-settings-contrast="high" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.contrast.high">High</span>
-            </k3-button>
-          </k3-button-group>
+          <k3-card variant="filled" class="settings-card">
+            <div class="settings-card-body">
+              <k3-button-group
+                id="settings-contrast-group"
+                class="settings-group settings-group--connected"
+                variant="connected"
+                equal-width
+                size="xs"
+                selection="single"
+                aria-label="Contrast"
+              >
+                <k3-button data-settings-contrast="default" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.contrast.default">Default</span>
+                </k3-button>
+                <k3-button data-settings-contrast="medium" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.contrast.medium">Medium</span>
+                </k3-button>
+                <k3-button data-settings-contrast="high" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.contrast.high">High</span>
+                </k3-button>
+              </k3-button-group>
+            </div>
+          </k3-card>
         </section>
 
         <section class="settings-section" aria-labelledby="settings-motion-title">
@@ -9528,25 +11575,32 @@ static styles = [
           >
             Motion
           </h3>
-          <k3-button-group
-            id="settings-motion-group"
-            class="settings-group settings-group--cols-2"
-            selection="single"
-            aria-label="Motion scheme"
-          >
-            <k3-button data-settings-motion="standard" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.motion.standard">Standard</span>
-            </k3-button>
-            <k3-button data-settings-motion="expressive" size="xs" variant="tonal">
-              <span data-i18n="playground.ctrl.motion.expressive">Expressive</span>
-            </k3-button>
-          </k3-button-group>
-          <div class="settings-row settings-row--switch">
-            <span class="settings-label" data-i18n="playground.ctrl.motion.animations"
-              >Animations</span
-            >
-            <k3-switch id="settings-animations" aria-label="Animations"></k3-switch>
-          </div>
+          <k3-card variant="filled" class="settings-card">
+            <div class="settings-card-body">
+              <k3-button-group
+                id="settings-motion-group"
+                class="settings-group settings-group--connected"
+                variant="connected"
+                equal-width
+                size="xs"
+                selection="single"
+                aria-label="Motion scheme"
+              >
+                <k3-button data-settings-motion="standard" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.motion.standard">Standard</span>
+                </k3-button>
+                <k3-button data-settings-motion="expressive" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.motion.expressive">Expressive</span>
+                </k3-button>
+              </k3-button-group>
+              <div class="settings-row settings-row--switch">
+                <span class="settings-label" data-i18n="playground.ctrl.motion.animations"
+                  >Animations</span
+                >
+                <k3-switch id="settings-animations" aria-label="Animations"></k3-switch>
+              </div>
+            </div>
+          </k3-card>
         </section>
 
         <section class="settings-section" aria-labelledby="settings-dir-title">
@@ -9557,35 +11611,43 @@ static styles = [
           >
             Directionality
           </h3>
-          <div
-            id="settings-dir-group"
-            class="settings-dir-row"
-            role="group"
-            aria-label="Direction"
-          >
-            <k3-button data-settings-dir="ltr" size="xs" variant="tonal">
-              <span
-                slot="icon"
-                class="ms notranslate"
-                translate="no"
-                lang="zxx"
-                data-k3-icon="arrow_forward"
-                aria-hidden="true"
-              ></span>
-              <span data-i18n="playground.ctrl.dir.ltr">Left to right</span>
-            </k3-button>
-            <k3-button data-settings-dir="rtl" size="xs" variant="tonal">
-              <span
-                slot="icon"
-                class="ms notranslate"
-                translate="no"
-                lang="zxx"
-                data-k3-icon="arrow_back"
-                aria-hidden="true"
-              ></span>
-              <span data-i18n="playground.ctrl.dir.rtl">Right to left</span>
-            </k3-button>
-          </div>
+          <k3-card variant="filled" class="settings-card">
+            <div class="settings-card-body">
+              <k3-button-group
+                id="settings-dir-group"
+                class="settings-group settings-group--connected settings-group--dir"
+                variant="connected"
+                equal-width
+                size="xs"
+                selection="single"
+                aria-label="Direction"
+                dir="ltr"
+              >
+                <k3-button
+                  data-settings-dir="ltr"
+                  size="xs"
+                  variant="tonal"
+                  aria-label="Left to right"
+                  data-i18n-aria-label="playground.ctrl.dir.ltr"
+                >
+                  <span class="notranslate" translate="no" lang="zxx" dir="ltr"
+                    >&lt;&nbsp;LTR</span
+                  >
+                </k3-button>
+                <k3-button
+                  data-settings-dir="rtl"
+                  size="xs"
+                  variant="tonal"
+                  aria-label="Right to left"
+                  data-i18n-aria-label="playground.ctrl.dir.rtl"
+                >
+                  <span class="notranslate" translate="no" lang="zxx" dir="ltr"
+                    >RTL&nbsp;&gt;</span
+                  >
+                </k3-button>
+              </k3-button-group>
+            </div>
+          </k3-card>
         </section>
 
         <section class="settings-section" aria-labelledby="settings-layout-title">
@@ -9596,14 +11658,20 @@ static styles = [
           >
             Layout
           </h3>
-          <div id="settings-container-row" class="settings-row settings-row--switch">
-            <span class="settings-label" data-i18n="playground.ctrl.container">Container</span>
-            <k3-switch id="settings-container" aria-label="Container"></k3-switch>
-          </div>
-          <div class="settings-row settings-row--switch">
-            <span class="settings-label" data-i18n="playground.ctrl.grid">Grid</span>
-            <k3-switch id="settings-grid" aria-label="Grid"></k3-switch>
-          </div>
+          <k3-card variant="filled" class="settings-card">
+            <div class="settings-card-body settings-pair">
+              <div id="settings-container-row" class="settings-row settings-row--switch">
+                <span class="settings-label" data-i18n="playground.ctrl.container"
+                  >Container</span
+                >
+                <k3-switch id="settings-container" aria-label="Container"></k3-switch>
+              </div>
+              <div class="settings-row settings-row--switch">
+                <span class="settings-label" data-i18n="playground.ctrl.grid">Grid</span>
+                <k3-switch id="settings-grid" aria-label="Grid"></k3-switch>
+              </div>
+            </div>
+          </k3-card>
         </section>
 
         <section class="settings-section" aria-labelledby="settings-sound-title">
@@ -9614,22 +11682,26 @@ static styles = [
           >
             Sound
           </h3>
-          <div class="settings-row settings-row--switch">
-            <span class="settings-label" data-i18n="playground.ctrl.audio">Audio</span>
-            <k3-switch
-              id="settings-audio"
-              aria-label="Audio"
-              data-i18n-aria-label="playground.ctrl.audio"
-            ></k3-switch>
-          </div>
-          <div class="settings-row settings-row--switch">
-            <span class="settings-label" data-i18n="playground.ctrl.music">Music</span>
-            <k3-switch
-              id="settings-music"
-              aria-label="Music"
-              data-i18n-aria-label="playground.ctrl.music"
-            ></k3-switch>
-          </div>
+          <k3-card variant="filled" class="settings-card">
+            <div class="settings-card-body settings-pair">
+              <div class="settings-row settings-row--switch">
+                <span class="settings-label" data-i18n="playground.ctrl.audio">Audio</span>
+                <k3-switch
+                  id="settings-audio"
+                  aria-label="Audio"
+                  data-i18n-aria-label="playground.ctrl.audio"
+                ></k3-switch>
+              </div>
+              <div class="settings-row settings-row--switch">
+                <span class="settings-label" data-i18n="playground.ctrl.music">Music</span>
+                <k3-switch
+                  id="settings-music"
+                  aria-label="Music"
+                  data-i18n-aria-label="playground.ctrl.music"
+                ></k3-switch>
+              </div>
+            </div>
+          </k3-card>
         </section>
       </div>
     </k3-sheet>

@@ -6,6 +6,10 @@ import { css } from 'lit';
  * Apply class **`k3-scroll`** on the overflow element. Override size with
  * `--k3-scroll-size` (default 6dp).
  *
+ * **Rounded scrollports:** set `--k3-scroll-track-inset` ≥ the element’s
+ * `border-radius`. WebKit paints the gutter as a rectangle — without inset the
+ * thumb cuts through the curve. Match the radius token (ex. extra-large → 1.75rem).
+ *
  * Do **not** set `scrollbar-width` / `scrollbar-color` on WebKit hosts:
  * Chromium 121+ lets those override `::-webkit-scrollbar-*` and keeps the
  * arrow buttons (incident already hit on side sheets).

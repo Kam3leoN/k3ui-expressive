@@ -1,4 +1,4 @@
-import { html, type PropertyValues } from 'lit';
+import { html, unsafeCSS, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import {
@@ -34,6 +34,13 @@ import {
   type FabMenuVariant,
 } from './fab-menu.specs.js';
 import { fabMenuStyles } from './fab-menu.styles.js';
+import {
+  concealPeersInZone,
+  fabMenuExpansionZone,
+  fabVisibilityCss,
+  restoreConcealedPeers,
+  type ConcealedPeer,
+} from './fab-visibility.js';
 
 export type {
   FabMenuPhase,
@@ -56,7 +63,7 @@ export { FabMenuSpecs } from './fab-menu.specs.js';
  * @see ./fab-menu.specs.ts
  */
 export class K3FabMenu extends K3Element {
-  static override styles = [hostReset, fabMenuStyles];
+  static override styles = [hostReset, unsafeCSS(fabVisibilityCss), fabMenuStyles];
 
   /** At most one open menu — opening another dismisses the current. */
   private static activeMenu: K3FabMenu | null = null;
@@ -96,6 +103,8 @@ export class K3FabMenu extends K3Element {
   private focusIndex = -1;
   private restoreFocusEl: HTMLElement | null = null;
   private itemCountWarned = false;
+  /** Floating peers hidden while this menu’s expansion zone is open. */
+  private concealedPeers: ConcealedPeer[] = [];
 
   private readonly onHostKeydown = (e: KeyboardEvent): void => this.handleArrowNav(e);
   private readonly onFocusIn = (): void => {
@@ -190,6 +199,7 @@ export class K3FabMenu extends K3Element {
     this.dirObserver = undefined;
     this.detachDismiss();
     this.detachLayoutWatch();
+    this.restoreOverlappingPeers();
     this.releaseActive();
     super.disconnectedCallback();
   }
@@ -211,6 +221,7 @@ export class K3FabMenu extends K3Element {
          * then morph — avoids first-paint jump and retracts toward the pills.
          */
         this.applyMenuSide(this.computeMenuSide());
+        this.refreshConcealedPeers();
         await this.updateComplete;
         if (gen !== this.motionGen) return;
         await K3FabMenu.nextFrame();
@@ -222,8 +233,12 @@ export class K3FabMenu extends K3Element {
         const settled = this.computeMenuSide();
         if (settled !== this.menuSide) {
           this.applyMenuSide(settled);
+          this.refreshConcealedPeers();
           await this.playEnterMotion(() => gen === this.motionGen);
           if (gen !== this.motionGen) return;
+        } else {
+          /* Pills now measured — tighten peer zone */
+          this.refreshConcealedPeers();
         }
         this.attachLayoutWatch();
       },
@@ -238,6 +253,8 @@ export class K3FabMenu extends K3Element {
     const gen = ++this.motionGen;
     this.clearPhaseTimer();
     this.rememberFocus();
+    /* Peers reappear as the menu retracts */
+    this.restoreOverlappingPeers();
     return runOpenClose(
       this,
       'close',
@@ -350,7 +367,36 @@ export class K3FabMenu extends K3Element {
     if (next === this.menuSide) return;
     /* Flip side only — natural height, no max-height clamp into the FAB. */
     this.applyMenuSide(next);
+    this.refreshConcealedPeers();
     void this.replayOpenAfterFlip();
+  }
+
+  private menuWidthPx(): number {
+    const menu = this.renderRoot.querySelector('.menu');
+    if (menu instanceof HTMLElement) {
+      const w = menu.getBoundingClientRect().width;
+      if (w > 1) return w;
+    }
+    return FabMenuSpecs.itemMaxWidthDp;
+  }
+
+  /** Hide FABs / buttons that sit in the pill expansion perimeter. */
+  private refreshConcealedPeers(): void {
+    restoreConcealedPeers(this.concealedPeers);
+    const trigger = this.getBoundingClientRect();
+    if (trigger.width < 1 || trigger.height < 1) return;
+    const zone = fabMenuExpansionZone(trigger, {
+      side: this.menuSide,
+      menuHeightPx: this.menuHeightPx(),
+      menuWidthPx: this.menuWidthPx(),
+      gapPx: FabMenuSpecs.fabGapDp,
+      trailingRight: fabMenuIsTrailingRight(this.placement, this.rtl),
+    });
+    this.concealedPeers = concealPeersInZone(this, zone);
+  }
+
+  private restoreOverlappingPeers(): void {
+    restoreConcealedPeers(this.concealedPeers);
   }
 
   // ── Phase sync / spring ─────────────────────────────────────────────────

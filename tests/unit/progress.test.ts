@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { init } from '../../src/index.js';
+import * as waveformPcm from '../../src/components/media/waveform-pcm.js';
 
 describe('k3-progress', () => {
   let host: HTMLElement;
@@ -12,6 +13,8 @@ describe('k3-progress', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
+    waveformPcm.clearWaveformPeakCache();
     host.remove();
   });
 
@@ -217,5 +220,87 @@ describe('k3-progress', () => {
     /* updated() → resetCanvasBox removes the circular size var */
     expect(el.style.getPropertyValue('--k3-progress-size')).toBe('');
     expect(el.getAttribute('variant')).toBe('linear');
+  });
+
+  it('oscillation shape reflects and clears wavy alias', async () => {
+    host.innerHTML = `<k3-progress value="0.42" shape="wavy" wavy></k3-progress>`;
+    const el = host.querySelector('k3-progress') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+      shape: string;
+      wavy: boolean;
+      src: string;
+    };
+    await el.updateComplete;
+    expect(el.shape).toBe('wavy');
+    expect(el.wavy).toBe(true);
+
+    el.shape = 'oscillation';
+    await el.updateComplete;
+    expect(el.getAttribute('shape')).toBe('oscillation');
+    expect(el.wavy).toBe(false);
+    expect(el.hasAttribute('wavy')).toBe(false);
+  });
+
+  it('oscillation without src skips PCM load (placeholder only)', async () => {
+    const loadSpy = vi.spyOn(waveformPcm, 'loadWaveformPeaks');
+    host.innerHTML = `<k3-progress shape="oscillation" value="0.5" show-percent></k3-progress>`;
+    const el = host.querySelector('k3-progress') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+      shape: string;
+      src: string;
+    };
+    await el.updateComplete;
+    await Promise.resolve();
+    expect(el.shape).toBe('oscillation');
+    expect(el.src).toBe('');
+    expect(loadSpy).not.toHaveBeenCalled();
+    expect(el.shadowRoot!.querySelector('.value-text')?.textContent).toContain('50%');
+  });
+
+  it('oscillation with src loads PCM peaks via shared waveform cache', async () => {
+    const peaks = new Float32Array([0.2, 0.9, 0.4, 0.7]);
+    const loadSpy = vi
+      .spyOn(waveformPcm, 'loadWaveformPeaks')
+      .mockResolvedValue(peaks);
+    host.innerHTML = `<k3-progress
+      shape="oscillation"
+      src="/sounds/hello.mp3"
+      value="0.42"
+    ></k3-progress>`;
+    const el = host.querySelector('k3-progress') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+      shape: string;
+      src: string;
+    };
+    await el.updateComplete;
+    await vi.waitFor(() => {
+      expect(loadSpy).toHaveBeenCalled();
+    });
+    expect(loadSpy.mock.calls[0]![0]).toBe('/sounds/hello.mp3');
+    expect(el.getAttribute('src')).toBe('/sounds/hello.mp3');
+  });
+
+  it('circular ignores oscillation paint path (shape still set)', async () => {
+    const loadSpy = vi.spyOn(waveformPcm, 'loadWaveformPeaks');
+    host.innerHTML = `<k3-progress
+      variant="circular"
+      shape="oscillation"
+      src="/sounds/hello.mp3"
+      value="0.5"
+    ></k3-progress>`;
+    const el = host.querySelector('k3-progress') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+      shape: string;
+      variant: string;
+    };
+    await el.updateComplete;
+    await Promise.resolve();
+    expect(el.variant).toBe('circular');
+    expect(el.shape).toBe('oscillation');
+    /* isOscillation requires linear — no PCM fetch */
+    expect(loadSpy).not.toHaveBeenCalled();
+    expect(el.shadowRoot!.querySelector('.root')!.classList.contains('circular')).toBe(
+      true,
+    );
   });
 });

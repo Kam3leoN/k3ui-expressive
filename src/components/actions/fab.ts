@@ -1,18 +1,22 @@
-import { html, css, nothing } from 'lit';
+import { html, css, unsafeCSS, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { K3Element, stateLayerStyles, focusRingStyles, emitLifecycle } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { fabHide, fabShow, fabVisibilityCss } from './fab-visibility.js';
 
 /**
  * FAB — M3 Expressive sizes: default 56 / medium 80 / large 96.
  * `small` (40) is deprecated and no longer recommended.
+ *
+ * Visibility: {@link show} / {@link hide} (scale + fade, like Android FAB).
  */
 export class K3Fab extends K3Element {
   static override styles = [
     hostReset,
     stateLayerStyles,
     focusRingStyles,
+    unsafeCSS(fabVisibilityCss),
     css`
       :host {
         /* default FAB — 56 dp · corner 16 dp (M3 squircle, not a circle) */
@@ -33,6 +37,12 @@ export class K3Fab extends K3Element {
             var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
           /* No spatial overshoot — undershoot leaves a white crescent beside .fab */
           border-radius var(--k3-sys-motion-duration-short4, 200ms)
+            var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+          opacity var(--k3-sys-motion-duration-short4, 200ms)
+            var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+          transform var(--k3-sys-motion-duration-short4, 200ms)
+            var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+          visibility var(--k3-sys-motion-duration-short4, 200ms)
             var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1));
       }
       :host([data-pressed]) {
@@ -234,6 +244,22 @@ export class K3Fab extends K3Element {
   /** Soft → circle spring morph (FAB menu open). */
   @property({ type: Boolean, reflect: true }) round = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
+
+  private visibilityGen = 0;
+
+  /** Animate in (M3 FAB show). */
+  async show(): Promise<boolean> {
+    const gen = ++this.visibilityGen;
+    await fabShow(this);
+    return gen === this.visibilityGen;
+  }
+
+  /** Animate out then `hidden` (M3 FAB hide). */
+  async hide(): Promise<boolean> {
+    const gen = ++this.visibilityGen;
+    await fabHide(this);
+    return gen === this.visibilityGen;
+  }
 
   override render() {
     const name = this.ariaLabel || this.getAttribute('aria-label') || undefined;

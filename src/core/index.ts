@@ -85,6 +85,40 @@ export {
 } from './dnd.js';
 export { haptic, type HapticNamed, type HapticPattern } from './haptic.js';
 export {
+  keyboard,
+  attachKeyboard,
+  bindChord,
+  bindChords,
+  normalizeKey,
+  parseChord,
+  matchChord,
+  chordId,
+  type KeyId,
+  type KeyboardPhase,
+  type KeyboardKeyDetail,
+  type KeyboardChordDetail,
+  type KeyboardController,
+  type AttachKeyboardOptions,
+  type BindChordOptions,
+} from './keyboard.js';
+export {
+  mouse,
+  attachMouse,
+  normalizeMouseButton,
+  buttonsFromBitfield,
+  type MouseButton,
+  type MousePhase,
+  type MousePoint,
+  type MouseDetail,
+  type MouseController,
+  type AttachMouseOptions,
+} from './mouse.js';
+export {
+  bindMediaHotkeys,
+  type MediaHotkeyHandlers,
+  type MediaHotkeyOptions,
+} from './media-hotkeys.js';
+export {
   gestures,
   detectGesture,
   phase,

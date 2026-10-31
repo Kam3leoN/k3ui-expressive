@@ -12,6 +12,7 @@ import {
   isButtonGroupWidthMorphable,
   planPressWidths,
 } from '../../src/components/actions/button-group.press.js';
+import { devicePixelSnapCss } from '../../src/core/css-length.js';
 
 describe('button-group specs (M3 / Android / Compose)', () => {
   it('matches m3.material.io button-groups/specs tokens', () => {
@@ -239,6 +240,23 @@ describe('k3-button-group', () => {
     expect(items[2]!.style.width).toBe('');
   });
 
+  it('connected snaps 2dp gap via devicePixelSnapCss', async () => {
+    host.innerHTML = `
+      <k3-button-group variant="connected" selection="none" label="Extras">
+        <k3-button variant="tonal">A</k3-button>
+        <k3-button variant="tonal">B</k3-button>
+      </k3-button-group>
+    `;
+    const el = host.querySelector('k3-button-group') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+    };
+    await el.updateComplete;
+    await Promise.resolve();
+    expect(el.style.getPropertyValue('--k3-btn-group-connected-gap')).toBe(
+      devicePixelSnapCss(ButtonGroupConnectedGapDp),
+    );
+  });
+
   it('connected marks positions, preserves child variant, sets data-connected', async () => {
     host.innerHTML = `
       <k3-button-group variant="connected" size="md" shape="square" sync selection="single">
@@ -262,6 +280,30 @@ describe('k3-button-group', () => {
     expect(items.every((i) => i.variant === 'outlined')).toBe(true);
     expect(items.every((i) => i.hasAttribute('data-connected'))).toBe(true);
     expect(el.getAttribute('shape')).toBe('square');
+  });
+
+  it('connected resolves buttons nested in k3-tooltip wrappers', async () => {
+    await import('../../src/components/feedback/tooltip.js');
+    host.innerHTML = `
+      <k3-button-group variant="connected" selection="single" sync size="sm" label="Extras">
+        <k3-tooltip content="Repeat"><k3-button variant="tonal" selected>R</k3-button></k3-tooltip>
+        <k3-tooltip content="Shuffle"><k3-button variant="tonal">S</k3-button></k3-tooltip>
+        <k3-button variant="tonal">V</k3-button>
+      </k3-button-group>
+    `;
+    const el = host.querySelector('k3-button-group') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+    };
+    await el.updateComplete;
+    await Promise.resolve();
+    const tips = [...el.querySelectorAll(':scope > k3-tooltip')];
+    const items = [...el.querySelectorAll('k3-button')];
+    expect(items.map((i) => i.getAttribute('data-bg'))).toEqual(['first', 'middle', 'last']);
+    expect(tips.map((t) => t.getAttribute('data-bg'))).toEqual(['first', 'middle']);
+    expect(items.every((i) => i.hasAttribute('data-connected'))).toBe(true);
+    expect(tips.every((t) => t.hasAttribute('data-connected'))).toBe(true);
+    expect(tips[0]!.hasAttribute('selected')).toBe(true);
+    expect(tips[1]!.hasAttribute('selected')).toBe(false);
   });
 
   it('connected square uses 4dp facing seams and pronounced first/last outer', async () => {

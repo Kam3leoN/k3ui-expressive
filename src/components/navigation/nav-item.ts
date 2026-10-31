@@ -3,6 +3,7 @@ import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { K3Element } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { formatBadgeLabel } from '../feedback/badge.js';
 
 export type NavItemLayout = 'vertical' | 'horizontal';
 
@@ -196,6 +197,7 @@ export class K3NavItem extends K3Element {
         justify-content: center;
         width: 1.5rem;
         height: 1.5rem;
+        flex-shrink: 0;
         font-family: 'Material Symbols Rounded', sans-serif;
         font-size: 1.5rem;
         line-height: 1;
@@ -219,6 +221,39 @@ export class K3NavItem extends K3Element {
           'GRAD' 0,
           'opsz' 24;
         color: var(--k3-sys-color-on-secondary-container);
+      }
+
+      /* M3 large badge — anchors on the indicator pill (.shell), not the glyph */
+      .badge {
+        position: absolute;
+        z-index: 2;
+        box-sizing: border-box;
+        display: grid;
+        place-items: center;
+        min-width: 1rem;
+        height: 1rem;
+        padding-inline: 0.25rem;
+        inset-block-start: -0.25rem;
+        inset-inline-end: -0.125rem;
+        pointer-events: none;
+        background: var(--k3-sys-color-error);
+        color: var(--k3-sys-color-on-error);
+        border-radius: var(--k3-sys-shape-corner-full);
+        font-family: var(--k3-ref-typeface-plain, inherit);
+        font-size: var(--k3-sys-typescale-label-small-size, 0.6875rem);
+        font-weight: var(--k3-sys-typescale-label-small-weight, 500);
+        letter-spacing: var(--k3-sys-typescale-label-small-tracking, 0.03rem);
+        line-height: 1;
+        white-space: nowrap;
+      }
+      .badge[hidden] {
+        display: none;
+      }
+      /* Horizontal pill — keep badge on the icon’s trailing corner of the shell */
+      :host([layout='horizontal']) .badge {
+        inset-block-start: 0.5rem;
+        inset-inline-end: auto;
+        inset-inline-start: calc(1rem + 1.5rem - 0.75rem);
       }
 
       .label {
@@ -299,6 +334,12 @@ export class K3NavItem extends K3Element {
   @property() icon = '';
   @property() label = '';
   @property() href = '';
+  /**
+   * Count / short label for an M3 large badge on the icon
+   * (e.g. component catalog size on the Components destination).
+   * Empty → no badge. Numbers above 999 → `999+`.
+   */
+  @property() badge = '';
 
   /** Internal — drives ::after scaleX after a collapsed paint frame. */
   @state() private selected = false;
@@ -408,18 +449,23 @@ export class K3NavItem extends K3Element {
     super.disconnectedCallback();
   }
 
+  private get badgeLabel(): string {
+    return formatBadgeLabel(this.badge);
+  }
+
   private body() {
     const label = html`<span class="label" part="label">${this.label}<slot></slot></span>`;
     const row = this.layout === 'horizontal';
+    const count = this.badgeLabel;
     return html`
       <span
         class=${classMap({
-      shell: true,
-      selected: this.selected,
-      highlight: this.highlight,
-      'pill-reset-selected': this.pillResetSelected,
-      'pill-reset-highlight': this.pillResetHighlight,
-    })}
+          shell: true,
+          selected: this.selected,
+          highlight: this.highlight,
+          'pill-reset-selected': this.pillResetSelected,
+          'pill-reset-highlight': this.pillResetHighlight,
+        })}
         part="indicator"
       >
         <span
@@ -431,6 +477,15 @@ export class K3NavItem extends K3Element {
           data-k3-icon=${this.icon || nothing}
           >${this.icon ? nothing : html`<slot name="icon"></slot>`}</span
         >
+        <span
+          class="badge"
+          part="badge"
+          ?hidden=${!count}
+          role=${count ? 'status' : nothing}
+          aria-hidden=${count ? 'false' : 'true'}
+          aria-label=${count || nothing}
+          >${count || nothing}</span
+        >
         ${row ? label : nothing}
       </span>
       ${row ? nothing : label}
@@ -440,12 +495,15 @@ export class K3NavItem extends K3Element {
   override render() {
     const current = this.active ? 'page' : nothing;
     const expanded = this.menuOpen ? 'true' : this.href ? nothing : 'false';
+    const count = this.badgeLabel;
+    const ariaLabel = count ? `${this.label}, ${count}` : nothing;
     if (this.href) {
       return html`<a
         class="item"
         part="container"
         href=${this.href}
         aria-current=${current}
+        aria-label=${ariaLabel}
         @click=${this.onClick}
         >${this.body()}</a
       >`;
@@ -457,6 +515,7 @@ export class K3NavItem extends K3Element {
       aria-current=${current}
       aria-expanded=${expanded}
       aria-haspopup="menu"
+      aria-label=${ariaLabel}
       @click=${this.onClick}
     >
       ${this.body()}

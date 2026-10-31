@@ -506,9 +506,9 @@
   {
     "id": "signature",
     "v1": "Signature",
-    "v2": "—",
+    "v2": "k3-signature",
     "prio": "P2",
-    "status": "hors-scope-effets"
+    "status": "porté"
   },
   {
     "id": "toast",

@@ -8,12 +8,14 @@ import {
   setFormValue,
   hasNamedSlot,
   focusRingStyles,
+  stateLayerStyles,
   haptic,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import {
   SLIDER_HANDLE_GAP,
   SLIDER_HANDLE_GAP_PRESSED,
+  SLIDER_HANDLE_TARGET_DP,
   SLIDER_HANDLE_WIDTH_PRESSED,
   SLIDER_INNER_CORNER,
   SLIDER_JUMP_MS,
@@ -68,7 +70,8 @@ interface SegDesc {
 }
 
 /**
- * M3 / M3 Expressive slider.
+ * M3 / M3 Expressive slider — handle is a ≥48×48 input target (like switch /
+ * radio / checkbox) with state layer; painted thumb sits inside.
  *
  * - Variants: `standard` · `centered` · `range` (range = horizontal only)
  * - Sizes: `xs` · `sm` · `md` · `lg` · `xl`
@@ -86,7 +89,10 @@ interface SegDesc {
  */
 export class K3Slider extends K3Element {
   static formAssociated = true;
-  static override styles = [hostReset, focusRingStyles, sliderStyles];
+  static override styles = [hostReset, stateLayerStyles, focusRingStyles, sliderStyles];
+
+  /** Documented M3 min handle hit target (dp). */
+  static readonly handleTargetDp = SLIDER_HANDLE_TARGET_DP;
 
   internals = attachInternals(this);
 
@@ -523,6 +529,8 @@ export class K3Slider extends K3Element {
   override updated(changed?: Map<string, unknown>): void {
     this.syncHostMetrics();
     this.bindTrackObserver();
+    /* Elevate host while the floating value bubble is visible (sibling stacking). */
+    this.toggleAttribute('data-vi-active', this.showIndicator && this.valueIndicator);
     /* Form-associated a11y mirror (jsdom may lack ARIA reflection on internals). */
     try {
       this.internals.ariaDisabled = this.disabled ? 'true' : 'false';
@@ -1232,8 +1240,10 @@ export class K3Slider extends K3Element {
                     class=${classMap({
                       handle: true,
                       'k3-focus-ring': true,
+                      'k3-state-layer': true,
                       'active-drag': this.activeHandle === 'start',
                     })}
+                    ?pressed=${this.pressed && this.activeHandle === 'start'}
                     style=${styleMap(this.posStyle(this.handlePct('start')))}
                     part="handle"
                     role="slider"
@@ -1245,13 +1255,17 @@ export class K3Slider extends K3Element {
                     aria-disabled=${this.disabled ? 'true' : 'false'}
                     aria-label=${label || 'Minimum'}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'start')}
-                  ></div>
+                  >
+                    <span class="thumb" part="thumb" aria-hidden="true"></span>
+                  </div>
                   <div
                     class=${classMap({
                       handle: true,
                       'k3-focus-ring': true,
+                      'k3-state-layer': true,
                       'active-drag': this.activeHandle === 'end',
                     })}
+                    ?pressed=${this.pressed && this.activeHandle === 'end'}
                     style=${styleMap(this.posStyle(this.handlePct('end')))}
                     part="handle"
                     role="slider"
@@ -1263,15 +1277,19 @@ export class K3Slider extends K3Element {
                     aria-disabled=${this.disabled ? 'true' : 'false'}
                     aria-label=${label || 'Maximum'}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'end')}
-                  ></div>
+                  >
+                    <span class="thumb" part="thumb" aria-hidden="true"></span>
+                  </div>
                 `
               : html`
                   <div
                     class=${classMap({
                       handle: true,
                       'k3-focus-ring': true,
+                      'k3-state-layer': true,
                       'active-drag': true,
                     })}
+                    ?pressed=${this.pressed}
                     style=${styleMap(this.posStyle(this.handlePct('value')))}
                     part="handle"
                     role="slider"
@@ -1283,7 +1301,9 @@ export class K3Slider extends K3Element {
                     aria-disabled=${this.disabled ? 'true' : 'false'}
                     aria-label=${label || nothing}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'value')}
-                  ></div>
+                  >
+                    <span class="thumb" part="thumb" aria-hidden="true"></span>
+                  </div>
                 `}
 
             ${this.range

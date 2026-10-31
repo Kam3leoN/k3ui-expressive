@@ -77,4 +77,22 @@ describe('k3-countdown', () => {
     await el.updateComplete;
     expect(el.getRemainingTime()).toBe(5000);
   });
+
+  it('auto-starts by default when auto-start attribute is omitted', async () => {
+    const el = await mount(`<k3-countdown time="5000" format="ss"></k3-countdown>`);
+    expect(el.autoStart).toBe(true);
+    vi.advanceTimersByTime(1500);
+    await el.updateComplete;
+    expect(el.getRemainingTime()).toBeLessThan(5000);
+  });
+
+  it('tracks end-date and restarts when the date changes', async () => {
+    const el = await mount(
+      `<k3-countdown end-date="${new Date(Date.now() + 10_000).toISOString()}" format="ss"></k3-countdown>`,
+    );
+    expect(el.getRemainingTime()).toBeGreaterThan(0);
+    el.endDate = new Date(Date.now() + 60_000).toISOString();
+    await el.updateComplete;
+    expect(el.getRemainingTime()).toBeGreaterThan(50_000);
+  });
 });

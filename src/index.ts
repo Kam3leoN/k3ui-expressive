@@ -36,6 +36,19 @@ import {
   repeat,
   sequence,
   defineGestureElements,
+  keyboard,
+  attachKeyboard,
+  bindChord,
+  bindChords,
+  normalizeKey,
+  parseChord,
+  matchChord,
+  chordId,
+  mouse,
+  attachMouse,
+  normalizeMouseButton,
+  buttonsFromBitfield,
+  bindMediaHotkeys,
 } from './core/index.js';
 import { showSnackbar, snackbarQueue } from './components/feedback/snackbar-queue.js';
 
@@ -147,6 +160,19 @@ export {
   repeat,
   sequence,
   defineGestureElements,
+  keyboard,
+  attachKeyboard,
+  bindChord,
+  bindChords,
+  normalizeKey,
+  parseChord,
+  matchChord,
+  chordId,
+  mouse,
+  attachMouse,
+  normalizeMouseButton,
+  buttonsFromBitfield,
+  bindMediaHotkeys,
 };
 export type {
   DragAxis,
@@ -182,6 +208,21 @@ export type {
   RepeatGestureDetail,
   SequenceGestureDetail,
   SwipeDirection,
+  KeyId,
+  KeyboardPhase,
+  KeyboardKeyDetail,
+  KeyboardChordDetail,
+  KeyboardController,
+  AttachKeyboardOptions,
+  BindChordOptions,
+  MouseButton,
+  MousePhase,
+  MousePoint,
+  MouseDetail,
+  MouseController,
+  AttachMouseOptions,
+  MediaHotkeyHandlers,
+  MediaHotkeyOptions,
 } from './core/index.js';
 
 export {
@@ -218,7 +259,12 @@ export {
 } from './components/feedback/sound-fx.js';
 export {
   AudioPlayerSpecs,
+  resolveAudioPlayerVariant,
   type AudioTrack,
+  type AudioPlayerVariant,
+  type AudioPlayerVariantAlias,
+  type AudioPlayerView,
+  type AudioRepeatMode,
 } from './components/media/audio-player.js';
 export type { K3SoundFx } from './components/feedback/sound-fx.js';
 export type { K3AudioPlayer } from './components/media/audio-player.js';

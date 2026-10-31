@@ -3,6 +3,9 @@
  * Class: .k3-scroll
  * Tokens: --k3-scroll-size (6dp) · --k3-scroll-track-inset
  *
+ * Rounded corners: --k3-scroll-track-inset MUST be ≥ border-radius so the thumb
+ * never cuts through the curve (WebKit gutter is rectangular).
+ *
  * Keep in sync with src/core/scrollbar.ts (Lit constructable sheet for shadow).
  * Do NOT set scrollbar-width/color on WebKit hosts (Chromium 121+ arrows bug).
  */

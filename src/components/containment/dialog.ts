@@ -16,6 +16,11 @@ import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
 import { dialogStyles } from './dialog.styles.js';
 import { deriveDialogFooterChrome } from './dialog-chrome.js';
+import {
+  registerSheetChromeHost,
+  unregisterSheetChromeHost,
+  recomputeSheetChromeShift,
+} from './sheet-chrome-shift.js';
 
 /**
  * Dialog variant — M3 anatomy.
@@ -133,6 +138,24 @@ export class K3Dialog extends K3Element {
     return this.enterPromise;
   }
 
+  /** Dialogs always act as modal overlays for floating chrome. */
+  get modal(): boolean {
+    return true;
+  }
+
+  /** Used by sheet-chrome-shift. */
+  isSheetVisible(): boolean {
+    return this.visible || this.open;
+  }
+
+  /** Dialog panel bounds — FAB perimeter conceal. */
+  getOverlayZone(): DOMRectReadOnly | null {
+    const el = this.panelEl;
+    if (!el || !(this.visible || this.open)) return null;
+    const r = el.getBoundingClientRect();
+    return r.width >= 1 && r.height >= 1 ? r : null;
+  }
+
   async show(): Promise<boolean> {
     const ok = await runOpenClose(
       this,
@@ -152,6 +175,9 @@ export class K3Dialog extends K3Element {
       },
       { source: 'api' },
     );
+    if (ok) {
+      requestAnimationFrame(() => recomputeSheetChromeShift());
+    }
     return ok;
   }
 
@@ -169,6 +195,7 @@ export class K3Dialog extends K3Element {
       { source },
     );
     if (ok) this.restoreLayer();
+    recomputeSheetChromeShift();
     return ok;
   }
 
@@ -214,6 +241,7 @@ export class K3Dialog extends K3Element {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    registerSheetChromeHost(this);
     if (typeof matchMedia === 'function') {
       this.compactMq = matchMedia(COMPACT_MQ);
       this.compact = this.compactMq.matches;
@@ -230,10 +258,16 @@ export class K3Dialog extends K3Element {
     /* Attribute `open` without show() — enter path only (no 2nd open-start) */
     if (changed.has('open')) {
       if (this.open && !this.visible) {
-        void this.playEnter();
+        void this.playEnter().then(() => {
+          requestAnimationFrame(() => recomputeSheetChromeShift());
+        });
       } else if (!this.open && !this.visible) {
         this.restoreLayer();
+        recomputeSheetChromeShift();
       }
+    }
+    if (changed.has('visible') && this.visible) {
+      requestAnimationFrame(() => recomputeSheetChromeShift());
     }
     if (
       changed.has('variant') ||
@@ -253,6 +287,7 @@ export class K3Dialog extends K3Element {
     this.compactMq = null;
     /* Reparent to body fires disconnect — keep home markers for restore */
     if (!this.portal.isElevating) {
+      unregisterSheetChromeHost(this);
       this.portal.clearHome();
     }
     super.disconnectedCallback();

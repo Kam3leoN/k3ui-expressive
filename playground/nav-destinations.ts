@@ -19,6 +19,13 @@ export interface ComponentMenuGroup {
   labelKey: string;
 }
 
+/** Internal pages under the Resources rail destination (Sober-like). */
+export interface ResourcePage {
+  id: string;
+  icon: string;
+  labelKey: string;
+}
+
 export const COMPONENT_MENU_GROUPS: ComponentMenuGroup[] = [
   { category: 'Buttons', icon: 'touch_app', labelKey: 'doc.nav.buttons' },
   { category: 'Actions', icon: 'gesture', labelKey: 'doc.nav.actions' },
@@ -26,6 +33,15 @@ export const COMPONENT_MENU_GROUPS: ComponentMenuGroup[] = [
   { category: 'Feedback', icon: 'notifications', labelKey: 'doc.nav.feedback' },
   { category: 'Containment', icon: 'dashboard', labelKey: 'doc.nav.containment' },
   { category: 'Navigation', icon: 'menu', labelKey: 'doc.nav.navigation' },
+];
+
+/** Material Symbols browser — ligatures only (no ms-icon package). */
+export const RESOURCE_PAGES: ResourcePage[] = [
+  {
+    id: 'material-symbols',
+    icon: 'mood',
+    labelKey: 'doc.nav.resources.material-symbols',
+  },
 ];
 
 export const NAV_DESTINATIONS: NavDestination[] = [
@@ -55,6 +71,13 @@ export const NAV_DESTINATIONS: NavDestination[] = [
     category: 'Styles',
     icon: 'palette',
     labelKey: 'doc.nav.styles',
+    href: '',
+  },
+  {
+    id: 'resources',
+    category: 'Resources',
+    icon: 'inventory_2',
+    labelKey: 'doc.nav.resources',
     href: '',
   },
 ];
@@ -88,6 +111,9 @@ export function destinationForPage(
   }
   if (cat === 'Utilities') {
     return NAV_DESTINATIONS.find((d) => d.id === 'utilities') ?? null;
+  }
+  if (cat === 'Resources') {
+    return NAV_DESTINATIONS.find((d) => d.id === 'resources') ?? null;
   }
   if (isComponentCategory(cat)) {
     return NAV_DESTINATIONS.find((d) => d.id === 'components') ?? null;

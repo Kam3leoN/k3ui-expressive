@@ -25,9 +25,12 @@ export const sliderStyles = css`
 
   :host {
     display: block;
+    position: relative;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    /* Resting — stay in flow; elevated only while the value bubble is shown */
+    z-index: 0;
     --k3-slider-track: var(--k3-sys-color-secondary-container);
     --k3-slider-active: var(--k3-sys-color-primary);
     --k3-slider-handle: var(--k3-sys-color-primary);
@@ -53,6 +56,10 @@ export const sliderStyles = css`
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
+  }
+  /* Temporary elevation while dragging — bubble must clear sibling chrome (FAB play, etc.) */
+  :host([data-vi-active]) {
+    z-index: var(--k3-slider-vi-elevate-z, 40);
   }
   /* Color roles — active + handle + on-active stops/icon. */
   :host([color='secondary']) {
@@ -275,7 +282,11 @@ export const sliderStyles = css`
     flex: 1 1 auto;
     width: 100%;
     min-width: 0;
-    min-height: var(--k3-slider-handle-h, 44px);
+    /* ≥ handle / 48dp target so the input hit area isn’t clipped */
+    min-height: max(
+      var(--k3-slider-handle-h, 44px),
+      var(--k3-sys-touch-target, 3rem)
+    );
     cursor: pointer;
     /* Single press clock — hw + pad + origin gap lockstep. */
     --k3-slider-hw: var(--k3-slider-hw-rest, 4px);
@@ -294,10 +305,16 @@ export const sliderStyles = css`
   :host([orientation='vertical']) .area {
     flex-direction: column;
     flex: 0 0 auto;
-    width: var(--k3-slider-handle-h, 44px);
+    width: max(
+      var(--k3-slider-handle-h, 44px),
+      var(--k3-sys-touch-target, 3rem)
+    );
     height: var(--k3-slider-vertical-len, 192px);
     min-height: var(--k3-slider-vertical-len, 192px);
-    min-width: var(--k3-slider-handle-h, 44px);
+    min-width: max(
+      var(--k3-slider-handle-h, 44px),
+      var(--k3-sys-touch-target, 3rem)
+    );
   }
 
   .track {
@@ -395,27 +412,47 @@ export const sliderStyles = css`
   }
 
   /*
-   * Handle — width/height = --k3-slider-hw (same clock as --k3-slider-pad).
-   * z-index above stops so the handle covers its discrete stop.
+   * Handle = ≥48×48 input target (same idea as switch / radio / checkbox
+   * target), with painted thumb inside + k3-state-layer.
+   * Box ≥ max(touch-target, handle cross-axis) so md+ thumbs are not clipped.
    */
   .handle {
+    --k3-slider-handle-target: max(
+      var(--k3-sys-touch-target, 3rem),
+      var(--k3-slider-handle-h, 44px)
+    );
     position: absolute;
     top: 50%;
-    width: var(--k3-slider-hw, 4px);
-    height: var(--k3-slider-handle-h, 44px);
+    box-sizing: border-box;
+    width: var(--k3-slider-handle-target);
+    height: var(--k3-slider-handle-target);
     border-radius: var(--k3-sys-shape-corner-full, 999px);
-    background: var(--k3-slider-handle);
+    background: transparent;
+    color: var(--k3-slider-handle);
+    display: grid;
+    place-items: center;
     z-index: 2;
     touch-action: none;
     transform: translate(-50%, -50%);
     transform-origin: center center;
   }
+  .handle .thumb {
+    box-sizing: border-box;
+    width: var(--k3-slider-hw, 4px);
+    height: var(--k3-slider-handle-h, 44px);
+    border-radius: var(--k3-sys-shape-corner-full, 999px);
+    background: var(--k3-slider-handle);
+    pointer-events: none;
+    z-index: 1;
+  }
   :host([orientation='vertical']) .handle {
     left: 50%;
     top: auto; /* bottom set inline — min at bottom */
+    transform: translate(-50%, 50%);
+  }
+  :host([orientation='vertical']) .handle .thumb {
     width: var(--k3-slider-handle-h, 44px);
     height: var(--k3-slider-hw, 4px);
-    transform: translate(-50%, 50%);
   }
   /* top-to-bottom: min at top — position via top %, center on axis. */
   :host([orientation='vertical'][top-to-bottom]) .handle {

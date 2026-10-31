@@ -12,6 +12,8 @@ import { registry } from '../registry/register.js';
 import { haptic } from '../core/haptic.js';
 import { dnd } from '../core/dnd.js';
 import { gestures, defineGestureElements } from '../core/gestures/index.js';
+import { keyboard } from '../core/keyboard.js';
+import { mouse } from '../core/mouse.js';
 import { watchIconLigatures } from '../icons/ligature.js';
 import { showSnackbar, snackbarQueue } from '../components/feedback/snackbar-queue.js';
 // Styles are imported from src/index.ts / playground — keep runtime free of CSS side-effects.
@@ -41,6 +43,8 @@ export interface K3UIGlobal {
   haptic: typeof haptic;
   dnd: typeof dnd;
   gestures: typeof gestures;
+  keyboard: typeof keyboard;
+  mouse: typeof mouse;
   snackbar: {
     show: typeof showSnackbar;
     queue: typeof snackbarQueue;
@@ -113,6 +117,8 @@ export async function init(options?: InitOptions): Promise<K3UIGlobal> {
     haptic,
     dnd,
     gestures,
+    keyboard,
+    mouse,
     snackbar: { show: showSnackbar, queue: snackbarQueue },
   };
 

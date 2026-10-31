@@ -8,6 +8,9 @@ export type TextFieldType =
   | 'search'
   | 'tel'
   | 'url'
-  | 'number';
+  | 'number'
+  | 'date'
+  | 'time'
+  | 'datetime-local';
 
 export type PinCharset = 'numeric' | 'alpha' | 'alphanumeric';

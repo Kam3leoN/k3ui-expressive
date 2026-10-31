@@ -227,3 +227,42 @@ export function indicatorAmplitudeFactor(progress: number): number {
   if (p > 0.85) return (0.95 - p) / 0.1;
   return 1;
 }
+
+/**
+ * Mirrored vertical-bar waveform (podcast / oscilloscope seek).
+ * Peaks must come from real PCM (`waveform-pcm`) — not procedural noise.
+ * `frac` = played portion 0..1; bars left of the playhead use `active`.
+ */
+export function drawOscillationBars(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  frac: number,
+  peaks: ArrayLike<number>,
+  active: string,
+  track: string,
+  rtl = false,
+): void {
+  const W = Math.max(0, width);
+  const H = Math.max(0, height);
+  if (!W || !H || !peaks.length) return;
+  const bar = Math.max(1.5, Math.min(3, W / 120));
+  const gap = Math.max(1, bar * 0.65);
+  const step = bar + gap;
+  const n = Math.max(1, Math.floor((W - bar) / step) + 1);
+  const cy = H / 2;
+  const maxHalf = H * 0.46;
+  const f = Math.min(1, Math.max(0, frac));
+
+  for (let i = 0; i < n; i++) {
+    const x = bar / 2 + i * step;
+    if (x > W - bar / 2) break;
+    const amp = peaks[i % peaks.length] ?? 0.4;
+    const half = Math.max(bar, amp * maxHalf);
+    const t = x / W;
+    const played = rtl ? t >= 1 - f : t <= f;
+    ctx.fillStyle = played ? active : track;
+    roundRect(ctx, x - bar / 2, cy - half, bar, half * 2, bar / 2);
+    ctx.fill();
+  }
+}

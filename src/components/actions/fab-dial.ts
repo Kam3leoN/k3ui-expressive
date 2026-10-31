@@ -1,4 +1,4 @@
-import { html, nothing, type PropertyValues } from 'lit';
+import { html, nothing, unsafeCSS, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -26,6 +26,7 @@ import {
   type FabDialPhase,
 } from './fab-dial.specs.js';
 import { fabDialStyles } from './fab-dial.styles.js';
+import { fabVisibilityCss } from './fab-visibility.js';
 
 export type {
   FabCornerPosition,
@@ -78,7 +79,7 @@ function parseItemsAttr(value: string | null): FabDialItem[] {
  * @see ./fab-dial.specs.ts
  */
 export class K3FabDial extends K3Element {
-  static override styles = [hostReset, fabDialStyles];
+  static override styles = [hostReset, unsafeCSS(fabVisibilityCss), fabDialStyles];
 
   private static activeDial: K3FabDial | null = null;
 

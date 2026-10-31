@@ -41,17 +41,32 @@
   }
 
   /*
-   * Modal sheet open — M3 FAB: disappear / reappear on layout change.
+   * Modal sheet/dialog open — sticky audio (FABs use perimeter show/hide).
    * Toggled by sheet-chrome-shift (`data-k3-sheet-chrome-hidden` on <html>).
    */
-  html[data-k3-sheet-chrome-hidden] k3-fab-menu[fixed],
-  html[data-k3-sheet-chrome-hidden] k3-fab-dial[fixed],
-  html[data-k3-sheet-chrome-hidden] k3-fab-rail[fixed],
-  html[data-k3-sheet-chrome-hidden] k3-scroll-to-top,
   html[data-k3-sheet-chrome-hidden] k3-audio-player[variant='sticky'] {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
+  }
+
+  /*
+   * Fab-menu expansion / overlay conceal — peers without show/hide
+   * (k3-button, …). FABs animate via fab-visibility + `hidden`.
+   */
+  [data-k3-fab-menu-concealed],
+  [data-k3-overlay-concealed] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: scale(0.8);
+    transition:
+      opacity var(--k3-sys-motion-duration-short4, 200ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+      transform var(--k3-sys-motion-duration-short4, 200ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+      visibility var(--k3-sys-motion-duration-short4, 200ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1));
   }
 }
 

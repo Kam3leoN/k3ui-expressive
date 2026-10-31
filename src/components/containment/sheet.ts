@@ -438,6 +438,14 @@ export class K3Sheet extends K3Element {
     return this.visible;
   }
 
+  /** Sheet panel bounds — FAB perimeter conceal (not the scrim). */
+  getOverlayZone(): DOMRectReadOnly | null {
+    const el = this.sheetEl;
+    if (!el || !this.visible) return null;
+    const r = el.getBoundingClientRect();
+    return r.width >= 1 && r.height >= 1 ? r : null;
+  }
+
   async show(): Promise<boolean> {
     const ok = await runOpenClose(
       this,

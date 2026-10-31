@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   SLIDER_HANDLE_GAP,
   SLIDER_HANDLE_GAP_PRESSED,
+  SLIDER_HANDLE_TARGET_DP,
   SLIDER_HANDLE_WIDTH_PRESSED,
   SLIDER_ICON_MIN_PAIRS,
   SLIDER_SIZES,
@@ -39,6 +40,7 @@ describe('slider tokens (M3 Expressive)', () => {
     expect(SLIDER_STOP).toBe(4);
     expect(SLIDER_STOP_EDGE_INSET).toBe(6);
     expect(SLIDER_VALUE_INDICATOR_GAP).toBe(4);
+    expect(SLIDER_HANDLE_TARGET_DP).toBe(48);
   });
 
   it('allows inset icon only on standard · md+', () => {

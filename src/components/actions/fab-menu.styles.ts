@@ -76,7 +76,7 @@ export const fabMenuStyles = css`
     --k3-fab-menu-origin: right center;
   }
 
-  /* ── Corner dock (16dp) + nav-bar lift · sheet hide via html attr ── */
+  /* ── Corner dock (16dp) + nav-bar lift · sheet/dialog via fab-visibility ── */
   :host([fixed]) {
     position: fixed;
     inset-inline-end: var(--k3-fab-menu-edge);

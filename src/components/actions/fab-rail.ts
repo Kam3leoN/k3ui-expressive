@@ -1,4 +1,4 @@
-import { html, nothing, type PropertyValues } from 'lit';
+import { html, nothing, unsafeCSS, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -28,6 +28,7 @@ import {
   type FabRailPhase,
 } from './fab-rail.specs.js';
 import { fabRailStyles } from './fab-rail.styles.js';
+import { fabVisibilityCss } from './fab-visibility.js';
 
 export type {
   FabCornerPosition,
@@ -82,7 +83,7 @@ function parseItemsAttr(value: string | null): FabRailItem[] {
  * @see ./fab-rail.specs.ts
  */
 export class K3FabRail extends K3Element {
-  static override styles = [hostReset, fabRailStyles];
+  static override styles = [hostReset, unsafeCSS(fabVisibilityCss), fabRailStyles];
 
   private static activeRail: K3FabRail | null = null;
 

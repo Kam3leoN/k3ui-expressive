@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { init } from '../../src/index.js';
 import {
   FabMenuSpecs,
@@ -213,6 +213,41 @@ describe('k3-fab-menu lifecycle', () => {
     expect(endItems.every((i) => !i.hasAttribute('data-icon-end'))).toBe(true);
     expect(startItems.every((i) => i.hasAttribute('data-icon-end'))).toBe(true);
   });
+
+  it('conceals overlapping peer FABs while open and restores on hide', async () => {
+    host.innerHTML = `
+      <k3-fab id="peer"></k3-fab>
+      <k3-fab-menu id="menu">
+        <k3-fab-menu-item>One</k3-fab-menu-item>
+        <k3-fab-menu-item>Two</k3-fab-menu-item>
+      </k3-fab-menu>
+    `;
+    const menu = host.querySelector('#menu') as HTMLElement & {
+      show: () => Promise<boolean>;
+      hide: () => Promise<boolean>;
+      updateComplete: Promise<unknown>;
+    };
+    const peer = host.querySelector('#peer') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+    };
+    await menu.updateComplete;
+    await peer.updateComplete;
+
+    vi.spyOn(menu, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(100, 300, 56, 56),
+    );
+    vi.spyOn(peer, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(100, 120, 56, 56),
+    );
+
+    await menu.show();
+    expect(peer.hasAttribute('data-k3-fab-menu-concealed') || peer.hasAttribute('hidden')).toBe(
+      true,
+    );
+
+    await menu.hide();
+    expect(peer.hasAttribute('data-k3-fab-menu-concealed')).toBe(false);
+  }, 10_000);
 
   it('ArrowDown / ArrowRight move focus through items then close FAB', async () => {
     host.innerHTML = `

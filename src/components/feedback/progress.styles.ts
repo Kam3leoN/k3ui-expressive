@@ -1,7 +1,7 @@
 import { css } from 'lit';
 
 /**
- * Host chrome for `k3-progress` — drawing is canvas (M3E flat / wavy).
+ * Host chrome for `k3-progress` — drawing is canvas (M3E flat / wavy / oscillation).
  *
  * Slot contract:
  * - `leading` → label (± icon)
@@ -26,6 +26,22 @@ export const progressStyles = css`
     --k3-progress-track: var(--k3-sys-color-secondary-container);
     --k3-progress-stop: var(--k3-sys-color-primary);
     --k3-progress-size: 40px;
+  }
+
+  :host([interactive]:not([indeterminate])) {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+  }
+
+  :host([interactive]:not([indeterminate]):focus-visible) {
+    outline: 2px solid var(--k3-sys-color-primary);
+    outline-offset: 2px;
+    border-radius: var(--k3-sys-shape-corner-extra-small, 0.25rem);
+  }
+
+  :host([interactive][data-dragging]) {
+    cursor: grabbing;
   }
   :host([variant='circular']) {
     display: inline-block;
@@ -214,6 +230,9 @@ export const progressStyles = css`
   }
   :host([variant='linear']) .indicator {
     width: 100%;
+  }
+  :host([variant='linear'][shape='oscillation']) .indicator {
+    min-height: 2.25rem;
   }
   :host([variant='linear']) canvas {
     width: 100% !important; /* override leftover circular inline size */

@@ -42,6 +42,7 @@ const WIDE_TAG = new Set([
   'k3-slider',
   'k3-progress',
   'k3-card',
+  'k3-carousel',
   'k3-menu',
   'k3-avatar-group',
 ]);
@@ -180,6 +181,7 @@ export function promoteDemoHost(host: Element): boolean {
   if (host.closest('.demo-frame, .demo-block, .doc-usage, pre, code, .code-sample')) return false;
   if (host.matches(SKIP_HOST)) return false;
   if (host.dataset.demoEnhance === 'off') return false;
+  if (host.closest('[data-demo-enhance="off"]')) return false;
   if (host.closest(SKIP_PAGE)) return false;
 
   const kids = [...host.children].filter(isEl).filter((k) => !isOverlayControl(k));
@@ -299,6 +301,7 @@ function isWrapTarget(el: HTMLElement): boolean {
 export function wrapStackControlRuns(stack: HTMLElement): number {
   if (stack.closest(SKIP_PAGE)) return 0;
   if (stack.dataset.demoEnhance === 'off') return 0;
+  if (stack.closest('[data-demo-enhance="off"]')) return 0;
   if (stack.closest('.demo-block, .demo-frame, .doc-usage')) return 0;
 
   const children = [...stack.children].filter(isEl);

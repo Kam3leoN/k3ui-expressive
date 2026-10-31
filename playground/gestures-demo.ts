@@ -21,6 +21,8 @@ import {
   attachDraggable,
   attachDroppable,
 } from '../src/core/dnd.js';
+import { attachKeyboard, bindChords } from '../src/core/keyboard.js';
+import { attachMouse } from '../src/core/mouse.js';
 
 let wired = false;
 
@@ -193,6 +195,74 @@ export function wireUtilityDemos(): void {
         ),
       ),
     );
+  }
+
+  /* Keyboard */
+  const kbPad = document.getElementById('kb-pad');
+  if (kbPad) {
+    const kb = attachKeyboard(kbPad);
+    kb.on('down', (d) => {
+      log('kb-pad-log', `↓ ${d.key} · [${[...d.pressed].join(' + ')}]`);
+      kbPad.classList.add('is-flash');
+    });
+    kb.on('up', (d) => {
+      log('kb-pad-log', `↑ ${d.key} · [${[...d.pressed].join(' + ') || '—'}]`);
+      if (!d.pressed.size) kbPad.classList.remove('is-flash');
+    });
+  }
+
+  const kbChord = document.getElementById('kb-chord-pad');
+  if (kbChord) {
+    bindChords(
+      kbChord,
+      {
+        'control+k': () => {
+          log('kb-chord-log', '✓ control+k');
+          kbChord.classList.add('is-flash');
+          setTimeout(() => kbChord.classList.remove('is-flash'), 200);
+        },
+        'control+shift+k': () => {
+          log('kb-chord-log', '✓ control+shift+k');
+          kbChord.classList.add('is-flash');
+          setTimeout(() => kbChord.classList.remove('is-flash'), 200);
+        },
+      },
+      { ignoreFields: true },
+    );
+  }
+
+  /* Mouse */
+  const mousePad = document.getElementById('mouse-pad');
+  const mouseDot = document.getElementById('mouse-pad-dot');
+  if (mousePad) {
+    const m = attachMouse(mousePad, { preventContextMenu: true });
+    const placeDot = (x: number, y: number) => {
+      if (!mouseDot) return;
+      const r = mousePad.getBoundingClientRect();
+      mouseDot.style.left = `${x - r.left}px`;
+      mouseDot.style.top = `${y - r.top}px`;
+      mouseDot.style.margin = '-1.25rem 0 0 -1.25rem';
+    };
+    m.on('move', (d) => {
+      placeDot(d.clientX, d.clientY);
+      log('mouse-pad-log', `move ${Math.round(d.x)},${Math.round(d.y)}`);
+    });
+    m.on('down', (d) => log('mouse-pad-log', `↓ ${d.button}`));
+    m.on('up', (d) => log('mouse-pad-log', `↑ ${d.button}`));
+    m.on('click', (d) => log('mouse-pad-log', `click ${d.button}`));
+    m.on('dblclick', () => log('mouse-pad-log', 'dblclick'));
+    m.on('dragstart', () => {
+      mousePad.classList.add('is-flash');
+      log('mouse-pad-log', 'dragstart');
+    });
+    m.on('drag', (d) =>
+      log('mouse-pad-log', `drag Δ${Math.round(d.totalX)},${Math.round(d.totalY)}`),
+    );
+    m.on('dragend', () => {
+      mousePad.classList.remove('is-flash');
+      log('mouse-pad-log', 'dragend');
+    });
+    m.on('wheel', (d) => log('mouse-pad-log', `wheel ${Math.round(d.deltaY)}`));
   }
 
   /* DnD page */

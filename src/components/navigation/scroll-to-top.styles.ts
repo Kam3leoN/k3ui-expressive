@@ -82,6 +82,15 @@ export const scrollToTopStyles = css`
     transform: none;
   }
 
+  /* Peer conceal — fab-menu expansion or sheet/dialog overlay. */
+  :host([data-k3-fab-menu-concealed]),
+  :host([data-k3-overlay-concealed]) {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden;
+    transform: scale(0.8);
+  }
+
   .control {
     position: relative;
     display: block;

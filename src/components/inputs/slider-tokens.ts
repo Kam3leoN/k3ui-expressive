@@ -41,6 +41,8 @@ export const SLIDER_VALUE_INDICATOR_W = 48;
 export const SLIDER_VALUE_INDICATOR_H = 44;
 /** Gap between handle tip and value-indicator bubble (all sizes). */
 export const SLIDER_VALUE_INDICATOR_GAP = 4;
+/** Invisible handle hit target (dp) — M3 min touch / `--k3-sys-touch-target`. */
+export const SLIDER_HANDLE_TARGET_DP = 48;
 
 export const SLIDER_SIZES: Record<SliderSize, SliderSizeTokens> = {
   xs: { track: 16, handle: 44, handleWidth: 4, corner: 8, icon: 0, verticalLen: 192 },
