@@ -22,11 +22,21 @@ describe('k3-confetti', () => {
     document.querySelectorAll('body > canvas').forEach((c) => c.remove());
   });
 
-  it('registers and exposes fire / presetFire', async () => {
+  it('registers and exposes fire / presetFire / rain', async () => {
     expect(customElements.get('k3-confetti')).toBeTruthy();
     expect(typeof el.fire).toBe('function');
     expect(typeof el.presetFire).toBe('function');
+    expect(typeof el.rain).toBe('function');
     expect(el.getAttribute('role')).toBe('presentation');
+  });
+
+  it('rain() emits start and schedules particles', async () => {
+    const onStart = vi.fn();
+    el.addEventListener('k3-confetti-start', onStart);
+    el.rain({ count: 3, gravity: 0.9, duration: 0.2 });
+    expect(onStart).toHaveBeenCalled();
+    expect(ConfettiPresets.rain).toBeTypeOf('function');
+    expect(ConfettiPresets.fireRain).toBeTypeOf('function');
   });
 
   it('fire() emits start and resolves (jsdom may skip paint)', async () => {

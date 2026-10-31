@@ -12,7 +12,10 @@ import {
 import {
   ConfettiPresets,
   firePreset,
+  fireRain,
+  rain,
   type ConfettiPresetTarget,
+  type ConfettiRainOptions,
 } from './confetti/confetti.presets.js';
 import {
   ConfettiSpecs,
@@ -20,12 +23,14 @@ import {
 } from './confetti/confetti.specs.js';
 import { confettiStyles } from './confetti/confetti.styles.js';
 
-export type { ConfettiFireOptions, ConfettiPresetId };
+export type { ConfettiFireOptions, ConfettiPresetId, ConfettiRainOptions };
 export {
   ConfettiCannon,
   ConfettiPresets,
   ConfettiSpecs,
   firePreset,
+  fireRain,
+  rain,
   shapeFromPath,
   shapeFromText,
 };
@@ -33,7 +38,7 @@ export {
 /**
  * Confetti effect — vendored canvas-confetti engine (no npm dep).
  *
- * Imperative: `el.fire()`, `el.preset('basic')`, or `ConfettiPresets.fireBasic()`.
+ * Imperative: `el.fire()`, `el.presetFire('basic')`, `el.rain()`, or `ConfettiPresets.fireBasic()`.
  * Attribute `preset` + `auto-fire` fires on connect.
  *
  * @fires k3-confetti-start — before a burst
@@ -117,6 +122,15 @@ export class K3Confetti extends K3Element {
   presetFire(id: ConfettiPresetId): void {
     this.emit('k3-confetti-start', { preset: id });
     firePreset(id, this.ensureCannon() as ConfettiPresetTarget);
+  }
+
+  /**
+   * Confetti rain from the top of the viewport.
+   * @example el.rain({ count: 250, gravity: 0.9, duration: 3 })
+   */
+  rain(options: ConfettiRainOptions = {}): void {
+    this.emit('k3-confetti-start', { preset: 'rain', options });
+    fireRain(this.ensureCannon() as ConfettiPresetTarget, options);
   }
 
   /** Stop / clear the current animation. */

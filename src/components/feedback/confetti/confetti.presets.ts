@@ -11,7 +11,19 @@ import {
   type ConfettiFireShape,
   type ConfettiPathShape,
 } from './confetti-engine.js';
-import type { ConfettiPresetId } from './confetti.specs.js';
+import { ConfettiSpecs, type ConfettiPresetId } from './confetti.specs.js';
+
+/** Options for the top-down confetti rain effect. */
+export type ConfettiRainOptions = {
+  /** Total particles to launch (default 250). */
+  count?: number;
+  /** Base gravity multiplier (default 0.9). */
+  gravity?: number;
+  /** Effect length in seconds — launch window is 60 % of this (default 3). */
+  duration?: number;
+  /** Palette; defaults to the rain preset colours. */
+  colors?: readonly string[];
+};
 
 export type ConfettiPresetTarget = ConfettiCannon | HTMLElement | undefined;
 
@@ -228,6 +240,61 @@ export function fireEmoji(target?: ConfettiPresetTarget): void {
   });
 }
 
+/**
+ * Confetti rain — particles spawn above the viewport and fall for `duration` seconds.
+ * Launch window = 60 % of duration (rAF-paced, one particle per shot).
+ *
+ * @example
+ * rain({ count: 250, gravity: 0.9, duration: 3 });
+ */
+export function fireRain(
+  target?: ConfettiPresetTarget,
+  options: ConfettiRainOptions = {},
+): void {
+  const instance = resolveCannon(target);
+  if (!instance) return;
+
+  const defaults = ConfettiSpecs.rain;
+  const count = Math.max(0, Math.floor(options.count ?? defaults.count));
+  const gravity = options.gravity ?? defaults.gravity;
+  const duration = Math.max(0.1, options.duration ?? defaults.duration);
+  const palette = options.colors?.length ? options.colors : defaults.colors;
+  if (count === 0) return;
+
+  const launchMs = duration * 600;
+  const start = performance.now();
+  let fired = 0;
+
+  const frame = (now: number) => {
+    const targetCount = Math.min(
+      count,
+      Math.round((count * (now - start)) / launchMs),
+    );
+    for (; fired < targetCount; fired++) {
+      void instance.fire({
+        particleCount: 1,
+        origin: { x: Math.random(), y: -0.05 - Math.random() * 0.2 },
+        angle: 270,
+        spread: 70,
+        startVelocity: 8 + Math.random() * 14,
+        gravity: gravity * (0.85 + Math.random() * 0.3),
+        drift: (Math.random() - 0.5) * 1.2,
+        decay: 0.93,
+        ticks: 600,
+        scalar: 0.9 + Math.random() * 0.6,
+        colors: [palette[Math.floor(Math.random() * palette.length)]!],
+      });
+    }
+    if (fired < count) requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+/** Alias — same as `fireRain` without a target (fullscreen cannon). */
+export function rain(options: ConfettiRainOptions = {}): void {
+  fireRain(undefined, options);
+}
+
 const PRESET_MAP: Record<ConfettiPresetId, (t?: ConfettiPresetTarget) => void> = {
   basic: fireBasic,
   random: fireRandom,
@@ -237,6 +304,7 @@ const PRESET_MAP: Record<ConfettiPresetId, (t?: ConfettiPresetTarget) => void> =
   snow: fireSnow,
   'school-pride': fireSchoolPride,
   shapes: fireShapes,
+  rain: (t) => fireRain(t),
 };
 
 /** Run a named preset by id. */
@@ -257,5 +325,7 @@ export const ConfettiPresets = {
   fireSchoolPride,
   fireShapes,
   fireEmoji,
+  fireRain,
+  rain,
   firePreset,
 };

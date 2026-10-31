@@ -763,11 +763,15 @@ end?.addEventListener("k3-change", () => {
     html: `<k3-confetti id="celebrate"></k3-confetti>
 <k3-button variant="filled" onclick="document.getElementById('celebrate').presetFire('basic')">
   Celebrate
+</k3-button>
+<k3-button variant="tonal" onclick="document.getElementById('celebrate').rain()">
+  Rain
 </k3-button>`,
-    jsExtra: `import { ConfettiPresets } from 'k3ui';
+    jsExtra: `import { ConfettiPresets, rain } from 'k3ui';
 // Imperative (no element required):
 ConfettiPresets.fireBasic();
-ConfettiPresets.fireFireworks();`,
+ConfettiPresets.fireFireworks();
+rain({ count: 250, gravity: 0.9, duration: 3 });`,
   },
   'sound-fx': {
     components: ['k3-sound-fx', 'k3-button'],

@@ -46,7 +46,27 @@ export const ConfettiSpecs = {
     'stars',
     'snow',
     'shapes',
+    'rain',
   ] as const,
+  /** Defaults for `rain()` — particle drizzle from the top. */
+  rain: {
+    count: 250,
+    gravity: 0.9,
+    duration: 3,
+    colors: [
+      '#e67e22',
+      '#2ecc71',
+      '#3498db',
+      '#84AAC2',
+      '#E6D68D',
+      '#F67933',
+      '#42A858',
+      '#4F50A2',
+      '#A86BB7',
+      '#e74c3c',
+      '#1abc9c',
+    ] as const,
+  },
 };
 
 export type ConfettiPresetId = (typeof ConfettiSpecs.presets)[number];

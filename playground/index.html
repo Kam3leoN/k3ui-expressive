@@ -9436,8 +9436,8 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
             <p class="doc-intro" data-i18n="doc.confetti.intro">
               Confetti celebrates success states with particle bursts. The engine is a TypeScript port
               of Kiril Vatev’s canvas-confetti, shipped inside K3ui so you never add that package. Use
-              fire(), named presets, or custom SVG path shapes. Reduced motion is honored by
-              default.
+              fire(), rain() for a top-down drizzle, named presets, or custom SVG path shapes. Reduced
+              motion is honored by default.
             </p>
           </header>
           <k3-confetti id="demo-confetti"></k3-confetti>
@@ -9537,6 +9537,17 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">8</span>
               </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-button
+                    variant="filled"
+                    data-confetti-preset="rain"
+                    data-i18n="confetti.preset.rain"
+                    >Rain</k3-button
+                  >
+                </div>
+                <span class="demo-case-num" aria-hidden="true">9</span>
+              </div>
             </div>
             <ol class="variant-guide">
               <li>
@@ -9572,6 +9583,10 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
               <li>
                 <span class="pill-num">8</span
                 ><span class="variant-label" data-i18n="confetti.preset.shapes">Custom shapes</span>
+              </li>
+              <li>
+                <span class="pill-num">9</span
+                ><span class="variant-label" data-i18n="confetti.preset.rain">Rain</span>
               </li>
             </ol>
           </div>

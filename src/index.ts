@@ -244,10 +244,13 @@ export {
   ConfettiPresets,
   ConfettiSpecs,
   firePreset,
+  fireRain,
+  rain,
   shapeFromPath,
   shapeFromText,
   type ConfettiFireOptions,
   type ConfettiPresetId,
+  type ConfettiRainOptions,
 } from './components/feedback/confetti.js';
 export {
   getSoundFx,
