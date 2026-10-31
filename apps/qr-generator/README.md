@@ -30,11 +30,18 @@ npm run preview:qr
 
 Yes — a static deploy of this app works (unlike opening `index.html` as `file://`).
 
-Production (`k3ui-expressive.vercel.app`) builds this app via the repo-root `vercel.json`:
+Hosted separately from the playground docs:
 
-- Install: `npm ci` (repo root)
-- Build: `npm run build:qr`
-- Output: `apps/qr-generator/dist`
-- `base: './'` is set so assets resolve on any path
+| Site | URL |
+| --- | --- |
+| Playground / docs | https://k3ui-expressive.vercel.app |
+| This QR app | https://k3ui-apps-qr-generator.vercel.app |
 
-Icons load from `fonts.googleapis.com` at runtime (online). Playground docs stay local (`npm run build:playground`) or on a separate Vercel project if you point one at `playground/dist`.
+Vercel project **`k3ui-apps-qr-generator`** (Root Directory = `apps/qr-generator`, see `vercel.json` here):
+
+- Install: `cd ../.. && npm ci`
+- Build: `cd ../.. && npm run build:qr`
+- Output: `dist`
+- `base: './'` so assets resolve on any path
+
+Icons load from `fonts.googleapis.com` at runtime (online).
