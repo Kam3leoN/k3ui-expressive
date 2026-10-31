@@ -1,9 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = path.resolve('D:/K3ui');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const kind = process.argv[2] || 'patch';
 const pkgPath = path.join(root, 'package.json');
+const lockPath = path.join(root, 'package-lock.json');
 const verPath = path.join(root, 'src/version.ts');
 const changelogPath = path.join(root, 'CHANGELOG.md');
 
@@ -16,7 +18,17 @@ else next = `${maj}.${min}.${pat + 1}`;
 
 pkg.version = next;
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
-fs.writeFileSync(verPath, `/** Semver package version — kept in sync by scripts/bump-version.mjs */\nexport const VERSION = '${next}';\n`);
+fs.writeFileSync(
+  verPath,
+  `/** Semver package version — kept in sync by scripts/bump-version.mjs */\nexport const VERSION = '${next}';\n`,
+);
+
+if (fs.existsSync(lockPath)) {
+  const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+  lock.version = next;
+  if (lock.packages?.['']) lock.packages[''].version = next;
+  fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n');
+}
 
 let log = fs.existsSync(changelogPath) ? fs.readFileSync(changelogPath, 'utf8') : '# Changelog\n\n';
 const stub = `## [${next}] — ${new Date().toISOString().slice(0, 10)}\n\n### Changed\n\n- Version bump (${kind})\n\n`;
