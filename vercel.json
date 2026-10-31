@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "npm ci",
-  "buildCommand": "npm run build:playground",
-  "outputDirectory": "playground/dist",
+  "buildCommand": "npm run build:qr",
+  "outputDirectory": "apps/qr-generator/dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
