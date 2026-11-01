@@ -13,6 +13,13 @@ export default defineConfig({
     include: ['tests/unit/**/*.test.ts', 'apps/*/tests/**/*.test.ts'],
     setupFiles: ['tests/setup.ts'],
     css: true,
+    server: {
+      deps: {
+        /* MCU 0.4.0 ships extension-less relative ESM imports Node cannot resolve —
+           let Vite transform it like in the browser build. */
+        inline: [/@material\/material-color-utilities/],
+      },
+    },
   },
   css: {
     preprocessorOptions: {

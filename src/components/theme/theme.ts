@@ -1,13 +1,7 @@
 import { html, css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { K3Element } from '../../core/index.js';
-import {
-  themeApi,
-  type ColorMode,
-  type MotionScheme,
-  type ColorVariant,
-  type ContrastLevel,
-} from '../../theme/apply.js';
+import { themeApi, type ColorMode, type MotionScheme, type ColorVariant, type ContrastLevel, DEFAULT_COLOR_SPEC, type ColorSpecVersion } from '../../theme/apply.js';
 import { hostReset } from '../_shared.js';
 
 export class K3Theme extends K3Element {
@@ -20,6 +14,8 @@ export class K3Theme extends K3Element {
   /** Theme Builder contrast — default · medium · high */
   @property({ attribute: 'contrast' }) contrast: ContrastLevel = 'default';
   @property({ type: Boolean }) global = true;
+  /** Material color spec — `2025` (default, M3 Expressive) or `2021` (legacy hues). */
+  @property({ attribute: 'spec-version' }) specVersion: ColorSpecVersion = DEFAULT_COLOR_SPEC;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -37,6 +33,7 @@ export class K3Theme extends K3Element {
       motion: this.motion,
       variant: this.colorVariant,
       contrast: this.contrast,
+      specVersion: this.specVersion,
       target: this.global ? document.documentElement : this,
     });
   }

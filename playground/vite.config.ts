@@ -2,8 +2,14 @@ import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import { readFileSync } from 'node:fs';
-import { themeCssVars } from '../src/theme/apply.js';
-import { DEFAULT_THEME, THEME_SEEDS } from './theme-defaults.js';
+import { build as esbuild } from 'esbuild';
+import {
+  DEFAULT_THEME,
+  THEME_CACHE_KEY,
+  THEME_SEEDS,
+  THEME_STORE_KEYS,
+  THEME_STORE_PREFIX,
+} from './theme-defaults.js';
 
 /* Default playground locale — static HTML ships its strings so the first paint
    is final (no English → French swap after boot, which delayed LCP). */
@@ -33,7 +39,31 @@ function compactHtml(html: string): string {
  * app applies at boot. Only used when the visitor kept the default settings
  * (stored under k3ui.doc.theme.*) — a customised theme still comes from JS.
  */
-function prepaintTheme(): string {
+/*
+ * The theme API is bundled with esbuild before use: MCU 0.4.0 ships extension-less
+ * relative ESM imports that Node cannot load directly (bundlers resolve them).
+ */
+type ThemeModule = typeof import('../src/theme/apply.js');
+let themeModule: Promise<ThemeModule> | undefined;
+function loadThemeModule(): Promise<ThemeModule> {
+  themeModule ??= esbuild({
+    entryPoints: [resolve(__dirname, '../src/theme/apply.ts')],
+    bundle: true,
+    format: 'esm',
+    platform: 'node',
+    write: false,
+    logLevel: 'silent',
+  }).then(
+    (out) =>
+      import(
+        `data:text/javascript;base64,${Buffer.from(out.outputFiles[0]!.text).toString('base64')}`
+      ) as Promise<ThemeModule>,
+  );
+  return themeModule;
+}
+
+async function prepaintTheme(): Promise<string> {
+  const { AUTO_LIGHT_END_H, AUTO_LIGHT_START_H, themeCssVars } = await loadThemeModule();
   const seed = THEME_SEEDS[DEFAULT_THEME.seedIdx];
   const vars = themeCssVars({
     seed,
@@ -45,13 +75,23 @@ function prepaintTheme(): string {
     .map(([k, v]) => `${k}:${v}`)
     .join(';');
   const defaults = { ...DEFAULT_THEME, seed };
-  return (
-    `    <style>html[data-k3-prepaint]{${css}}</style>\n` +
-    `    <script>(function(){try{var d=${JSON.stringify(defaults)};for(var k in d){` +
-    `var v=localStorage.getItem('k3ui.doc.theme.'+k);` +
-    `if(v!==null&&String(JSON.parse(v)).toLowerCase()!==String(d[k]).toLowerCase())return}}catch(e){}` +
-    `document.documentElement.setAttribute('data-k3-prepaint','')})()</script>\n`
-  );
+  /*
+   * 1. Returning visitor: replay the variables the app cached last time, when the
+   *    stored settings and the resolved light/dark mode still match.
+   * 2. Default settings: use the build-time theme above.
+   * 3. Otherwise: static tokens until the app applies the theme (unchanged behaviour).
+   */
+  const script =
+    `(function(){var r=document.documentElement,P=${JSON.stringify(THEME_STORE_PREFIX)};try{` +
+    `var c=JSON.parse(localStorage.getItem(${JSON.stringify(THEME_CACHE_KEY)})||'null');` +
+    `var s=JSON.stringify(${JSON.stringify(THEME_STORE_KEYS)}.map(function(k){return localStorage.getItem(P+k)}));` +
+    `if(c&&c.settings===s&&c.vars){var v=localStorage.getItem(P+'mode'),m=v?JSON.parse(v):${JSON.stringify(DEFAULT_THEME.mode)},h=new Date().getHours();` +
+    `var d=m==='dark'||m==='light'?m:m==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):(h>=${AUTO_LIGHT_START_H}&&h<${AUTO_LIGHT_END_H}?'light':'dark');` +
+    `if(c.mode===d){for(var k in c.vars)r.style.setProperty(k,c.vars[k]);if(c.scheme)r.style.colorScheme=c.scheme;r.setAttribute('data-k3-color-mode',d);return}}` +
+    `var e=${JSON.stringify(defaults)};for(var n in e){var x=localStorage.getItem(P+n);` +
+    `if(x!==null&&String(JSON.parse(x)).toLowerCase()!==String(e[n]).toLowerCase())return}}catch(z){}` +
+    `r.setAttribute('data-k3-prepaint','')})()`;
+  return `    <style>html[data-k3-prepaint]{${css}}</style>\n    <script>${script}</script>\n`;
 }
 
 function prerenderI18n(html: string): string {
@@ -75,10 +115,10 @@ export default defineConfig({
       name: 'k3-lh-html',
       transformIndexHtml: {
         order: 'post',
-        handler(html, ctx) {
+        async handler(html, ctx) {
           const bundle = ctx.bundle;
           if (!bundle) return html;
-          let out = compactHtml(prerenderI18n(html)).replace('</head>', `${prepaintTheme()}  </head>`);
+          let out = compactHtml(prerenderI18n(html)).replace('</head>', `${await prepaintTheme()}  </head>`);
           const font = Object.keys(bundle).find((k) =>
             k.includes('google-sans-latin-400-normal'),
           );

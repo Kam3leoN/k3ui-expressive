@@ -50,7 +50,13 @@ import {
 } from './material-symbols.js';
 import { docStore, DocKeys } from './doc-store.js';
 import { ariaTabs, installTabKeyboard, selectTab } from './aria-tabs.js';
-import { DEFAULT_THEME, THEME_SEEDS } from './theme-defaults.js';
+import {
+  DEFAULT_THEME,
+  THEME_CACHE_KEY,
+  THEME_SEEDS,
+  THEME_STORE_KEYS,
+  THEME_STORE_PREFIX,
+} from './theme-defaults.js';
 import { mountSponsors } from './sponsors.js';
 import { enhanceAllDemos } from './demo-enhance.js';
 /* API tables + Usage snippets only matter on component / style pages → own chunks */
@@ -1855,6 +1861,48 @@ function setDocumentDir(dir: 'ltr' | 'rtl'): void {
   syncDirControl();
 }
 
+/**
+ * <k3-theme> applies its own attributes when it upgrades: give it the saved
+ * settings first, so it never overrides the theme init() just applied
+ * (that override made the colours flip at load for customised themes).
+ */
+function syncThemeElement(seed: string): void {
+  const theme = document.getElementById('theme');
+  if (!theme) return;
+  theme.setAttribute('primary-seed', seed);
+  theme.setAttribute('color-mode', themeMode);
+  theme.setAttribute('color-variant', colorVariant);
+  theme.setAttribute('contrast', contrastLevel);
+  theme.setAttribute('motion', motionScheme);
+}
+
+/**
+ * Remember the CSS variables the theme API just wrote (and the resolved mode):
+ * the pre-paint script in <head> replays them on the next load, so returning
+ * visitors with a customised theme get their colours from the first frame.
+ */
+function cacheAppliedTheme(): void {
+  try {
+    const root = document.documentElement;
+    const vars: Record<string, string> = {};
+    for (let i = 0; i < root.style.length; i++) {
+      const name = root.style[i]!;
+      if (name.startsWith('--k3-')) vars[name] = root.style.getPropertyValue(name);
+    }
+    localStorage.setItem(
+      THEME_CACHE_KEY,
+      JSON.stringify({
+        settings: JSON.stringify(THEME_STORE_KEYS.map((k) => localStorage.getItem(THEME_STORE_PREFIX + k))),
+        mode: root.dataset.k3ColorMode ?? '',
+        scheme: root.style.colorScheme,
+        vars,
+      }),
+    );
+  } catch {
+    /* storage unavailable (private mode / quota) — next load just skips the cache */
+  }
+}
+
 function applyThemePersist(): void {
   const seed = seeds[seedIdx] ?? seeds[0]!;
   docStore.set(DocKeys.themeSeed, seed);
@@ -1888,6 +1936,7 @@ function applyThemePersist(): void {
   });
   refreshColorDocs(seed);
   syncSettingsDialog();
+  cacheAppliedTheme();
 }
 
 /** Refresh the active Color family page after theme seed/variant change. */
@@ -2083,6 +2132,7 @@ async function boot(): Promise<void> {
     window.K3UI_MANUAL = true;
     const savedSeed = seeds[seedIdx] ?? seeds[0]!;
     const savedLocale = docStore.get(DocKeys.uiLocale, 'fr');
+    syncThemeElement(savedSeed);
     const api = await init({
       locale: savedLocale,
       theme: {
@@ -2096,6 +2146,7 @@ async function boot(): Promise<void> {
       components: [...SHELL_COMPONENTS],
     });
 
+    cacheAppliedTheme();
     const ver = document.getElementById('ver');
     if (ver) ver.textContent = `v${api.version}`;
 

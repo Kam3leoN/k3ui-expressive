@@ -68,6 +68,10 @@ export {
   type ColorRoleKey,
   type ColorRoleGroup,
   type SemanticName,
+  DEFAULT_COLOR_SPEC,
+  AUTO_LIGHT_START_H,
+  AUTO_LIGHT_END_H,
+  type ColorSpecVersion,
 } from './theme/apply.js';
 export {
   DEFAULT_MOOD_LEGEND,

@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- `specVersion` theme option (`'2025'` default · `'2021'`), `<k3-theme spec-version>`, `DEFAULT_COLOR_SPEC`, `AUTO_LIGHT_START_H` / `AUTO_LIGHT_END_H`
 - `k3-qr-code` — styled QR: zero-dependency encoder (ISO/IEC 18004, v1–40, ECC L–H), qr.io patterns / markers / centres, gradient, logo, CTA frames; PNG / SVG / JPEG / WebP export
 - `buildQrPayload()` / `validateQrPayload()` helpers
 - `i18n.extend()` — merge app/demo locale dictionaries into the runtime catalogs
@@ -19,11 +20,13 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Material Color Utilities 0.2.7 → 0.4.0 with the **2025 color spec** by default: the Expressive variant keeps the seed hue on primary (the 2021 spec rotated it by +240°, so a purple seed gave a teal UI). Tonal spot / vibrant / neutral also follow the 2025 tones; `specVersion: '2021'` keeps the previous colours
 - Replaced `qr-code-styling`-based QR with in-house encoder + SVG renderer
 - QR generator wizard moved out of the published package to `apps/qr-generator` (`npm run dev:qr`)
 
 ### Fixed
 
+- Playground: colours flipped at load / refresh for customised themes — `<k3-theme>` re-applied its static attributes over the saved theme; it is now synced before it upgrades, and returning visitors replay their cached theme before first paint
 - `K3UI.keyboard` / `K3UI.mouse` were typed on the global but missing at runtime
 - `k3-sheet` drag-to-dismiss threw a ReferenceError (`isRtl` undefined)
 - `k3-card-set` keyboard navigation never moved focus (`nav.index` → `itemIndex`)

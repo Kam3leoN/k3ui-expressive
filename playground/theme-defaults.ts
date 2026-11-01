@@ -11,3 +11,12 @@ export const DEFAULT_THEME = {
   variant: 'expressive',
   contrast: 'default',
 } as const;
+
+/** localStorage prefix of the doc store (docStore keys are `theme.*`). */
+export const THEME_STORE_PREFIX = 'k3ui.doc.theme.';
+
+/** Settings that decide the theme — the pre-paint cache is keyed on their raw values. */
+export const THEME_STORE_KEYS = ['seed', 'seedIdx', 'mode', 'variant', 'contrast', 'motion'] as const;
+
+/** Last theme the app applied (CSS variables + resolved mode), replayed before first paint. */
+export const THEME_CACHE_KEY = `${THEME_STORE_PREFIX}cache`;

@@ -85,8 +85,11 @@ Two layers — use the one that fits:
 
 ## Theming
 
-`K3UI.init({ theme: { seed: '#00639B', variant } })` — `variant` defaults to `expressive`
-(hue-rotated, M3 Expressive). Use `tonalspot` to keep a brand colour recognisable.
+`K3UI.init({ theme: { seed: '#00639B', variant, specVersion } })` — `variant` defaults to
+`expressive`. Colours follow the Material **2025** color spec by default (Material 3
+Expressive): Expressive keeps the seed hue on primary and rotates secondary / tertiary.
+`specVersion: '2021'` (or `<k3-theme spec-version="2021">`) restores the legacy palette,
+where Expressive rotated the primary hue by +240°.
 
 ## Development
 

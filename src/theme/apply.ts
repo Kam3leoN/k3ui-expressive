@@ -43,8 +43,9 @@ export type ColorMode = 'light' | 'dark' | 'auto' | 'system';
 export type MotionScheme = 'expressive' | 'standard';
 
 /** Auto mode daylight window (local hours, inclusive start / exclusive end). */
-const AUTO_LIGHT_START_H = 7;
-const AUTO_LIGHT_END_H = 18;
+/** `auto` mode: light from 07:00 (inclusive) to 18:00 (exclusive), local time. */
+export const AUTO_LIGHT_START_H = 7;
+export const AUTO_LIGHT_END_H = 18;
 
 /**
  * MCU scheme variants (Material Theme Builder / m3e).
@@ -64,12 +65,23 @@ export type ColorVariant =
 /** Theme Builder contrast — maps to MCU `contrastLevel` −1…1. */
 export type ContrastLevel = 'default' | 'medium' | 'high';
 
+/**
+ * Material color spec. `2025` = Material 3 Expressive: the Expressive variant
+ * keeps the seed hue on primary (2021 rotated it by +240°). Variants without a
+ * 2025 recipe (fidelity, monochrome, rainbow, fruit salad) use 2021 either way.
+ */
+export type ColorSpecVersion = '2021' | '2025';
+
+export const DEFAULT_COLOR_SPEC: ColorSpecVersion = '2025';
+
 export interface ThemeOptions {
   seed?: string;
   mode?: ColorMode;
   motion?: MotionScheme;
   variant?: ColorVariant;
   contrast?: ContrastLevel;
+  /** Material color spec (default `2025`). */
+  specVersion?: ColorSpecVersion;
   target?: HTMLElement | Document;
 }
 
@@ -136,7 +148,7 @@ function contrastValue(level: ContrastLevel): number {
 /** MCU SchemeRainbow recipe (not exported from 0.2.7 barrel). */
 function schemeRainbow(source: Hct, dark: boolean, contrast: number): DynamicScheme {
   return new DynamicScheme({
-    sourceColorArgb: source.toInt(),
+    sourceColorHct: source,
     variant: Variant.RAINBOW,
     contrastLevel: contrast,
     isDark: dark,
@@ -154,7 +166,7 @@ function schemeRainbow(source: Hct, dark: boolean, contrast: number): DynamicSch
 /** MCU SchemeFruitSalad recipe (not exported from 0.2.7 barrel). */
 function schemeFruitSalad(source: Hct, dark: boolean, contrast: number): DynamicScheme {
   return new DynamicScheme({
-    sourceColorArgb: source.toInt(),
+    sourceColorHct: source,
     variant: Variant.FRUIT_SALAD,
     contrastLevel: contrast,
     isDark: dark,
@@ -177,27 +189,28 @@ function buildScheme(
   dark: boolean,
   variant: ColorVariant,
   contrast: ContrastLevel,
+  spec: ColorSpecVersion = DEFAULT_COLOR_SPEC,
 ): DynamicScheme {
   const source = Hct.fromInt(argbFromHex(seed));
   const c = contrastValue(contrast);
   switch (variant) {
     case 'expressive':
-      return new SchemeExpressive(source, dark, c);
+      return new SchemeExpressive(source, dark, c, spec, 'phone');
     case 'vibrant':
-      return new SchemeVibrant(source, dark, c);
+      return new SchemeVibrant(source, dark, c, spec, 'phone');
     case 'fidelity':
-      return new SchemeFidelity(source, dark, c);
+      return new SchemeFidelity(source, dark, c, spec, 'phone');
     case 'monochrome':
-      return new SchemeMonochrome(source, dark, c);
+      return new SchemeMonochrome(source, dark, c, spec, 'phone');
     case 'neutral':
-      return new SchemeNeutral(source, dark, c);
+      return new SchemeNeutral(source, dark, c, spec, 'phone');
     case 'rainbow':
       return schemeRainbow(source, dark, c);
     case 'fruitsalad':
       return schemeFruitSalad(source, dark, c);
     case 'tonalspot':
     default:
-      return new SchemeTonalSpot(source, dark, c);
+      return new SchemeTonalSpot(source, dark, c, spec, 'phone');
   }
 }
 
@@ -206,8 +219,9 @@ function schemeToCssVars(
   dark: boolean,
   variant: ColorVariant,
   contrast: ContrastLevel,
+  spec: ColorSpecVersion = DEFAULT_COLOR_SPEC,
 ): Record<string, string> {
-  const scheme = buildScheme(seed, dark, variant, contrast);
+  const scheme = buildScheme(seed, dark, variant, contrast, spec);
   const vars: Record<string, string> = {};
 
   const colors = MaterialDynamicColors as unknown as Record<string, DynamicColor | undefined>;
@@ -228,13 +242,20 @@ function schemeToCssVars(
  * `themeApi.apply()` writes for that seed / mode / variant / contrast.
  */
 export function themeCssVars(
-  options: { seed?: string; dark?: boolean; variant?: ColorVariant; contrast?: ContrastLevel } = {},
+  options: {
+    seed?: string;
+    dark?: boolean;
+    variant?: ColorVariant;
+    contrast?: ContrastLevel;
+    specVersion?: ColorSpecVersion;
+  } = {},
 ): Record<string, string> {
   return schemeToCssVars(
     options.seed ?? '#6750A4',
     options.dark ?? false,
     options.variant ?? 'expressive',
     options.contrast ?? 'default',
+    options.specVersion ?? DEFAULT_COLOR_SPEC,
   );
 }
 
@@ -279,6 +300,7 @@ export const themeApi = {
     const motion = merged.motion ?? 'expressive';
     const variant = merged.variant ?? 'expressive';
     const contrast = merged.contrast ?? 'default';
+    const spec = merged.specVersion ?? DEFAULT_COLOR_SPEC;
     const resolved = resolveMode(mode);
     const target =
       merged.target instanceof HTMLElement
@@ -290,7 +312,7 @@ export const themeApi = {
     if (!target) return;
 
     try {
-      const vars = schemeToCssVars(seed, resolved === 'dark', variant, contrast);
+      const vars = schemeToCssVars(seed, resolved === 'dark', variant, contrast, spec);
       for (const [k, v] of Object.entries(vars)) {
         target.style.setProperty(k, v);
       }
