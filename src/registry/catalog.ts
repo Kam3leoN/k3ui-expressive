@@ -58,6 +58,7 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-progress', load: () => import('../components/feedback/progress.js') },
   { tag: 'k3-loading-indicator', load: () => import('../components/feedback/loading-indicator.js') },
   { tag: 'k3-skeleton', load: () => import('../components/feedback/skeleton.js') },
+  { tag: 'k3-lazy', load: () => import('../components/feedback/lazy.js') },
   { tag: 'k3-snackbar', load: () => import('../components/feedback/snackbar.js') },
   { tag: 'k3-alert', load: () => import('../components/feedback/alert.js') },
   { tag: 'k3-tooltip', load: () => import('../components/feedback/tooltip.js') },
@@ -66,6 +67,12 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-marquee', load: () => import('../components/feedback/marquee.js') },
   { tag: 'k3-confetti', load: () => import('../components/feedback/confetti.js') },
   { tag: 'k3-sound-fx', load: () => import('../components/feedback/sound-fx.js') },
+  // animation (decorative WAAPI effects — no animejs/gsap)
+  { tag: 'k3-text-bounce', load: () => import('../components/animation/text-bounce.js') },
+  { tag: 'k3-text-scramble', load: () => import('../components/animation/text-scramble.js') },
+  { tag: 'k3-heart-burst', load: () => import('../components/animation/heart-burst.js') },
+  { tag: 'k3-halftone', load: () => import('../components/animation/halftone.js') },
+  { tag: 'k3-glow-particles', load: () => import('../components/animation/glow-particles.js') },
   // media
   { tag: 'k3-audio-player', load: () => import('../components/media/audio-player.js') },
   { tag: 'k3-qr-code', load: () => import('../components/media/qr-code.js') },

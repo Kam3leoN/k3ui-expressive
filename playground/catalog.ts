@@ -14,6 +14,7 @@ export const DOC_CATEGORIES = [
   'Actions',
   'Inputs',
   'Feedback',
+  'Animation',
   'Containment',
   'Navigation',
   'Utilities',
@@ -345,6 +346,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.skeleton.blurb',
   },
   {
+    id: 'lazy',
+    category: 'Feedback',
+    title: 'Lazy loading',
+    titleKey: 'doc.lazy.title',
+    blurbKey: 'doc.lazy.blurb',
+  },
+  {
     id: 'snackbar',
     category: 'Feedback',
     title: 'Snackbar',
@@ -420,6 +428,42 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'QR code',
     titleKey: 'doc.qr-code.title',
     blurbKey: 'doc.qr-code.blurb',
+  },
+  // Animation — decorative WAAPI effects (extend with morph / particles later)
+  {
+    id: 'text-bounce',
+    category: 'Animation',
+    title: 'Text bounce',
+    titleKey: 'doc.text-bounce.title',
+    blurbKey: 'doc.text-bounce.blurb',
+  },
+  {
+    id: 'text-scramble',
+    category: 'Animation',
+    title: 'Text scramble',
+    titleKey: 'doc.text-scramble.title',
+    blurbKey: 'doc.text-scramble.blurb',
+  },
+  {
+    id: 'heart-burst',
+    category: 'Animation',
+    title: 'Heart burst',
+    titleKey: 'doc.heart-burst.title',
+    blurbKey: 'doc.heart-burst.blurb',
+  },
+  {
+    id: 'halftone',
+    category: 'Animation',
+    title: 'Halftone',
+    titleKey: 'doc.halftone.title',
+    blurbKey: 'doc.halftone.blurb',
+  },
+  {
+    id: 'glow-particles',
+    category: 'Animation',
+    title: 'Glow particles',
+    titleKey: 'doc.glow-particles.title',
+    blurbKey: 'doc.glow-particles.blurb',
   },
   // Containment
   {

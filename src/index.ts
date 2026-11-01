@@ -58,6 +58,7 @@ export { debug } from './debug/logger.js';
 export { i18n } from './i18n/index.js';
 export {
   themeApi as theme,
+  themeCssVars,
   COLOR_ROLES,
   COLOR_ROLE_GROUPS,
   colorRoleToCssVar,
@@ -93,6 +94,8 @@ export { registry } from './registry/register.js';
 export {
   springs,
   motionCss,
+  easings,
+  type NamedEasing,
   enterScaleY,
   enterScaleYPopover,
   enterScaleYKeyframes,
@@ -253,6 +256,32 @@ export {
   type ConfettiRainOptions,
 } from './components/feedback/confetti.js';
 export {
+  K3TextBounce,
+  TextBounceSpecs,
+} from './components/animation/text-bounce.js';
+export {
+  K3TextScramble,
+  TextScrambleSpecs,
+  SCRAMBLE_CHAR_PRESETS,
+  type ScrambleCharPreset,
+  type ScrambleFrom,
+} from './components/animation/text-scramble.js';
+export {
+  K3HeartBurst,
+  HeartBurstSpecs,
+  type HeartBurstTrigger,
+  type HeartBurstIcon,
+} from './components/animation/heart-burst.js';
+export {
+  K3Halftone,
+  HalftoneSpecs,
+  type HalftoneTone,
+} from './components/animation/halftone.js';
+export {
+  K3GlowParticles,
+  GlowParticlesSpecs,
+} from './components/animation/glow-particles.js';
+export {
   getSoundFx,
   SoundFxController,
   SoundFxSpecs,
@@ -316,6 +345,21 @@ export {
   type QrWifiEncryption,
 } from './components/media/qr-code.payload.js';
 export type { K3SoundFx } from './components/feedback/sound-fx.js';
+export type { K3Lazy } from './components/feedback/lazy.js';
+export {
+  LazySpecs,
+  LAZY_FALLBACKS,
+  type LazyFallback,
+  type LazyState,
+} from './components/feedback/lazy.specs.js';
+export {
+  whenTriggered,
+  pendingCustomElements,
+  LAZY_TRIGGERS,
+  type LazyTrigger,
+  type WhenTriggeredOptions,
+} from './core/lazy.js';
+export { registerWhen, isKnown } from './registry/register.js';
 export type { K3AudioPlayer } from './components/media/audio-player.js';
 export type { K3QrCode } from './components/media/qr-code.js';
 

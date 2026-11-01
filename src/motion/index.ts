@@ -1,4 +1,5 @@
 export { springs, motionCss } from './springs.js';
+export { easings, type NamedEasing } from './easings.js';
 export {
   motionSpatialFast,
   motionSpatialDefault,

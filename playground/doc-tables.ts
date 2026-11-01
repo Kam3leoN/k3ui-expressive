@@ -642,6 +642,31 @@ const COMPONENT_API: Record<
       ['goTo', '(index) => void', 'Jump to item'],
     ],
   },
+  lazy: {
+    properties: [
+      ['trigger', "'visible'|'idle'|'interaction'|'eager'|'manual'", 'visible', 'When loading starts'],
+      ['root-margin', 'string', '200px', 'Viewport margin for visible'],
+      ['fallback', "'skeleton'|'indicator'|'none'", 'skeleton', 'Placeholder until ready'],
+      ['animation', "'wave'|'pulse'|'none'", 'wave', 'Skeleton animation'],
+      ['delay · min-duration', 'number', '150 · 300', 'Indicator anti-flicker (ms)'],
+      ['state', "'idle'|'loading'|'ready'|'error'", 'idle', 'Reflected'],
+      ['loader', '() => Promise', 'null', 'Async work after registration (JS)'],
+    ],
+    methods: [
+      ['load', '() => Promise<void>', 'Start now (any trigger)'],
+      ['retry', '() => Promise<void>', 'Try again after an error'],
+    ],
+    events: [
+      ['k3-load-start', "{ source: 'auto' | 'api' }", 'Loading begins'],
+      ['k3-load-end', '{ ok, tags }', 'Ready or failed — tags registered'],
+      ['k3-error', '{ error }', 'Loader or registration failed'],
+    ],
+    slots: [
+      ['(default)', 'Content revealed once ready'],
+      ['fallback', 'Custom placeholder'],
+      ['error', 'Custom error message'],
+    ],
+  },
   countdown: {
     properties: [
       ['time', 'number', '0', 'Duration ms (if no end-date)'],
@@ -672,6 +697,84 @@ const COMPONENT_API: Record<
       ['play / stop', '() => void', 'Animation control'],
     ],
     slots: [['(default)', 'Ticker content']],
+  },
+  'text-bounce': {
+    properties: [
+      ['text', 'string', 'HELLO WORLD', 'String to split into characters'],
+      ['loop', 'boolean', 'false', 'Replay forever'],
+      ['loop-delay', 'number', '1000', 'Pause between loops (ms)'],
+      ['stagger', 'number', '50', 'Delay between characters (ms)'],
+      ['autoplay', 'boolean', 'true', 'Play on connect / when text changes'],
+    ],
+    methods: [
+      ['play / stop / restart', '() => void', 'WAAPI control'],
+    ],
+  },
+  'text-scramble': {
+    properties: [
+      ['text', 'string', '(blurb)', 'Target string to reveal'],
+      [
+        'chars',
+        "'default'|'braille'|'blocks'|'numbers'|string",
+        'default',
+        'Noise set (presets or literal / a-z ranges)',
+      ],
+      ['from', "'left'|'center'|'right'|'random'", 'left', 'Reveal wave origin'],
+      ['loop', 'boolean', 'false', 'Replay after loop-delay'],
+      ['loop-delay', 'number', '2000', 'Pause between loops (ms)'],
+      ['reveal-rate · settle-rate', 'number', '55 · 28', 'Reveal / settle pacing'],
+      ['autoplay', 'boolean', 'true', 'Play on connect'],
+    ],
+    methods: [
+      ['play', '(text?) => Promise<void>', 'Scramble toward text (or current)'],
+      ['stop / restart', '() => void', 'Cancel or replay'],
+    ],
+  },
+  'heart-burst': {
+    properties: [
+      ['trigger', "'hover'|'click'|'both'", 'hover', 'When to spawn particles'],
+      ['continuous', 'boolean', 'true', 'Keep pulsing at the pointer while hovered'],
+      ['block', 'boolean', 'false', 'Block host for cards / full-width targets'],
+      ['clip', 'boolean', 'false', 'Keep flight inside the target (soft fade, no hard cut)'],
+      ['icon', "'heart'|'star'|'like'", 'heart', 'Particle glyph'],
+      ['count', 'number', '10', 'Particles per burst'],
+      ['color', 'string', "''", 'Accent (also --k3-heart-burst-color)'],
+      [
+        '--k3-heart-burst-particle-size',
+        'CSS length',
+        '1.25rem',
+        'Base particle size (likes / hearts / stars)',
+      ],
+    ],
+    methods: [['burst', '(count?) => void', 'Fire at last pointer (or centre)']],
+    slots: [['(default)', 'Any target surface (button, card, h1, p, …)']],
+  },
+  halftone: {
+    properties: [
+      ['size', 'number', '10', 'Dot cell pitch (CSS px)'],
+      ['intensity', 'number', '0.55', 'Screen opacity 0…1'],
+      ['color', 'string', '#0a0a0a', 'Dot color'],
+      ['tone', "'dark'|'light'", 'dark', 'Blend: multiply · soft-light'],
+      ['animated', 'boolean', 'false', 'Slow grid drift'],
+      ['duration', 'number', '12000', 'Drift loop (ms)'],
+    ],
+    slots: [['(default)', 'Surface under the screen (img, card, …)']],
+    'css-parts': [['screen', 'Dot overlay layer']],
+  },
+  'glow-particles': {
+    properties: [
+      ['count', 'number', '48', 'Particle count'],
+      ['color', 'string', '#7dd3fc', 'Glow color'],
+      ['speed', 'number', '0.35', 'Drift speed multiplier'],
+      ['glow', 'number', '18', 'Soft blur radius (px)'],
+      ['interactive', 'boolean', 'false', 'Attract toward pointer'],
+      ['autoplay', 'boolean', 'true', 'Start on connect'],
+    ],
+    methods: [
+      ['play / stop / restart', '() => void', 'Animation control'],
+    ],
+    slots: [['(default)', 'Foreground content over the canvas']],
+    'css-parts': [['canvas', 'Particle canvas']],
   },
   breadcrumb: {
     properties: [

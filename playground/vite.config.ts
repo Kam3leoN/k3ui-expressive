@@ -2,12 +2,57 @@ import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import { readFileSync } from 'node:fs';
+import { themeCssVars } from '../src/theme/apply.js';
+import { DEFAULT_THEME, THEME_SEEDS } from './theme-defaults.js';
 
 /* Default playground locale — static HTML ships its strings so the first paint
    is final (no English → French swap after boot, which delayed LCP). */
 const DEFAULT_LOCALE = 'fr';
 const escapeHtml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/*
+ * Strip source comments and indentation-only text between tags (build only).
+ * pre / code / textarea / script / style keep their content byte-for-byte, and
+ * attribute values are never touched — rendered text is identical.
+ */
+function compactHtml(html: string): string {
+  const kept: string[] = [];
+  const guarded = html.replace(/<(pre|code|textarea|script|style)\b[\s\S]*?<\/\1>/gi, (m) => {
+    kept.push(m);
+    return `\u0000${kept.length - 1}\u0000`;
+  });
+  return guarded
+    .replace(/<!--(?!\[if)[\s\S]*?-->/g, '')
+    .replace(/>([^<]*)</g, (_m, text: string) => `>${text.replace(/\n[ \t]+/g, '\n')}<`)
+    .replace(/\u0000(\d+)\u0000/g, (_m, i: string) => kept[Number(i)]!);
+}
+
+/*
+ * Default theme computed at build: the first paint already has the colours the
+ * app applies at boot. Only used when the visitor kept the default settings
+ * (stored under k3ui.doc.theme.*) — a customised theme still comes from JS.
+ */
+function prepaintTheme(): string {
+  const seed = THEME_SEEDS[DEFAULT_THEME.seedIdx];
+  const vars = themeCssVars({
+    seed,
+    dark: DEFAULT_THEME.mode !== 'light',
+    variant: DEFAULT_THEME.variant,
+    contrast: DEFAULT_THEME.contrast,
+  });
+  const css = Object.entries(vars)
+    .map(([k, v]) => `${k}:${v}`)
+    .join(';');
+  const defaults = { ...DEFAULT_THEME, seed };
+  return (
+    `    <style>html[data-k3-prepaint]{${css}}</style>\n` +
+    `    <script>(function(){try{var d=${JSON.stringify(defaults)};for(var k in d){` +
+    `var v=localStorage.getItem('k3ui.doc.theme.'+k);` +
+    `if(v!==null&&String(JSON.parse(v)).toLowerCase()!==String(d[k]).toLowerCase())return}}catch(e){}` +
+    `document.documentElement.setAttribute('data-k3-prepaint','')})()</script>\n`
+  );
+}
 
 function prerenderI18n(html: string): string {
   const dict = JSON.parse(
@@ -33,7 +78,7 @@ export default defineConfig({
         handler(html, ctx) {
           const bundle = ctx.bundle;
           if (!bundle) return html;
-          let out = prerenderI18n(html);
+          let out = compactHtml(prerenderI18n(html)).replace('</head>', `${prepaintTheme()}  </head>`);
           const font = Object.keys(bundle).find((k) =>
             k.includes('google-sans-latin-400-normal'),
           );

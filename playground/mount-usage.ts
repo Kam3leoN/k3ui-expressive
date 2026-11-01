@@ -1,3 +1,4 @@
+import { ariaTabs } from './aria-tabs.js';
 import {
   USAGE_BY_PAGE,
   buildUsageCss,
@@ -76,6 +77,7 @@ export function createUsageSection(snip: UsageSnippet): HTMLElement {
     panel('js', buildUsageJs(snip), true),
   );
   section.append(header, sample);
+  ariaTabs(section);
   return section;
 }
 

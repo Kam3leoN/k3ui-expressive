@@ -112,9 +112,9 @@ export class K3Tooltip extends K3Element {
         --k3-tooltip-inline-sign: -1;
       }
 
-      .tip {
+    .tip {
         position: absolute;
-        z-index: 40;
+      z-index: 40;
         box-sizing: border-box;
         opacity: 0;
         visibility: hidden;

@@ -202,3 +202,10 @@ export {
   type DockedFitController,
 } from './surface-variant.js';
 export { resolveIdRef } from './id-ref.js';
+export {
+  whenTriggered,
+  pendingCustomElements,
+  LAZY_TRIGGERS,
+  type LazyTrigger,
+  type WhenTriggeredOptions,
+} from './lazy.js';

@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file.
 - Every component module self-registers its tag on import (guarded)
 - `resolveIdRef()` — `for="…"` targets resolve inside shadow roots (date / time pickers, slider)
 - `--k3-text-field-max-width`; CI workflow and `npm run check`
+- `themeCssVars()` — pure scheme → CSS custom properties (prerender / SSR); same values `themeApi.apply()` writes
+- `k3-lazy` — lazy region: trigger (`visible` · `idle` · `interaction` · `eager` · `manual`), registers the k3 elements it contains, optional `loader`, `k3-skeleton` around the real content (no layout shift) or `k3-loading-indicator` after 150 ms (kept 300 ms), custom `fallback` / `error` slots, Retry, `aria-busy`, `k3-load-start` / `k3-load-end`
+- Lazy utilities (no UI): `whenTriggered()`, `pendingCustomElements()`, `registry.registerWhen()`; lifecycle phases `load-start` / `load-end`
 
 ### Changed
 
@@ -39,6 +42,13 @@ All notable changes to this project will be documented in this file.
 - Static page paints first: default locale prerendered at build, app booted after first paint, no whole-app fade, reserved shell sizes (CLS 0), lazy images, loading veil hidden at boot
 - Catalog warm-up on first interaction (idle, never with Save-Data) instead of every page view; Material Symbols variable fonts load only on their pages
 - Vercel: immutable cache for hashed assets, security headers
+- Default theme prerendered at build (`playground/theme-defaults.ts`): no purple → teal colour flash when the app boots
+- API tables and Usage snippets load with their page (own chunks); Usage blocks no longer pre-mounted for every page at boot
+- Icon glyphs of not-yet-upgraded elements stay out of layout (icon font leaves the critical window); bottom nav bar placeholder matches the final bar
+- Dialog, settings switches and page footer nav register after first paint
+- Build-time HTML compaction (comments, indentation; `pre` / `code` / `script` / `style` untouched — rendered text identical): 541 → 429 KB
+- Code-sample and package-manager toggles follow the WAI-ARIA tabs pattern (roles, `aria-selected`, roving tabindex, arrow keys) — accessibility 100 on component pages
+- New docs page *Lazy loading* (`k3-lazy`: skeleton, indicator, error + Retry, Replay)
 
 ## [0.1.0] — 2026-10-31
 

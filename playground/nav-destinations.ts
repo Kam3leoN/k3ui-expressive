@@ -67,6 +67,13 @@ export const NAV_DESTINATIONS: NavDestination[] = [
     href: '',
   },
   {
+    id: 'animations',
+    category: 'Animation',
+    icon: 'animation',
+    labelKey: 'doc.nav.animation',
+    href: '',
+  },
+  {
     id: 'styles',
     category: 'Styles',
     icon: 'palette',
@@ -111,6 +118,9 @@ export function destinationForPage(
   }
   if (cat === 'Utilities') {
     return NAV_DESTINATIONS.find((d) => d.id === 'utilities') ?? null;
+  }
+  if (cat === 'Animation') {
+    return NAV_DESTINATIONS.find((d) => d.id === 'animations') ?? null;
   }
   if (cat === 'Resources') {
     return NAV_DESTINATIONS.find((d) => d.id === 'resources') ?? null;

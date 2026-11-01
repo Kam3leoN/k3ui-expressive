@@ -1,6 +1,12 @@
 import { catalog } from './catalog.js';
 import { COMPONENT_DEPS } from './deps.js';
 import { debug } from '../debug/logger.js';
+import {
+  pendingCustomElements,
+  whenTriggered,
+  type LazyTrigger,
+  type WhenTriggeredOptions,
+} from '../core/lazy.js';
 
 export type CustomElementConstructor = typeof HTMLElement;
 
@@ -39,9 +45,35 @@ export function isRegistered(tag: string): boolean {
   return registered.has(tag) || !!customElements.get(tag);
 }
 
+/** `true` when the catalog knows how to load `tag`. */
+export function isKnown(tag: string): boolean {
+  return catalog.some((c) => c.tag === tag);
+}
+
+/**
+ * Wait for `trigger`, then define every k3 element used under `root` (with the
+ * elements they render — see deps.ts). Resolves with the tags it registered.
+ *
+ * ```ts
+ * await registry.registerWhen(document.querySelector('#comments')!, 'visible');
+ * ```
+ */
+export async function registerWhen(
+  root: Element,
+  trigger: LazyTrigger = 'visible',
+  options: WhenTriggeredOptions = {},
+): Promise<string[]> {
+  await whenTriggered(root, trigger, options);
+  const tags = pendingCustomElements(root).filter(isKnown);
+  await registerAll(tags);
+  return tags;
+}
+
 export const registry = {
   register,
   registerAll,
+  registerWhen,
+  isKnown,
   isRegistered,
   get tags(): string[] {
     return [...registered];

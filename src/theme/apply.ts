@@ -222,6 +222,22 @@ function schemeToCssVars(
   return vars;
 }
 
+/**
+ * CSS custom properties of a resolved scheme — pure (no DOM), e.g. to
+ * prerender the default theme at build time or on the server. Same values
+ * `themeApi.apply()` writes for that seed / mode / variant / contrast.
+ */
+export function themeCssVars(
+  options: { seed?: string; dark?: boolean; variant?: ColorVariant; contrast?: ContrastLevel } = {},
+): Record<string, string> {
+  return schemeToCssVars(
+    options.seed ?? '#6750A4',
+    options.dark ?? false,
+    options.variant ?? 'expressive',
+    options.contrast ?? 'default',
+  );
+}
+
 let mediaListener: ((e: MediaQueryListEvent) => void) | null = null;
 let autoTimer: ReturnType<typeof setTimeout> | null = null;
 let lastOptions: ThemeOptions = {};

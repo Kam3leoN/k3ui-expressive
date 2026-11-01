@@ -449,6 +449,28 @@ cal.addEventListener("k3-change", (e) => console.log(e.detail));`,
     components: ['k3-loading'],
     html: `<k3-loading size="medium"></k3-loading>`,
   },
+  lazy: {
+    components: ['k3-lazy'],
+    html: `<!-- Skeleton (default) — registers what it contains when it scrolls into view -->
+<k3-lazy>
+  <k3-card>…</k3-card>
+</k3-lazy>
+
+<!-- Loading indicator, only for loads longer than 150 ms -->
+<k3-lazy fallback="indicator" trigger="idle">…</k3-lazy>
+
+<!-- Your own placeholder -->
+<k3-lazy trigger="interaction">
+  <p slot="fallback">Hover to load the comments</p>
+  <section>…</section>
+</k3-lazy>`,
+    jsExtra: `const region = document.querySelector("k3-lazy");
+region.loader = () => fetch("/api/report").then((r) => r.json()).then(render);
+region.addEventListener("k3-load-end", (e) => console.log(e.detail.ok, e.detail.tags));
+
+// Same logic without UI (utility)
+await K3UI.registry.registerWhen(document.querySelector("#comments"), "visible");`,
+  },
   skeleton: {
     components: ['k3-skeleton'],
     html: `<k3-skeleton variant="text"></k3-skeleton>
@@ -772,6 +794,70 @@ end?.addEventListener("k3-change", () => {
 ConfettiPresets.fireBasic();
 ConfettiPresets.fireFireworks();
 rain({ count: 250, gravity: 0.9, duration: 3 });`,
+  },
+  'text-bounce': {
+    components: ['k3-text-bounce', 'k3-button'],
+    html: `<k3-text-bounce id="hello" text="HELLO WORLD" loop loop-delay="1000"></k3-text-bounce>
+<k3-button variant="tonal" onclick="document.getElementById('hello').restart()">
+  Replay
+</k3-button>`,
+    jsExtra: `const el = document.getElementById('hello');
+el.loop = false; // one-shot
+el.play();`,
+  },
+  'text-scramble': {
+    components: ['k3-text-scramble', 'k3-button'],
+    html: `<!-- Change · normal vs uppercase noise -->
+<k3-text-scramble id="blurb" text="scrambleText() reveals text via a smooth randomized character scramble."></k3-text-scramble>
+<k3-button onclick="Object.assign(document.getElementById('blurb'),{chars:'default'}).play('New copy.')">Normal</k3-button>
+<k3-button onclick="Object.assign(document.getElementById('blurb'),{chars:'uppercase'}).play('NEW COPY.')">Uppercase</k3-button>
+
+<!-- Change text via button -->
+<k3-text-scramble id="msg" text="Hello World!"></k3-text-scramble>
+<k3-button variant="tonal" onclick="document.getElementById('msg').play('Goodbye Moon!')">
+  Change text
+</k3-button>
+
+<!-- Character presets -->
+<k3-text-scramble id="chars" chars="braille" text="Pick braille, blocks, or numbers for the scramble."></k3-text-scramble>
+<k3-button onclick="Object.assign(document.getElementById('chars'),{chars:'blocks'}).play()">Blocks</k3-button>`,
+    jsExtra: `document.querySelector('k3-text-scramble')?.play();`,
+  },
+  'heart-burst': {
+    components: ['k3-heart-burst', 'k3-button', 'k3-card'],
+    html: `<!-- Button — hearts may float past the chrome -->
+<k3-heart-burst continuous icon="heart" color="#ff4b4b">
+  <k3-button variant="filled">Sponsor</k3-button>
+</k3-heart-burst>
+
+<!-- Card — hover only on the card; stars may rise above -->
+<k3-heart-burst block continuous icon="star" color="#ffb300">
+  <k3-card variant="outlined">Hover me</k3-card>
+</k3-heart-burst>
+
+<!-- Text — fewer / larger likes that rise like the button hearts -->
+<k3-heart-burst continuous icon="like" color="#1e88e5" count="4" style="--k3-heart-burst-particle-size: 1.85rem">
+  <h1>Love this headline</h1>
+</k3-heart-burst>`,
+    jsExtra: `document.querySelector('k3-heart-burst')?.burst(12);`,
+  },
+  halftone: {
+    components: ['k3-halftone'],
+    html: `<k3-halftone size="10" intensity="0.6" animated>
+  <div style="aspect-ratio:16/10;background:linear-gradient(135deg,#f59e0b,#db2777,#6366f1)"></div>
+</k3-halftone>
+
+<!-- Light tone over a dark surface -->
+<k3-halftone size="14" tone="light" color="#ffffff" intensity="0.45">
+  <div style="aspect-ratio:16/10;background:#0f172a"></div>
+</k3-halftone>`,
+  },
+  'glow-particles': {
+    components: ['k3-glow-particles'],
+    html: `<k3-glow-particles count="56" color="#7dd3fc" interactive style="min-block-size:14rem">
+  <strong>Glow</strong>
+</k3-glow-particles>`,
+    jsExtra: `document.querySelector('k3-glow-particles')?.restart();`,
   },
   'sound-fx': {
     components: ['k3-sound-fx', 'k3-button'],

@@ -267,6 +267,22 @@ k3-nav-rail:not(:defined) {
   display: block;
   block-size: 4rem;
   overflow: hidden;
+  /* Same container as the upgraded bar — the first frame already looks final */
+  visibility: visible;
+  background: var(--k3-sys-color-surface-container);
+  border-block-start: 1px solid var(--k3-sys-color-outline-variant);
+  box-sizing: border-box;
+}
+
+/*
+ * Icons inside elements that are not upgraded yet stay out of layout: their
+ * ligatures would otherwise fetch the icon font during the critical window.
+ * They are hidden anyway (visibility) and appear with their component.
+ */
+:not(:defined) .ms,
+:not(:defined) [data-k3-icon],
+.app[data-nav='bar'] k3-nav-bar:not(:defined) > * {
+  display: none;
 }
 
 /*
@@ -1704,6 +1720,129 @@ k3-avatar [slot='badge'].ms {
   gap: 0.75rem; /* 12dp between siblings in one case */
   min-width: max-content;
 }
+/*
+ * Heart-burst demos — particles rise above the control; never clip the rain
+ * at the stage / frame edge. Content + pouces centered in each column.
+ */
+.demo-frame--heart-burst {
+  overflow: visible;
+  overflow-x: visible;
+  overflow-y: visible;
+}
+.demo-frame--cases.grid-3.demo-frame--heart-burst > .demo-case {
+  align-items: center !important;
+  overflow: visible;
+  z-index: 2;
+}
+.demo-frame--cases.grid-3 .demo-case-stage--burst {
+  width: 100%;
+  min-height: 10.5rem;
+  padding: 2.75rem 1rem 1.25rem;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  box-sizing: border-box;
+}
+.demo-case-stage--burst-card {
+  /* Room above for rising stars — card fills column width */
+  padding: 2.75rem 0.5rem 1.25rem;
+}
+.demo-frame--cases.grid-3 .demo-case-stage--burst > k3-heart-burst:not([block]) {
+  width: fit-content !important;
+  max-width: 100%;
+  margin-inline: auto;
+}
+.demo-frame--cases.grid-3 .demo-case-stage--burst-card > k3-heart-burst[block] {
+  width: 100% !important;
+  max-width: 100%;
+  margin-inline: auto;
+}
+.demo-frame--heart-burst > .demo-case > .demo-case-num {
+  align-self: center;
+  margin-inline: auto;
+}
+/* Text scramble — 3 equal columns; text, buttons & pills centered */
+.demo-frame--scramble {
+  overflow: visible;
+}
+.demo-frame--cases.grid-3.demo-frame--scramble > .demo-case {
+  align-items: center !important; /* beat grid-3 stretch — centers stage + pouce */
+}
+.demo-frame--cases.grid-3 .demo-case-stage--scramble {
+  width: 100%;
+  min-height: 12rem;
+  padding: var(--k3-sys-spacing-space300);
+  display: flex !important; /* beat grid-3 stage display:block */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--k3-sys-spacing-space300);
+  text-align: center;
+  box-sizing: border-box;
+}
+.demo-frame--cases.grid-3 .demo-case-stage--scramble > k3-text-scramble {
+  /* Same centering axis as the buttons under it */
+  display: block !important;
+  width: max-content !important;
+  max-width: min(100%, 18rem);
+  margin-inline: auto !important;
+  text-align: center;
+  letter-spacing: normal !important;
+}
+.demo-frame--cases.grid-3 .demo-case-stage--scramble > k3-button,
+.demo-frame--cases.grid-3 .demo-case-stage--scramble > .row {
+  display: flex;
+  width: max-content !important;
+  max-width: 100%;
+  margin-inline: auto !important;
+  flex-shrink: 0;
+}
+.demo-frame--cases.grid-3 .demo-case-stage--scramble > .row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space100);
+}
+.demo-frame--scramble > .demo-case > .demo-case-num {
+  align-self: center;
+  margin-inline: auto;
+}
+
+/* Halftone / glow particles demos */
+.demo-case-stage--halftone,
+.demo-case-stage--glow {
+  width: 100%;
+  max-width: 18rem;
+  margin-inline: auto;
+}
+.demo-case-stage--halftone > k3-halftone,
+.demo-case-stage--glow > k3-glow-particles {
+  display: block;
+  width: 100%;
+}
+.halftone-swatch {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 10;
+  min-block-size: 7.5rem;
+  color: #fff;
+  font: 600 1rem/1.2 var(--k3-sys-typescale-title-medium-font, system-ui);
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+}
+.halftone-swatch--warm {
+  background: linear-gradient(135deg, #f59e0b, #db2777, #6366f1);
+}
+.halftone-swatch--cool {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6, #8b5cf6);
+}
+.halftone-swatch--night {
+  background: linear-gradient(145deg, #0f172a, #1e293b 45%, #334155);
+}
+
 /*
  * Widths × sizes matrix (m3.material.io):
  * rows A–E = sizes · cols 1–3 = default / narrow / wide
@@ -3958,4 +4097,12 @@ k3-fab .ms-fill-icon {
 .qr-md2-swatch[aria-selected='true'] {
   border-color: var(--k3-sys-color-on-surface);
   box-shadow: 0 0 0 0.125rem var(--k3-sys-color-primary);
+}
+
+/* Lazy loading page — replay control above the stacked demo cases */
+.lazy-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--k3-sys-spacing-space100);
+  margin-block-end: var(--k3-sys-spacing-space200);
 }

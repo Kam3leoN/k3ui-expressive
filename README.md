@@ -67,6 +67,22 @@ registry, dependencies come along: `K3UI.init({ components: ['k3-audio-player'] 
 defines its slider, buttons and progress (`src/registry/deps.ts`, kept in sync by
 `tests/unit/registry-deps.test.ts`).
 
+## Lazy loading
+
+Two layers — use the one that fits:
+
+- **Utility** (logic only): `await registry.registerWhen(el, 'visible')` defines the k3
+  elements under `el` once it scrolls into view (`idle`, `interaction`, `eager` too).
+  `whenTriggered()` / `pendingCustomElements()` are the underlying primitives.
+- **Component** (states + a11y): `<k3-lazy>` adds a `k3-skeleton` around the real content
+  (or `fallback="indicator"`), an optional `loader` promise, errors with Retry, `aria-busy`.
+
+```html
+<k3-lazy trigger="visible">
+  <k3-card>…</k3-card>
+</k3-lazy>
+```
+
 ## Theming
 
 `K3UI.init({ theme: { seed: '#00639B', variant } })` — `variant` defaults to `expressive`

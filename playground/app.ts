@@ -49,15 +49,13 @@ import {
   mountMaterialSymbols,
 } from './material-symbols.js';
 import { docStore, DocKeys } from './doc-store.js';
+import { ariaTabs, installTabKeyboard, selectTab } from './aria-tabs.js';
+import { DEFAULT_THEME, THEME_SEEDS } from './theme-defaults.js';
 import { mountSponsors } from './sponsors.js';
-import {
-  mountDocTables,
-  mountTableIn,
-  createDocTable,
-  INIT_SECTION,
-} from './doc-tables.js';
 import { enhanceAllDemos } from './demo-enhance.js';
-import { mountUsageIfNeeded } from './mount-usage.js';
+/* API tables + Usage snippets only matter on component / style pages → own chunks */
+const loadDocTables = () => import('./doc-tables.js');
+const loadUsage = () => import('./mount-usage.js');
 import {
   isPlaygroundLocale,
   mountLocaleFlags,
@@ -91,20 +89,18 @@ const SHELL_COMPONENTS = [
   'k3-chip-set',
   'k3-split-button',
   'k3-top-app-bar',
-  'k3-doc-nav',
-  'k3-dialog',
   'k3-button',
   'k3-button-group',
-  'k3-switch',
   'k3-loading-indicator',
 ] as const;
 
 /** Registered right after first paint — not needed for LCP text. */
-const SHELL_DEFERRED = ['k3-tooltip', 'k3-snackbar'] as const;
+/* Off-screen at first paint (dialogs, settings switches, page footer nav) */
+const SHELL_DEFERRED = ['k3-tooltip', 'k3-snackbar', 'k3-dialog', 'k3-switch', 'k3-doc-nav'] as const;
 
-const seeds = ['#6750A4', '#00639B', '#8B1A4A', '#1B6B4A', '#B35C00'];
+const seeds: string[] = [...THEME_SEEDS];
 let seedIdx = (() => {
-  const idx = docStore.get<number>(DocKeys.themeSeedIdx, 0);
+  const idx = docStore.get<number>(DocKeys.themeSeedIdx, DEFAULT_THEME.seedIdx);
   return idx >= 0 && idx < seeds.length ? idx : 0;
 })();
 /* Restore last picked color into the active slot (picker mutates seeds[seedIdx]). */
@@ -114,7 +110,7 @@ let seedIdx = (() => {
 }
 /** Persisted theme preference — light · dark · auto · system (OS). */
 let themeMode: ColorMode = (() => {
-  const saved = docStore.get<string>(DocKeys.themeMode, 'light');
+  const saved = docStore.get<string>(DocKeys.themeMode, DEFAULT_THEME.mode);
   if (saved === 'light' || saved === 'dark' || saved === 'auto' || saved === 'system') {
     return saved;
   }
@@ -149,10 +145,10 @@ function parseContrast(raw: string | null | undefined): ContrastLevel {
 }
 
 let colorVariant: ColorVariant = parseColorVariant(
-  docStore.get<string>(DocKeys.themeVariant, 'expressive'),
+  docStore.get<string>(DocKeys.themeVariant, DEFAULT_THEME.variant),
 );
 let contrastLevel: ContrastLevel = parseContrast(
-  docStore.get<string>(DocKeys.themeContrast, 'default'),
+  docStore.get<string>(DocKeys.themeContrast, DEFAULT_THEME.contrast),
 );
 
 function resolvedIsDark(): boolean {
@@ -1120,6 +1116,27 @@ function buildNavSheet(destId: string): void {
       ul.append(li);
     }
     if (ul.childElementCount) nav.append(ul);
+  } else if (openDest.id === 'animations') {
+    const animIcons: Record<string, string> = {
+      'text-bounce': 'title',
+      'text-scramble': 'shuffle',
+      'heart-burst': 'favorite',
+      halftone: 'grid_on',
+      'glow-particles': 'flare',
+    };
+    const ul = document.createElement('ul');
+    ul.className = 'shell-sheet-nav';
+    for (const c of componentsInCategory('Animation')) {
+      const li = document.createElement('li');
+      const link = sheetNavLink(c, selectCurrent ? pageId : '');
+      const icon = document.createElement('span');
+      icon.className = 'ms';
+      setMsIcon(icon, animIcons[c.id] ?? 'animation');
+      link.prepend(icon);
+      li.append(link);
+      ul.append(li);
+    }
+    if (ul.childElementCount) nav.append(ul);
   } else if (openDest.id === 'resources') {
     const ul = document.createElement('ul');
     ul.className = 'shell-sheet-nav';
@@ -1295,6 +1312,21 @@ function fillNavMenu(destId?: string | null): {
       nodes.push(item);
     }
     menu.replaceChildren(...nodes);
+  } else if (openDest.id === 'animations') {
+    const animIcons: Record<string, string> = {
+      'text-bounce': 'title',
+      'text-scramble': 'shuffle',
+      'heart-burst': 'favorite',
+      halftone: 'grid_on',
+      'glow-particles': 'flare',
+    };
+    menu.replaceChildren(
+      ...componentsInCategory('Animation').map((c) => {
+        const item = leafMenuItem(c, pageId, { selectCurrent });
+        item.prepend(menuItemIcon(animIcons[c.id] ?? 'animation'));
+        return item;
+      }),
+    );
   } else if (openDest.id === 'resources') {
     menu.replaceChildren(
       ...RESOURCE_PAGES.map((page) => {
@@ -1344,6 +1376,7 @@ function fillNavMenu(destId?: string | null): {
  * Secondary destinations in an M3E menu (rail / tablet+):
  * - Components → parent categories with child pages as submenu
  * - Utilities → flat list; Keyboard expands to Basics / Media
+ * - Animations → flat list (text-bounce, heart-burst, …)
  * - Resources → Material Symbols browser page
  * - Styles → flat list; Color expands to Roles / Palettes / Additional
  */
@@ -1622,6 +1655,42 @@ function afterFirstPaint(task: () => void): void {
   requestAnimationFrame(() => requestAnimationFrame(run));
 }
 
+/** Feedback → Lazy loading: simulated latency, one failure then Retry, Replay. */
+let lazyReplayWired = false;
+function wireLazyDemos(): void {
+  const page = document.getElementById('page-lazy');
+  if (!page) return;
+  type LazyDemo = HTMLElement & { loader: (() => Promise<unknown>) | null; load(): Promise<void> };
+  const arm = (el: LazyDemo): void => {
+    const latency = Number(el.dataset.latency ?? 1200);
+    let failOnce = el.dataset.fail === '1';
+    el.loader = () =>
+      new Promise<void>((resolve, reject) => {
+        window.setTimeout(() => {
+          if (!failOnce) return resolve();
+          failOnce = false;
+          reject(new Error('Simulated network error'));
+        }, latency);
+      });
+    void customElements.whenDefined('k3-lazy').then(() => el.load());
+  };
+  const replay = (): void => {
+    page.querySelectorAll<LazyDemo>('k3-lazy.lazy-demo').forEach((el) => {
+      const fresh = el.cloneNode(true) as LazyDemo;
+      /* A clone copies the reflected state — start over from idle */
+      fresh.removeAttribute('state');
+      fresh.removeAttribute('aria-busy');
+      el.replaceWith(fresh);
+      arm(fresh);
+    });
+  };
+  if (!lazyReplayWired) {
+    lazyReplayWired = true;
+    document.getElementById('btn-lazy-replay')?.addEventListener('click', replay);
+  }
+  replay();
+}
+
 /** Styles → Icons — live FILL / wght / GRAD / opsz (Material Symbols New). */
 let iconsAxesWired = false;
 async function wireIconsAxesDemo(): Promise<void> {
@@ -1681,7 +1750,8 @@ async function wireIconsAxesDemo(): Promise<void> {
 }
 
 /** Styles token pages — `<k3-table>` Specs (Token / Value / Notes). */
-function fillStyleTokenDemos(): void {
+async function fillStyleTokenDemos(): Promise<void> {
+  const { mountTableIn } = await loadDocTables();
   const spacing = document.getElementById('spacing-scale');
   if (spacing && !spacing.querySelector('k3-table')) {
     mountTableIn(spacing, {
@@ -1842,6 +1912,10 @@ function updateColorHct(seed: string): void {
 
 /** Specs / Properties / Methods / … — always `<k3-table>` (current page only). */
 async function ensureDocTables(pageId?: string): Promise<void> {
+  const [{ createDocTable, INIT_SECTION, mountDocTables }, { mountUsageIfNeeded }] = await Promise.all([
+    loadDocTables(),
+    loadUsage(),
+  ]);
   const id = pageId ?? currentPageId();
   if (id === 'home') {
     const home = document.getElementById('page-home');
@@ -2046,13 +2120,11 @@ async function boot(): Promise<void> {
     wireShellGithubMenu();
     wireQuickStartTabs();
     wireCodeSamples();
+    ariaTabs();
+    installTabKeyboard();
     /* Demo frames → equal cases + horizontal nums (skip matrix / fab-menu) */
     enhanceAllDemos();
-    /* Usage HTML/CSS/JS before Specs — every component page */
-    document.querySelectorAll<HTMLElement>('.comp-page[data-page]').forEach((page) => {
-      const id = page.getAttribute('data-page');
-      if (id) mountUsageIfNeeded(page, id);
-    });
+    /* Usage HTML/CSS/JS mounts with the page (ensureDocTables) — not 97 pages at boot */
     applyPlaygroundI18n();
 
     /** Register only CE tags present on a page (avoids upgrading every demo at boot). */
@@ -2074,6 +2146,7 @@ async function boot(): Promise<void> {
         void import('../src/fonts/fonts-code.css');
       }
       if (articleId === 'shapes') await fillShapes();
+      if (articleId === 'lazy') wireLazyDemos();
       if (articleId === 'material-symbols') await mountMaterialSymbols();
       if (
         articleId === 'spacing' ||
@@ -2085,7 +2158,7 @@ async function boot(): Promise<void> {
         isColorFamilyPage(articleId)
       ) {
         await registry.register('k3-table');
-        fillStyleTokenDemos();
+        await fillStyleTokenDemos();
       }
       const seed = seeds[seedIdx] ?? savedSeed;
       if (articleId === 'color-roles') {
@@ -2554,7 +2627,7 @@ function wireQuickStartTabs(): void {
       btn.addEventListener('click', () => {
         const id = btn.dataset.qsTab;
         if (!id) return;
-        tabs.querySelectorAll('.qs-tab').forEach((b) => b.classList.toggle('is-active', b === btn));
+        selectTab(tabs, btn);
         card.querySelectorAll<HTMLElement>('[data-qs-panel]').forEach((panel) => {
           panel.hidden = panel.dataset.qsPanel !== id;
         });
@@ -2575,7 +2648,7 @@ function wireCodeSamples(): void {
       const tabs = root?.querySelector<HTMLElement>('.qs-tabs');
       const id = tab.dataset.codeTab;
       if (!root || !tabs || !id) return;
-      tabs.querySelectorAll('.qs-tab').forEach((b) => b.classList.toggle('is-active', b === tab));
+      selectTab(tabs, tab);
       root.querySelectorAll<HTMLElement>('[data-code-panel]').forEach((panel) => {
         panel.hidden = panel.dataset.codePanel !== id;
       });
@@ -2786,6 +2859,8 @@ function wireDemoPages(): void {
   wireCountdownLab();
   wireCarouselLab();
   wireConfettiDemo();
+  wireTextBounceDemo();
+  wireTextScrambleDemo();
   wireAudioPlayerDemoRights();
 }
 
@@ -2906,6 +2981,85 @@ function wireAudioPlayerDemoRights(): void {
     player.addEventListener('k3-share', block('share'));
     player.addEventListener('k3-download', block('download'));
   });
+}
+
+/** Text bounce — loop switch + replay. */
+function wireTextBounceDemo(): void {
+  const page = document.getElementById('page-text-bounce');
+  if (!page || page.dataset.textBounceWired) return;
+  page.dataset.textBounceWired = '1';
+  const bounce = document.getElementById('demo-text-bounce') as
+    | (HTMLElement & { loop: boolean; play: () => void; restart: () => void })
+    | null;
+  const loopSw = document.getElementById('text-bounce-loop') as
+    | (HTMLElement & { selected: boolean })
+    | null;
+  const replay = document.getElementById('text-bounce-replay');
+  loopSw?.addEventListener('k3-change', ((e: CustomEvent<{ selected?: boolean }>) => {
+    if (!bounce) return;
+    bounce.loop = !!e.detail?.selected;
+    bounce.play();
+  }) as EventListener);
+  replay?.addEventListener('k3-click', () => bounce?.restart());
+}
+
+/** Text scramble — change-text button + braille/blocks/numbers presets. */
+function wireTextScrambleDemo(): void {
+  const page = document.getElementById('page-text-scramble');
+  if (!page || page.dataset.textScrambleWired) return;
+  page.dataset.textScrambleWired = '1';
+
+  type ScrambleEl = HTMLElement & {
+    chars: string;
+    play: (text?: string) => Promise<void>;
+  };
+
+  const blurbPhrases = [
+    'scrambleText() reveals text via a smooth randomized character scramble.',
+    'Reveal any string with a smooth randomized character scramble.',
+    'Noise glyphs settle into readable copy, character by character.',
+  ];
+  let blurbIdx = 0;
+  const blurbEl = document.getElementById('demo-scramble-loop') as ScrambleEl | null;
+  document.getElementById('demo-scramble-normal-btn')?.addEventListener('k3-click', () => {
+    if (!blurbEl) return;
+    blurbIdx = (blurbIdx + 1) % blurbPhrases.length;
+    blurbEl.chars = 'default';
+    void blurbEl.play(blurbPhrases[blurbIdx]);
+  });
+  document.getElementById('demo-scramble-upper-btn')?.addEventListener('k3-click', () => {
+    if (!blurbEl) return;
+    blurbIdx = (blurbIdx + 1) % blurbPhrases.length;
+    blurbEl.chars = 'uppercase';
+    void blurbEl.play(blurbPhrases[blurbIdx]!.toUpperCase());
+  });
+
+  const phrases = [
+    'Hello World!',
+    'Goodbye Moon!',
+    'Scramble done!',
+    'k3-text-scramble',
+  ];
+  let phraseIdx = 0;
+  const changeEl = document.getElementById('demo-scramble-change') as ScrambleEl | null;
+  document.getElementById('demo-scramble-change-btn')?.addEventListener('k3-click', () => {
+    phraseIdx = (phraseIdx + 1) % phrases.length;
+    void changeEl?.play(phrases[phraseIdx]);
+  });
+
+  const charsEl = document.getElementById('demo-scramble-chars') as ScrambleEl | null;
+  page.addEventListener('k3-click', ((e: Event) => {
+    const path = e.composedPath() as EventTarget[];
+    const btn = path.find(
+      (n): n is HTMLElement =>
+        n instanceof HTMLElement && n.hasAttribute('data-scramble-chars'),
+    );
+    if (!btn || !charsEl) return;
+    const set = btn.getAttribute('data-scramble-chars');
+    if (!set) return;
+    charsEl.chars = set;
+    void charsEl.play();
+  }) as EventListener);
 }
 
 /** Confetti playground — preset buttons → `k3-confetti#demo-confetti`. */

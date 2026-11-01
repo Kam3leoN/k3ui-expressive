@@ -14,7 +14,9 @@ export type LifecyclePhase =
   | 'select-start'
   | 'select-end'
   | 'morph-start'
-  | 'morph-end';
+  | 'morph-end'
+  | 'load-start'
+  | 'load-end';
 
 export interface LifecycleDetail {
   reason?: string;

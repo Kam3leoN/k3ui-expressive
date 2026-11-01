@@ -5667,6 +5667,70 @@ fav?.addEventListener("k3-change", (e) => {
 &lt;k3-skeleton animation="wave" style="width:8rem;height:5rem"&gt;&lt;/k3-skeleton&gt;</code></pre>
         </article>
 
+        <!-- FEEDBACK: LAZY LOADING -->
+        <article class="comp-page" data-page="lazy" id="page-lazy" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
+            <h1 data-i18n="doc.lazy.title">Lazy loading</h1>
+            <p data-i18n="doc.lazy.blurb">Load a region when needed — skeleton or loading indicator until ready.</p>
+            <p class="doc-intro" data-i18n="doc.lazy.intro">k3-lazy waits for its trigger, registers the k3 components it contains, awaits an optional loader, then reveals the content.</p>
+          </header>
+
+          <div class="surface stack gap-md">
+            <div class="lazy-demo-actions">
+              <k3-button id="btn-lazy-replay" variant="tonal">
+                <span data-i18n="doc.lazy.replay">Replay</span>
+              </k3-button>
+            </div>
+            <div class="demo-frame demo-frame--cases demo-frame--stack items-start" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-lazy class="lazy-demo" trigger="manual" data-latency="1600" style="width: 100%">
+                    <k3-card variant="outlined" style="width: 100%">
+                      <div style="padding: 1rem">
+                        <strong data-i18n="doc.lazy.cardTitle">Weekly report</strong>
+                        <p data-i18n="doc.lazy.cardBody">Loaded when needed — components and data arrive together.</p>
+                      </div>
+                    </k3-card>
+                  </k3-lazy>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-lazy class="lazy-demo" trigger="manual" fallback="indicator" data-latency="1600" style="width: 100%">
+                    <k3-card variant="outlined" style="width: 100%">
+                      <div style="padding: 1rem">
+                        <strong data-i18n="doc.lazy.cardTitle">Weekly report</strong>
+                        <p data-i18n="doc.lazy.cardBody">Loaded when needed — components and data arrive together.</p>
+                      </div>
+                    </k3-card>
+                  </k3-lazy>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-lazy class="lazy-demo" trigger="manual" data-latency="1000" data-fail="1" style="width: 100%">
+                    <k3-card variant="outlined" style="width: 100%">
+                      <div style="padding: 1rem">
+                        <strong data-i18n="doc.lazy.cardTitle">Weekly report</strong>
+                        <p data-i18n="doc.lazy.cardBody">Loaded when needed — components and data arrive together.</p>
+                      </div>
+                    </k3-card>
+                  </k3-lazy>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label">skeleton</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">indicator</span></li>
+              <li><span class="pill-num">3</span><span class="variant-label">error · retry</span></li>
+            </ol>
+          </div>
+        </article>
+
         <!-- SNACKBAR -->
         <article class="comp-page" data-page="snackbar" id="page-snackbar" hidden>
           <header class="section-head">
@@ -9587,6 +9651,393 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
               <li>
                 <span class="pill-num">9</span
                 ><span class="variant-label" data-i18n="confetti.preset.rain">Rain</span>
+              </li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- ANIMATION: TEXT BOUNCE -->
+        <article class="comp-page" data-page="text-bounce" id="page-text-bounce" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.text-bounce.title">Text bounce</h1>
+            <p data-i18n="doc.text-bounce.blurb">
+              Per-letter flip + bounce — WAAPI only (Anime.js doc vibe, no dependency).
+            </p>
+            <p class="doc-intro" data-i18n="doc.text-bounce.intro">
+              Splits a string into characters and plays a staggered flip-up / bounce-down cycle with
+              the Web Animations API. Toggle loop for a continuous reel, or fire once.
+            </p>
+          </header>
+          <section class="doc-section">
+            <h2 data-i18n="doc.text-bounce.section.demo">Demo</h2>
+            <p data-i18n="doc.text-bounce.section.demo.blurb">
+              Inspired by the Anime.js Animation docs — HELLO WORLD.
+            </p>
+          </section>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="min-height: 6rem; align-items: center">
+                  <k3-text-bounce
+                    id="demo-text-bounce"
+                    text="HELLO WORLD"
+                    loop
+                    loop-delay="1000"
+                    style="font-size: 1.75rem; font-weight: 700; letter-spacing: 0.08em"
+                  ></k3-text-bounce>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="surface row wrap" style="gap: var(--k3-sys-spacing-space300); margin-top: var(--k3-sys-spacing-space300)">
+            <k3-switch id="text-bounce-loop" selected>
+              <span data-i18n="doc.text-bounce.loop">Loop continuously</span>
+            </k3-switch>
+            <k3-button id="text-bounce-replay" variant="tonal" data-i18n="doc.text-bounce.replay"
+              >Replay</k3-button
+            >
+          </div>
+        </article>
+
+        <!-- ANIMATION: TEXT SCRAMBLE -->
+        <article class="comp-page" data-page="text-scramble" id="page-text-scramble" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.text-scramble.title">Text scramble</h1>
+            <p data-i18n="doc.text-scramble.blurb">
+              Randomized character reveal — Anime.js scrambleText vibe, no dependency.
+            </p>
+            <p class="doc-intro" data-i18n="doc.text-scramble.intro">
+              Reveals text through a scramble of random glyphs, then settles. Loop with a pause,
+              change the string from a button, or pick braille / blocks / numbers as the noise set.
+            </p>
+          </header>
+          <section class="doc-section">
+            <h2 data-i18n="doc.text-scramble.section.demo">Demo</h2>
+            <p data-i18n="doc.text-scramble.section.demo.blurb">
+              Three examples — loop, change text, and character presets.
+            </p>
+          </section>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases grid-3 demo-frame--scramble" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--scramble">
+                  <k3-text-scramble
+                    id="demo-scramble-loop"
+                    autoplay
+                    style="font-family: var(--k3-ref-typeface-brand-mono, ui-monospace, monospace); font-size: 0.95rem; text-align: center"
+                    text="scrambleText() reveals text via a smooth randomized character scramble."
+                  ></k3-text-scramble>
+                  <div class="row wrap" style="gap: var(--k3-sys-spacing-space100); justify-content: center">
+                    <k3-button id="demo-scramble-normal-btn" variant="tonal" data-i18n="doc.text-scramble.change.normal"
+                      >Change · normal</k3-button
+                    >
+                    <k3-button id="demo-scramble-upper-btn" variant="tonal" data-i18n="doc.text-scramble.change.upper"
+                      >Change · uppercase</k3-button
+                    >
+                  </div>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--scramble">
+                  <k3-text-scramble
+                    id="demo-scramble-change"
+                    autoplay
+                    style="font-family: var(--k3-ref-typeface-brand-mono, ui-monospace, monospace); font-size: 1.35rem; font-weight: 600; letter-spacing: normal; text-align: center"
+                    text="Hello World!"
+                  ></k3-text-scramble>
+                  <k3-button id="demo-scramble-change-btn" variant="tonal" data-i18n="doc.text-scramble.change"
+                    >Change text</k3-button
+                  >
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--scramble">
+                  <k3-text-scramble
+                    id="demo-scramble-chars"
+                    chars="braille"
+                    style="font-family: var(--k3-ref-typeface-brand-mono, ui-monospace, monospace); font-size: 0.95rem; text-align: center"
+                    text="Pick braille, blocks, or numbers for the scramble."
+                  ></k3-text-scramble>
+                  <div class="row wrap" style="gap: var(--k3-sys-spacing-space100); justify-content: center">
+                    <k3-button data-scramble-chars="braille" variant="tonal" data-i18n="doc.text-scramble.chars.braille"
+                      >Braille</k3-button
+                    >
+                    <k3-button data-scramble-chars="blocks" variant="tonal" data-i18n="doc.text-scramble.chars.blocks"
+                      >Blocks</k3-button
+                    >
+                    <k3-button data-scramble-chars="numbers" variant="tonal" data-i18n="doc.text-scramble.chars.numbers"
+                      >Numbers</k3-button
+                    >
+                  </div>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.text-scramble.guide.loop">Change · normal / uppercase</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.text-scramble.guide.change">Button · change text</span>
+              </li>
+              <li>
+                <span class="pill-num">3</span
+                ><span class="variant-label" data-i18n="doc.text-scramble.guide.chars">Chars · braille / blocks / numbers</span>
+              </li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- ANIMATION: HEART BURST -->
+        <article class="comp-page" data-page="heart-burst" id="page-heart-burst" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.heart-burst.title">Heart burst</h1>
+            <p data-i18n="doc.heart-burst.blurb">
+              Pointer-following particles — heart / star / like · hover on the target only · WAAPI only.
+            </p>
+            <p class="doc-intro" data-i18n="doc.heart-burst.intro">
+              Only the slotted surface triggers. Without clip, particles may rise above (card). With
+              clip, flight stays inside the text box and fades out — no hard cut.
+            </p>
+          </header>
+          <section class="doc-section">
+            <h2 data-i18n="doc.heart-burst.section.demo">Demo</h2>
+            <p data-i18n="doc.heart-burst.section.demo.blurb">
+              Three targets side by side — hover the control only; card stars may rise above; text stays soft-contained.
+            </p>
+          </section>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases grid-3 demo-frame--heart-burst" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--burst">
+                  <k3-heart-burst continuous color="#ff4b4b" icon="heart">
+                    <k3-button
+                      variant="filled"
+                      style="--k3-button-container-color: #3a2424; --k3-button-label-color: #ff4b4b; gap: 0.5rem"
+                    >
+                      <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"></span>
+                      <span data-i18n="doc.heart-burst.sponsor">Sponsor</span>
+                    </k3-button>
+                  </k3-heart-burst>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--burst demo-case-stage--burst-card">
+                  <k3-heart-burst block continuous icon="star" color="#ffb300">
+                    <k3-card variant="outlined" style="padding: var(--k3-sys-spacing-space300); box-sizing: border-box">
+                      <div style="display: flex; align-items: flex-start; gap: 0.5rem">
+                        <span
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="star"
+                          aria-hidden="true"
+                          style="color: #ffb300; font-variation-settings: 'FILL' 1"
+                        ></span>
+                        <div>
+                          <strong data-i18n="doc.heart-burst.demo.card.title">Hover the card</strong>
+                          <p style="margin: 0.35rem 0 0; opacity: 0.8; font-size: 0.875rem" data-i18n="doc.heart-burst.demo.card.body">
+                            Stars rise above the card — hover only on the card.
+                          </p>
+                        </div>
+                      </div>
+                    </k3-card>
+                  </k3-heart-burst>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--burst">
+                  <k3-heart-burst
+                    continuous
+                    icon="like"
+                    color="#1e88e5"
+                    count="4"
+                    style="--k3-heart-burst-particle-size: 1.85rem"
+                  >
+                    <h2
+                      style="margin: 0; font-size: 1.35rem; display: inline-flex; align-items: center; gap: 0.4rem"
+                    >
+                      <span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="thumb_up"
+                        aria-hidden="true"
+                        style="color: #1e88e5; font-variation-settings: 'FILL' 1"
+                      ></span>
+                      <span data-i18n="doc.heart-burst.demo.heading">Love this headline</span>
+                    </h2>
+                  </k3-heart-burst>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.heart-burst.demo.guide.button">Button · hearts</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.heart-burst.demo.guide.card">Card · stars</span>
+              </li>
+              <li>
+                <span class="pill-num">3</span
+                ><span class="variant-label" data-i18n="doc.heart-burst.demo.guide.text">Text · likes</span>
+              </li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- ANIMATION: HALFTONE -->
+        <article class="comp-page" data-page="halftone" id="page-halftone" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.halftone.title">Halftone</h1>
+            <p data-i18n="doc.halftone.blurb">
+              CSS/SVG lookalike of Figma Community Halftone — radial dot screen over slotted content.
+            </p>
+            <p class="doc-intro" data-i18n="doc.halftone.intro">
+              Overlays a dual-lattice radial-dot screen on any slotted surface (photo, card, gradient).
+              Tune pitch (size), opacity (intensity), and tone (dark = multiply · light = soft-light).
+              Optional animated drift. No WebGL / WebGPU — pure CSS.
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.halftone.section.demo">Demo</h2>
+            <p data-i18n="doc.halftone.section.demo.blurb">Three pitches — fine, medium + drift, light tone.</p>
+            <div class="demo-frame demo-frame--cases grid-3" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--halftone">
+                  <k3-halftone size="6" intensity="0.65" style="--k3-halftone-radius: 1rem">
+                    <div class="halftone-swatch halftone-swatch--warm">
+                      <span data-i18n="doc.halftone.demo.label">Halftone</span>
+                    </div>
+                  </k3-halftone>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--halftone">
+                  <k3-halftone size="10" intensity="0.55" animated style="--k3-halftone-radius: 1rem">
+                    <div class="halftone-swatch halftone-swatch--cool">
+                      <span data-i18n="doc.halftone.demo.label">Halftone</span>
+                    </div>
+                  </k3-halftone>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--halftone">
+                  <k3-halftone
+                    size="14"
+                    tone="light"
+                    color="#ffffff"
+                    intensity="0.4"
+                    style="--k3-halftone-radius: 1rem"
+                  >
+                    <div class="halftone-swatch halftone-swatch--night">
+                      <span data-i18n="doc.halftone.demo.label">Halftone</span>
+                    </div>
+                  </k3-halftone>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.halftone.guide.fine">Fine · size 6</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.halftone.guide.animated">Medium · animated</span>
+              </li>
+              <li>
+                <span class="pill-num">3</span
+                ><span class="variant-label" data-i18n="doc.halftone.guide.light">Coarse · light tone</span>
+              </li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- ANIMATION: GLOW PARTICLES -->
+        <article class="comp-page" data-page="glow-particles" id="page-glow-particles" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.glow-particles.title">Glow particles</h1>
+            <p data-i18n="doc.glow-particles.blurb">
+              Canvas 2D lookalike of Figma Community Glowing particles — soft drifting dots.
+            </p>
+            <p class="doc-intro" data-i18n="doc.glow-particles.intro">
+              Fullscreen-in-host canvas with soft radial particles. Count, color, speed, and glow are tunable.
+              interactive gently attracts dots toward the pointer. Honors prefers-reduced-motion (static frame).
+              No WebGL / WebGPU.
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.glow-particles.section.demo">Demo</h2>
+            <p data-i18n="doc.glow-particles.section.demo.blurb">
+              Default drift · interactive pointer pull · warm palette.
+            </p>
+            <div class="demo-frame demo-frame--cases grid-3" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--glow">
+                  <k3-glow-particles count="40" color="#7dd3fc" style="--k3-glow-particles-min-block-size: 11rem">
+                    <strong data-i18n="doc.glow-particles.demo.caption">Glow</strong>
+                  </k3-glow-particles>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--glow">
+                  <k3-glow-particles
+                    count="64"
+                    color="#a5b4fc"
+                    interactive
+                    style="--k3-glow-particles-min-block-size: 11rem"
+                  >
+                    <strong data-i18n="doc.glow-particles.demo.interactive">Move the pointer</strong>
+                  </k3-glow-particles>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--glow">
+                  <k3-glow-particles
+                    count="36"
+                    color="#fbbf24"
+                    speed="0.45"
+                    glow="22"
+                    style="--k3-glow-particles-min-block-size: 11rem; --k3-glow-particles-bg: #1a1208"
+                  >
+                    <strong data-i18n="doc.glow-particles.demo.caption">Glow</strong>
+                  </k3-glow-particles>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.glow-particles.guide.default">Default · cyan</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.glow-particles.guide.interactive">Interactive</span>
+              </li>
+              <li>
+                <span class="pill-num">3</span
+                ><span class="variant-label" data-i18n="doc.glow-particles.guide.warm">Warm · amber</span>
               </li>
             </ol>
           </div>
