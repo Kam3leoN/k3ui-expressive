@@ -1555,8 +1555,10 @@ k3-avatar [slot='badge'].ms {
 .demo-frame--cases.grid-2,
 .demo-frame--cases.grid-3,
 .demo-frame--demo.grid-2,
-.demo-frame--demo.grid-3 {
-  /* Prefer grid tracks over flex wrap (keeps 2-up side-by-side) */
+.demo-frame--demo.grid-3,
+.demo-frame--cases.k3-layout-grid,
+.demo-frame--demo.k3-layout-grid {
+  /* Prefer grid tracks over flex wrap (keeps N-up side-by-side) */
   display: grid;
   grid-template-columns: repeat(var(--k3-layout-columns, 12), minmax(0, 1fr));
   gap: var(--k3-layout-gutter, 0.5rem);
@@ -1573,7 +1575,9 @@ k3-avatar [slot='badge'].ms {
 .demo-frame--cases.grid-2 > .demo-case,
 .demo-frame--cases.grid-3 > .demo-case,
 .demo-frame--demo.grid-2 > .demo-case,
-.demo-frame--demo.grid-3 > .demo-case {
+.demo-frame--demo.grid-3 > .demo-case,
+.demo-frame--cases.k3-layout-grid > .demo-case,
+.demo-frame--demo.k3-layout-grid > .demo-case {
   min-width: 0;
   width: 100%;
   max-width: 100%;
@@ -1583,7 +1587,9 @@ k3-avatar [slot='badge'].ms {
 .demo-frame--cases.grid-2 .demo-case-stage,
 .demo-frame--cases.grid-3 .demo-case-stage,
 .demo-frame--demo.grid-2 .demo-case-stage,
-.demo-frame--demo.grid-3 .demo-case-stage {
+.demo-frame--demo.grid-3 .demo-case-stage,
+.demo-frame--cases.k3-layout-grid .demo-case-stage,
+.demo-frame--demo.k3-layout-grid .demo-case-stage {
   display: block;
   min-width: 0;
   width: 100%;
@@ -1593,7 +1599,9 @@ k3-avatar [slot='badge'].ms {
 .demo-frame--cases.grid-2 .demo-case-stage > *,
 .demo-frame--cases.grid-3 .demo-case-stage > *,
 .demo-frame--demo.grid-2 .demo-case-stage > *,
-.demo-frame--demo.grid-3 .demo-case-stage > * {
+.demo-frame--demo.grid-3 .demo-case-stage > *,
+.demo-frame--cases.k3-layout-grid .demo-case-stage > *,
+.demo-frame--demo.k3-layout-grid .demo-case-stage > * {
   min-width: 0 !important;
   width: 100%;
   max-width: 100%;
@@ -1811,36 +1819,32 @@ k3-avatar [slot='badge'].ms {
   margin-inline: auto;
 }
 
-/* Halftone / glow particles demos */
-.demo-case-stage--halftone,
+/* Glow particles demos */
 .demo-case-stage--glow {
   width: 100%;
   max-width: 18rem;
   margin-inline: auto;
 }
-.demo-case-stage--halftone > k3-halftone,
 .demo-case-stage--glow > k3-glow-particles {
   display: block;
   width: 100%;
 }
-.halftone-swatch {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 16 / 10;
-  min-block-size: 7.5rem;
-  color: #fff;
-  font: 600 1rem/1.2 var(--k3-sys-typescale-title-medium-font, system-ui);
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+
+/* Charts demos */
+.demo-frame--charts {
+  align-items: stretch;
 }
-.halftone-swatch--warm {
-  background: linear-gradient(135deg, #f59e0b, #db2777, #6366f1);
+.demo-case-stage--chart {
+  width: 100%;
+  min-width: 0;
 }
-.halftone-swatch--cool {
-  background: linear-gradient(135deg, #22d3ee, #3b82f6, #8b5cf6);
-}
-.halftone-swatch--night {
-  background: linear-gradient(145deg, #0f172a, #1e293b 45%, #334155);
+.demo-case-stage--chart > k3-chart {
+  display: block;
+  width: 100%;
+  background: var(--k3-sys-color-surface-container-lowest, transparent);
+  border-radius: var(--k3-sys-shape-corner-large, 1rem);
+  padding: var(--k3-sys-spacing-space200, 0.75rem);
+  box-sizing: border-box;
 }
 
 /*
@@ -4106,3 +4110,137 @@ k3-fab .ms-fill-icon {
   gap: var(--k3-sys-spacing-space100);
   margin-block-end: var(--k3-sys-spacing-space200);
 }
+
+.settings-hint {
+  margin: var(--k3-sys-spacing-space100) 0 0;
+  color: var(--k3-sys-color-on-surface-variant);
+  font-size: var(--k3-sys-typescale-body-small-size, 0.75rem);
+  line-height: var(--k3-sys-typescale-body-small-line-height, 1rem);
+}
+
+/* Halftone lab — live print beside its options */
+.halftone-lab {
+  display: grid;
+  gap: var(--k3-sys-spacing-space300);
+  align-items: start;
+}
+@media (min-width: 840px) {
+  .halftone-lab {
+    grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+  }
+}
+.halftone-lab > k3-halftone {
+  --k3-halftone-radius: var(--k3-sys-shape-corner-large);
+}
+.halftone-lab-controls {
+  display: grid;
+  gap: var(--k3-sys-spacing-space200);
+}
+.halftone-lab-controls k3-select,
+.halftone-lab-controls k3-slider {
+  inline-size: 100%;
+}
+
+/* Iso filter — periodic table */
+.demo-frame--iso,
+.demo-frame--masonry {
+  align-items: stretch;
+}
+.periodic-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.15rem;
+  margin: 0;
+  padding: var(--k3-sys-spacing-space100, 0.5rem);
+  border: none;
+  border-radius: var(--k3-sys-shape-corner-medium, 0.75rem);
+  color: var(--k3-sys-color-on-primary-container, #21005d);
+  background: var(--k3-sys-color-primary-container, #eaddff);
+  text-align: start;
+  cursor: default;
+  font: inherit;
+  min-block-size: 4.5rem;
+}
+.periodic-tile--w2 {
+  min-block-size: 5.75rem;
+}
+.periodic-tile--w3 {
+  min-block-size: 7rem;
+}
+.periodic-z {
+  font-size: 0.65rem;
+  opacity: 0.75;
+  line-height: 1;
+}
+.periodic-symbol {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.periodic-name {
+  font-size: 0.65rem;
+  line-height: 1.2;
+  opacity: 0.85;
+}
+.periodic-tile--alkali {
+  background: #ffcdd2;
+  color: #4a0f14;
+}
+.periodic-tile--alkaline-earth {
+  background: #ffe0b2;
+  color: #4e2a00;
+}
+.periodic-tile--transition {
+  background: #c5cae9;
+  color: #1a237e;
+}
+.periodic-tile--post-transition {
+  background: #b2ebf2;
+  color: #004d40;
+}
+.periodic-tile--metalloid {
+  background: #d7ccc8;
+  color: #3e2723;
+}
+.periodic-tile--nonmetal {
+  background: #c8e6c9;
+  color: #1b5e20;
+}
+.periodic-tile--halogen {
+  background: #fff9c4;
+  color: #5d4037;
+}
+.periodic-tile--noble {
+  background: #e1bee7;
+  color: #4a148c;
+}
+.periodic-tile--lanthanide {
+  background: #f8bbd0;
+  color: #880e4f;
+}
+.periodic-tile--actinide {
+  background: #ffccbc;
+  color: #bf360c;
+}
+
+/* Masonry demo tiles */
+.masonry-tile {
+  display: grid;
+  place-items: center;
+  border-radius: var(--k3-sys-shape-corner-large, 1rem);
+  color: var(--k3-sys-color-on-primary-container, #21005d);
+  font: 700 1.25rem/1 var(--k3-sys-typescale-title-large-font, system-ui);
+}
+.masonry-tile--a { background: #eaddff; }
+.masonry-tile--b { background: #ffd8e4; }
+.masonry-tile--c { background: #c8ebd1; }
+.masonry-tile--d { background: #c4e7ff; }
+.masonry-tile--e { background: #ffe08a; }
+.masonry-tile--f { background: #d4e3ff; }
+.masonry-tile--g { background: #ffdad6; }
+.masonry-tile--h { background: #e8def8; }
+.masonry-tile--i { background: #bcecfe; }
+.masonry-tile--j { background: #f5e0c3; }
+.masonry-tile--k { background: #d6f0d6; }
+.masonry-tile--l { background: #f2d7ee; }

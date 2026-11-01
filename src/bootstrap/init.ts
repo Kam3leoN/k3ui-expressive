@@ -1,13 +1,7 @@
 import { VERSION } from '../version.js';
 import { debug, type DebugLevel } from '../debug/logger.js';
 import { i18n, type LocaleCode } from '../i18n/index.js';
-import {
-  themeApi,
-  type ColorMode,
-  type MotionScheme,
-  type ColorVariant,
-  type ContrastLevel,
-} from '../theme/apply.js';
+import { themeApi, type ColorMode, type MotionScheme, type ColorVariant, type ContrastLevel, DEFAULT_COLOR_SPEC, type ColorSpecVersion } from '../theme/apply.js';
 import { registry } from '../registry/register.js';
 import { haptic } from '../core/haptic.js';
 import { dnd } from '../core/dnd.js';
@@ -26,6 +20,8 @@ export interface InitOptions {
     motion?: MotionScheme;
     variant?: ColorVariant;
     contrast?: ContrastLevel;
+    /** Material color spec — `2025` (default) or `2021`. */
+    specVersion?: ColorSpecVersion;
   };
   debug?: boolean | { level?: DebugLevel };
   components?: 'all' | string[];
@@ -89,6 +85,7 @@ export async function init(options?: InitOptions): Promise<K3UIGlobal> {
     motion: opts.theme?.motion ?? 'expressive',
     variant: opts.theme?.variant ?? 'expressive',
     contrast: opts.theme?.contrast ?? 'default',
+    specVersion: opts.theme?.specVersion ?? DEFAULT_COLOR_SPEC,
   });
 
   await registry.registerAll(opts.components ?? 'all');

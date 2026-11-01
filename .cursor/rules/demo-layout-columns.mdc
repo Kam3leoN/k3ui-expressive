@@ -1,0 +1,58 @@
+---
+description: Frames de démo — colonnes layout k3ui (span égal) + helpers k3-demo-cols-*
+alwaysApply: true
+globs: playground/**/*.{html,css,ts,scss}
+---
+
+# Demo frames — colonnes layout (obligatoire)
+
+Toute **frame d’exemples** (`.demo-frame--cases` / `--demo`) avec **N cas côte à côte** doit s’aligner sur la **grille layout** (`--k3-layout-columns` · 4 / 8 / 12) — pas de flex « joli » ni de `max-width: 28rem` inventé.
+
+## Helper (source de vérité)
+
+Dans `src/tokens/_layout.scss` :
+
+| Classe | Effet (enfant) |
+|---|---|
+| `.k3-demo-cols-2` | `span` = moitié des colonnes → **6** @12 · **4** @8 · **2** @4 |
+| `.k3-demo-cols-3` | tiers → **4** @12 |
+| `.k3-demo-cols-4` | quarts → **3** @12 |
+| `.k3-col-span-*` / `.k3-col-full` | spans explicites si pack inégal |
+
+Legacy accepté : `.grid-2` / `.grid-3` (mêmes tracks) — **préférer** le helper canonique ci-dessous.
+
+## Markup canonique
+
+```html
+<!-- ✅ GOOD — 2 exemples = 2 × span 6 (desktop) -->
+<div class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2" data-demo-enhance="off">
+  <div class="demo-case">
+    <div class="demo-case-stage">…</div>
+    <span class="demo-case-num" aria-hidden="true">1</span>
+  </div>
+  <div class="demo-case">
+    <div class="demo-case-stage">…</div>
+    <span class="demo-case-num" aria-hidden="true">2</span>
+  </div>
+</div>
+
+<!-- ❌ BAD — flex + max-width magique -->
+<div class="demo-frame demo-frame--cases">
+  <div class="demo-case-stage" style="max-width: 28rem">…</div>
+</div>
+```
+
+## Règles dures
+
+1. **N exemples → `k3-demo-cols-N`** (ou spans explicites si inégal).
+2. Frame = **`k3-layout-grid`** (tracks = `--k3-layout-columns`, gap = `--k3-layout-gutter`).
+3. Stages **pleine largeur de la colonne** — pas de `max-width` / `width` inline qui casse l’overlay grille.
+4. Breakout chrome (déjà dans `playground.css` pour `.demo-frame--cases.k3-layout-grid`) — ne pas l’annuler.
+5. Scroll dans un case → **`.k3-scroll`** (jamais scrollbar native Windows) — voir `edge-scrollbar.mdc`.
+
+## Checklist
+
+- [ ] `k3-layout-grid` + `k3-demo-cols-N` (ou `.grid-2` / `.grid-3` legacy)
+- [ ] Overlay Grid ON : bords des cases alignés sur les pistes
+- [ ] Pas de `max-width` arbitraire sur `.demo-case-stage`
+- [ ] Contenu scrollable → `.k3-scroll` (+ `--x` si overflow horizontal)

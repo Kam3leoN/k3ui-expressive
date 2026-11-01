@@ -70,6 +70,7 @@ async function prepaintTheme(): Promise<string> {
     dark: DEFAULT_THEME.mode !== 'light',
     variant: DEFAULT_THEME.variant,
     contrast: DEFAULT_THEME.contrast,
+    specVersion: DEFAULT_THEME.spec,
   });
   const css = Object.entries(vars)
     .map(([k, v]) => `${k}:${v}`)

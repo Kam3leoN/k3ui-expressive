@@ -73,6 +73,8 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-heart-burst', load: () => import('../components/animation/heart-burst.js') },
   { tag: 'k3-halftone', load: () => import('../components/animation/halftone.js') },
   { tag: 'k3-glow-particles', load: () => import('../components/animation/glow-particles.js') },
+  // charts (Chart.js)
+  { tag: 'k3-chart', load: () => import('../components/charts/chart.js') },
   // media
   { tag: 'k3-audio-player', load: () => import('../components/media/audio-player.js') },
   { tag: 'k3-qr-code', load: () => import('../components/media/qr-code.js') },
@@ -94,6 +96,8 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-codeblock', load: () => import('../components/containment/codeblock.js') },
   { tag: 'k3-carousel', load: () => import('../components/containment/carousel.js') },
   { tag: 'k3-carousel-item', load: () => import('../components/containment/carousel-item.js') },
+  { tag: 'k3-masonry', load: () => import('../components/containment/masonry.js') },
+  { tag: 'k3-iso-filter', load: () => import('../components/containment/iso-filter.js') },
   { tag: 'k3-table', load: () => import('../components/containment/table.js') },
   { tag: 'k3-avatar', load: () => import('../components/containment/avatar.js') },
   {

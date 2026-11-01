@@ -31,7 +31,7 @@ describe('k3-codeblock', () => {
   });
 
   afterEach(() => {
-    host.remove();
+    host?.remove();
     vi.unstubAllGlobals();
   });
 
@@ -39,13 +39,17 @@ describe('k3-codeblock', () => {
     host.innerHTML = `<k3-codeblock label="demo" language="javascript" code="const ok = 1;"></k3-codeblock>`;
     const el = host.querySelector('k3-codeblock') as K3CodeBlock;
     await el.updateComplete;
+    await el.updateComplete;
 
     const onCopy = vi.fn();
     el.addEventListener('k3-copy', onCopy as EventListener);
 
-    const btn = el.shadowRoot!.querySelector('[part="copy"]') as HTMLButtonElement;
-    btn.click();
+    const btn = el.shadowRoot!.querySelector('[part="copy"]') as HTMLElement;
+    expect(btn).toBeTruthy();
+    const inner = btn.shadowRoot?.querySelector('button') as HTMLButtonElement | null;
+    (inner ?? btn).click();
     await Promise.resolve();
+    await el.updateComplete;
 
     expect(onCopy).toHaveBeenCalledWith(
       expect.objectContaining({ detail: { text: 'const ok = 1;' } }),

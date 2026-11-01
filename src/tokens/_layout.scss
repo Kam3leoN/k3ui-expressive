@@ -89,6 +89,61 @@
   gap: var(--k3-layout-gutter);
 }
 
+/*
+ * Equal column packs — parent = `.k3-layout-grid` (same tracks as overlay).
+ * Children each take an equal share of `--k3-layout-columns`:
+ *   2 → half (6 of 12 · 4 of 8 · 2 of 4)
+ *   3 → third (4 of 12 · …)
+ *   4 → quarter (3 of 12 · 2 of 8 · 1 of 4)
+ * Use on demo frames: `demo-frame--cases k3-layout-grid k3-demo-cols-2`
+ */
+.k3-demo-cols-2 > *,
+.k3-demo-cols-3 > *,
+.k3-demo-cols-4 > * {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.k3-demo-cols-2 > * {
+  grid-column: span max(1, calc(var(--k3-layout-columns) / 2));
+}
+
+.k3-demo-cols-3 > * {
+  grid-column: span max(1, calc(var(--k3-layout-columns) / 3));
+}
+
+.k3-demo-cols-4 > * {
+  grid-column: span max(1, calc(var(--k3-layout-columns) / 4));
+}
+
+/* Explicit span helpers when you need an uneven pack */
+.k3-col-span-1 {
+  grid-column: span 1;
+}
+.k3-col-span-2 {
+  grid-column: span 2;
+}
+.k3-col-span-3 {
+  grid-column: span 3;
+}
+.k3-col-span-4 {
+  grid-column: span 4;
+}
+.k3-col-span-6 {
+  grid-column: span 6;
+}
+.k3-col-span-8 {
+  grid-column: span 8;
+}
+.k3-col-span-12 {
+  grid-column: span 12;
+}
+.k3-col-full {
+  grid-column: 1 / -1;
+}
+
 /* Overlay visualization */
 .k3-layout-grid-overlay {
   pointer-events: none;

@@ -8842,18 +8842,22 @@ fav?.addEventListener("k3-change", (e) => {
             <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
             <h1 data-i18n="doc.codeblock.title">Code block</h1>
             <p data-i18n="doc.codeblock.blurb">
-              Syntax-highlighted sample — copy · download · collapsible toolbar.
+              k3-list shell — tabs title · copy/download · expandable source.
             </p>
             <p class="doc-intro" data-i18n="doc.codeblock.intro">
-              Code blocks present highlighted snippets with an optional toolbar for copy and
-              download. Pass source via the default slot or the code property, set language for
-              highlighting, and collapse long samples automatically or with collapsible.
+              Built on k3-list: the first item is a taller header with a k3-tabs title and
+              copy/download icon buttons (click flashes a tooltip). The last item holds the
+              highlighted source and expands when collapsible. Pass source via the default slot
+              or the code property.
             </p>
           </header>
           <div class="demo-block">
-            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+            <div
+              class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+              data-demo-enhance="off"
+            >
               <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 28rem">
+                <div class="demo-case-stage">
                   <k3-codeblock label="HTML" language="html">
                     <pre><code>&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
                   </k3-codeblock>
@@ -8861,7 +8865,7 @@ fav?.addEventListener("k3-change", (e) => {
                 <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
               <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 28rem">
+                <div class="demo-case-stage">
                   <k3-codeblock label="TypeScript" language="typescript" collapsible>
                     <pre><code>import { K3UI } from "k3ui";
 await K3UI.init({ components: ["k3-button"] });</code></pre>
@@ -8871,8 +8875,8 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
               </div>
             </div>
             <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">Toolbar · copy</span></li>
-              <li><span class="pill-num">2</span><span class="variant-label">Collapsible</span></li>
+              <li><span class="pill-num">1</span><span class="variant-label">List · tabs · copy/download</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label">Expandable body</span></li>
             </ol>
           </div>
         </article>
@@ -9149,6 +9153,109 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
                 <span class="pill-num">1</span
                 ><span class="variant-label" data-i18n="doc.carousel.guide.fullscreen"
                   >Full-screen · vertical</span
+                >
+              </li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- CONTAINMENT: ISO FILTER -->
+        <article class="comp-page" data-page="iso-filter" id="page-iso-filter" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.iso-filter.title">Iso filter</h1>
+            <p data-i18n="doc.iso-filter.blurb">
+              Isotope-style filter + masonry — chip filters, data-filter items, no Isotope.js.
+            </p>
+            <p class="doc-intro" data-i18n="doc.iso-filter.intro">
+              k3-iso-filter shows and hides slotted items by data-filter / data-category tokens.
+              Pair a chip set in the filters slot with layout="masonry" (or grid) for an animated
+              rearrange. Built-in packer — no Isotope.js.
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.iso-filter.section.demo">Periodic table</h2>
+            <p data-i18n="doc.iso-filter.section.demo.blurb">
+              Filter by element group — masonry tiles rearrange.
+            </p>
+            <div class="demo-frame demo-frame--cases demo-frame--stack demo-frame--iso" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-iso-filter
+                    id="demo-iso-filter"
+                    layout="masonry"
+                    column-width="72"
+                    gap="8"
+                    filter="*"
+                  >
+                    <k3-chip-set
+                      id="demo-iso-filters"
+                      slot="filters"
+                      selection="single"
+                      data-i18n-aria-label="doc.iso-filter.filters.label"
+                      aria-label="Element groups"
+                    ></k3-chip-set>
+                  </k3-iso-filter>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.iso-filter.guide.periodic"
+                  >Periodic table · masonry</span
+                >
+              </li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- CONTAINMENT: MASONRY -->
+        <article class="comp-page" data-page="masonry" id="page-masonry" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.masonry.title">Masonry</h1>
+            <p data-i18n="doc.masonry.blurb">
+              Cascading column pack — variable-height tiles without Isotope.js.
+            </p>
+            <p class="doc-intro" data-i18n="doc.masonry.intro">
+              k3-masonry packs slotted children into columns by shortest-column placement.
+              Set gap and column-width (or fixed columns). ResizeObserver keeps the layout fresh.
+              Prefer this when you only need masonry; use k3-iso-filter when you also need filters.
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.masonry.section.demo">Demo</h2>
+            <p data-i18n="doc.masonry.section.demo.blurb">
+              Mixed tile heights — packs into columns.
+            </p>
+            <div class="demo-frame demo-frame--cases demo-frame--stack demo-frame--masonry" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%">
+                  <k3-masonry id="demo-masonry" gap="12" column-width="160">
+                    <div class="masonry-tile masonry-tile--a" style="min-block-size: 6rem">A</div>
+                    <div class="masonry-tile masonry-tile--b" style="min-block-size: 9rem">B</div>
+                    <div class="masonry-tile masonry-tile--c" style="min-block-size: 5rem">C</div>
+                    <div class="masonry-tile masonry-tile--d" style="min-block-size: 11rem">D</div>
+                    <div class="masonry-tile masonry-tile--e" style="min-block-size: 7rem">E</div>
+                    <div class="masonry-tile masonry-tile--f" style="min-block-size: 8rem">F</div>
+                    <div class="masonry-tile masonry-tile--g" style="min-block-size: 4.5rem">G</div>
+                    <div class="masonry-tile masonry-tile--h" style="min-block-size: 10rem">H</div>
+                    <div class="masonry-tile masonry-tile--i" style="min-block-size: 6.5rem">I</div>
+                    <div class="masonry-tile masonry-tile--j" style="min-block-size: 7.5rem">J</div>
+                    <div class="masonry-tile masonry-tile--k" style="min-block-size: 5.5rem">K</div>
+                    <div class="masonry-tile masonry-tile--l" style="min-block-size: 9.5rem">L</div>
+                  </k3-masonry>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.masonry.guide.mixed"
+                  >Mixed heights · column-width 160</span
                 >
               </li>
             </ol>
@@ -9904,69 +10011,51 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
             <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
             <h1 data-i18n="doc.halftone.title">Halftone</h1>
             <p data-i18n="doc.halftone.blurb">
-              CSS/SVG lookalike of Figma Community Halftone — radial dot screen over slotted content.
+              Screen-print halftone — separated inks on rotated screens, dots true to the tones.
             </p>
             <p class="doc-intro" data-i18n="doc.halftone.intro">
-              Overlays a dual-lattice radial-dot screen on any slotted surface (photo, card, gradient).
-              Tune pitch (size), opacity (intensity), and tone (dark = multiply · light = soft-light).
-              Optional animated drift. No WebGL / WebGPU — pure CSS.
+              With an image, k3-halftone prints it like a screen print: the picture is separated into inks
+              (poster, CMYK, riso or a single ink), each ink gets its own rotated screen, dot sizes follow
+              the tones exactly, and the plates overprint on paper. Any other content keeps the CSS dot overlay.
             </p>
           </header>
           <div class="demo-block">
-            <h2 data-i18n="doc.halftone.section.demo">Demo</h2>
-            <p data-i18n="doc.halftone.section.demo.blurb">Three pitches — fine, medium + drift, light tone.</p>
-            <div class="demo-frame demo-frame--cases grid-3" data-demo-enhance="off">
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--halftone">
-                  <k3-halftone size="6" intensity="0.65" style="--k3-halftone-radius: 1rem">
-                    <div class="halftone-swatch halftone-swatch--warm">
-                      <span data-i18n="doc.halftone.demo.label">Halftone</span>
-                    </div>
-                  </k3-halftone>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">1</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--halftone">
-                  <k3-halftone size="10" intensity="0.55" animated style="--k3-halftone-radius: 1rem">
-                    <div class="halftone-swatch halftone-swatch--cool">
-                      <span data-i18n="doc.halftone.demo.label">Halftone</span>
-                    </div>
-                  </k3-halftone>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">2</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--halftone">
-                  <k3-halftone
-                    size="14"
-                    tone="light"
-                    color="#ffffff"
-                    intensity="0.4"
-                    style="--k3-halftone-radius: 1rem"
-                  >
-                    <div class="halftone-swatch halftone-swatch--night">
-                      <span data-i18n="doc.halftone.demo.label">Halftone</span>
-                    </div>
-                  </k3-halftone>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">3</span>
+            <h2 data-i18n="doc.halftone.section.lab">Lab</h2>
+            <p data-i18n="doc.halftone.section.lab.blurb">Play with the options — the print updates live.</p>
+            <div class="halftone-lab">
+              <k3-halftone
+                id="halftone-lab"
+                preset="poster"
+                size="8"
+                src="/landscapes/hills.jpg"
+                alt="Rolling hills"
+                data-i18n-alt="doc.halftone.alt.hills"
+                style="--k3-halftone-radius: var(--k3-sys-shape-corner-large); min-block-size: 14rem"
+              ></k3-halftone>
+              <div class="halftone-lab-controls">
+                <k3-select id="ht-preset" variant="outlined" value="poster" label="Inks" data-i18n-label="doc.halftone.lab.preset">
+                  <k3-menu-item value="poster">Poster</k3-menu-item>
+                  <k3-menu-item value="cmyk">CMYK</k3-menu-item>
+                  <k3-menu-item value="riso">Riso</k3-menu-item>
+                  <k3-menu-item value="mono">Mono</k3-menu-item>
+                </k3-select>
+                <k3-select id="ht-shape" variant="outlined" value="circle" label="Dot shape" data-i18n-label="doc.halftone.lab.shape">
+                  <k3-menu-item value="circle" data-i18n="doc.halftone.shape.circle">Round</k3-menu-item>
+                  <k3-menu-item value="ellipse" data-i18n="doc.halftone.shape.ellipse">Elliptical</k3-menu-item>
+                  <k3-menu-item value="square" data-i18n="doc.halftone.shape.square">Square</k3-menu-item>
+                  <k3-menu-item value="line" data-i18n="doc.halftone.shape.line">Lines</k3-menu-item>
+                </k3-select>
+                <k3-slider id="ht-size" min="4" max="20" step="1" value="8" label="Screen pitch" data-i18n-label="doc.halftone.lab.size"></k3-slider>
+                <k3-slider id="ht-contrast" min="0.6" max="2" step="0.05" value="1.25" label="Contrast" data-i18n-label="doc.halftone.lab.contrast"></k3-slider>
+                <k3-slider id="ht-misregistration" min="0" max="4" step="0.5" value="1" label="Misregistration" data-i18n-label="doc.halftone.lab.misregistration"></k3-slider>
+                <k3-slider id="ht-angle" min="-45" max="45" step="5" value="0" label="Screen angle" data-i18n-label="doc.halftone.lab.angle"></k3-slider>
+                <k3-slider id="ht-grain" min="0" max="1" step="0.05" value="0.12" label="Paper grain" data-i18n-label="doc.halftone.lab.grain"></k3-slider>
+                <k3-slider id="ht-dotgain" min="-0.3" max="0.3" step="0.05" value="0" label="Dot gain" data-i18n-label="doc.halftone.lab.dotGain"></k3-slider>
+                <k3-switch id="ht-animated"><span data-i18n="doc.halftone.lab.animated">Drifting register</span></k3-switch>
+                <k3-switch id="ht-light"><span data-i18n="doc.halftone.lab.light">Light ink on dark stock</span></k3-switch>
+                <div><k3-button id="ht-download" variant="tonal"><span data-i18n="doc.halftone.lab.download">Download PNG</span></k3-button></div>
               </div>
             </div>
-            <ol class="variant-guide">
-              <li>
-                <span class="pill-num">1</span
-                ><span class="variant-label" data-i18n="doc.halftone.guide.fine">Fine · size 6</span>
-              </li>
-              <li>
-                <span class="pill-num">2</span
-                ><span class="variant-label" data-i18n="doc.halftone.guide.animated">Medium · animated</span>
-              </li>
-              <li>
-                <span class="pill-num">3</span
-                ><span class="variant-label" data-i18n="doc.halftone.guide.light">Coarse · light tone</span>
-              </li>
-            </ol>
           </div>
         </article>
 
@@ -10043,6 +10132,179 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
           </div>
         </article>
 
+
+        <!-- CHARTS: BAR -->
+        <article class="comp-page" data-page="charts-bar" id="page-charts-bar" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.charts">Charts</p>
+            <h1 data-i18n="doc.charts-bar.title">Bar charts</h1>
+            <p data-i18n="doc.charts-bar.blurb">
+              Vertical, horizontal, stacked, and grouped bars — Chart.js via k3-chart.
+            </p>
+            <p class="doc-intro" data-i18n="doc.charts-bar.intro">
+              Bar charts map categories to lengths. Use type="bar" on k3-chart; set indexAxis to "y"
+              for horizontal bars, or stack datasets with scales.x/y.stacked. Colours and grids follow
+              K3ui system tokens.
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.charts-bar.section.demo">Demo</h2>
+            <p data-i18n="doc.charts-bar.section.demo.blurb">
+              Four layouts — vertical, horizontal, stacked, grouped.
+            </p>
+            <div class="demo-frame demo-frame--cases grid-2 demo-frame--charts" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-bar-vertical" type="bar" height="240"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-bar-horizontal" type="bar" height="240"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-bar-stacked" type="bar" height="240"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-bar-grouped" type="bar" height="240"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">4</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label" data-i18n="doc.charts-bar.guide.vertical">Vertical</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label" data-i18n="doc.charts-bar.guide.horizontal">Horizontal</span></li>
+              <li><span class="pill-num">3</span><span class="variant-label" data-i18n="doc.charts-bar.guide.stacked">Stacked</span></li>
+              <li><span class="pill-num">4</span><span class="variant-label" data-i18n="doc.charts-bar.guide.grouped">Grouped</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- CHARTS: LINE -->
+        <article class="comp-page" data-page="charts-line" id="page-charts-line" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.charts">Charts</p>
+            <h1 data-i18n="doc.charts-line.title">Line charts</h1>
+            <p data-i18n="doc.charts-line.blurb">
+              Line, multi-series, tension, and area fills — Chart.js via k3-chart.
+            </p>
+            <p class="doc-intro" data-i18n="doc.charts-line.intro">
+              Line charts show trends over ordered categories. Use type="line"; enable fill for area
+              charts and tension for smooth curves. Multiple datasets share the same axes.
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.charts-line.section.demo">Demo</h2>
+            <p data-i18n="doc.charts-line.section.demo.blurb">
+              Four layouts — line, multi-series, smooth, area.
+            </p>
+            <div class="demo-frame demo-frame--cases grid-2 demo-frame--charts" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-line-simple" type="line" height="240"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-line-multi" type="line" height="240"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-line-smooth" type="line" height="240"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-line-area" type="line" height="240"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">4</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label" data-i18n="doc.charts-line.guide.line">Line</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label" data-i18n="doc.charts-line.guide.multi">Multi-series</span></li>
+              <li><span class="pill-num">3</span><span class="variant-label" data-i18n="doc.charts-line.guide.smooth">Smooth · tension</span></li>
+              <li><span class="pill-num">4</span><span class="variant-label" data-i18n="doc.charts-line.guide.area">Area · fill</span></li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- CHARTS: OTHER -->
+        <article class="comp-page" data-page="charts-other" id="page-charts-other" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.charts">Charts</p>
+            <h1 data-i18n="doc.charts-other.title">Other charts</h1>
+            <p data-i18n="doc.charts-other.blurb">
+              Pie, doughnut, radar, polar, bubble, and scatter — Chart.js via k3-chart.
+            </p>
+            <p class="doc-intro" data-i18n="doc.charts-other.intro">
+              The remaining Chart.js types wrap the same k3-chart host. Pick type="pie" | "doughnut" |
+              "radar" | "polarArea" | "bubble" | "scatter". Radial charts use the r scale; bubble/scatter
+              use linear x/y.
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.charts-other.section.demo">Demo</h2>
+            <p data-i18n="doc.charts-other.section.demo.blurb">Six types — pie through scatter.</p>
+            <div class="demo-frame demo-frame--cases grid-3 demo-frame--charts" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-other-pie" type="pie" height="220"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-other-doughnut" type="doughnut" height="220"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-other-radar" type="radar" height="220"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-other-polar" type="polarArea" height="220"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">4</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-other-bubble" type="bubble" height="220"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">5</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--chart">
+                  <k3-chart id="demo-other-scatter" type="scatter" height="220"></k3-chart>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">6</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label" data-i18n="doc.charts-other.guide.pie">Pie</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label" data-i18n="doc.charts-other.guide.doughnut">Doughnut</span></li>
+              <li><span class="pill-num">3</span><span class="variant-label" data-i18n="doc.charts-other.guide.radar">Radar</span></li>
+              <li><span class="pill-num">4</span><span class="variant-label" data-i18n="doc.charts-other.guide.polar">Polar area</span></li>
+              <li><span class="pill-num">5</span><span class="variant-label" data-i18n="doc.charts-other.guide.bubble">Bubble</span></li>
+              <li><span class="pill-num">6</span><span class="variant-label" data-i18n="doc.charts-other.guide.scatter">Scatter</span></li>
+            </ol>
+          </div>
+        </article>
         <!-- FEEDBACK: SOUND FX -->
         <article class="comp-page" data-page="sound-fx" id="page-sound-fx" hidden>
           <header class="section-head">
@@ -11606,6 +11868,29 @@ static styles = [
                 role="group"
                 aria-label="MD2 500 color presets"
               ></div>
+            </div>
+          </k3-card>
+        </section>
+
+        <section class="settings-section" aria-labelledby="settings-spec-title">
+          <h3 id="settings-spec-title" class="settings-section-title" data-i18n="playground.ctrl.settings.spec">
+            Color spec
+          </h3>
+          <k3-card variant="filled" class="settings-card">
+            <div class="settings-card-body">
+              <k3-select
+                id="settings-spec"
+                variant="outlined"
+                value="2025"
+                label="Material color spec"
+                data-i18n-label="playground.ctrl.settings.specLabel"
+              >
+                <k3-menu-item value="2025" data-i18n="playground.ctrl.spec.2025">2025 · Material 3 Expressive</k3-menu-item>
+                <k3-menu-item value="2021" data-i18n="playground.ctrl.spec.2021">2021 · Material 3 (legacy)</k3-menu-item>
+              </k3-select>
+              <p class="settings-hint" data-i18n="playground.ctrl.settings.specHint">
+                2025 keeps your seed hue on primary with Expressive. Fidelity, monochrome, rainbow and fruit salad always use 2021.
+              </p>
             </div>
           </k3-card>
         </section>

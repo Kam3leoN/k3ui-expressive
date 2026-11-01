@@ -756,6 +756,34 @@ document.getElementById("dlg")?.show?.();`,
   </k3-carousel-item>
 </k3-carousel>`,
   },
+  'iso-filter': {
+    components: ['k3-iso-filter', 'k3-chip-set', 'k3-chip'],
+    html: `<k3-iso-filter layout="masonry" column-width="72" gap="8" filter="*">
+  <k3-chip-set slot="filters" selection="single" aria-label="Groups">
+    <k3-chip variant="filter" value="*" selected>All</k3-chip>
+    <k3-chip variant="filter" value="alkali">Alkali</k3-chip>
+    <k3-chip variant="filter" value="noble">Noble gas</k3-chip>
+  </k3-chip-set>
+  <div data-filter="alkali">Li</div>
+  <div data-filter="alkali">Na</div>
+  <div data-filter="noble">He</div>
+  <div data-filter="noble">Ne</div>
+</k3-iso-filter>`,
+    jsExtra: `const iso = document.querySelector('k3-iso-filter');
+iso.addEventListener('k3-filter-change', (e) => console.log(e.detail.filter));
+// Or set programmatically:
+// iso.filter = 'alkali';`,
+  },
+  masonry: {
+    components: ['k3-masonry'],
+    html: `<k3-masonry gap="12" column-width="160">
+  <div style="min-block-size:6rem;background:#eaddff">A</div>
+  <div style="min-block-size:9rem;background:#ffd8e4">B</div>
+  <div style="min-block-size:5rem;background:#c8ebd1">C</div>
+  <div style="min-block-size:11rem;background:#c4e7ff">D</div>
+</k3-masonry>`,
+    jsExtra: `document.querySelector('k3-masonry')?.layout();`,
+  },
   countdown: {
     components: ['k3-countdown', 'k3-text-field'],
     html: `<!-- Duration (ms) -->
@@ -843,14 +871,28 @@ el.play();`,
   },
   halftone: {
     components: ['k3-halftone'],
-    html: `<k3-halftone size="10" intensity="0.6" animated>
-  <div style="aspect-ratio:16/10;background:linear-gradient(135deg,#f59e0b,#db2777,#6366f1)"></div>
+    html: `<!-- Screen print of an image: separated inks, rotated screens -->
+<k3-halftone preset="poster" size="9">
+  <img src="photo.jpg" alt="Harbour at dusk" />
 </k3-halftone>
 
-<!-- Light tone over a dark surface -->
-<k3-halftone size="14" tone="light" color="#ffffff" intensity="0.45">
-  <div style="aspect-ratio:16/10;background:#0f172a"></div>
+<!-- Process CMYK, perfect register, elliptical dots -->
+<k3-halftone preset="cmyk" shape="ellipse" misregistration="0" size="7">
+  <img src="photo.jpg" alt="" />
+</k3-halftone>
+
+<!-- Your own spot inks -->
+<k3-halftone inks='[{"color":"#0b3d91","angle":45,"channel":"luma"},{"color":"#ff6a00","angle":15,"channel":"mk"}]'>
+  <img src="photo.jpg" alt="" />
+</k3-halftone>
+
+<!-- Any other content keeps the CSS dot overlay -->
+<k3-halftone size="10" intensity="0.6" animated>
+  <div style="aspect-ratio:16/10;background:linear-gradient(135deg,#f59e0b,#db2777,#6366f1)"></div>
 </k3-halftone>`,
+    jsExtra: `const print = document.querySelector("k3-halftone");
+print.addEventListener("k3-render", (e) => console.log(e.detail.dots, "dots"));
+await print.download("poster.png"); // composited PNG`,
   },
   'glow-particles': {
     components: ['k3-glow-particles'],
@@ -858,6 +900,41 @@ el.play();`,
   <strong>Glow</strong>
 </k3-glow-particles>`,
     jsExtra: `document.querySelector('k3-glow-particles')?.restart();`,
+  },
+  'charts-bar': {
+    components: ['k3-chart'],
+    html: `<k3-chart id="revenue" type="bar" height="280"></k3-chart>`,
+    jsExtra: `const el = document.getElementById('revenue');
+el.data = {
+  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+  datasets: [{ label: 'Revenue', data: [12, 19, 14, 22, 18, 25] }],
+};
+// Horizontal bars:
+// el.options = { indexAxis: 'y' };`,
+  },
+  'charts-line': {
+    components: ['k3-chart'],
+    html: `<k3-chart id="trend" type="line" height="280"></k3-chart>`,
+    jsExtra: `const el = document.getElementById('trend');
+el.data = {
+  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+  datasets: [{
+    label: 'Users',
+    data: [120, 145, 132, 168, 190, 210],
+    tension: 0.35,
+    fill: true,
+  }],
+};`,
+  },
+  'charts-other': {
+    components: ['k3-chart'],
+    html: `<k3-chart id="share" type="doughnut" height="260"></k3-chart>`,
+    jsExtra: `const el = document.getElementById('share');
+el.data = {
+  labels: ['Product', 'Services', 'Support', 'Other'],
+  datasets: [{ data: [42, 28, 18, 12] }],
+};
+// Also: pie · radar · polarArea · bubble · scatter`,
   },
   'sound-fx': {
     components: ['k3-sound-fx', 'k3-button'],

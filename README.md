@@ -91,6 +91,20 @@ Expressive): Expressive keeps the seed hue on primary and rotates secondary / te
 `specVersion: '2021'` (or `<k3-theme spec-version="2021">`) restores the legacy palette,
 where Expressive rotated the primary hue by +240°.
 
+## Halftone
+
+`<k3-halftone>` screen-prints an image: inks are separated (poster, CMYK, riso, mono or your
+own `inks`), each ink gets its own rotated screen and dot sizes follow the tones exactly.
+
+```html
+<k3-halftone preset="cmyk" shape="ellipse" size="7">
+  <img src="photo.jpg" alt="Harbour at dusk" />
+</k3-halftone>
+```
+
+Cross-origin images need CORS (`crossorigin="anonymous"`) — otherwise the component falls back
+to its CSS dot overlay and fires `k3-error`. Any other slotted content keeps that overlay.
+
 ## Development
 
 ```bash

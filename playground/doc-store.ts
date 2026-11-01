@@ -61,6 +61,7 @@ export const DocKeys = {
   themeSeed: 'theme.seed',
   themeMode: 'theme.mode',
   themeMotion: 'theme.motion',
+  themeSpec: 'theme.spec',
   themeVariant: 'theme.variant',
   themeContrast: 'theme.contrast',
   themeSeedIdx: 'theme.seedIdx',

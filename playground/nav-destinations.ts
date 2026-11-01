@@ -31,6 +31,7 @@ export const COMPONENT_MENU_GROUPS: ComponentMenuGroup[] = [
   { category: 'Actions', icon: 'gesture', labelKey: 'doc.nav.actions' },
   { category: 'Inputs', icon: 'input', labelKey: 'doc.nav.inputs' },
   { category: 'Feedback', icon: 'notifications', labelKey: 'doc.nav.feedback' },
+  { category: 'Charts', icon: 'bar_chart', labelKey: 'doc.nav.charts' },
   { category: 'Containment', icon: 'dashboard', labelKey: 'doc.nav.containment' },
   { category: 'Navigation', icon: 'menu', labelKey: 'doc.nav.navigation' },
 ];

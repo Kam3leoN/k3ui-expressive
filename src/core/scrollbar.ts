@@ -26,6 +26,11 @@ export const edgeScrollbarStyles = css`
     overscroll-behavior: contain;
   }
 
+  /* Horizontal (and optional vertical) — code samples, wide tables */
+  .k3-scroll.k3-scroll--x {
+    overflow-x: auto;
+  }
+
   .k3-scroll::-webkit-scrollbar {
     width: var(--k3-scroll-size);
     height: var(--k3-scroll-size);

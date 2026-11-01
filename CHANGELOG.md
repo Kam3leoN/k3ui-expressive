@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- `K3UI.init({ theme: { specVersion } })`; playground settings: Material color spec select (2025 / 2021) applied live, persisted and replayed before first paint
+- `k3-halftone` **print mode** — real screen-print halftone of an image (`<img>` / `<canvas>` / `<video>` / `src`): ink separation with grey-component replacement, one rotated screen per ink, tone-accurate dots (area-true lookup table), plates overprinted on paper; presets `poster` · `cmyk` · `riso` · `mono`, custom `inks`, `shape` (circle · ellipse · square · line), `contrast`, `black`, `dot-gain`, `angle`, `misregistration`, `paper`, `grain`, `roughness`, `ink-opacity`, `toBlob()` / `download()`, `k3-render`; animated register drift without re-rendering. `renderHalftone()` engine exported
 - `specVersion` theme option (`'2025'` default · `'2021'`), `<k3-theme spec-version>`, `DEFAULT_COLOR_SPEC`, `AUTO_LIGHT_START_H` / `AUTO_LIGHT_END_H`
 - `k3-qr-code` — styled QR: zero-dependency encoder (ISO/IEC 18004, v1–40, ECC L–H), qr.io patterns / markers / centres, gradient, logo, CTA frames; PNG / SVG / JPEG / WebP export
 - `buildQrPayload()` / `validateQrPayload()` helpers
@@ -20,6 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- `k3-halftone`: any non-image content keeps the CSS dot overlay (previous behaviour, same attributes); `mode="overlay"` forces it for images
 - Material Color Utilities 0.2.7 → 0.4.0 with the **2025 color spec** by default: the Expressive variant keeps the seed hue on primary (the 2021 spec rotated it by +240°, so a purple seed gave a teal UI). Tonal spot / vibrant / neutral also follow the 2025 tones; `specVersion: '2021'` keeps the previous colours
 - Replaced `qr-code-styling`-based QR with in-house encoder + SVG renderer
 - QR generator wizard moved out of the published package to `apps/qr-generator` (`npm run dev:qr`)

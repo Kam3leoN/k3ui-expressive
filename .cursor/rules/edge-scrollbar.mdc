@@ -19,10 +19,11 @@ alwaysApply: true
 ## Règles dures
 
 1. Tout `overflow-y: auto|scroll` → classe **`k3-scroll`** (+ `edgeScrollbarStyles` dans `static styles` si shadow).
-2. Scrollbar **collée au bord** du scrollport :
-   - overflow sur le parent `.k3-scroll`
-   - padding sur un **inner** (pas sur le scrollport)
-3. **Courbes / `border-radius` — OBLIGATOIRE**  
+2. Overflow **horizontal** (code, tables) → **`k3-scroll k3-scroll--x`** (jamais `overflow-x: auto` nu).
+3. Scrollbar **collée au bord** du scrollport :
+ - overflow sur le parent `.k3-scroll`
+ - padding sur un **inner** (pas sur le scrollport)
+4. **Courbes / `border-radius` — OBLIGATOIRE**  
    Le gutter WebKit est **rectangulaire** : sans inset, le thumb **traverse le coin arrondi**.  
    → Poser **`--k3-scroll-track-inset` ≥ `border-radius`** du même élément (même token de shape).
 
@@ -40,8 +41,8 @@ alwaysApply: true
 }
 ```
 
-4. **Interdit** sur WebKit : `scrollbar-width` / `scrollbar-color` sur le même nœud que `::-webkit-scrollbar-*`.
-5. Tokens : `--k3-scroll-size` (défaut **6dp**) · `--k3-scroll-track-inset` (0 si coins carrés).
+5. **Interdit** sur WebKit : `scrollbar-width` / `scrollbar-color` sur le même nœud que `::-webkit-scrollbar-*`.
+6. Tokens : `--k3-scroll-size` (défaut **6dp**) · `--k3-scroll-track-inset` (0 si coins carrés).
 
 ```ts
 // ✅ GOOD — shadow

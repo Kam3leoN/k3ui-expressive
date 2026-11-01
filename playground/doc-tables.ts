@@ -593,14 +593,22 @@ const COMPONENT_API: Record<
   },
   codeblock: {
     properties: [
-      ['label', 'string', 'Code', 'Toolbar title'],
-      ['language', 'string', 'plain', 'Highlight grammar'],
-      ['collapsible', 'boolean', 'false', 'Expand/collapse long blocks'],
-      ['show-copy / show-download', 'boolean', 'true', 'Toolbar actions'],
+      ['label', 'string', "''", 'k3-tabs title (falls back to language)'],
+      ['language', 'string', "''", 'Highlight grammar'],
+      ['collapsible', 'boolean', 'false', 'Last list item expandable'],
+      ['show-copy / show-download', 'boolean', 'true', 'Header icon buttons'],
       ['code', 'string', "''", 'Source when no slot'],
     ],
     events: [['k3-copy', '{ text }', 'Copy succeeded']],
     slots: [['(default)', '<pre><code>…</code></pre>']],
+    'css-parts': [
+      ['list', 'k3-list shell'],
+      ['header', 'First list item (tabs + actions)'],
+      ['body', 'Last list item (source)'],
+      ['tabs', 'Title k3-tabs'],
+      ['copy · download', 'Header icon buttons'],
+      ['content', 'Highlighted pre/code'],
+    ],
   },
   carousel: {
     properties: [
@@ -641,6 +649,37 @@ const COMPONENT_API: Record<
       ['prev / next', '() => void', 'Step by one'],
       ['goTo', '(index) => void', 'Jump to item'],
     ],
+  },
+  'iso-filter': {
+    properties: [
+      ['filter', 'string', "'*'", 'Active token (* = all)'],
+      ['layout', "'masonry'|'grid'", 'masonry', 'Pack mode'],
+      ['gap', 'number', '8', 'Gutter (px)'],
+      ['column-width', 'number', '72', 'Target column width (masonry)'],
+    ],
+    methods: [
+      ['setFilter', '(value) => void', 'Set filter + relayout'],
+      ['refresh', '() => void', 'Re-apply filter + pack'],
+    ],
+    events: [['k3-filter-change', '{ filter }', 'After filter changes']],
+    slots: [
+      ['filters', 'Chip set / filter UI (listens to k3-change)'],
+      ['(default)', 'Items with data-filter or data-category'],
+    ],
+    'css-parts': [
+      ['toolbar', 'Filters row'],
+      ['board', 'Items board'],
+    ],
+  },
+  masonry: {
+    properties: [
+      ['gap', 'number', '8', 'Gutter (px)'],
+      ['column-width', 'number', '180', 'Target column width'],
+      ['columns', 'number', '0', 'Fixed column count (0 = auto)'],
+    ],
+    methods: [['layout', '() => void', 'Force re-pack']],
+    slots: [['(default)', 'Tiles / cards of any height']],
+    'css-parts': [['viewport', 'Positioned pack root']],
   },
   lazy: {
     properties: [
@@ -751,15 +790,34 @@ const COMPONENT_API: Record<
   },
   halftone: {
     properties: [
-      ['size', 'number', '10', 'Dot cell pitch (CSS px)'],
-      ['intensity', 'number', '0.55', 'Screen opacity 0…1'],
-      ['color', 'string', '#0a0a0a', 'Dot color'],
-      ['tone', "'dark'|'light'", 'dark', 'Blend: multiply · soft-light'],
-      ['animated', 'boolean', 'false', 'Slow grid drift'],
-      ['duration', 'number', '12000', 'Drift loop (ms)'],
+      ['mode', "'auto'|'print'|'overlay'", 'auto', 'print for images, overlay otherwise'],
+      ['preset', "'poster'|'cmyk'|'riso'|'mono'", 'poster', 'Ink set (print)'],
+      ['inks', 'JSON', "''", 'Custom inks [{color, angle, channel, offset}]'],
+      ['shape', "'circle'|'ellipse'|'square'|'line'", 'circle', 'Dot shape (print)'],
+      ['size', 'number', '10', 'Screen pitch (CSS px)'],
+      ['contrast · black · dot-gain', 'number', '1.25 · 0.9 · 0', 'Tones · black generation · ink spread'],
+      ['angle · misregistration', 'number', '0 · 1', 'Screen rotation · plate offset'],
+      ['paper · grain · roughness', 'string · number', 'cream · 0.12 · 0', 'Stock (print)'],
+      ['ink-opacity', 'number', '1', 'Ink opacity (print)'],
+      ['src · alt', 'string', "''", 'Image without slot · accessible name'],
+      ['intensity · color', 'number · string', '0.55 · #0a0a0a', 'Overlay opacity · dot / mono ink colour'],
+      ['tone', "'dark'|'light'", 'dark', 'Ink on paper · light ink on dark stock'],
+      ['animated · duration', 'boolean · number', 'false · 12000', 'Drifting register / grid (ms)'],
     ],
-    slots: [['(default)', 'Surface under the screen (img, card, …)']],
-    'css-parts': [['screen', 'Dot overlay layer']],
+    methods: [
+      ['toBlob', '(type?, width?) => Promise<Blob>', 'Composited print'],
+      ['download', '(filename?) => Promise<void>', 'Save as PNG / JPEG'],
+      ['refresh', '() => void', 'Re-print (e.g. after drawing into a slotted canvas)'],
+    ],
+    events: [
+      ['k3-render', '{ mode, width, height, dots, ms }', 'After each print'],
+      ['k3-error', "{ reason: 'load'|'cross-origin'|'canvas' }", 'Falls back to the overlay'],
+    ],
+    slots: [['(default)', '<img> / <canvas> / <video> to print, or any content (overlay)']],
+    'css-parts': [
+      ['print', 'Paper + ink plates'],
+      ['screen', 'Overlay dot screen'],
+    ],
   },
   'glow-particles': {
     properties: [
@@ -775,6 +833,60 @@ const COMPONENT_API: Record<
     ],
     slots: [['(default)', 'Foreground content over the canvas']],
     'css-parts': [['canvas', 'Particle canvas']],
+  },
+  'charts-bar': {
+    properties: [
+      ['type', "'bar'|…", 'bar', 'Chart.js type (bar on this page)'],
+      ['data', 'ChartData', '{}', 'labels + datasets'],
+      ['options', 'ChartOptions', 'null', 'Merged over K3 theme defaults'],
+      ['height', 'number', '280', 'Frame height (CSS px)'],
+      ['update-mode', 'UpdateMode', 'default', 'Chart.js update mode'],
+      ['label', 'string', "''", 'aria-label override'],
+    ],
+    methods: [
+      ['getChart', '() => Chart|null', 'Underlying Chart.js instance'],
+      ['refresh', '(mode?) => void', 'Force Chart.js update'],
+      ['toBase64Image', '(type?, quality?) => string', 'PNG / JPEG data URL'],
+    ],
+    'css-parts': [
+      ['frame', 'Sized chart frame'],
+      ['canvas', 'Chart.js canvas'],
+    ],
+  },
+  'charts-line': {
+    properties: [
+      ['type', "'line'|…", 'line', 'Chart.js type (line on this page)'],
+      ['data', 'ChartData', '{}', 'labels + datasets (fill / tension supported)'],
+      ['options', 'ChartOptions', 'null', 'Merged over K3 theme defaults'],
+      ['height', 'number', '280', 'Frame height (CSS px)'],
+    ],
+    methods: [
+      ['getChart / refresh / toBase64Image', '—', 'Same as Bar charts'],
+    ],
+    'css-parts': [
+      ['frame', 'Sized chart frame'],
+      ['canvas', 'Chart.js canvas'],
+    ],
+  },
+  'charts-other': {
+    properties: [
+      [
+        'type',
+        "'pie'|'doughnut'|'radar'|'polarArea'|'bubble'|'scatter'",
+        'pie',
+        'Non bar/line Chart.js types',
+      ],
+      ['data', 'ChartData', '{}', 'Type-specific datasets'],
+      ['options', 'ChartOptions', 'null', 'Merged over K3 theme defaults'],
+      ['height', 'number', '280', 'Frame height (CSS px)'],
+    ],
+    methods: [
+      ['getChart / refresh / toBase64Image', '—', 'Same as Bar charts'],
+    ],
+    'css-parts': [
+      ['frame', 'Sized chart frame'],
+      ['canvas', 'Chart.js canvas'],
+    ],
   },
   breadcrumb: {
     properties: [

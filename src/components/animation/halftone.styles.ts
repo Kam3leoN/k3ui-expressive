@@ -73,4 +73,69 @@ export const halftoneStyles = css`
       animation: none;
     }
   }
+
+  /* ── Print mode: paper + one canvas per ink, composited like real inks ── */
+  .print {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    border-radius: inherit;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .print canvas {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+  }
+  .print .plate {
+    mix-blend-mode: multiply;
+    will-change: transform;
+  }
+  :host([tone='light']) .print .plate {
+    mix-blend-mode: screen;
+  }
+  /* Animated misregistration — plates drift, no re-render */
+  :host([animated]) .print .plate {
+    animation: k3-halftone-register var(--k3-halftone-duration, 12s) ease-in-out infinite alternate;
+    animation-delay: calc(var(--k3-halftone-plate, 0) * -1.7s);
+  }
+  @keyframes k3-halftone-register {
+    0% {
+      transform: translate(0, 0);
+    }
+    33% {
+      transform: translate(calc(var(--k3-halftone-drift, 1.5px) * 1), calc(var(--k3-halftone-drift, 1.5px) * -0.6));
+    }
+    66% {
+      transform: translate(calc(var(--k3-halftone-drift, 1.5px) * -0.8), calc(var(--k3-halftone-drift, 1.5px) * 0.9));
+    }
+    100% {
+      transform: translate(calc(var(--k3-halftone-drift, 1.5px) * 0.4), calc(var(--k3-halftone-drift, 1.5px) * 0.5));
+    }
+  }
+  /* Source stays in the light DOM (alt text) but is not painted twice.
+     Keep a real layout box (no 1×1 clip) so eager/decode still work; hide visually. */
+  .source-hidden {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1;
+  }
+  .source-hidden ::slotted(img),
+  .source-hidden ::slotted(video),
+  .source-hidden ::slotted(canvas) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :host([animated]) .print .plate {
+      animation: none;
+    }
+  }
 `;

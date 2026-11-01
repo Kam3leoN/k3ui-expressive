@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property, state, query } from 'lit/decorators.js';
 import {
   K3Element,
+  edgeScrollbarStyles,
   handleFocusNavKey,
   runWhenConnected,
   devicePixelSnapCss,
@@ -39,7 +40,7 @@ export type ListSelection = 'none' | 'single' | 'multiple' | 'switch';
  * @see https://m3.material.io/components/lists/guidelines
  */
 export class K3List extends K3Element {
-  static override styles = [hostReset, listStyles];
+  static override styles = [hostReset, edgeScrollbarStyles, listStyles];
 
   /** Visual style — segmented is M3 Expressive default. */
   @property({ reflect: true }) variant: ListVariant = 'segmented';
@@ -462,7 +463,7 @@ export class K3List extends K3Element {
 
     return html`
       <div
-        class="list"
+        class="list k3-scroll"
         part="container"
         role=${this.selection !== 'none' ? 'presentation' : 'presentation'}
         aria-label=${this.label || nothing}

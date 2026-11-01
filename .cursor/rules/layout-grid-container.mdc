@@ -37,7 +37,9 @@ Helpers CSS : `.k3-container` / `.k3-container-none` · **`.k3-layout-grid`** ·
 ## Playground — helpers
 
 - `.k3-layout-grid` → classe canonique (tokens)
-- `.grid-2` / `.grid-3` → 2-up / 3-up (mêmes tracks + gutter)
+- **`.k3-demo-cols-2|3|4`** → packs égaux (2 → span 6 @12) — **préférer** pour les frames démo (voir `demo-layout-columns.mdc`)
+- `.grid-2` / `.grid-3` → legacy 2-up / 3-up (mêmes tracks + gutter)
+- `.k3-col-span-*` / `.k3-col-full` → spans explicites
 - `.catalog-cards` · `k3-doc-nav` → même gutter
 
 ```css

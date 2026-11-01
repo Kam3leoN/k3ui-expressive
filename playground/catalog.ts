@@ -14,6 +14,7 @@ export const DOC_CATEGORIES = [
   'Actions',
   'Inputs',
   'Feedback',
+  'Charts',
   'Animation',
   'Containment',
   'Navigation',
@@ -521,6 +522,20 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Lists',
     titleKey: 'doc.list.title',
     blurbKey: 'doc.list.blurb',
+  },
+  {
+    id: 'iso-filter',
+    category: 'Containment',
+    title: 'Iso filter',
+    titleKey: 'doc.iso-filter.title',
+    blurbKey: 'doc.iso-filter.blurb',
+  },
+  {
+    id: 'masonry',
+    category: 'Containment',
+    title: 'Masonry',
+    titleKey: 'doc.masonry.title',
+    blurbKey: 'doc.masonry.blurb',
   },
   {
     id: 'table',

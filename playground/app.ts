@@ -1,5 +1,6 @@
 /* Playground app — booted by main.ts after the first paint. */
 import { init } from '../src/bootstrap/init.js';
+import type { ColorSpecVersion } from '../src/theme/apply.js';
 import { registry } from '../src/registry/register.js';
 import { buildDynamicPalettes } from '../src/theme/palettes.js';
 import {
@@ -125,6 +126,12 @@ let themeMode: ColorMode = (() => {
 /** Animations on by default — opt out via rail foot (desktop) or app-bar (phone). */
 let animationsOn = docStore.get<boolean>(DocKeys.uiAnimations, true);
 /** M3 motion scheme — Expressive (spring) default · Standard (utilitarian). */
+/** Material color spec — 2025 (M3 Expressive) or 2021 (legacy hues). */
+let colorSpec: ColorSpecVersion = (() => {
+  const saved = docStore.get<string>(DocKeys.themeSpec, DEFAULT_THEME.spec);
+  return saved === '2021' ? '2021' : '2025';
+})();
+
 let motionScheme: MotionScheme = (() => {
   const saved = docStore.get<string>(DocKeys.themeMotion, 'expressive');
   return saved === 'standard' ? 'standard' : 'expressive';
@@ -483,6 +490,9 @@ function syncSettingsDialog(): void {
     syncSettingsToggle(el, el.getAttribute('data-settings-theme') === themeMode);
   });
 
+  const spec = document.getElementById('settings-spec') as (HTMLElement & { value?: string }) | null;
+  if (spec && spec.value !== colorSpec) spec.value = colorSpec;
+
   document.querySelectorAll<HTMLElement>('[data-settings-variant]').forEach((el) => {
     syncSettingsToggle(el, el.getAttribute('data-settings-variant') === colorVariant);
   });
@@ -555,6 +565,7 @@ async function openSettingsSheet(): Promise<void> {
   await registry.register('k3-button-group');
   await registry.register('k3-tooltip');
   await registry.register('k3-switch');
+  await registry.register('k3-select');
   mountSettingsMd2SeedPresets();
   syncSettingsDialog();
   applyPlaygroundI18n();
@@ -1874,6 +1885,7 @@ function syncThemeElement(seed: string): void {
   theme.setAttribute('color-variant', colorVariant);
   theme.setAttribute('contrast', contrastLevel);
   theme.setAttribute('motion', motionScheme);
+  theme.setAttribute('spec-version', colorSpec);
 }
 
 /**
@@ -1911,6 +1923,7 @@ function applyThemePersist(): void {
   docStore.set(DocKeys.themeVariant, colorVariant);
   docStore.set(DocKeys.themeContrast, contrastLevel);
   docStore.set(DocKeys.themeMotion, motionScheme);
+  docStore.set(DocKeys.themeSpec, colorSpec);
   const theme = document.getElementById('theme') as HTMLElement & {
     primarySeed: string;
     colorMode: string;
@@ -1926,6 +1939,7 @@ function applyThemePersist(): void {
     if ('colorVariant' in theme) theme.colorVariant = colorVariant;
     if ('contrast' in theme) theme.contrast = contrastLevel;
     if ('motion' in theme) theme.motion = motionScheme;
+    if ('specVersion' in theme) (theme as unknown as { specVersion: ColorSpecVersion }).specVersion = colorSpec;
   }
   window.K3UI?.theme.apply({
     seed,
@@ -1933,6 +1947,7 @@ function applyThemePersist(): void {
     motion: motionScheme,
     variant: colorVariant,
     contrast: contrastLevel,
+    specVersion: colorSpec,
   });
   refreshColorDocs(seed);
   syncSettingsDialog();
@@ -2141,6 +2156,7 @@ async function boot(): Promise<void> {
         motion: motionScheme,
         variant: colorVariant,
         contrast: contrastLevel,
+        specVersion: colorSpec,
       },
       debug: false,
       components: [...SHELL_COMPONENTS],
@@ -2233,6 +2249,16 @@ async function boot(): Promise<void> {
       /* Labs that need upgraded CEs — wire after registerAll for this page. */
       if (articleId === 'countdown') wireCountdownLab();
       if (articleId === 'carousel') wireCarouselLab();
+      if (articleId === 'halftone') wireHalftoneLab();
+      if (
+        articleId === 'charts-bar' ||
+        articleId === 'charts-line' ||
+        articleId === 'charts-other'
+      ) {
+        await wireChartsDemos();
+      }
+      if (articleId === 'iso-filter') await wireIsoFilterDemo();
+      if (articleId === 'masonry') await wireMasonryDemo();
     };
 
     const initialPage = currentPageId();
@@ -2530,11 +2556,15 @@ function wireShellChrome(): void {
     }
   });
 
-  document.getElementById('settings-variant-group')?.addEventListener('k3-change', (e) => {
-    const btn = (e as CustomEvent<{ selected?: HTMLElement }>).detail?.selected;
-    const v = parseColorVariant(btn?.getAttribute('data-settings-variant'));
-    colorVariant = v;
-    syncColorVariantButtons();
+  /* Color spec — applied on the fly (theme API is synchronous; no re-init) */
+  document.getElementById('settings-spec')?.addEventListener('k3-change', (e) => {
+    if (e.target !== e.currentTarget) return;
+    const v = (e as CustomEvent<{ value?: string }>).detail?.value;
+    if (v !== '2021' && v !== '2025') return;
+    if (v === colorSpec) return;
+    colorSpec = v;
+    applyThemePersist();
+    void showFlash(t('playground.settings.flash.spec', { value: t(`playground.ctrl.spec.${v}`) }));
     applyThemePersist();
     void showFlash(
       t('playground.settings.flash.variant', {
@@ -2912,6 +2942,7 @@ function wireDemoPages(): void {
   wireConfettiDemo();
   wireTextBounceDemo();
   wireTextScrambleDemo();
+  wireChartsDemos();
   wireAudioPlayerDemoRights();
 }
 
@@ -3052,6 +3083,148 @@ function wireTextBounceDemo(): void {
     bounce.play();
   }) as EventListener);
   replay?.addEventListener('k3-click', () => bounce?.restart());
+}
+
+/** Halftone lab — every control drives the live print (bound on first visit). */
+let halftoneLabWired = false;
+function wireHalftoneLab(): void {
+  const lab = document.getElementById('halftone-lab') as
+    | (HTMLElement & Record<string, unknown> & { download(name?: string): Promise<void> })
+    | null;
+  if (!lab || halftoneLabWired) return;
+  halftoneLabWired = true;
+  const on = (id: string, type: string, apply: (detail: Record<string, unknown>) => void): void => {
+    const el = document.getElementById(id);
+    el?.addEventListener(type, (e) => {
+      if (e.target !== el) return;
+      apply(((e as CustomEvent).detail ?? {}) as Record<string, unknown>);
+    });
+  };
+  const value = (prop: string) => (d: Record<string, unknown>) => {
+    if (d.value !== undefined) lab[prop] = d.value;
+  };
+  const num = (prop: string) => (d: Record<string, unknown>) => {
+    const n = Number(d.value);
+    if (Number.isFinite(n)) lab[prop] = n;
+  };
+  on('ht-preset', 'k3-change', value('preset'));
+  on('ht-shape', 'k3-change', value('shape'));
+  for (const [id, prop] of [
+    ['ht-size', 'size'],
+    ['ht-contrast', 'contrast'],
+    ['ht-misregistration', 'misregistration'],
+    ['ht-angle', 'angle'],
+    ['ht-grain', 'grain'],
+    ['ht-dotgain', 'dotGain'],
+  ] as const) {
+    on(id, 'k3-input', num(prop));
+    on(id, 'k3-change', num(prop));
+  }
+  on('ht-animated', 'k3-change', (d) => void (lab.animated = !!d.selected));
+  on('ht-light', 'k3-change', (d) => void (lab.tone = d.selected ? 'light' : 'dark'));
+  document.getElementById('ht-download')?.addEventListener('k3-click', () => void lab.download('k3ui-halftone.png'));
+}
+
+/** Iso filter — periodic-table tiles + group chips. */
+async function wireIsoFilterDemo(): Promise<void> {
+  const page = document.getElementById('page-iso-filter');
+  const host = document.getElementById('demo-iso-filter') as
+    | (HTMLElement & { refresh?: () => void; filter: string })
+    | null;
+  const chipSet = document.getElementById('demo-iso-filters');
+  if (!page || !host || !chipSet) return;
+
+  const data = await import('./periodic-table-data.js');
+  await customElements.whenDefined('k3-iso-filter');
+  await customElements.whenDefined('k3-chip');
+
+  const fill = (): void => {
+    chipSet.replaceChildren(
+      ...data.ELEMENT_GROUPS.map((g) => {
+        const chip = document.createElement('k3-chip');
+        chip.setAttribute('variant', 'filter');
+        chip.setAttribute('value', g.id);
+        if (g.id === (host.filter || '*')) chip.setAttribute('selected', '');
+        chip.textContent = t(g.labelKey);
+        return chip;
+      }),
+    );
+    for (const el of [...host.children]) {
+      if (el.getAttribute('slot') === 'filters') continue;
+      el.remove();
+    }
+    for (const el of data.PERIODIC_ELEMENTS) {
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = `periodic-tile periodic-tile--${el.group} periodic-tile--w${el.weight}`;
+      tile.dataset.filter = el.group;
+      tile.title = `${el.name} (${el.z})`;
+      tile.innerHTML =
+        `<span class="periodic-z">${el.z}</span>` +
+        `<span class="periodic-symbol">${el.symbol}</span>` +
+        `<span class="periodic-name">${el.name}</span>`;
+      host.append(tile);
+    }
+    host.refresh?.();
+  };
+
+  fill();
+  if (!page.dataset.isoWired) {
+    page.dataset.isoWired = '1';
+    document.addEventListener('k3-locale-change', () => {
+      if (page.hidden) return;
+      fill();
+    });
+  }
+}
+
+/** Masonry — ensure pack after CE upgrade / page show. */
+async function wireMasonryDemo(): Promise<void> {
+  const el = document.getElementById('demo-masonry') as
+    | (HTMLElement & { layout?: () => void })
+    | null;
+  if (!el) return;
+  await customElements.whenDefined('k3-masonry');
+  el.layout?.();
+}
+
+/** Chart.js demos — assign data/options after k3-chart upgrades. */
+async function wireChartsDemos(): Promise<void> {
+  const data = await import('./charts-demo-data.js');
+  type ChartEl = HTMLElement & {
+    data: unknown;
+    options: unknown;
+    updateComplete?: Promise<unknown>;
+  };
+  const assign = async (
+    id: string,
+    chartData: unknown,
+    options?: unknown,
+  ): Promise<void> => {
+    const el = document.getElementById(id) as ChartEl | null;
+    if (!el) return;
+    await customElements.whenDefined('k3-chart');
+    await el.updateComplete;
+    el.data = chartData;
+    if (options !== undefined) el.options = options;
+  };
+
+  await Promise.all([
+    assign('demo-bar-vertical', data.barVertical),
+    assign('demo-bar-horizontal', data.barHorizontal, data.barHorizontalOpts),
+    assign('demo-bar-stacked', data.barStacked, data.barStackedOpts),
+    assign('demo-bar-grouped', data.barGrouped),
+    assign('demo-line-simple', data.lineSimple),
+    assign('demo-line-multi', data.lineMulti),
+    assign('demo-line-smooth', data.lineSmooth),
+    assign('demo-line-area', data.lineArea),
+    assign('demo-other-pie', data.pieData),
+    assign('demo-other-doughnut', data.doughnutData),
+    assign('demo-other-radar', data.radarData),
+    assign('demo-other-polar', data.polarData),
+    assign('demo-other-bubble', data.bubbleData),
+    assign('demo-other-scatter', data.scatterData),
+  ]);
 }
 
 /** Text scramble — change-text button + braille/blocks/numbers presets. */

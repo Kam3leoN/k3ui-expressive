@@ -16,6 +16,8 @@ export const CodeBlockSpecs = {
     ariaLabel: 'Code sample',
     copyLabel: 'Copy code',
     downloadLabel: 'Download code',
+    copiedLabel: 'Copied',
+    downloadedLabel: 'Downloaded',
     expandMore: 'Show more',
     expandLess: 'Show less',
   },

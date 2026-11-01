@@ -4,6 +4,11 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { K3Element } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
+import '../actions/icon-button.js';
+import '../feedback/tooltip.js';
+import '../navigation/tabs.js';
+import './list.js';
+import './list-item.js';
 import { highlightCode, languageFromClassName, resolveCodeLanguage } from './codeblock-highlighter.js';
 import { CodeBlockSpecs } from './codeblock.specs.js';
 import { codeblockStyles } from './codeblock.styles.js';
@@ -11,13 +16,21 @@ import { codeblockStyles } from './codeblock.styles.js';
 export { CodeBlockSpecs } from './codeblock.specs.js';
 export { highlightCode, resolveCodeLanguage } from './codeblock-highlighter.js';
 
+type TipHost = HTMLElement & {
+  content: string;
+  show: () => Promise<void>;
+  hide: () => Promise<void>;
+};
+
 /**
- * Code sample card with optional toolbar (copy / download) and collapse.
+ * Code sample built on `k3-list`:
+ * - first item = header (`k3-tabs` title + copy / download)
+ * - last item = highlighted source (expandable when `collapsible`)
  *
  * @fires k3-copy — `{ text }` after a successful copy
  */
 export class K3CodeBlock extends K3Element {
-  static override styles = [hostReset, codeblockStyles];
+  static override styles = [hostReset, ...codeblockStyles];
 
   @property() label = CodeBlockSpecs.defaultLabel;
   @property() language: string = CodeBlockSpecs.defaultLanguage;
@@ -27,38 +40,51 @@ export class K3CodeBlock extends K3Element {
     CodeBlockSpecs.defaultCollapsedHeight;
   @property({ type: Boolean, attribute: 'show-toolbar' }) showToolbar = CodeBlockSpecs.showToolbar;
   @property({ type: Boolean, attribute: 'show-copy' }) showCopy = CodeBlockSpecs.showCopy;
-  @property({ type: Boolean, attribute: 'show-download' }) showDownload = CodeBlockSpecs.showDownload;
+  @property({ type: Boolean, attribute: 'show-download' }) showDownload =
+    CodeBlockSpecs.showDownload;
   /** Raw source when not using the default slot. */
   @property() code = '';
 
-  @state() private expanded = false;
+  @state() private contentExpanded = true;
   @state() private highlighted = '';
   @state() private resolvedLang = 'plain';
   @state() private sourceText = '';
+
+  private tipTimers = new Map<string, number>();
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', CodeBlockSpecs.accessibility.role);
     if (!this.hasAttribute('aria-label')) {
-      this.setAttribute('aria-label', i18n.t('codeblock.ariaLabel', CodeBlockSpecs.accessibility.ariaLabel));
+      this.setAttribute(
+        'aria-label',
+        i18n.t('codeblock.ariaLabel', CodeBlockSpecs.accessibility.ariaLabel),
+      );
     }
-    this.style.setProperty('--k3-codeblock-collapsed-height', `${this.collapsedHeight}px`);
+  }
+
+  override disconnectedCallback(): void {
+    for (const id of this.tipTimers.values()) window.clearTimeout(id);
+    this.tipTimers.clear();
+    super.disconnectedCallback();
+  }
+
+  override willUpdate(changed: PropertyValues): void {
+    if (
+      changed.has('code') ||
+      changed.has('language') ||
+      (!this.sourceText && (this.code || this.childElementCount))
+    ) {
+      this.syncSource();
+    }
   }
 
   override firstUpdated(): void {
     this.syncSource();
     if (!this.collapsible && this.shouldAutoCollapse()) {
-      this.collapsible = true;
-    }
-  }
-
-  override updated(changed: PropertyValues): void {
-    super.updated(changed);
-    if (changed.has('collapsedHeight')) {
-      this.style.setProperty('--k3-codeblock-collapsed-height', `${this.collapsedHeight}px`);
-    }
-    if (changed.has('code') || changed.has('language')) {
-      this.syncSource();
+      queueMicrotask(() => {
+        this.collapsible = true;
+      });
     }
   }
 
@@ -101,18 +127,50 @@ export class K3CodeBlock extends K3Element {
     this.highlighted = highlightCode(this.sourceText, this.resolvedLang);
   }
 
+  private titleLabel(): string {
+    const custom = this.label.trim();
+    if (custom) return custom;
+    const lang = this.resolvedLang;
+    if (!lang || lang === 'plain') return 'Code';
+    return lang.toUpperCase();
+  }
+
+  private async flashTip(part: 'copy' | 'download', message: string): Promise<void> {
+    const tip = this.renderRoot?.querySelector(
+      `k3-tooltip[data-action="${part}"]`,
+    ) as TipHost | null;
+    if (!tip?.show || !tip?.hide) return;
+    const prev = tip.content;
+    tip.content = message;
+    await tip.show();
+    const prevTimer = this.tipTimers.get(part);
+    if (prevTimer) window.clearTimeout(prevTimer);
+    this.tipTimers.set(
+      part,
+      window.setTimeout(() => {
+        this.tipTimers.delete(part);
+        void tip.hide();
+        tip.content = prev;
+      }, 1400),
+    );
+  }
+
   private async copyText(): Promise<void> {
     const text = this.sourceText;
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
       this.emit('k3-copy', { text });
+      await this.flashTip(
+        'copy',
+        i18n.t('codeblock.copied', CodeBlockSpecs.accessibility.copiedLabel),
+      );
     } catch {
       /* ignore — clipboard may be blocked */
     }
   }
 
-  private downloadText(): void {
+  private async downloadText(): Promise<void> {
     const text = this.sourceText;
     if (!text) return;
     const base = (this.label || 'code').replace(/[^\w.-]+/g, '_') || 'code';
@@ -130,89 +188,140 @@ export class K3CodeBlock extends K3Element {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    await this.flashTip(
+      'download',
+      i18n.t('codeblock.downloaded', CodeBlockSpecs.accessibility.downloadedLabel),
+    );
   }
 
-  private toggleExpand(): void {
-    this.expanded = !this.expanded;
-    if (this.expanded) {
-      this.setAttribute('expanded', '');
-    } else {
-      this.removeAttribute('expanded');
+  private onContentExpand = (e: Event): void => {
+    const detail = (e as CustomEvent<{ expanded?: boolean }>).detail;
+    if (typeof detail?.expanded === 'boolean') {
+      this.contentExpanded = detail.expanded;
     }
+  };
+
+  private stopItemActivate = (e: Event): void => {
+    e.stopPropagation();
+  };
+
+  private renderCode() {
+    return html`
+      <div class="code k3-scroll k3-scroll--x" part="content">
+        <pre><code class="language-${this.resolvedLang || 'plain'}">${unsafeHTML(
+          this.highlighted,
+        )}</code></pre>
+      </div>
+    `;
   }
 
-  override render() {
-    const showBar = this.showToolbar && (this.showCopy || this.showDownload || this.label);
-    const showExpand = this.collapsible;
-
+  private renderActions() {
+    if (!this.showToolbar || (!this.showCopy && !this.showDownload)) return nothing;
     return html`
-      <div class="card" part="card">
-        ${showBar
+      <div class="actions" slot="trailing" @click=${this.stopItemActivate} @keydown=${this.stopItemActivate}>
+        ${this.showCopy
           ? html`
-              <div class="toolbar" part="toolbar">
-                ${this.label ? html`<span class="label" part="label">${this.label}</span>` : nothing}
-                <div class="actions">
-                  ${this.showCopy
-                    ? html`
-                        <button
-                          type="button"
-                          class="action"
-                          part="copy"
-                          aria-label=${i18n.t('codeblock.copy', CodeBlockSpecs.accessibility.copyLabel)}
-                          @click=${() => void this.copyText()}
-                        >
-                          <span
-                            class="icon ms notranslate"
-                            translate="no"
-                            lang="zxx"
-                            data-k3-icon="content_copy"
-                            aria-hidden="true"
-                          ></span>
-                        </button>
-                      `
-                    : nothing}
-                  ${this.showDownload
-                    ? html`
-                        <button
-                          type="button"
-                          class="action"
-                          part="download"
-                          aria-label=${i18n.t('codeblock.download', CodeBlockSpecs.accessibility.downloadLabel)}
-                          @click=${() => this.downloadText()}
-                        >
-                          <span
-                            class="icon ms notranslate"
-                            translate="no"
-                            lang="zxx"
-                            data-k3-icon="download"
-                            aria-hidden="true"
-                          ></span>
-                        </button>
-                      `
-                    : nothing}
-                </div>
-              </div>
+              <k3-tooltip
+                data-action="copy"
+                position="top"
+                content=${i18n.t('codeblock.copy', CodeBlockSpecs.accessibility.copyLabel)}
+              >
+                <k3-icon-button
+                  part="copy"
+                  size="sm"
+                  variant="standard"
+                  label=${i18n.t('codeblock.copy', CodeBlockSpecs.accessibility.copyLabel)}
+                  @k3-click=${() => this.copyText()}
+                >
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="content_copy"
+                    aria-hidden="true"
+                  ></span>
+                </k3-icon-button>
+              </k3-tooltip>
             `
           : nothing}
-        <div class="content" part="content">
-          <pre><code class="language-${this.resolvedLang || 'plain'}">${unsafeHTML(this.highlighted)}</code></pre>
-        </div>
-        ${showExpand
+        ${this.showDownload
           ? html`
-              <button
-                type="button"
-                class="expand"
-                part="expand"
-                aria-expanded=${this.expanded ? 'true' : 'false'}
-                @click=${() => this.toggleExpand()}
+              <k3-tooltip
+                data-action="download"
+                position="top"
+                content=${i18n.t('codeblock.download', CodeBlockSpecs.accessibility.downloadLabel)}
               >
-                ${this.expanded
-                  ? i18n.t('codeblock.showLess', CodeBlockSpecs.accessibility.expandLess)
-                  : i18n.t('codeblock.showMore', CodeBlockSpecs.accessibility.expandMore)}
-              </button>
+                <k3-icon-button
+                  part="download"
+                  size="sm"
+                  variant="standard"
+                  label=${i18n.t('codeblock.download', CodeBlockSpecs.accessibility.downloadLabel)}
+                  @k3-click=${() => this.downloadText()}
+                >
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="download"
+                    aria-hidden="true"
+                  ></span>
+                </k3-icon-button>
+              </k3-tooltip>
             `
           : nothing}
       </div>
+    `;
+  }
+
+  private onBodyExpand = (e: Event): void => {
+    if (!this.collapsible) {
+      /* Locked open — force expand back if the row was toggled. */
+      const item = e.target as HTMLElement & { expanded?: boolean };
+      if (item && item.expanded === false) item.expanded = true;
+      return;
+    }
+    this.onContentExpand(e);
+  };
+
+  override render() {
+    const title = this.titleLabel();
+    const canToggle = this.collapsible;
+    const open = !canToggle || this.contentExpanded;
+
+    return html`
+      <k3-list class="shell" part="list" variant="segmented" aria-label=${title}>
+        <k3-list-item class="header" part="header" lines="three">
+          <k3-tabs
+            class="title-tabs"
+            slot="headline"
+            part="tabs"
+            variant="secondary"
+            labels=${title}
+            index="0"
+            @click=${this.stopItemActivate}
+          ></k3-tabs>
+          ${this.renderActions()}
+        </k3-list-item>
+        <k3-list-item
+          class=${canToggle ? 'body' : 'body body--static'}
+          part="body"
+          expandable
+          ?expanded=${open}
+          @k3-expand=${this.onBodyExpand}
+        >
+          ${canToggle
+            ? html`
+                <span slot="headline" class="body-label">
+                  ${open
+                    ? i18n.t('codeblock.showLess', CodeBlockSpecs.accessibility.expandLess)
+                    : i18n.t('codeblock.showMore', CodeBlockSpecs.accessibility.expandMore)}
+                </span>
+              `
+            : nothing}
+          <div slot="expand">${this.renderCode()}</div>
+        </k3-list-item>
+      </k3-list>
+      <slot hidden @slotchange=${() => this.syncSource()}></slot>
     `;
   }
 }

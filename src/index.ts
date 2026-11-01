@@ -286,6 +286,36 @@ export {
   GlowParticlesSpecs,
 } from './components/animation/glow-particles.js';
 export {
+  K3Chart,
+  ChartSpecs,
+  type K3ChartType,
+} from './components/charts/chart.js';
+export {
+  K3Masonry,
+  MasonrySpecs,
+} from './components/containment/masonry.js';
+export {
+  packMasonryItems,
+  type MasonryPackOptions,
+} from './components/containment/masonry-pack.js';
+export {
+  K3IsoFilter,
+  IsoFilterSpecs,
+  type IsoFilterLayout,
+} from './components/containment/iso-filter.js';
+export {
+  ensureChartJsRegistered,
+  Chart as ChartJs,
+  type ChartConfiguration,
+  type ChartData,
+  type ChartOptions,
+  type ChartType,
+} from './components/charts/chart.register.js';
+export {
+  buildDefaultOptions,
+  mergeChartOptions,
+} from './components/charts/chart.theme.js';
+export {
   getSoundFx,
   SoundFxController,
   SoundFxSpecs,

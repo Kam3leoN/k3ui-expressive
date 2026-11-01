@@ -44,7 +44,7 @@ export const listStyles = css`
     background: var(--k3-list-bg, transparent);
     border-radius: var(--k3-sys-shape-corner-large, 1rem);
     max-height: var(--k3-list-max-height, none);
-    overflow: auto;
+    /* Edge scrollbar via .k3-scroll — never Windows native arrows. */
     gap: 0;
   }
 

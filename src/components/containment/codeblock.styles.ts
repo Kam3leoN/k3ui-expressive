@@ -1,162 +1,134 @@
 import { css } from 'lit';
+import { edgeScrollbarStyles } from '../../core/scrollbar.js';
 
-export const codeblockStyles = css`
-  :host {
-    display: block;
-    font-family: var(--k3-ref-typeface-code, ui-monospace, monospace);
-    color: var(--k3-sys-color-on-surface);
-  }
+export const codeblockStyles = [
+  edgeScrollbarStyles,
+  css`
+    :host {
+      display: block;
+      font-family: var(--k3-ref-typeface-code, ui-monospace, monospace);
+      color: var(--k3-sys-color-on-surface);
+    }
 
-  .card {
-    border-radius: var(--k3-sys-shape-corner-medium, 0.75rem);
-    background: var(--k3-sys-color-surface-container-low);
-    border: 1px solid var(--k3-sys-color-outline-variant);
-    overflow: hidden;
-  }
+    .shell {
+      width: 100%;
+    }
 
-  .toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--k3-sys-spacing-space200, 1rem);
-    padding: var(--k3-sys-spacing-space100, 0.5rem) var(--k3-sys-spacing-space200, 1rem);
-    background: var(--k3-sys-color-surface-container);
-    border-block-end: 1px solid var(--k3-sys-color-outline-variant);
-  }
+    .header {
+      /* Taller first row — room for k3-tabs title */
+      --k3-codeblock-header-min: 4.5rem;
+    }
 
-  .label {
-    font-family: var(--k3-ref-typeface-brand, system-ui, sans-serif);
-    font-size: var(--k3-sys-typescale-label-large-size, 0.875rem);
-    color: var(--k3-sys-color-on-surface-variant);
-  }
+    .header::part(container) {
+      min-height: var(--k3-codeblock-header-min, 4.5rem);
+      align-items: center;
+    }
 
-  .actions {
-    display: flex;
-    align-items: center;
-    gap: var(--k3-sys-spacing-space50, 0.25rem);
-    margin-inline-start: auto;
-  }
+    .title-tabs {
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      min-width: 6rem;
+    }
 
-  .action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
-    border: 0;
-    border-radius: var(--k3-sys-shape-corner-full, 999px);
-    background: transparent;
-    color: var(--k3-sys-color-on-surface-variant);
-    cursor: pointer;
-  }
+    .title-tabs::part(tablist) {
+      border-block-end-color: transparent;
+    }
 
-  .action:hover {
-    background: color-mix(in srgb, var(--k3-sys-color-on-surface) 8%, transparent);
-  }
+    .title-tabs::part(panels) {
+      display: none;
+    }
 
-  .action:focus-visible {
-    outline: 2px solid var(--k3-sys-color-primary);
-    outline-offset: 2px;
-  }
+    .title-tabs::part(tab) {
+      flex: 0 0 auto;
+      min-width: 4.5rem;
+      padding-inline: 1rem;
+      pointer-events: none; /* title only — not a real tab switcher */
+    }
 
-  .content {
-    position: relative;
-    overflow: auto;
-    max-height: none;
-  }
+    .actions {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--k3-sys-spacing-space50, 0.25rem);
+    }
 
-  :host([collapsible]) .content {
-    max-height: var(--k3-codeblock-collapsed-height, 150px);
-    overflow: hidden;
-  }
+    .body-label {
+      font-family: var(--k3-ref-typeface-brand, system-ui, sans-serif);
+      font-size: var(--k3-sys-typescale-label-large-size, 0.875rem);
+      color: var(--k3-sys-color-on-surface-variant);
+    }
 
-  :host([collapsible][expanded]) .content {
-    max-height: var(--k3-codeblock-full-height, none);
-    overflow: auto;
-  }
+    /* Non-collapsible — code always open, no chevron / toggle row */
+    .body--static::part(chevron) {
+      display: none;
+    }
 
-  pre {
-    margin: 0;
-    padding: var(--k3-sys-spacing-space200, 1rem);
-    overflow-x: auto;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-    tab-size: 2;
-  }
+    .body--static::part(container) {
+      min-height: 0;
+      padding-block: 0;
+    }
 
-  code {
-    font-family: inherit;
-    white-space: pre;
-  }
+    /*
+     * Scroll lives on .code (k3-scroll) — never on <pre>.
+     * --x enables horizontal for long lines without Windows native arrows.
+     */
+    .code.k3-scroll {
+      position: relative;
+      width: 100%;
+      max-block-size: none;
+      box-sizing: border-box;
+    }
 
-  .token--keyword {
-    color: var(--k3-sys-color-primary);
-  }
+    :host([collapsible]:not([expanded])) .code.k3-scroll {
+      max-block-size: var(--k3-codeblock-collapsed-height, 12rem);
+    }
 
-  .token--string {
-    color: var(--k3-sys-color-tertiary);
-  }
+    pre {
+      margin: 0;
+      padding: var(--k3-sys-spacing-space200, 1rem);
+      overflow: visible;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      tab-size: 2;
+    }
 
-  .token--comment {
-    color: var(--k3-sys-color-on-surface-variant);
-    font-style: italic;
-  }
+    code {
+      font-family: inherit;
+      white-space: pre;
+    }
 
-  .token--tag {
-    color: var(--k3-sys-color-error);
-  }
+    .token--keyword {
+      color: var(--k3-sys-color-primary);
+    }
 
-  .token--attr {
-    color: var(--k3-sys-color-secondary);
-  }
+    .token--string {
+      color: var(--k3-sys-color-tertiary);
+    }
 
-  .token--constant {
-    color: var(--k3-sys-color-tertiary);
-  }
+    .token--comment {
+      color: var(--k3-sys-color-on-surface-variant);
+      font-style: italic;
+    }
 
-  .token--number {
-    color: var(--k3-sys-color-tertiary);
-  }
+    .token--tag {
+      color: var(--k3-sys-color-error);
+    }
 
-  .expand {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--k3-sys-spacing-space100, 0.5rem);
-    width: 100%;
-    padding: var(--k3-sys-spacing-space150, 0.75rem);
-    border: 0;
-    border-block-start: 1px solid var(--k3-sys-color-outline-variant);
-    background: var(--k3-sys-color-surface-container);
-    color: var(--k3-sys-color-primary);
-    font-family: var(--k3-ref-typeface-brand, system-ui, sans-serif);
-    font-size: var(--k3-sys-typescale-label-large-size, 0.875rem);
-    cursor: pointer;
-  }
+    .token--attr {
+      color: var(--k3-sys-color-secondary);
+    }
 
-  .expand:focus-visible {
-    outline: 2px solid var(--k3-sys-color-primary);
-    outline-offset: -2px;
-  }
+    .token--constant {
+      color: var(--k3-sys-color-tertiary);
+    }
 
-  .icon {
-    font-family: var(
-      --k3-sys-icon-font-family,
-      'Material Symbols Rounded',
-      'Material Symbols Outlined',
-      sans-serif
-    );
-    font-weight: 400;
-    font-style: normal;
-    font-size: 1.25rem;
-    line-height: 1;
-    letter-spacing: normal;
-    font-feature-settings: 'liga';
-  }
+    .token--number {
+      color: var(--k3-sys-color-tertiary);
+    }
 
-  ::slotted(pre),
-  :host > pre {
-    display: none;
-  }
-`;
+    ::slotted(pre),
+    :host > pre {
+      display: none;
+    }
+  `,
+];

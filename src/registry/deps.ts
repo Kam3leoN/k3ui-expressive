@@ -14,6 +14,13 @@ export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
   'k3-card-set': ['k3-card', 'k3-menu', 'k3-menu-item'],
   'k3-carousel': ['k3-carousel-item', 'k3-icon-button'],
   'k3-chip-set': ['k3-chip'],
+  'k3-codeblock': [
+    'k3-icon-button',
+    'k3-list',
+    'k3-list-item',
+    'k3-tabs',
+    'k3-tooltip',
+  ],
   'k3-date-picker': ['k3-button', 'k3-calendar', 'k3-date-picker-toggle', 'k3-icon-button', 'k3-text-field'],
   'k3-dialog': ['k3-button'],
   'k3-fab-dial': ['k3-fab'],
