@@ -2792,10 +2792,18 @@ function wireShellChrome(): void {
     colorSpec = v;
     applyThemePersist();
     void showFlash(t('playground.settings.flash.spec', { value: t(`playground.ctrl.spec.${v}`) }));
+  });
+
+  /* Color variant (settings sheet) — was missing: UI toggled but theme stayed on expressive */
+  document.getElementById('settings-variant-group')?.addEventListener('k3-change', (e) => {
+    const btn = (e as CustomEvent<{ selected?: HTMLElement }>).detail?.selected;
+    const next = parseColorVariant(btn?.getAttribute('data-settings-variant'));
+    if (next === colorVariant) return;
+    colorVariant = next;
     applyThemePersist();
     void showFlash(
       t('playground.settings.flash.variant', {
-        value: t(`playground.ctrl.variant.${v}`),
+        value: t(`playground.ctrl.variant.${next}`),
       }),
     );
   });
