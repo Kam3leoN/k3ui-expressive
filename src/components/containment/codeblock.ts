@@ -4,6 +4,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { K3Element, prefersReducedMotion } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
+import '../actions/button.js';
 import '../actions/icon-button.js';
 import { showSnackbar } from '../feedback/snackbar-queue.js';
 import '../feedback/tooltip.js';
@@ -35,9 +36,11 @@ type CodeSample = {
  * - `k3-tabs` title (one sample) or switcher (several slotted `<pre><code>`)
  * - copy / download icon buttons + snackbar confirm
  * - dark rounded `<pre><code>` panel (no list / no line numbers)
+ * - optional collapsible preview with Show / Hide code chip (primary filled)
  *
  * @fires k3-copy — `{ text }` after a successful copy
  * @fires k3-tab — `{ index }` when the active sample tab changes
+ * @fires k3-expand — `{ expanded }` when the Show / Hide code chip toggles
  */
 export class K3CodeBlock extends K3Element {
   static override styles = [hostReset, ...codeblockStyles];
@@ -45,14 +48,16 @@ export class K3CodeBlock extends K3Element {
   @property() label = CodeBlockSpecs.defaultLabel;
   @property() language: string = CodeBlockSpecs.defaultLanguage;
   /**
-   * Kept for markup compat — collapse UI was removed with the list shell.
-   * @deprecated No effect.
+   * Truncate tall samples behind a fade + Show / Hide code chip.
+   * The chip appears only when content exceeds `collapsed-height`.
    */
   @property({ type: Boolean, reflect: true })
   collapsible: boolean = CodeBlockSpecs.defaultCollapsible;
-  /** @deprecated No effect. */
+  /** Max panel height (px) while collapsed. */
   @property({ type: Number, attribute: 'collapsed-height' }) collapsedHeight =
     CodeBlockSpecs.defaultCollapsedHeight;
+  /** Whether the full sample is visible (when `collapsible`). */
+  @property({ type: Boolean, reflect: true }) expanded = false;
   @property({ type: Boolean, attribute: 'show-toolbar' }) showToolbar = CodeBlockSpecs.showToolbar;
   @property({ type: Boolean, attribute: 'show-copy' }) showCopy = CodeBlockSpecs.showCopy;
   @property({ type: Boolean, attribute: 'show-download' }) showDownload =
@@ -71,9 +76,12 @@ export class K3CodeBlock extends K3Element {
   /** Language as written by the author (`html`, `c++`…) — kept as a class next to the canonical one. */
   @state() private requestedLang = 'plain';
   @state() private sourceText = '';
+  /** True when natural content height exceeds `collapsedHeight`. */
+  @state() private overflows = false;
 
   /** Cancels in-flight panel height springs on rapid tab switches. */
   private panelAnimGen = 0;
+  private measureRaf = 0;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -255,7 +263,99 @@ export class K3CodeBlock extends K3Element {
       if (!ready || lang !== this.resolvedLang) return;
       const next = highlightCode(this.sourceText, lang);
       if (next !== this.highlighted) this.highlighted = next;
+      this.scheduleMeasureOverflow();
     });
+    this.scheduleMeasureOverflow();
+  }
+
+  private scheduleMeasureOverflow(): void {
+    if (this.measureRaf) cancelAnimationFrame(this.measureRaf);
+    this.measureRaf = requestAnimationFrame(() => {
+      this.measureRaf = 0;
+      void this.measureOverflow();
+    });
+  }
+
+  /** Detect whether the sample is taller than the collapsed preview. */
+  private async measureOverflow(): Promise<void> {
+    if (!this.collapsible) {
+      if (this.overflows) this.overflows = false;
+      return;
+    }
+    await this.updateComplete;
+    const pre = this.renderRoot?.querySelector<HTMLElement>('.code pre');
+    if (!pre) return;
+    /*
+     * Prefer layout height; fall back to a line estimate so headless /
+     * zero-layout environments still open the chip for tall samples.
+     */
+    const lines = Math.max(1, this.sourceText.split(/\r?\n/).length);
+    const estimated = lines * 22; /* ~0.875rem × 1.375 line-height */
+    const natural = Math.max(pre.scrollHeight || 0, estimated);
+    const next = natural > this.collapsedHeight + 4;
+    if (next !== this.overflows) this.overflows = next;
+    if (!next && this.expanded) this.expanded = false;
+  }
+
+  private get isCollapsedPreview(): boolean {
+    return this.collapsible && this.overflows && !this.expanded;
+  }
+
+  private get showExpandChip(): boolean {
+    return this.collapsible && this.overflows;
+  }
+
+  private async toggleExpanded(): Promise<void> {
+    if (!this.showExpandChip) return;
+    const next = !this.expanded;
+    const panel = this.renderRoot?.querySelector<HTMLElement>('.panel');
+    if (!panel || prefersReducedMotion()) {
+      this.expanded = next;
+      this.emit('k3-expand', { expanded: next });
+      return;
+    }
+
+    const gen = ++this.panelAnimGen;
+    const from = panel.getBoundingClientRect().height;
+    panel.classList.remove('panel--animating');
+    panel.classList.add('panel--sizing');
+    panel.style.maxBlockSize = 'none';
+    panel.style.blockSize = `${from}px`;
+
+    this.expanded = next;
+    this.emit('k3-expand', { expanded: next });
+    await this.updateComplete;
+    await new Promise<void>((r) => requestAnimationFrame(() => r()));
+    if (gen !== this.panelAnimGen) return;
+
+    /* Natural height without clamp, then target = full or collapsed */
+    panel.classList.remove('panel--collapsed');
+    panel.style.blockSize = 'auto';
+    const natural = panel.getBoundingClientRect().height;
+    const to = next ? natural : Math.min(natural, this.collapsedHeight);
+
+    panel.style.blockSize = `${from}px`;
+    panel.offsetHeight; /* reflow — lock start frame */
+    if (!next) panel.classList.add('panel--collapsed');
+    panel.classList.add('panel--animating');
+    panel.style.blockSize = `${to}px`;
+
+    const done = (): void => {
+      if (gen !== this.panelAnimGen) return;
+      panel.removeEventListener('transitionend', onEnd);
+      window.clearTimeout(fallback);
+      panel.classList.remove('panel--animating', 'panel--sizing');
+      panel.style.blockSize = '';
+      panel.style.maxBlockSize = '';
+      this.scheduleMeasureOverflow();
+    };
+    const onEnd = (e: TransitionEvent): void => {
+      if (e.target !== panel) return;
+      if (e.propertyName !== 'block-size' && e.propertyName !== 'height') return;
+      done();
+    };
+    panel.addEventListener('transitionend', onEnd);
+    const fallback = window.setTimeout(done, 600);
   }
 
   private tabLabels(): string {
@@ -400,18 +500,60 @@ export class K3CodeBlock extends K3Element {
     `;
   }
 
+  private renderExpandChip() {
+    if (!this.showExpandChip) return nothing;
+    const open = this.expanded;
+    const label = open
+      ? i18n.t('codeblock.hideCode', CodeBlockSpecs.accessibility.hideCodeLabel)
+      : i18n.t('codeblock.showCode', CodeBlockSpecs.accessibility.showCodeLabel);
+    return html`
+      <k3-button
+        class="expand"
+        part="expand"
+        variant="filled"
+        size="sm"
+        shape="round"
+        aria-expanded=${open ? 'true' : 'false'}
+        @k3-click=${() => void this.toggleExpanded()}
+      >
+        <span
+          slot="icon"
+          class="ms notranslate"
+          translate="no"
+          lang="zxx"
+          data-k3-icon=${open ? 'expand_less' : 'code'}
+          aria-hidden="true"
+        ></span>
+        ${label}
+      </k3-button>
+    `;
+  }
+
   override render() {
     const hasChrome =
       this.showToolbar || this.showCopy || this.showDownload;
+    const collapsed = this.isCollapsedPreview;
+    const wrapClass = this.showExpandChip
+      ? 'panel-wrap panel-wrap--toggle'
+      : 'panel-wrap';
+    const panelClass = collapsed ? 'panel panel--collapsed' : 'panel';
     return html`
       <div class=${hasChrome ? 'shell shell--chrome' : 'shell'} part="shell">
         ${this.renderChrome()}
-        <div class="panel" part="panel">
-          <div class="code k3-scroll k3-scroll--x" part="content">
-            <pre><code class=${this.languageClass()}>${unsafeHTML(
-              this.highlighted,
-            )}</code></pre>
+        <div
+          class=${wrapClass}
+          part="panel-wrap"
+          style=${`--k3-codeblock-collapsed:${this.collapsedHeight}px`}
+        >
+          <div class=${panelClass} part="panel">
+            <div class="code k3-scroll k3-scroll--x" part="content">
+              <pre><code class=${this.languageClass()}>${unsafeHTML(
+                this.highlighted,
+              )}</code></pre>
+            </div>
+            ${collapsed ? html`<div class="fade" aria-hidden="true"></div>` : nothing}
           </div>
+          ${this.renderExpandChip()}
         </div>
       </div>
       <slot

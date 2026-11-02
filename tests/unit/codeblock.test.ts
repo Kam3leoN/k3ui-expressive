@@ -87,4 +87,36 @@ describe('k3-codeblock', () => {
     await el.updateComplete;
     expect(el.shadowRoot!.querySelector('code')?.textContent).toContain('.a{}');
   });
+
+  it('shows Show code chip when collapsible content overflows', async () => {
+    const lines = Array.from({ length: 24 }, (_, i) => `line ${i + 1};`).join('\n');
+    const el = document.createElement('k3-codeblock') as K3CodeBlock;
+    el.collapsible = true;
+    el.collapsedHeight = 80;
+    el.language = 'javascript';
+    el.code = lines;
+    host.appendChild(el);
+    await el.updateComplete;
+    await el.updateComplete;
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await el.updateComplete;
+
+    const chip = el.shadowRoot!.querySelector('[part="expand"]') as HTMLElement | null;
+    expect(chip).toBeTruthy();
+    expect(el.shadowRoot!.querySelector('.panel--collapsed')).toBeTruthy();
+    expect(el.shadowRoot!.querySelector('.fade')).toBeTruthy();
+
+    const onExpand = vi.fn();
+    el.addEventListener('k3-expand', onExpand as EventListener);
+    const btn = chip!.shadowRoot?.querySelector('button') as HTMLButtonElement | null;
+    (btn ?? chip)!.click();
+    await el.updateComplete;
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    expect(el.expanded).toBe(true);
+    expect(onExpand).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: { expanded: true } }),
+    );
+    expect(el.shadowRoot!.querySelector('.fade')).toBeNull();
+  });
 });

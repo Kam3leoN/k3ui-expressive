@@ -49,8 +49,7 @@ export const codeblockStyles = [
 
     /* Dark panel aliases (legacy attribute values still paint the same) */
     :host([theme='okaidia']),
-    :host([theme='dark']),
-    :host([theme='bulma']) {
+    :host([theme='dark']) {
       --k3-code-bg: #24292e;
       --k3-code-fg: #d1d5da;
     }
@@ -160,6 +159,17 @@ export const codeblockStyles = [
       color: var(--k3-sys-color-primary);
     }
 
+    /* Wraps the code panel + optional Show/Hide chip on the bottom edge */
+    .panel-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .panel-wrap--toggle {
+      /* Room for the half-protruding expand chip */
+      margin-block-end: 1.25rem;
+    }
+
     .panel {
       position: relative;
       overflow: hidden;
@@ -173,6 +183,51 @@ export const codeblockStyles = [
     /* No chrome — keep full outer radius on the code panel alone */
     .shell:not(.shell--chrome) .panel {
       border-radius: var(--k3-codeblock-radius, 1rem);
+    }
+
+    .panel--collapsed {
+      max-block-size: var(--k3-codeblock-collapsed, 9.375rem);
+    }
+
+    .panel--collapsed .code.k3-scroll {
+      max-block-size: inherit;
+      overflow: hidden;
+    }
+
+    /* Soft fade into the panel colour when truncated */
+    .fade {
+      position: absolute;
+      inset-inline: 0;
+      bottom: 0;
+      z-index: 1;
+      height: 4.5rem;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--k3-code-bg) 0%, transparent),
+        var(--k3-code-bg)
+      );
+    }
+
+    /*
+     * Expand / collapse chip — sits on the panel’s bottom edge.
+     * Filled primary (Material Expressive theme roles).
+     */
+    .expand {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      z-index: 2;
+      transform: translate(-50%, 50%);
+      box-shadow: var(--k3-sys-elevation-level2, 0 2px 6px rgb(0 0 0 / 0.28));
+      border-radius: var(--k3-sys-shape-corner-full, 9999px);
+    }
+
+    .expand::part(container) {
+      min-height: 2.25rem;
+      padding-inline: 1rem;
+      gap: var(--k3-sys-spacing-space100, 0.5rem);
+      font-weight: 600;
     }
 
     /* Height spring when switching language tabs (line-count change) */

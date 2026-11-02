@@ -729,7 +729,7 @@ document.getElementById("dlg")?.show?.();`,
   },
   codeblock: {
     components: ['k3-codeblock'],
-    html: `<k3-codeblock>
+    html: `<k3-codeblock collapsible collapsed-height="160">
   <pre data-label="HTML"><code class="language-html">&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
   <pre data-label="TypeScript"><code class="language-typescript">import { K3UI } from "k3ui";</code></pre>
   <pre data-label="CSS"><code class="language-css">.a { color: red; }</code></pre>

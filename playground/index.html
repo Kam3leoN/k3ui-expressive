@@ -8842,11 +8842,12 @@ fav?.addEventListener("k3-change", (e) => {
             <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
             <h1 data-i18n="doc.codeblock.title">Code block</h1>
             <p data-i18n="doc.codeblock.blurb">
-              Dark code panel — tabs title · copy/download icons · lightweight highlighter.
+              Dark code panel — tabs · copy/download · Show code expand · custom highlighter.
             </p>
             <p class="doc-intro" data-i18n="doc.codeblock.intro">
               Rounded dark code panel with an optional k3-tabs title and copy / download icon
-              buttons. Pass source via the default slot or the code property.
+              buttons. Use collapsible for a faded preview and a primary Show / Hide code chip.
+              Pass source via the default slot or the code property.
             </p>
           </header>
           <div class="demo-block">
@@ -8856,18 +8857,44 @@ fav?.addEventListener("k3-change", (e) => {
             >
               <div class="demo-case k3-col-full">
                 <div class="demo-case-stage">
-                  <k3-codeblock id="codeblock-demo">
-                    <pre data-label="HTML"><code class="language-html">&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
+                  <k3-codeblock id="codeblock-demo" collapsible collapsed-height="160">
+                    <pre data-label="HTML"><code class="language-html">&lt;nav class="pagination" role="navigation" aria-label="pagination"&gt;
+  &lt;a href="#" class="pagination-previous"&gt;Previous&lt;/a&gt;
+  &lt;a href="#" class="pagination-next"&gt;Next page&lt;/a&gt;
+  &lt;ul class="pagination-list"&gt;
+    &lt;li&gt;&lt;a href="#" class="pagination-link" aria-label="Goto page 1"&gt;1&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;span class="pagination-ellipsis"&gt;&amp;hellip;&lt;/span&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#" class="pagination-link" aria-label="Goto page 45"&gt;45&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;
+      &lt;a class="pagination-link is-current" aria-label="Page 46" aria-current="page"&gt;46&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href="#" class="pagination-link" aria-label="Goto page 47"&gt;47&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;span class="pagination-ellipsis"&gt;&amp;hellip;&lt;/span&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#" class="pagination-link" aria-label="Goto page 86"&gt;86&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;</code></pre>
                     <pre data-label="TypeScript"><code class="language-typescript">import { K3UI } from "k3ui";
-await K3UI.init({ components: ["k3-button"] });</code></pre>
-                    <pre data-label="CSS"><code class="language-css">.card:hover { color: var(--k3-sys-color-primary); }</code></pre>
+
+await K3UI.init({ components: ["k3-codeblock", "k3-button"] });
+
+const block = document.querySelector("k3-codeblock");
+block?.addEventListener("k3-expand", (e) => {
+  console.log("expanded", e.detail.expanded);
+});</code></pre>
+                    <pre data-label="CSS"><code class="language-css">k3-codeblock {
+  --k3-codeblock-radius: 1rem;
+}
+
+k3-codeblock[collapsible]:not([expanded])::part(panel) {
+  /* Preview height comes from collapsed-height (default 150) */
+}</code></pre>
                   </k3-codeblock>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
             </div>
             <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">HTML · TypeScript · CSS</span></li>
+              <li><span class="pill-num">1</span><span class="variant-label">collapsible · Show code</span></li>
             </ol>
           </div>
           <div class="demo-block">
