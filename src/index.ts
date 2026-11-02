@@ -394,6 +394,15 @@ export {
   type WhenTriggeredOptions,
 } from './core/lazy.js';
 export { registerWhen, isKnown } from './registry/register.js';
+import { syntax } from './syntax/index.js';
+export {
+  syntax,
+  LANGUAGE_MANIFEST,
+  type K3Syntax,
+  type SyntaxLanguagePack,
+  type SyntaxLanguageInfo,
+} from './syntax/index.js';
+export type { CodeBlockTheme } from './components/containment/codeblock.js';
 export type { K3AudioPlayer } from './components/media/audio-player.js';
 export type { K3QrCode } from './components/media/qr-code.js';
 
@@ -409,6 +418,7 @@ export const K3UI: K3UIGlobal = {
   gestures,
   keyboard,
   mouse,
+  syntax,
   snackbar: { show: showSnackbar, queue: snackbarQueue },
 };
 

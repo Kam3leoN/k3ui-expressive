@@ -6,7 +6,7 @@ import type { K3CodeBlock } from '../../src/components/containment/codeblock.js'
 describe('codeblock highlighter', () => {
   it('wraps javascript keywords', () => {
     const html = highlightCode('const x = true;', 'javascript');
-    expect(html).toContain('token--keyword');
+    expect(html).toContain('token keyword');
     expect(html).toContain('const');
   });
 

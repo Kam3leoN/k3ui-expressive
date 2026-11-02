@@ -4244,3 +4244,59 @@ k3-fab .ms-fill-icon {
 .masonry-tile--j { background: #f5e0c3; }
 .masonry-tile--k { background: #d6f0d6; }
 .masonry-tile--l { background: #f2d7ee; }
+
+/* Code block — language gallery */
+.codeblock-gallery {
+  display: grid;
+  gap: var(--k3-sys-spacing-space200);
+  max-inline-size: 48rem;
+}
+.codeblock-gallery k3-select {
+  max-inline-size: 20rem;
+}
+
+/* Marquee lab — live ticker beside its options */
+.marquee-lab {
+  display: grid;
+  gap: var(--k3-sys-spacing-space300);
+  align-items: start;
+}
+@media (min-width: 840px) {
+  .marquee-lab {
+    grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+  }
+}
+.marquee-lab-stage {
+  display: flex;
+  align-items: center;
+  min-block-size: 5.5rem;
+  /* Fade on: inset so the mask breathes. Fade off: full-bleed to the stage edge. */
+  padding-block: var(--k3-sys-spacing-space200, 1rem);
+  padding-inline: var(--k3-sys-spacing-space200, 1rem);
+  border-radius: var(--k3-sys-shape-corner-large, 1.75rem);
+  /* Material Expressive defaults — overridden by --mq-lab-* when custom hex is set */
+  background: var(--k3-sys-color-surface-container, #f3edf7);
+  color: var(--k3-sys-color-on-surface, #1d1b20);
+  overflow: hidden;
+}
+.marquee-lab-stage[data-fade='off'] {
+  padding-inline: 0;
+}
+.marquee-lab-stage[data-bg='custom'] {
+  background: var(--mq-lab-bg);
+}
+.marquee-lab-stage[data-fg='custom'] {
+  color: var(--mq-lab-fg);
+}
+.marquee-lab-stage k3-marquee {
+  inline-size: 100%;
+  color: inherit;
+}
+.marquee-lab-controls {
+  display: grid;
+  gap: var(--k3-sys-spacing-space200);
+}
+.marquee-lab-controls k3-select,
+.marquee-lab-controls k3-text-field {
+  inline-size: 100%;
+}

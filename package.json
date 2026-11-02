@@ -15,6 +15,11 @@
       "import": "./dist/k3ui.js",
       "default": "./dist/k3ui.js"
     },
+    "./syntax": {
+      "types": "./dist/k3ui-syntax.d.ts",
+      "import": "./dist/k3ui-syntax.js",
+      "default": "./dist/k3ui-syntax.js"
+    },
     "./k3ui.css": "./dist/k3ui.css",
     "./fonts.css": "./dist/fonts/fonts.css",
     "./fonts-ui.css": "./dist/fonts/fonts-ui.css",
@@ -30,7 +35,7 @@
   "scripts": {
     "dev": "vite --config playground/vite.config.ts",
     "dev:qr": "vite --config apps/qr-generator/vite.config.ts",
-    "build": "npm run build:lib && npm run build:fonts && npm run build:tokens && npm run budget:bundle",
+    "build": "npm run build:lib && npm run build:syntax && npm run build:fonts && npm run build:tokens && npm run budget:bundle",
     "build:lib": "vite build",
     "build:fonts": "node scripts/copy-fonts.mjs",
     "build:playground": "vite build --config playground/vite.config.ts",
@@ -44,7 +49,9 @@
     "lint": "tsc --noEmit",
     "check": "npm run lint && npm test && npm run build",
     "preview": "vite preview --config playground/vite.config.ts",
-    "preview:qr": "vite preview --config apps/qr-generator/vite.config.ts"
+    "preview:qr": "vite preview --config apps/qr-generator/vite.config.ts",
+    "build:syntax": "node scripts/build-syntax.mjs",
+    "vendor:prism": "node scripts/vendor-prism.mjs"
   },
   "keywords": [
     "material-design",
@@ -80,6 +87,7 @@
     "esbuild": "^0.25.12",
     "flag-icons": "^7.6.0",
     "jsdom": "^26.0.0",
+    "prismjs": "^1.30.0",
     "sass": "^1.85.1",
     "tailwindcss": "^4.0.14",
     "typescript": "^5.8.2",

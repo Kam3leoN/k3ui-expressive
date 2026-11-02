@@ -1,6 +1,7 @@
 import { VERSION } from '../version.js';
 import { debug, type DebugLevel } from '../debug/logger.js';
 import { i18n, type LocaleCode } from '../i18n/index.js';
+import { syntax, type K3Syntax } from '../syntax/index.js';
 import { themeApi, type ColorMode, type MotionScheme, type ColorVariant, type ContrastLevel, DEFAULT_COLOR_SPEC, type ColorSpecVersion } from '../theme/apply.js';
 import { registry } from '../registry/register.js';
 import { haptic } from '../core/haptic.js';
@@ -45,6 +46,8 @@ export interface K3UIGlobal {
     show: typeof showSnackbar;
     queue: typeof snackbarQueue;
   };
+  /** Syntax highlighting (private Prism instance, Okaidia tokens). */
+  syntax: K3Syntax;
 }
 
 declare global {
@@ -116,6 +119,7 @@ export async function init(options?: InitOptions): Promise<K3UIGlobal> {
     gestures,
     keyboard,
     mouse,
+    syntax,
     snackbar: { show: showSnackbar, queue: snackbarQueue },
   };
 

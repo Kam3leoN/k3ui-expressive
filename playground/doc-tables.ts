@@ -594,7 +594,8 @@ const COMPONENT_API: Record<
   codeblock: {
     properties: [
       ['label', 'string', "''", 'k3-tabs title (falls back to language)'],
-      ['language', 'string', "''", 'Highlight grammar'],
+      ['language', 'string', "''", 'Prism id or alias — html, php, sql, c++, c#, react…'],
+      ['theme', "'material'|'okaidia'", 'material', 'Token colours — M3 adaptive (default) or Okaidia'],
       ['collapsible', 'boolean', 'false', 'Last list item expandable'],
       ['show-copy / show-download', 'boolean', 'true', 'Header icon buttons'],
       ['code', 'string', "''", 'Source when no slot'],
@@ -725,17 +726,34 @@ const COMPONENT_API: Record<
   },
   marquee: {
     properties: [
-      ['mode', "'infinite'|'classic'", 'infinite', 'Loop style'],
-      ['direction', "'left'|'right'", 'left', 'Scroll direction'],
-      ['duration', 'number', '20', 'Seconds per cycle'],
-      ['speed', 'number', 'null', 'Px/s (overrides duration)'],
+      ['mode', "'infinite'|'classic'", 'infinite', 'Seamless loop · edge-to-edge pass'],
+      ['start', "'filled'|'edge'", 'filled', 'Infinite: covered at once · enters from the far edge'],
+      ['direction', "'left'|'right'|'up'|'down'", 'left', 'Scroll direction (up / down need a height)'],
+      ['speed', 'number', 'null', 'Px/s (MarqueeJS) — overrides duration'],
+      ['duration', 'number', '20', 'Seconds per loop when speed is unset'],
+      ['gap', 'number', '80', 'Px between items and copies'],
+      ['separator', 'string', "''", 'Text between copies (e.g. •)'],
+      ['clone-count', "'auto'|number", 'auto', 'Copies (max 15)'],
       ['pause-on-hover', 'boolean', 'false', 'Pause while hovered'],
-      ['autoplay', 'boolean', 'true', 'Start on connect'],
+      ['pause-on-focus', 'boolean', 'true', 'Pause while focus is inside'],
+      ['pause-at-items', 'boolean', 'false', 'Dwell when each item’s start hits the near edge'],
+      ['item-pause', 'number', '1.5', 'Dwell seconds when pause-at-items is on'],
+      ['paused · autoplay', 'boolean', 'false · true', 'Paused by API / control · start on connect'],
     ],
     methods: [
-      ['play / stop', '() => void', 'Animation control'],
+      ['start / play · pause / stop · resume · toggle', '() => void', 'Playback (stop keeps the position)'],
+      ['restart', '() => void', 'Back to the starting position'],
+      ['addContent · replaceContent · getContentList', '(…) => …', 'Dynamic content'],
+      ['recalculate', '() => void', 'Re-measure after layout changes'],
     ],
-    slots: [['(default)', 'Ticker content']],
+    events: [
+      ['k3-pause · k3-play', '{ source }', 'Paused / resumed by the API or a control'],
+      ['k3-item-pause', '{ index, offset }', 'Item dwell started (pause-at-items)'],
+    ],
+    slots: [['(default)', 'Items: text, links, images, chips…']],
+    'css-parts': [
+      ['viewport · track · set', 'Clip area · moving strip · one copy'],
+    ],
   },
   'text-bounce': {
     properties: [

@@ -10,10 +10,11 @@ const jsPath = path.join(root, 'dist/k3ui.js');
 const cssPath = path.join(root, 'dist/k3ui.css');
 
 // Soft budgets for early 0.0.x — CSS excludes self-hosted fonts (dist/fonts)
-/* Measured after 0.1.0: ~453 kB JS (one inlined bundle) / ~13 kB CSS.
+/* Measured: ~584 kB JS (one inlined bundle) incl. chart.js (~70 kB — candidate for an
+ * on-demand pack like dist/k3ui-syntax.js) and the syntax core + web grammars (~15 kB) / ~13 kB CSS.
  * Raise only on purpose — and tighten again once components ship as chunks. */
 const LIMITS = {
-  jsGzipKb: Number(process.env.K3UI_BUDGET_JS_KB ?? 500),
+  jsGzipKb: Number(process.env.K3UI_BUDGET_JS_KB ?? 600),
   cssGzipKb: Number(process.env.K3UI_BUDGET_CSS_KB ?? 24),
 };
 
@@ -28,8 +29,12 @@ function gzipKb(file) {
 
 const js = gzipKb(jsPath);
 const css = gzipKb(cssPath);
+/* Optional language pack — loaded on demand, never part of k3ui.js */
+const syntaxPath = path.join(root, 'dist/k3ui-syntax.js');
+const syntaxKb = fs.existsSync(syntaxPath) ? gzipKb(syntaxPath) : 0;
 console.log(`Budget: k3ui.js ${js.toFixed(1)} kB gzip (limit ${LIMITS.jsGzipKb})`);
 console.log(`Budget: k3ui.css ${css.toFixed(1)} kB gzip (limit ${LIMITS.cssGzipKb})`);
+if (syntaxKb) console.log(`Info:   k3ui-syntax.js ${syntaxKb.toFixed(1)} kB gzip (on demand)`);
 
 if (js > LIMITS.jsGzipKb || css > LIMITS.cssGzipKb) {
   console.error('Bundle budget exceeded');

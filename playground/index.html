@@ -8873,11 +8873,28 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">2</span>
               </div>
+              <div class="demo-case">
+                <div class="demo-case-stage" style="width: 100%; max-width: 28rem">
+                  <k3-codeblock label="CSS" language="css">
+                    <pre><code>.card:hover { color: var(--k3-sys-color-primary); }</code></pre>
+                  </k3-codeblock>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
             </div>
             <ol class="variant-guide">
               <li><span class="pill-num">1</span><span class="variant-label">List · tabs · copy/download</span></li>
               <li><span class="pill-num">2</span><span class="variant-label">Expandable body</span></li>
+              <li><span class="pill-num">3</span><span class="variant-label" data-i18n="doc.codeblock.guide.material">Material theme</span></li>
             </ol>
+          </div>
+          <div class="demo-block">
+            <h2 data-i18n="doc.codeblock.section.languages">Languages</h2>
+            <p data-i18n="doc.codeblock.section.languages.blurb">Pick a language — grammars beyond the web set load on demand.</p>
+            <div class="codeblock-gallery">
+              <k3-select id="codeblock-lang" variant="outlined" label="Language" data-i18n-label="doc.codeblock.lang.label"></k3-select>
+              <k3-codeblock id="codeblock-gallery" label="PHP" language="php" collapsible></k3-codeblock>
+            </div>
           </div>
         </article>
 
@@ -9562,37 +9579,70 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
             <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
             <h1 data-i18n="doc.marquee.title">Marquee</h1>
             <p data-i18n="doc.marquee.blurb">
-              Horizontal ticker — infinite loop or classic pass · speed · pause on hover.
+              Ticker in px/s — enters from the edge or loops seamlessly · logos · pause on hover or with a button.
             </p>
             <p class="doc-intro" data-i18n="doc.marquee.intro">
-              Marquees scroll slotted content horizontally for tickers and credits. Choose infinite
-              duplication or a classic one-pass animation, tune duration or speed, and pause on hover
-              when users need to read the text.
+              Modelled on MarqueeJS: speed in pixels per second, four directions, automatic copies so the
+              loop never shows a gap, pause on hover or focus, and automatic pause off-screen or in a hidden tab.
             </p>
           </header>
           <div class="demo-block">
-            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 32rem">
-                  <k3-marquee pause-on-hover>
-                    <span>K3ui · Material 3 Expressive · Playground · </span>
-                  </k3-marquee>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">1</span>
+            <h2 data-i18n="doc.marquee.section.lab">Playground</h2>
+            <p data-i18n="doc.marquee.section.lab.blurb">Tune the options — the ticker updates live.</p>
+            <div class="marquee-lab">
+              <div class="marquee-lab-stage" id="mq-stage">
+                <k3-marquee id="mq-lab" speed="80" gap="48" direction="left" start="filled">
+                  <span data-i18n="doc.marquee.text.item1">Headline one — pause here</span>
+                  <span data-i18n="doc.marquee.text.item2">Headline two — then here</span>
+                  <span data-i18n="doc.marquee.text.item3">Headline three — and again</span>
+                  <span data-i18n="doc.marquee.text.item4">Headline four — loop</span>
+                </k3-marquee>
               </div>
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 32rem">
-                  <k3-marquee mode="classic" direction="right" duration="12">
-                    <span>Classic pass · right · </span>
-                  </k3-marquee>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">2</span>
+              <div class="marquee-lab-controls">
+                <k3-select id="mq-dir" variant="outlined" value="left" label="Direction" data-i18n-label="doc.marquee.lab.direction">
+                  <k3-menu-item value="left" data-i18n="doc.marquee.lab.dir.left">Left</k3-menu-item>
+                  <k3-menu-item value="right" data-i18n="doc.marquee.lab.dir.right">Right</k3-menu-item>
+                </k3-select>
+                <k3-switch id="mq-continuous" selected>
+                  <span data-i18n="doc.marquee.lab.continuous">Continuous</span>
+                </k3-switch>
+                <k3-select id="mq-content" variant="outlined" value="text" label="Content" data-i18n-label="doc.marquee.lab.content">
+                  <k3-menu-item value="text" data-i18n="doc.marquee.lab.content.text">Text</k3-menu-item>
+                  <k3-menu-item value="image" data-i18n="doc.marquee.lab.content.image">Image</k3-menu-item>
+                </k3-select>
+                <k3-switch id="mq-hover">
+                  <span data-i18n="doc.marquee.lab.pauseOnHover">Pause on hover</span>
+                </k3-switch>
+                <k3-switch id="mq-pause-items">
+                  <span data-i18n="doc.marquee.lab.pauseAtItems">Pause at each item</span>
+                </k3-switch>
+                <k3-switch id="mq-fade" selected>
+                  <span data-i18n="doc.marquee.lab.fade">Edge fade</span>
+                </k3-switch>
+                <k3-switch id="mq-bg-custom">
+                  <span data-i18n="doc.marquee.lab.bgCustom">Custom background</span>
+                </k3-switch>
+                <k3-text-field
+                  id="mq-bg-hex"
+                  variant="outlined"
+                  label="Background hex"
+                  data-i18n-label="doc.marquee.lab.bgHex"
+                  value="#212121"
+                  hidden
+                ></k3-text-field>
+                <k3-switch id="mq-fg-custom">
+                  <span data-i18n="doc.marquee.lab.fgCustom">Custom text color</span>
+                </k3-switch>
+                <k3-text-field
+                  id="mq-fg-hex"
+                  variant="outlined"
+                  label="Text hex"
+                  data-i18n-label="doc.marquee.lab.fgHex"
+                  value="#ffffff"
+                  hidden
+                ></k3-text-field>
               </div>
             </div>
-            <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">Infinite · pause hover</span></li>
-              <li><span class="pill-num">2</span><span class="variant-label">Classic · right</span></li>
-            </ol>
           </div>
         </article>
 

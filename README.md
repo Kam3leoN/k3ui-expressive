@@ -105,6 +105,23 @@ own `inks`), each ink gets its own rotated screen and dot sizes follow the tones
 Cross-origin images need CORS (`crossorigin="anonymous"`) — otherwise the component falls back
 to its CSS dot overlay and fires `k3-error`. Any other slotted content keeps that overlay.
 
+## Syntax highlighting
+
+`<k3-codeblock language="php">` highlights with Prism grammars (vendored, private instance —
+no `window.Prism`). Web languages ship in `k3ui.js`; the others load on demand from
+`dist/k3ui-syntax.js`, next to `k3ui.js`. In bundled apps, register that pack up front:
+
+```js
+import { syntax } from 'k3ui';
+import * as extended from 'k3ui/syntax';
+syntax.use(extended);
+```
+
+`theme="material"` (default — adaptive M3 tokens, transparent over the list surface) or
+`theme="okaidia"` (fixed Prism dark panel); override any `--k3-code-*` variable for your own
+colours. Source uses JetBrains Mono. `npm run vendor:prism` regenerates `src/syntax/vendor`
+after a Prism update.
+
 ## Development
 
 ```bash

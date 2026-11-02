@@ -3,101 +3,98 @@ import { css } from 'lit';
 export const marqueeStyles = css`
   :host {
     display: block;
+    /* Full width even as a flex item — a classic pass must cross the whole space */
+    inline-size: 100%;
+    min-inline-size: 0;
+    box-sizing: border-box;
     overflow: hidden;
     --k3-marquee-gap: 5rem;
-    --k3-marquee-duration: 20s;
+    /* Edge fade (0% to disable) */
+    --k3-marquee-fade: 8%;
+  }
+
+  :host([direction='up']),
+  :host([direction='down']) {
+    /* Vertical scrolling needs a height (MarqueeJS: containerHeight) */
+    block-size: var(--k3-marquee-height, 12rem);
   }
 
   .viewport {
+    position: relative;
     overflow: hidden;
-    width: 100%;
+    inline-size: 100%;
+    block-size: 100%;
+    /* Fade length 0 / none → no mask (full-bleed to the host edge) */
     mask-image: linear-gradient(
       to right,
       transparent,
-      #000 8%,
-      #000 92%,
+      #000 var(--k3-marquee-fade, 8%),
+      #000 calc(100% - var(--k3-marquee-fade, 8%)),
       transparent
     );
   }
 
-  .viewport[data-state='paused'] .track {
-    animation-play-state: paused;
+  .viewport[data-axis='y'] {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--k3-marquee-fade, 8%),
+      #000 calc(100% - var(--k3-marquee-fade, 8%)),
+      transparent
+    );
+  }
+
+  :host([data-fade='off']) .viewport {
+    mask-image: none;
   }
 
   .track {
     display: flex;
-    width: max-content;
+    inline-size: max-content;
     gap: var(--k3-marquee-gap);
     will-change: transform;
   }
 
-  .track--infinite {
-    animation: k3-marquee-infinite-left var(--k3-marquee-duration) linear infinite;
+  /* Right / down: copies extend backwards; the anchor offset is set in JS */
+  .viewport[data-direction='right'] .track {
+    flex-direction: row-reverse;
   }
 
-  .track--infinite[data-direction='right'] {
-    animation-name: k3-marquee-infinite-right;
+  .viewport[data-axis='y'] .track {
+    flex-direction: column;
+    inline-size: 100%;
+    block-size: max-content;
   }
 
-  .track--classic {
-    animation: k3-marquee-classic-left var(--k3-marquee-duration) linear infinite;
+  .viewport[data-direction='down'] .track {
+    flex-direction: column-reverse;
   }
 
-  .track--classic[data-direction='right'] {
-    animation-name: k3-marquee-classic-right;
-  }
-
-  .set {
+  .set,
+  .sep {
     display: flex;
     flex-shrink: 0;
     align-items: center;
     gap: var(--k3-marquee-gap);
   }
 
-  .viewport[data-pause-hover='true']:hover .track {
-    animation-play-state: paused;
+  .viewport[data-axis='y'] .set {
+    flex-direction: column;
   }
 
-  @keyframes k3-marquee-infinite-left {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(calc(-50% - var(--k3-marquee-gap) / 2));
-    }
+  .sep {
+    color: var(--k3-marquee-separator-color, currentColor);
+    opacity: 0.6;
   }
 
-  @keyframes k3-marquee-infinite-right {
-    from {
-      transform: translateX(calc(-50% - var(--k3-marquee-gap) / 2));
-    }
-    to {
-      transform: translateX(0);
-    }
+  /* Reduced motion: no movement — the original content scrolls by hand instead */
+  .viewport[data-state='reduced'] {
+    overflow: auto;
+    mask-image: none;
   }
 
-  @keyframes k3-marquee-classic-left {
-    from {
-      transform: translateX(100%);
-    }
-    to {
-      transform: translateX(-100%);
-    }
-  }
-
-  @keyframes k3-marquee-classic-right {
-    from {
-      transform: translateX(-100%);
-    }
-    to {
-      transform: translateX(100%);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .track {
-      animation: none !important;
-      transform: none !important;
-    }
+  .viewport[data-state='reduced'] .clone,
+  .viewport[data-state='reduced'] .sep {
+    display: none;
   }
 `;

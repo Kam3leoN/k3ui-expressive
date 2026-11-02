@@ -1954,6 +1954,159 @@ function applyThemePersist(): void {
   cacheAppliedTheme();
 }
 
+/** Marquee lab — live options playground. */
+let marqueeDemosWired = false;
+function wireMarqueeDemos(): void {
+  type Mq = HTMLElement & {
+    direction: string;
+    mode: string;
+    pauseOnHover: boolean;
+    pauseAtItems: boolean;
+    itemPause: number;
+    gap: number;
+    speed: number;
+    restart(): void;
+    replaceContent(items: ReadonlyArray<string | Node>): void;
+  };
+  const marquee = document.getElementById('mq-lab') as Mq | null;
+  const stage = document.getElementById('mq-stage');
+  if (!marquee || !stage || marqueeDemosWired) return;
+  marqueeDemosWired = true;
+
+  const dir = document.getElementById('mq-dir') as (HTMLElement & { value?: string }) | null;
+  const continuous = document.getElementById('mq-continuous') as (HTMLElement & { selected?: boolean }) | null;
+  const content = document.getElementById('mq-content') as (HTMLElement & { value?: string }) | null;
+  const hover = document.getElementById('mq-hover') as (HTMLElement & { selected?: boolean }) | null;
+  const pauseItems = document.getElementById('mq-pause-items') as (HTMLElement & { selected?: boolean }) | null;
+  const fade = document.getElementById('mq-fade') as (HTMLElement & { selected?: boolean }) | null;
+  const bgCustom = document.getElementById('mq-bg-custom') as (HTMLElement & { selected?: boolean }) | null;
+  const bgHex = document.getElementById('mq-bg-hex') as (HTMLElement & { value?: string; hidden?: boolean }) | null;
+  const fgCustom = document.getElementById('mq-fg-custom') as (HTMLElement & { selected?: boolean }) | null;
+  const fgHex = document.getElementById('mq-fg-hex') as (HTMLElement & { value?: string; hidden?: boolean }) | null;
+
+  const LOGOS = ['nova', 'orbit', 'pixel', 'lumen', 'vertex', 'quanta'] as const;
+
+  const textNodes = (): HTMLElement[] =>
+    ['item1', 'item2', 'item3', 'item4'].map((id) => {
+      const span = document.createElement('span');
+      span.dataset.i18n = `doc.marquee.text.${id}`;
+      span.textContent = t(span.dataset.i18n);
+      return span;
+    });
+
+  const imageNodes = (): HTMLElement[] =>
+    LOGOS.map((name) => {
+      const img = document.createElement('img');
+      img.src = `/logos/${name}.svg`;
+      img.alt = name[0]!.toUpperCase() + name.slice(1);
+      img.height = 36;
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      return img;
+    });
+
+  const normalizeHex = (raw: string): string | null => {
+    const v = raw.trim();
+    if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v)) return v;
+    if (/^([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v)) return `#${v}`;
+    return null;
+  };
+
+  const apply = (): void => {
+    const direction = dir?.value === 'right' ? 'right' : 'left';
+    const loop = continuous?.selected !== false;
+    const kind = content?.value === 'image' ? 'image' : 'text';
+    const fadeOn = fade?.selected !== false;
+    const useBgCustom = !!bgCustom?.selected;
+    const useFgCustom = !!fgCustom?.selected;
+    marquee.direction = direction;
+    marquee.mode = loop ? 'infinite' : 'classic';
+    marquee.pauseOnHover = !!hover?.selected;
+    marquee.pauseAtItems = !!pauseItems?.selected;
+    marquee.itemPause = 1.5;
+    marquee.gap = kind === 'image' ? 56 : 48;
+    marquee.speed = loop ? 80 : 110;
+    marquee.style.setProperty('--k3-marquee-fade', fadeOn ? '8%' : '0%');
+    marquee.setAttribute('data-fade', fadeOn ? 'on' : 'off');
+    stage.dataset.fade = fadeOn ? 'on' : 'off';
+    marquee.replaceContent(kind === 'image' ? imageNodes() : textNodes());
+
+    /* BG: custom + valid hex → hex; otherwise Material surface-container */
+    if (bgHex) bgHex.hidden = !useBgCustom;
+    const bgColor = useBgCustom ? normalizeHex(bgHex?.value ?? '') : null;
+    if (bgColor) {
+      stage.dataset.bg = 'custom';
+      stage.style.setProperty('--mq-lab-bg', bgColor);
+    } else {
+      stage.dataset.bg = 'material';
+      stage.style.removeProperty('--mq-lab-bg');
+    }
+
+    /* Text: custom only for text content; empty hex → Material on-surface */
+    const showFg = kind === 'text' && useFgCustom;
+    if (fgCustom) fgCustom.hidden = kind !== 'text';
+    if (fgHex) fgHex.hidden = !showFg;
+    const fgColor = showFg ? normalizeHex(fgHex?.value ?? '') : null;
+    if (fgColor) {
+      stage.dataset.fg = 'custom';
+      stage.style.setProperty('--mq-lab-fg', fgColor);
+    } else {
+      stage.dataset.fg = 'material';
+      stage.style.removeProperty('--mq-lab-fg');
+    }
+
+    marquee.restart();
+  };
+
+  dir?.addEventListener('k3-change', apply);
+  continuous?.addEventListener('k3-change', apply);
+  content?.addEventListener('k3-change', apply);
+  hover?.addEventListener('k3-change', apply);
+  pauseItems?.addEventListener('k3-change', apply);
+  fade?.addEventListener('k3-change', apply);
+  bgCustom?.addEventListener('k3-change', apply);
+  bgHex?.addEventListener('k3-change', apply);
+  bgHex?.addEventListener('k3-input', apply);
+  fgCustom?.addEventListener('k3-change', apply);
+  fgHex?.addEventListener('k3-change', apply);
+  fgHex?.addEventListener('k3-input', apply);
+  apply();
+}
+
+/** Code block gallery — one sample per language (samples + extended grammars load on demand). */
+let codeblockGalleryWired = false;
+async function wireCodeblockGallery(): Promise<void> {
+  const select = document.getElementById('codeblock-lang') as (HTMLElement & { value?: string }) | null;
+  const block = document.getElementById('codeblock-gallery') as
+    | (HTMLElement & { language: string; label: string; code: string })
+    | null;
+  if (!select || !block || codeblockGalleryWired) return;
+  codeblockGalleryWired = true;
+  const { CODE_SAMPLES } = await import('./code-samples.js');
+  select.replaceChildren(
+    ...CODE_SAMPLES.map((sample, i) => {
+      const item = document.createElement('k3-menu-item');
+      item.setAttribute('value', String(i));
+      item.textContent = sample.title;
+      return item;
+    }),
+  );
+  const show = (i: number): void => {
+    const sample = CODE_SAMPLES[i];
+    if (!sample) return;
+    block.language = sample.language;
+    block.label = sample.title;
+    block.code = sample.code;
+  };
+  select.addEventListener('k3-change', (e) => {
+    if (e.target !== select) return;
+    show(Number((e as CustomEvent<{ value?: string }>).detail?.value));
+  });
+  const start = Math.max(0, CODE_SAMPLES.findIndex((sample) => sample.language === 'php'));
+  select.value = String(start);
+  show(start);
+}
+
 /** Refresh the active Color family page after theme seed/variant change. */
 function refreshColorDocs(seed: string): void {
   const page = articlePageId(currentPageId());
@@ -2209,12 +2362,20 @@ async function boot(): Promise<void> {
         ),
       ];
       if (tags.length) await registry.registerAll(tags);
-      if (articleId === 'quick-start' || page.querySelector('pre, code')) {
+      /* JetBrains Mono — needed for k3-codeblock + any light-DOM pre/code */
+      if (
+        articleId === 'codeblock' ||
+        articleId === 'quick-start' ||
+        tags.includes('k3-codeblock') ||
+        page.querySelector('pre, code')
+      ) {
         void import('../src/fonts/fonts-code.css');
       }
       if (articleId === 'shapes') await fillShapes();
       if (articleId === 'lazy') wireLazyDemos();
       if (articleId === 'material-symbols') await mountMaterialSymbols();
+      if (articleId === 'codeblock') void wireCodeblockGallery();
+      if (articleId === 'marquee') wireMarqueeDemos();
       if (
         articleId === 'spacing' ||
         articleId === 'elevation' ||

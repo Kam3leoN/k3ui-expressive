@@ -731,7 +731,28 @@ document.getElementById("dlg")?.show?.();`,
     components: ['k3-codeblock'],
     html: `<k3-codeblock label="Usage" language="html">
 <pre><code>&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
-</k3-codeblock>`,
+</k3-codeblock>
+
+<!-- Any Prism id or alias: php, sql, sqlite, mysql, c++, c#, python, go, nginx, react… -->
+<k3-codeblock label="PHP" language="php" collapsible>
+<pre><code>&lt;?php echo "Bonjour $name"; ?&gt;</code></pre>
+</k3-codeblock>
+
+<!-- Token colours from the M3 theme instead of Okaidia -->
+<k3-codeblock language="css" code=".a { color: red; }"></k3-codeblock>
+<k3-codeblock language="js" theme="okaidia" code="const x = 1;"></k3-codeblock>`,
+    css: `/* Your own token theme: override any --k3-code-* */
+k3-codeblock {
+  --k3-code-bg: #1e1e2e;
+  --k3-code-keyword: #cba6f7;
+  --k3-code-string: #a6e3a1;
+}`,
+    jsExtra: `import { syntax } from 'k3ui';
+syntax.highlight('SELECT 1', 'mysql'); // escaped HTML with token spans
+
+// Bundled apps: register the extended pack up front (CDN builds fetch it on demand)
+import * as extended from 'k3ui/syntax';
+syntax.use(extended);`,
   },
   carousel: {
     components: ['k3-carousel', 'k3-carousel-item'],
@@ -804,9 +825,38 @@ end?.addEventListener("k3-change", () => {
   },
   marquee: {
     components: ['k3-marquee'],
-    html: `<k3-marquee pause-on-hover>
-  <span>K3ui · Material 3 Expressive · Playground demo · </span>
+    html: `<!-- Enters from the right edge, then loops -->
+<k3-marquee start="edge" speed="90">
+  <span>Breaking · k3ui marquee</span>
+</k3-marquee>
+
+<!-- Covered from the first frame, seamless loop -->
+<k3-marquee speed="70" gap="40" separator="•">
+  <span>Seamless infinite loop</span>
+</k3-marquee>
+
+<!-- Logos -->
+<k3-marquee speed="50" gap="56" pause-on-hover aria-label="Partners">
+  <img src="/logos/nova.svg" alt="Nova" height="36" />
+  <img src="/logos/orbit.svg" alt="Orbit" height="36" />
+</k3-marquee>
+
+<!-- Classic pass, vertical -->
+<k3-marquee mode="classic" direction="up" style="--k3-marquee-height: 10rem">
+  <p>Credits…</p>
+</k3-marquee>
+
+<!-- Pause at each item (start hits the near edge) -->
+<k3-marquee pause-at-items item-pause="1.5" speed="70" gap="64">
+  <span>Headline one</span>
+  <span>Headline two</span>
+  <span>Headline three</span>
 </k3-marquee>`,
+    jsExtra: `const marquee = document.querySelector("k3-marquee");
+pauseButton.addEventListener("click", () => marquee.toggle());
+marquee.pauseOnHover = false;      // hover no longer pauses
+marquee.speed = 120;               // px/s, applied live
+marquee.addContent("New item");    // copies refresh automatically`,
   },
   confetti: {
     components: ['k3-confetti', 'k3-button'],

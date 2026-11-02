@@ -1,0 +1,51 @@
+/** Code samples for the k3-codeblock language gallery (playground only, lazy-loaded). */
+export interface CodeSample {
+  title: string;
+  language: string;
+  code: string;
+}
+
+export const CODE_SAMPLES: readonly CodeSample[] = [
+  { title: 'HTML', language: 'html', code: `<!doctype html>\n<html lang="fr">\n  <body>\n    <!-- Bouton M3 -->\n    <k3-button variant="filled" onclick="save()">Enregistrer</k3-button>\n  </body>\n</html>` },
+  { title: 'XML', language: 'xml', code: `<?xml version="1.0" encoding="UTF-8"?>\n<catalog>\n  <book id="bk101" lang="fr">\n    <title>Sérigraphie &amp; trames</title>\n    <price currency="EUR">29.90</price>\n  </book>\n</catalog>` },
+  { title: 'PHP', language: 'php', code: `<?php\ndeclare(strict_types=1);\n\nfunction greet(string $name): string {\n    return "Bonjour {$name} !";\n}\n\necho greet($_GET['name'] ?? 'monde');` },
+  { title: 'CSS', language: 'css', code: `@media (prefers-color-scheme: dark) {\n  :root { --k3-code-bg: #272822; }\n}\n.card:hover > .title::after {\n  content: "→";\n  color: rgb(102 217 239 / 0.9);\n}` },
+  { title: 'SCSS', language: 'scss', code: `$radius: 1rem;\n@mixin elevated($level: 1) {\n  box-shadow: 0 #{$level}px #{$level * 3}px rgb(0 0 0 / 0.2);\n}\n.card {\n  border-radius: $radius;\n  &:hover { @include elevated(3); }\n}` },
+  { title: 'Sass', language: 'sass', code: `$accent: #e8301f\n=pill($pad: .5rem)\n  border-radius: 999px\n  padding: $pad\n.badge\n  +pill\n  color: $accent` },
+  { title: 'JavaScript', language: 'js', code: `import { K3UI } from 'k3ui';\n\nconst api = await K3UI.init({ components: ['k3-button'] });\n// Écoute les clics\ndocument.addEventListener('k3-click', (e) => {\n  console.log(\`clic sur \${e.target.id}\`, /btn-\\d+/.test(e.target.id));\n});` },
+  { title: 'TypeScript', language: 'ts', code: `interface User {\n  id: number;\n  name: string;\n  roles?: readonly Role[];\n}\n\nexport async function load<T extends User>(id: T['id']): Promise<T | null> {\n  const res = await fetch(\`/api/users/\${id}\`);\n  return res.ok ? ((await res.json()) as T) : null;\n}` },
+  { title: 'React (JSX)', language: 'react', code: `export function Counter({ start = 0 }) {\n  const [count, setCount] = useState(start);\n  return (\n    <k3-button variant="tonal" onClick={() => setCount(count + 1)}>\n      Clics : {count}\n    </k3-button>\n  );\n}` },
+  { title: 'React (TSX)', language: 'tsx', code: `type Props = { items: string[] };\n\nexport const List = ({ items }: Props) => (\n  <ul className="list">\n    {items.map((item) => <li key={item}>{item}</li>)}\n  </ul>\n);` },
+  { title: 'JSON', language: 'json', code: `{\n  "name": "k3ui",\n  "version": "0.1.0",\n  "private": false,\n  "keywords": ["material", "web-components"],\n  "engines": { "node": ">=20" }\n}` },
+  { title: 'SQLite', language: 'sqlite', code: `CREATE TABLE IF NOT EXISTS notes (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  body TEXT NOT NULL,\n  created_at TEXT DEFAULT CURRENT_TIMESTAMP\n);\nSELECT id, body FROM notes WHERE body LIKE '%k3%' ORDER BY created_at DESC LIMIT 10;` },
+  { title: 'MySQL', language: 'mysql', code: `-- Commandes du mois\nSELECT c.name, COUNT(o.id) AS orders, SUM(o.total) AS revenue\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)\nGROUP BY c.id\nHAVING revenue > 100;` },
+  { title: 'MongoDB', language: 'mongodb', code: `db.orders.aggregate([\n  { $match: { status: "paid", total: { $gte: 50 } } },\n  { $group: { _id: "$customerId", spent: { $sum: "$total" } } },\n  { $sort: { spent: -1 } },\n  { $limit: 5 }\n]);` },
+  { title: 'C', language: 'c', code: `#include <stdio.h>\n\nint main(int argc, char *argv[]) {\n    for (int i = 0; i < argc; i++) {\n        printf("%d: %s\\n", i, argv[i]);\n    }\n    return 0;\n}` },
+  { title: 'C++', language: 'c++', code: `#include <vector>\n#include <algorithm>\n\ntemplate <typename T>\nT max_of(const std::vector<T>& v) {\n    return *std::max_element(v.begin(), v.end());\n}\n\nauto best = max_of<int>({3, 7, 1});` },
+  { title: 'C#', language: 'c#', code: `public record User(int Id, string Name);\n\npublic class UserService\n{\n    private readonly List<User> _users = new();\n\n    public User? Find(int id) => _users.FirstOrDefault(u => u.Id == id);\n}` },
+  { title: 'Go', language: 'go', code: `package main\n\nimport "fmt"\n\nfunc main() {\n\tch := make(chan int, 3)\n\tgo func() { ch <- 42 }()\n\tfmt.Println("reçu :", <-ch)\n}` },
+  { title: 'Python', language: 'python', code: `from dataclasses import dataclass\n\n@dataclass\nclass Point:\n    x: float\n    y: float\n\n    def norm(self) -> float:\n        return (self.x ** 2 + self.y ** 2) ** 0.5  # distance` },
+  { title: 'Lua', language: 'lua', code: `local Player = {}\nPlayer.__index = Player\n\nfunction Player.new(name)\n  return setmetatable({ name = name, hp = 100 }, Player)\nend\n\n-- dégâts\nfunction Player:hit(n) self.hp = self.hp - n end` },
+  { title: 'Java', language: 'java', code: `public final class Greeter {\n    private final String name;\n\n    public Greeter(String name) { this.name = name; }\n\n    @Override\n    public String toString() { return "Bonjour " + name; }\n}` },
+  { title: 'Kotlin', language: 'kotlin', code: `data class User(val id: Int, val name: String)\n\nfun main() {\n    val users = listOf(User(1, "Ana"), User(2, "Léo"))\n    users.filter { it.id > 1 }.forEach { println(it.name) }\n}` },
+  { title: 'Rust', language: 'rust', code: `#[derive(Debug)]\nstruct Point { x: i32, y: i32 }\n\nfn main() {\n    let p = Point { x: 1, y: 2 };\n    println!("{:?}", p);\n}` },
+  { title: 'Ruby', language: 'ruby', code: `class Greeter\n  def initialize(name) = @name = name\n\n  def greet\n    "Bonjour #{@name}!"\n  end\nend\n\nputs Greeter.new("monde").greet` },
+  { title: 'Swift', language: 'swift', code: `struct User: Identifiable {\n    let id: Int\n    var name: String\n}\n\nlet users = [User(id: 1, name: "Ana")]\nfor user in users where user.id > 0 {\n    print("Bonjour \\(user.name)")\n}` },
+  { title: 'Git', language: 'git', code: `$ git status\nOn branch main\nChanges to be committed:\n\tmodified:   src/syntax/index.ts\n$ git commit -m "feat(syntax): Prism grammars"\n+ new line\n- old line` },
+  { title: 'Diff', language: 'diff', code: `--- a/codeblock.ts\n+++ b/codeblock.ts\n@@ -1,3 +1,3 @@\n-import { old } from './old.js';\n+import { syntax } from '../../syntax/index.js';\n unchanged line` },
+  { title: 'Bash', language: 'bash', code: `#!/usr/bin/env bash\nset -euo pipefail\n\nfor file in dist/*.js; do\n  size=$(gzip -c "$file" | wc -c)\n  echo "$file: $((size / 1024)) KiB"\ndone` },
+  { title: 'Batch (.bat)', language: 'bat', code: `@echo off\nsetlocal enabledelayedexpansion\nset COUNT=0\nfor %%f in (*.txt) do (\n  set /a COUNT+=1\n  echo !COUNT!: %%f\n)\nif %COUNT% gtr 0 (echo Fini) else (echo Rien)` },
+  { title: 'PowerShell', language: 'powershell', code: `$files = Get-ChildItem -Path .\\dist -Filter *.js\nforeach ($f in $files) {\n    if ($f.Length -gt 100kb) {\n        Write-Host "$($f.Name) : $([math]::Round($f.Length / 1kb)) KiB"\n    }\n}` },
+  { title: 'AutoHotkey', language: 'autohotkey', code: `#Requires AutoHotkey v2.0\n; Ctrl+Alt+K ouvre k3ui\n^!k::\n{\n    Run "https://k3ui.dev"\n    MsgBox "Ouvert !", "k3ui", "T2"\n}` },
+  { title: 'AsciiDoc', language: 'asciidoc', code: `= Guide k3ui\n:toc: left\n\n== Installation\n\n[source,bash]\n----\nnpm i k3ui\n----\n\nNOTE: *Material 3 Expressive* par défaut.` },
+  { title: 'Markdown', language: 'markdown', code: `# k3ui\n\n> Composants **Material 3 Expressive**.\n\n- [x] Coloration syntaxique\n- [ ] Thèmes supplémentaires\n\n\`npm i k3ui\` puis [la doc](https://example.com).` },
+  { title: 'HTTP', language: 'http', code: `POST /api/notes HTTP/1.1\nHost: api.example.com\nContent-Type: application/json\nAuthorization: Bearer eyJhbGciOi...\n\n{"body": "Bonjour"}` },
+  { title: 'nginx', language: 'nginx', code: `server {\n    listen 443 ssl http2;\n    server_name k3ui.dev;\n\n    location /assets/ {\n        expires 1y;\n        add_header Cache-Control "public, immutable";\n    }\n}` },
+  { title: 'YAML', language: 'yaml', code: `name: CI\non: [push, pull_request]\njobs:\n  check:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: npm ci && npm run check` },
+  { title: 'TOML', language: 'toml', code: `[package]\nname = "k3ui"\nversion = "0.1.0"\n\n[dependencies]\nserde = { version = "1.0", features = ["derive"] }` },
+  { title: 'INI', language: 'ini', code: `; Configuration\n[server]\nhost = 127.0.0.1\nport = 8080\n\n[cache]\nenabled = true` },
+  { title: 'Dockerfile', language: 'docker', code: `FROM node:22-alpine AS build\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM nginx:alpine\nCOPY --from=build /app/dist /usr/share/nginx/html` },
+  { title: 'GraphQL', language: 'graphql', code: `query User($id: ID!) {\n  user(id: $id) {\n    name\n    posts(first: 3) { edges { node { title } } }\n  }\n}` },
+  { title: 'Regex', language: 'regex', code: `^(?<user>[\\w.+-]+)@(?<domain>[\\w-]+\\.[a-z]{2,})$` },
+  { title: 'ASCII (texte brut)', language: 'ascii', code: `+--------+      +---------+\n| k3ui   | ---> | Prism   |\n| .js    |      | (privé) |\n+--------+      +---------+` },
+];

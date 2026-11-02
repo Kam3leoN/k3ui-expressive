@@ -9,12 +9,20 @@ import '../feedback/tooltip.js';
 import '../navigation/tabs.js';
 import './list.js';
 import './list-item.js';
-import { highlightCode, languageFromClassName, resolveCodeLanguage } from './codeblock-highlighter.js';
+import {
+  highlightCode,
+  loadCodeLanguage,
+  rawLanguageFromClassName,
+  resolveCodeLanguage,
+} from './codeblock-highlighter.js';
 import { CodeBlockSpecs } from './codeblock.specs.js';
 import { codeblockStyles } from './codeblock.styles.js';
 
 export { CodeBlockSpecs } from './codeblock.specs.js';
-export { highlightCode, resolveCodeLanguage } from './codeblock-highlighter.js';
+export { highlightCode, resolveCodeLanguage, loadCodeLanguage } from './codeblock-highlighter.js';
+
+/** Token colour theme — `material` (M3 adaptive, default) or `okaidia` (fixed Prism dark). */
+export type CodeBlockTheme = 'material' | 'okaidia';
 
 type TipHost = HTMLElement & {
   content: string;
@@ -44,10 +52,14 @@ export class K3CodeBlock extends K3Element {
     CodeBlockSpecs.showDownload;
   /** Raw source when not using the default slot. */
   @property() code = '';
+  /** Token colours: `okaidia` (default) · `material` (follows the M3 theme). */
+  @property({ reflect: true }) theme: CodeBlockTheme = 'okaidia';
 
   @state() private contentExpanded = true;
   @state() private highlighted = '';
   @state() private resolvedLang = 'plain';
+  /** Language as written by the author (`html`, `c++`…) — kept as a class next to the canonical one. */
+  @state() private requestedLang = 'plain';
   @state() private sourceText = '';
 
   private tipTimers = new Map<string, number>();
@@ -113,18 +125,33 @@ export class K3CodeBlock extends K3Element {
       if (slotCode) {
         text = slotCode.textContent ?? '';
         if (!lang.trim()) {
-          lang = languageFromClassName(slotCode.className);
+          lang = rawLanguageFromClassName(slotCode.className);
         }
       }
     }
 
     this.sourceText = text;
-    this.resolvedLang = resolveCodeLanguage(lang.trim() || 'plain');
+    this.requestedLang = (lang.trim() || 'plain').toLowerCase();
+    this.resolvedLang = resolveCodeLanguage(this.requestedLang);
     this.refreshHighlight();
+  }
+
+  /** `language-html language-markup` — the author's name and Prism's canonical id. */
+  private languageClass(): string {
+    const resolved = this.resolvedLang || 'plain';
+    const requested = this.requestedLang || resolved;
+    return requested === resolved ? `language-${resolved}` : `language-${requested} language-${resolved}`;
   }
 
   private refreshHighlight(): void {
     this.highlighted = highlightCode(this.sourceText, this.resolvedLang);
+    /* Grammar in the extended pack: show plain text now, highlight once loaded */
+    const lang = this.resolvedLang;
+    void loadCodeLanguage(lang).then((ready) => {
+      if (!ready || lang !== this.resolvedLang) return;
+      const next = highlightCode(this.sourceText, lang);
+      if (next !== this.highlighted) this.highlighted = next;
+    });
   }
 
   private titleLabel(): string {
@@ -208,7 +235,7 @@ export class K3CodeBlock extends K3Element {
   private renderCode() {
     return html`
       <div class="code k3-scroll k3-scroll--x" part="content">
-        <pre><code class="language-${this.resolvedLang || 'plain'}">${unsafeHTML(
+        <pre><code class=${this.languageClass()}>${unsafeHTML(
           this.highlighted,
         )}</code></pre>
       </div>
