@@ -729,18 +729,19 @@ document.getElementById("dlg")?.show?.();`,
   },
   codeblock: {
     components: ['k3-codeblock'],
-    html: `<k3-codeblock label="Usage" language="html">
-<pre><code>&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
+    html: `<k3-codeblock>
+  <pre data-label="HTML"><code class="language-html">&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
+  <pre data-label="TypeScript"><code class="language-typescript">import { K3UI } from "k3ui";</code></pre>
+  <pre data-label="CSS"><code class="language-css">.a { color: red; }</code></pre>
 </k3-codeblock>
 
-<!-- Any Prism id or alias: php, sql, sqlite, mysql, c++, c#, python, go, nginx, react… -->
-<k3-codeblock label="PHP" language="php" collapsible>
+<!-- Single sample -->
+<k3-codeblock label="PHP" language="php">
 <pre><code>&lt;?php echo "Bonjour $name"; ?&gt;</code></pre>
 </k3-codeblock>
 
-<!-- Token colours from the M3 theme instead of Okaidia -->
-<k3-codeblock language="css" code=".a { color: red; }"></k3-codeblock>
-<k3-codeblock language="js" theme="okaidia" code="const x = 1;"></k3-codeblock>`,
+<!-- theme="material" = M3 adaptive · default = dark panel -->
+<k3-codeblock language="js" theme="material" code="const x = 1;"></k3-codeblock>`,
     css: `/* Your own token theme: override any --k3-code-* */
 k3-codeblock {
   --k3-code-bg: #1e1e2e;
@@ -748,11 +749,7 @@ k3-codeblock {
   --k3-code-string: #a6e3a1;
 }`,
     jsExtra: `import { syntax } from 'k3ui';
-syntax.highlight('SELECT 1', 'mysql'); // escaped HTML with token spans
-
-// Bundled apps: register the extended pack up front (CDN builds fetch it on demand)
-import * as extended from 'k3ui/syntax';
-syntax.use(extended);`,
+syntax.highlight('SELECT 1', 'mysql'); // escaped HTML with token spans`,
   },
   carousel: {
     components: ['k3-carousel', 'k3-carousel-item'],

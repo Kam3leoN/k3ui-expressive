@@ -40,6 +40,29 @@ export const SPACING_TOKENS = [
   { token: 'space900', css: '--k3-sys-spacing-space900', dp: 72 },
 ] as const;
 
+/**
+ * Layout breakpoints (mobile-first min-widths) — same as `_layout.scss` /
+ * helper prefixes `sm` · `md` · `lg` · `xl`.
+ */
+export const LAYOUT_BREAKPOINTS = [
+  { name: 'xs', minPx: 0, maxPx: 599, columns: 4, label: 'Compact' },
+  { name: 'sm', minPx: 600, maxPx: 904, columns: 8, label: 'Medium' },
+  { name: 'md', minPx: 905, maxPx: 1239, columns: 12, label: 'Expanded' },
+  { name: 'lg', minPx: 1240, maxPx: 1439, columns: 12, label: 'Large' },
+  { name: 'xl', minPx: 1440, maxPx: null, columns: 12, label: 'Extra-large' },
+] as const;
+
+/** Spacing step numbers used by base `.k3-p-*` / `.k3-m-*` / `.k3-gap-*` helpers. */
+export const HELPER_SPACE_STEPS = [
+  0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 400, 450, 500, 600, 700,
+  800, 900,
+] as const;
+
+/** Compact steps for responsive `.k3-{sm|md|lg|xl}-p/m/gap-*` helpers. */
+export const HELPER_SPACE_STEPS_RESPONSIVE = [
+  0, 50, 100, 150, 200, 300, 400, 600,
+] as const;
+
 export const ELEVATION_TOKENS = [
   { level: 0, css: '--k3-sys-elevation-level0' },
   { level: 1, css: '--k3-sys-elevation-level1' },

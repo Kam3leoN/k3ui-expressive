@@ -2139,7 +2139,7 @@ function wireMarqueeDemos(): void {
   apply();
 }
 
-/** Code block gallery — one sample per language (samples + extended grammars load on demand). */
+/** Code block gallery — one sample per language. */
 let codeblockGalleryWired = false;
 async function wireCodeblockGallery(): Promise<void> {
   const select = document.getElementById('codeblock-lang') as (HTMLElement & { value?: string }) | null;

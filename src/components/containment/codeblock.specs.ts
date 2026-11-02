@@ -18,8 +18,6 @@ export const CodeBlockSpecs = {
     downloadLabel: 'Download code',
     copiedLabel: 'Copied',
     downloadedLabel: 'Downloaded',
-    expandMore: 'Show more',
-    expandLess: 'Show less',
   },
   extensionByLang: {
     html: 'html',

@@ -72,4 +72,19 @@ describe('k3-codeblock', () => {
     expect(code?.className).toContain('language-html');
     expect(code?.textContent).toContain('<div>');
   });
+
+  it('switches slotted samples via tabs', async () => {
+    host.innerHTML = `<k3-codeblock>
+      <pre data-label="HTML"><code class="language-html">&lt;b&gt;</code></pre>
+      <pre data-label="CSS"><code class="language-css">.a{}</code></pre>
+    </k3-codeblock>`;
+    const el = host.querySelector('k3-codeblock') as K3CodeBlock;
+    await el.updateComplete;
+    await el.updateComplete;
+    expect(el.shadowRoot!.querySelector('code')?.textContent).toContain('<b>');
+    el.index = 1;
+    await el.updateComplete;
+    await el.updateComplete;
+    expect(el.shadowRoot!.querySelector('code')?.textContent).toContain('.a{}');
+  });
 });

@@ -1,7 +1,6 @@
 /**
- * Syntax highlighting for `k3-codeblock` — delegates to the k3ui syntax engine
- * (private Prism instance, see src/syntax). Kept as a thin adapter so the
- * public helpers keep their names.
+ * Syntax highlighting for `k3-codeblock` — thin adapter over the custom
+ * highlighter in `src/syntax` (no Prism).
  */
 import { syntax } from '../../syntax/index.js';
 
@@ -21,12 +20,12 @@ export function languageFromClassName(className: string): string {
   return resolveCodeLanguage(rawLanguageFromClassName(className));
 }
 
-/** Highlighted, escaped HTML — plain text until the language's grammar is loaded. */
+/** Highlighted, escaped HTML — plain text for unknown languages. */
 export function highlightCode(code: string, language: string): string {
   return syntax.highlight(code, language);
 }
 
-/** Load the grammar for `language` if needed (extended pack). */
+/** Kept for API compat — grammars are sync / built-in. */
 export function loadCodeLanguage(language: string): Promise<boolean> {
   return syntax.load(language);
 }

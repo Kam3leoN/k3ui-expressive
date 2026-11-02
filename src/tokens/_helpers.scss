@@ -1,0 +1,404 @@
+/* Layout / spacing / visibility / flex helpers
+ *
+ * Mobile-first. Breakpoints match the M3 layout grid:
+ *   sm ≥600 · md ≥905 · lg ≥1240 · xl ≥1440
+ *
+ * Spacing steps map to --k3-sys-spacing-space{N}.
+ * Padding / margin use logical properties (inline / block / start / end).
+ * Full step scale at base; responsive spacing uses a compact subset.
+ */
+
+$k3-space-steps: 0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 400, 450, 500,
+  600, 700, 800, 900;
+
+/* Common steps for sm/md/lg/xl variants — keeps CSS lean */
+$k3-space-steps-responsive: 0, 50, 100, 150, 200, 300, 400, 600;
+
+$k3-breakpoints: (
+  'sm': 600px,
+  'md': 905px,
+  'lg': 1240px,
+  'xl': 1440px,
+);
+
+@function k3-space-var($step) {
+  @return var(--k3-sys-spacing-space#{$step});
+}
+
+@mixin k3-display-utils($infix: '') {
+  $p: '';
+  @if $infix != '' {
+    $p: '#{$infix}-';
+  }
+
+  .k3-#{$p}hidden {
+    display: none !important;
+  }
+  .k3-#{$p}block {
+    display: block !important;
+  }
+  .k3-#{$p}inline-block {
+    display: inline-block !important;
+  }
+  .k3-#{$p}inline {
+    display: inline !important;
+  }
+  .k3-#{$p}flex {
+    display: flex !important;
+  }
+  .k3-#{$p}inline-flex {
+    display: inline-flex !important;
+  }
+  .k3-#{$p}grid {
+    display: grid !important;
+  }
+  .k3-#{$p}contents {
+    display: contents !important;
+  }
+}
+
+@mixin k3-flex-utils($infix: '', $compact: false) {
+  $p: '';
+  @if $infix != '' {
+    $p: '#{$infix}-';
+  }
+
+  .k3-#{$p}flex-row {
+    flex-direction: row;
+  }
+  .k3-#{$p}flex-row-reverse {
+    flex-direction: row-reverse;
+  }
+  .k3-#{$p}flex-col {
+    flex-direction: column;
+  }
+  .k3-#{$p}flex-col-reverse {
+    flex-direction: column-reverse;
+  }
+
+  .k3-#{$p}flex-wrap {
+    flex-wrap: wrap;
+  }
+  .k3-#{$p}flex-nowrap {
+    flex-wrap: nowrap;
+  }
+  .k3-#{$p}flex-wrap-reverse {
+    flex-wrap: wrap-reverse;
+  }
+
+  .k3-#{$p}justify-start {
+    justify-content: flex-start;
+  }
+  .k3-#{$p}justify-end {
+    justify-content: flex-end;
+  }
+  .k3-#{$p}justify-center {
+    justify-content: center;
+  }
+  .k3-#{$p}justify-between {
+    justify-content: space-between;
+  }
+  .k3-#{$p}justify-around {
+    justify-content: space-around;
+  }
+  .k3-#{$p}justify-evenly {
+    justify-content: space-evenly;
+  }
+
+  .k3-#{$p}items-start {
+    align-items: flex-start;
+  }
+  .k3-#{$p}items-end {
+    align-items: flex-end;
+  }
+  .k3-#{$p}items-center {
+    align-items: center;
+  }
+  .k3-#{$p}items-baseline {
+    align-items: baseline;
+  }
+  .k3-#{$p}items-stretch {
+    align-items: stretch;
+  }
+
+  @if not $compact {
+    .k3-#{$p}justify-stretch {
+      justify-content: stretch;
+    }
+
+    .k3-#{$p}content-start {
+      align-content: flex-start;
+    }
+    .k3-#{$p}content-end {
+      align-content: flex-end;
+    }
+    .k3-#{$p}content-center {
+      align-content: center;
+    }
+    .k3-#{$p}content-between {
+      align-content: space-between;
+    }
+    .k3-#{$p}content-around {
+      align-content: space-around;
+    }
+    .k3-#{$p}content-evenly {
+      align-content: space-evenly;
+    }
+    .k3-#{$p}content-stretch {
+      align-content: stretch;
+    }
+
+    .k3-#{$p}self-auto {
+      align-self: auto;
+    }
+    .k3-#{$p}self-start {
+      align-self: flex-start;
+    }
+    .k3-#{$p}self-end {
+      align-self: flex-end;
+    }
+    .k3-#{$p}self-center {
+      align-self: center;
+    }
+    .k3-#{$p}self-stretch {
+      align-self: stretch;
+    }
+    .k3-#{$p}self-baseline {
+      align-self: baseline;
+    }
+  }
+
+  .k3-#{$p}flex-1 {
+    flex: 1 1 0%;
+  }
+  .k3-#{$p}flex-auto {
+    flex: 1 1 auto;
+  }
+  .k3-#{$p}flex-initial {
+    flex: 0 1 auto;
+  }
+  .k3-#{$p}flex-none {
+    flex: none;
+  }
+  .k3-#{$p}grow {
+    flex-grow: 1;
+  }
+  .k3-#{$p}grow-0 {
+    flex-grow: 0;
+  }
+  .k3-#{$p}shrink {
+    flex-shrink: 1;
+  }
+  .k3-#{$p}shrink-0 {
+    flex-shrink: 0;
+  }
+
+  .k3-#{$p}flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@mixin k3-spacing-utils($infix: '', $steps: $k3-space-steps, $physical: true) {
+  $p: '';
+  @if $infix != '' {
+    $p: '#{$infix}-';
+  }
+
+  @each $step in $steps {
+    $v: k3-space-var($step);
+
+    .k3-#{$p}p-#{$step} {
+      padding: $v;
+    }
+    .k3-#{$p}pt-#{$step} {
+      padding-block-start: $v;
+    }
+    .k3-#{$p}pb-#{$step} {
+      padding-block-end: $v;
+    }
+    .k3-#{$p}ps-#{$step} {
+      padding-inline-start: $v;
+    }
+    .k3-#{$p}pe-#{$step} {
+      padding-inline-end: $v;
+    }
+    .k3-#{$p}px-#{$step} {
+      padding-inline: $v;
+    }
+    .k3-#{$p}py-#{$step} {
+      padding-block: $v;
+    }
+
+    .k3-#{$p}m-#{$step} {
+      margin: $v;
+    }
+    .k3-#{$p}mt-#{$step} {
+      margin-block-start: $v;
+    }
+    .k3-#{$p}mb-#{$step} {
+      margin-block-end: $v;
+    }
+    .k3-#{$p}ms-#{$step} {
+      margin-inline-start: $v;
+    }
+    .k3-#{$p}me-#{$step} {
+      margin-inline-end: $v;
+    }
+    .k3-#{$p}mx-#{$step} {
+      margin-inline: $v;
+    }
+    .k3-#{$p}my-#{$step} {
+      margin-block: $v;
+    }
+
+    .k3-#{$p}gap-#{$step} {
+      gap: $v;
+    }
+    .k3-#{$p}gap-x-#{$step} {
+      column-gap: $v;
+    }
+    .k3-#{$p}gap-y-#{$step} {
+      row-gap: $v;
+    }
+
+    @if $physical {
+      .k3-#{$p}pl-#{$step} {
+        padding-left: $v;
+      }
+      .k3-#{$p}pr-#{$step} {
+        padding-right: $v;
+      }
+      .k3-#{$p}ml-#{$step} {
+        margin-left: $v;
+      }
+      .k3-#{$p}mr-#{$step} {
+        margin-right: $v;
+      }
+    }
+  }
+
+  .k3-#{$p}m-auto {
+    margin: auto;
+  }
+  .k3-#{$p}mt-auto {
+    margin-block-start: auto;
+  }
+  .k3-#{$p}mb-auto {
+    margin-block-end: auto;
+  }
+  .k3-#{$p}ms-auto {
+    margin-inline-start: auto;
+  }
+  .k3-#{$p}me-auto {
+    margin-inline-end: auto;
+  }
+  .k3-#{$p}mx-auto {
+    margin-inline: auto;
+  }
+  .k3-#{$p}my-auto {
+    margin-block: auto;
+  }
+
+  @if $physical {
+    .k3-#{$p}ml-auto {
+      margin-left: auto;
+    }
+    .k3-#{$p}mr-auto {
+      margin-right: auto;
+    }
+  }
+}
+
+@mixin k3-visibility-utils {
+  .k3-invisible {
+    visibility: hidden !important;
+  }
+  .k3-visible {
+    visibility: visible !important;
+  }
+
+  /* Visually hidden — remains available to assistive tech */
+  .k3-sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .k3-sr-only-focusable:focus,
+  .k3-sr-only-focusable:focus-within {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: inherit !important;
+    margin: inherit !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: inherit !important;
+  }
+}
+
+/* Breakpoint-only display (visible solely inside that band) */
+@mixin k3-breakpoint-only {
+  .k3-xs-only,
+  .k3-sm-only,
+  .k3-md-only,
+  .k3-lg-only,
+  .k3-xl-only {
+    display: none !important;
+  }
+
+  @media (max-width: 599.98px) {
+    .k3-xs-only {
+      display: block !important;
+    }
+  }
+
+  @media (min-width: 600px) and (max-width: 904.98px) {
+    .k3-sm-only {
+      display: block !important;
+    }
+  }
+
+  @media (min-width: 905px) and (max-width: 1239.98px) {
+    .k3-md-only {
+      display: block !important;
+    }
+  }
+
+  @media (min-width: 1240px) and (max-width: 1439.98px) {
+    .k3-lg-only {
+      display: block !important;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .k3-xl-only {
+      display: block !important;
+    }
+  }
+}
+
+/* Emit all helpers into the current CSS context (call inside @layer utilities) */
+@mixin emit {
+  @include k3-display-utils();
+  @include k3-flex-utils();
+  @include k3-spacing-utils();
+  @include k3-visibility-utils;
+  @include k3-breakpoint-only;
+
+  @each $name, $width in $k3-breakpoints {
+    @media (min-width: $width) {
+      @include k3-display-utils($name);
+      @include k3-flex-utils($name, true);
+      @include k3-spacing-utils($name, $k3-space-steps-responsive, false);
+    }
+  }
+}

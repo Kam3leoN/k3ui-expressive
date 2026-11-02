@@ -187,7 +187,7 @@ export class K3Tooltip extends K3Element {
           color-mix(in srgb, var(--k3-sys-color-inverse-on-surface) 20%, transparent);
         font-size: var(--k3-sys-typescale-body-small-size, 0.75rem);
         line-height: var(--k3-sys-typescale-body-small-line-height, 1rem);
-        font-weight: var(--k3-sys-typescale-body-small-weight, 400);
+        font-weight: calc(var(--k3-sys-typescale-body-small-weight, 400) + 100);
         white-space: nowrap;
       }
 
@@ -218,7 +218,7 @@ export class K3Tooltip extends K3Element {
         color: var(--k3-sys-color-on-surface);
         font-size: var(--k3-sys-typescale-title-medium-size, 1rem);
         line-height: var(--k3-sys-typescale-title-medium-line-height, 1.5rem);
-        font-weight: var(--k3-sys-typescale-title-medium-weight, 500);
+        font-weight: calc(var(--k3-sys-typescale-title-medium-weight, 500) + 100);
       }
       .tip.rich .headline:not(.has) {
         display: none;
@@ -227,7 +227,7 @@ export class K3Tooltip extends K3Element {
         margin: 0;
         font-size: var(--k3-sys-typescale-body-large-size, 1rem);
         line-height: var(--k3-sys-typescale-body-large-line-height, 1.5rem);
-        font-weight: var(--k3-sys-typescale-body-large-weight, 400);
+        font-weight: calc(var(--k3-sys-typescale-body-large-weight, 400) + 100);
         color: var(--k3-sys-color-on-surface-variant);
       }
       .tip.rich .body:not(.has) {

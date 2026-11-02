@@ -4,7 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
-  /* src/syntax: fetch the extended language pack next to k3ui.js (dist/k3ui-syntax.js) */
   define: { __K3UI_LIB__: 'true' },
   plugins: [
     tailwindcss(),

@@ -2,6 +2,7 @@ import { html, css, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { K3Element, emitLifecycle, waitForMotion, isRtl } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
@@ -68,6 +69,7 @@ export class K3Tabs extends K3Element {
         -webkit-font-smoothing: antialiased;
         font-feature-settings: 'liga';
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        color: inherit; /* currentColor for inline SVG brand marks */
       }
       .icon[data-k3-icon]::before {
         content: attr(data-k3-icon);
@@ -78,7 +80,20 @@ export class K3Tabs extends K3Element {
         text-transform: none !important;
         speak: never;
       }
-      :host([variant='primary']) .icon {
+      .icon--svg {
+        display: none;
+        width: 1.5rem;
+        height: 1.5rem;
+        color: inherit;
+      }
+      .icon--svg svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        fill: currentColor;
+      }
+      :host([variant='primary']) .icon,
+      :host([variant='primary']) .icon--svg {
         display: block;
       }
       :host([variant='primary']) .tab {
@@ -138,8 +153,13 @@ export class K3Tabs extends K3Element {
   @property({ type: Number }) index = 0;
   /** Comma-separated labels */
   @property() labels = 'Tab 1,Tab 2';
-  /** Comma-separated Material Symbol ligatures (primary) */
+  /** Comma-separated Material Symbol ligatures (primary) — prefer `customIcons` for SVG. */
   @property() icons = '';
+  /**
+   * Per-tab icons for primary variant (JS only — SVGs contain commas).
+   * Each entry is either inline `<svg>…</svg>` (`fill="currentColor"`) or an MS ligature.
+   */
+  @property({ attribute: false }) customIcons: readonly string[] = [];
 
   @state() private current = 0;
   @state() private indLeft = 0;
@@ -221,6 +241,23 @@ export class K3Tabs extends K3Element {
     this.emit('k3-change', { index: i });
   }
 
+  private renderIcon(raw: string | undefined) {
+    if (!raw) return nothing;
+    if (raw.includes('<svg')) {
+      return html`<span class="icon--svg" part="icon" aria-hidden="true"
+        >${unsafeHTML(raw)}</span
+      >`;
+    }
+    return html`<span
+      class="icon notranslate"
+      part="icon"
+      translate="no"
+      lang="zxx"
+      data-k3-icon=${raw}
+      aria-hidden="true"
+    ></span>`;
+  }
+
   override render() {
     const labels = this.parseList(this.labels || this.getAttribute('labels') || 'Tab 1,Tab 2');
     const icons = this.parseList(this.icons || this.getAttribute('icons') || '');
@@ -233,8 +270,9 @@ export class K3Tabs extends K3Element {
         role="tablist"
         aria-label=${i18n.t('tabs.list')}
       >
-        ${labels.map(
-          (label, i) => html`
+        ${labels.map((label, i) => {
+          const icon = this.customIcons[i] || icons[i];
+          return html`
             <button
               type="button"
               class="tab"
@@ -245,21 +283,12 @@ export class K3Tabs extends K3Element {
               @click=${() => this.select(i)}
             >
               <span class="content" part="content">
-                ${primary && icons[i]
-                  ? html`<span
-                      class="icon notranslate"
-                      part="icon"
-                      translate="no"
-                      lang="zxx"
-                      data-k3-icon=${icons[i]!}
-                      aria-hidden="true"
-                    ></span>`
-                  : nothing}
+                ${primary ? this.renderIcon(icon) : nothing}
                 <span class="label" part="label">${label}</span>
               </span>
             </button>
-          `,
-        )}
+          `;
+        })}
         <div
           class="indicator"
           part="indicator"

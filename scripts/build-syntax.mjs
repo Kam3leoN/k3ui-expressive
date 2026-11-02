@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
- * dist/k3ui-syntax.js — the extended language pack (`k3ui/syntax`), a standalone
- * ES module with no import: `syntax.load()` fetches it next to k3ui.js, or apps
- * register it with `syntax.use(await import('k3ui/syntax'))`.
+ * dist/k3ui-syntax.js — legacy empty pack (`k3ui/syntax`).
+ * Grammars now ship in k3ui.js; this stub keeps `syntax.use(await import('k3ui/syntax'))` harmless.
  */
 import { build } from 'esbuild';
 import { writeFileSync } from 'node:fs';
@@ -22,7 +21,7 @@ await build({
 });
 writeFileSync(
   resolve(root, 'dist/k3ui-syntax.d.ts'),
-  `/** Extended language pack for k3ui syntax highlighting (Prism grammars, MIT). */\n` +
-    `export declare const LANGUAGES: ReadonlyArray<readonly [string, (prism: unknown) => void]>;\n`,
+  `/** Legacy empty language pack — grammars ship in k3ui.js. */\n` +
+    `export declare const LANGUAGES: ReadonlyArray<readonly [string, (engine: unknown) => void]>;\n`,
 );
-console.log('dist/k3ui-syntax.js written');
+console.log('dist/k3ui-syntax.js written (empty stub)');

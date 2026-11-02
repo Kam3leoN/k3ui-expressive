@@ -8842,58 +8842,40 @@ fav?.addEventListener("k3-change", (e) => {
             <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
             <h1 data-i18n="doc.codeblock.title">Code block</h1>
             <p data-i18n="doc.codeblock.blurb">
-              k3-list shell — tabs title · copy/download · expandable source.
+              Dark code panel — tabs title · copy/download icons · lightweight highlighter.
             </p>
             <p class="doc-intro" data-i18n="doc.codeblock.intro">
-              Built on k3-list: the first item is a taller header with a k3-tabs title and
-              copy/download icon buttons (click flashes a tooltip). The last item holds the
-              highlighted source and expands when collapsible. Pass source via the default slot
-              or the code property.
+              Rounded dark code panel with an optional k3-tabs title and copy / download icon
+              buttons. Pass source via the default slot or the code property.
             </p>
           </header>
           <div class="demo-block">
             <div
-              class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+              class="demo-frame demo-frame--cases k3-layout-grid"
               data-demo-enhance="off"
             >
-              <div class="demo-case">
+              <div class="demo-case k3-col-full">
                 <div class="demo-case-stage">
-                  <k3-codeblock label="HTML" language="html">
-                    <pre><code>&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
+                  <k3-codeblock id="codeblock-demo">
+                    <pre data-label="HTML"><code class="language-html">&lt;k3-button variant="filled"&gt;Save&lt;/k3-button&gt;</code></pre>
+                    <pre data-label="TypeScript"><code class="language-typescript">import { K3UI } from "k3ui";
+await K3UI.init({ components: ["k3-button"] });</code></pre>
+                    <pre data-label="CSS"><code class="language-css">.card:hover { color: var(--k3-sys-color-primary); }</code></pre>
                   </k3-codeblock>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
-              <div class="demo-case">
-                <div class="demo-case-stage">
-                  <k3-codeblock label="TypeScript" language="typescript" collapsible>
-                    <pre><code>import { K3UI } from "k3ui";
-await K3UI.init({ components: ["k3-button"] });</code></pre>
-                  </k3-codeblock>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">2</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 28rem">
-                  <k3-codeblock label="CSS" language="css">
-                    <pre><code>.card:hover { color: var(--k3-sys-color-primary); }</code></pre>
-                  </k3-codeblock>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">3</span>
-              </div>
             </div>
             <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">List · tabs · copy/download</span></li>
-              <li><span class="pill-num">2</span><span class="variant-label">Expandable body</span></li>
-              <li><span class="pill-num">3</span><span class="variant-label" data-i18n="doc.codeblock.guide.material">Material theme</span></li>
+              <li><span class="pill-num">1</span><span class="variant-label">HTML · TypeScript · CSS</span></li>
             </ol>
           </div>
           <div class="demo-block">
             <h2 data-i18n="doc.codeblock.section.languages">Languages</h2>
-            <p data-i18n="doc.codeblock.section.languages.blurb">Pick a language — grammars beyond the web set load on demand.</p>
+            <p data-i18n="doc.codeblock.section.languages.blurb">Pick a language — all grammars ship in the main bundle.</p>
             <div class="codeblock-gallery">
               <k3-select id="codeblock-lang" variant="outlined" label="Language" data-i18n-label="doc.codeblock.lang.label"></k3-select>
-              <k3-codeblock id="codeblock-gallery" label="PHP" language="php" collapsible></k3-codeblock>
+              <k3-codeblock id="codeblock-gallery" label="PHP" language="php"></k3-codeblock>
             </div>
           </div>
         </article>
@@ -11854,14 +11836,45 @@ static styles = [
             <p class="comp-category" data-i18n="doc.nav.styles">Styles</p>
             <h1 data-i18n="doc.spacing.title">Spacing</h1>
             <p data-i18n="doc.spacing.blurb">
-              space100 = 8dp baseline — full scale + layout gutter / margins.
+              space100 = 8dp baseline — tokens + .k3-p/m/gap helpers · breakpoints sm→xl.
             </p>
             <p class="doc-intro" data-i18n="doc.spacing.intro">
-              Spacing follows an 8 dp baseline (space100) through space0…900, plus layout gutter and margins. Use these tokens for padding and gaps instead of hard-coded rem values so density and breakpoints stay aligned with Material 3.
+              Spacing follows an 8 dp baseline (space100) through space0…900, plus layout gutter and margins. Prefer CSS variables or the .k3-p-* / .k3-m-* / .k3-gap-* helpers (logical properties, mobile-first sm·md·lg·xl) so density and breakpoints stay aligned with Material 3.
             </p>
           </header>
           <div class="surface surface-flush stack gap-lg">
             <div id="spacing-scale" class="token-scale" aria-label="Spacing scale"></div>
+            <div class="stack gap-md" aria-labelledby="spacing-helpers-title">
+              <header class="section-head sub">
+                <h2 id="spacing-helpers-title" data-i18n="doc.spacing.helpers.title">Helpers</h2>
+                <p data-i18n="doc.spacing.helpers.blurb">
+                  Display, flex, padding, margin, gap, and visibility — all prefixed .k3- with optional breakpoint infix.
+                </p>
+              </header>
+              <div class="stack gap-sm">
+                <p data-i18n="doc.spacing.helpers.breakpoints">
+                  Breakpoints (min-width): sm 600 · md 905 · lg 1240 · xl 1440. Example: .k3-md-flex .k3-md-gap-200 .k3-p-100.
+                </p>
+                <p data-i18n="doc.spacing.helpers.spacing">
+                  Padding / margin / gap: .k3-p-{step} · .k3-pt/pb/ps/pe/px/py · .k3-m-* (+ auto) · .k3-gap- / gap-x / gap-y. Full space0…900 at base; responsive infix uses 0·50·100·150·200·300·400·600.
+                </p>
+                <p data-i18n="doc.spacing.helpers.flex">
+                  Flex: .k3-flex · .k3-flex-col · .k3-flex-wrap · .k3-justify-* · .k3-items-* · .k3-flex-1 · .k3-grow · .k3-flex-center.
+                </p>
+                <p data-i18n="doc.spacing.helpers.visibility">
+                  Visibility: .k3-hidden · .k3-invisible · .k3-sr-only · .k3-sm-block · .k3-md-hidden · .k3-xs-only…xl-only.
+                </p>
+              </div>
+              <div
+                class="k3-flex k3-flex-wrap k3-items-center k3-gap-100 k3-p-200"
+                style="background: var(--k3-sys-color-surface-container); border-radius: var(--k3-sys-shape-corner-medium)"
+              >
+                <span class="k3-label-medium k3-p-100" style="background: var(--k3-sys-color-primary-container); border-radius: var(--k3-sys-shape-corner-small)">.k3-flex</span>
+                <span class="k3-label-medium k3-p-100" style="background: var(--k3-sys-color-primary-container); border-radius: var(--k3-sys-shape-corner-small)">.k3-gap-100</span>
+                <span class="k3-label-medium k3-p-100 k3-hidden k3-md-block" style="background: var(--k3-sys-color-tertiary-container); border-radius: var(--k3-sys-shape-corner-small)">.k3-md-block</span>
+                <span class="k3-label-medium k3-ms-auto k3-p-100" style="background: var(--k3-sys-color-secondary-container); border-radius: var(--k3-sys-shape-corner-small)">.k3-ms-auto</span>
+              </div>
+            </div>
           </div>
         </article>
 

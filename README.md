@@ -107,20 +107,17 @@ to its CSS dot overlay and fires `k3-error`. Any other slotted content keeps tha
 
 ## Syntax highlighting
 
-`<k3-codeblock language="php">` highlights with Prism grammars (vendored, private instance —
-no `window.Prism`). Web languages ship in `k3ui.js`; the others load on demand from
-`dist/k3ui-syntax.js`, next to `k3ui.js`. In bundled apps, register that pack up front:
+`<k3-codeblock language="php">` uses a lightweight built-in tokenizer (no Prism). Languages
+ship in `k3ui.js`. The legacy `k3ui/syntax` entry still exists as an empty stub so older
+`syntax.use()` calls stay harmless.
 
 ```js
 import { syntax } from 'k3ui';
-import * as extended from 'k3ui/syntax';
-syntax.use(extended);
+syntax.highlight('SELECT 1', 'mysql');
 ```
 
-`theme="material"` (default — adaptive M3 tokens, transparent over the list surface) or
-`theme="okaidia"` (fixed Prism dark panel); override any `--k3-code-*` variable for your own
-colours. Source uses JetBrains Mono. `npm run vendor:prism` regenerates `src/syntax/vendor`
-after a Prism update.
+Default `theme="dark"` uses a fixed dark panel; `theme="material"` follows M3 roles.
+Override any `--k3-code-*` variable for custom colours. Source uses JetBrains Mono.
 
 ## Development
 

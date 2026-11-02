@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-/* A host-page code element Prism would normally auto-highlight */
+/* A host-page code element must stay untouched */
 document.body.innerHTML = '<pre><code class="language-js">const host = 1;</code></pre>';
 const { syntax, LANGUAGE_MANIFEST } = await import('../../src/syntax/index.js');
 
@@ -48,20 +48,40 @@ describe('syntax engine', () => {
 
   it('resolves ids and aliases', () => {
     const cases: Record<string, string> = {
-      'c++': 'cpp', 'c#': 'csharp', cs: 'csharp', react: 'jsx', sqlite: 'sql', mysql: 'sql',
-      bat: 'batch', ahk: 'autohotkey', ascii: 'plain', '': 'plain', html: 'markup', xml: 'markup',
-      md: 'markdown', py: 'python', golang: 'go', mongo: 'mongodb', sh: 'bash', yml: 'yaml', ts: 'typescript',
+      'c++': 'cpp',
+      'c#': 'csharp',
+      cs: 'csharp',
+      react: 'jsx',
+      sqlite: 'sql',
+      mysql: 'sql',
+      bat: 'batch',
+      ahk: 'autohotkey',
+      ascii: 'plain',
+      '': 'plain',
+      html: 'markup',
+      xml: 'markup',
+      md: 'markdown',
+      py: 'python',
+      golang: 'go',
+      mongo: 'mongodb',
+      sh: 'bash',
+      yml: 'yaml',
+      ts: 'typescript',
     };
     for (const [alias, id] of Object.entries(cases)) expect(syntax.resolve(alias), alias).toBe(id);
   });
 
-  it('ships the web languages in the main bundle', () => {
-    for (const id of ['html', 'css', 'js', 'ts', 'jsx', 'tsx', 'json', 'svg']) expect(syntax.isReady(id), id).toBe(true);
-    expect(LANGUAGE_MANIFEST.php?.tier).toBe('extended');
+  it('ships languages in the main bundle', () => {
+    for (const id of ['html', 'css', 'js', 'ts', 'jsx', 'tsx', 'json', 'svg', 'php']) {
+      expect(syntax.isReady(id), id).toBe(true);
+    }
+    expect(LANGUAGE_MANIFEST.php?.tier).toBe('base');
   });
 
   it('escapes text — no HTML injection', () => {
-    expect(syntax.highlight('<img src=x onerror=alert(1)>', 'plain')).toBe('&lt;img src=x onerror=alert(1)&gt;');
+    expect(syntax.highlight('<img src=x onerror=alert(1)>', 'plain')).toBe(
+      '&lt;img src=x onerror=alert(1)&gt;',
+    );
     const html = syntax.highlight('<script>alert(1)</script>', 'html');
     expect(html).not.toContain('<script>');
     expect(html).toContain('&lt;');
@@ -72,7 +92,7 @@ describe('syntax engine', () => {
     expect(await syntax.load('klingon')).toBe(false);
   });
 
-  it('loads the extended pack on demand and highlights every requested language', async () => {
+  it('highlights every requested language', async () => {
     expect(await syntax.load('php')).toBe(true);
     for (const [lang, code] of Object.entries(SAMPLES)) {
       expect(await syntax.load(lang), lang).toBe(true);

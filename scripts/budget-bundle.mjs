@@ -15,7 +15,8 @@ const cssPath = path.join(root, 'dist/k3ui.css');
  * Raise only on purpose — and tighten again once components ship as chunks. */
 const LIMITS = {
   jsGzipKb: Number(process.env.K3UI_BUDGET_JS_KB ?? 600),
-  cssGzipKb: Number(process.env.K3UI_BUDGET_CSS_KB ?? 24),
+  /* Raised with layout helpers (display/flex/spacing/visibility) in k3ui.css */
+  cssGzipKb: Number(process.env.K3UI_BUDGET_CSS_KB ?? 28),
 };
 
 function gzipKb(file) {

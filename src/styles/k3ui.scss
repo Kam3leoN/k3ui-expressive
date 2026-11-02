@@ -9,6 +9,7 @@
 @use '../tokens/layout';
 @use '../tokens/table';
 @use '../tokens/scrollbar';
+@use '../tokens/helpers' as k3-helpers;
 
 /* Fonts are shipped separately (dist/fonts) — import k3ui/fonts-ui.css or
    k3ui/fonts.css so woff2 stay external and k3ui.css stays lean. */
@@ -240,6 +241,9 @@
     background: transparent !important;
     box-shadow: none !important;
   }
+
+  /* Breakpoints · display · flex · padding · margin · gap · visibility */
+  @include k3-helpers.emit;
 }
 
 @media (forced-colors: active) {

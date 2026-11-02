@@ -4,13 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- `k3-codeblock` rewritten without `k3-list` / line numbers: dark panel (`#24292e`, 16px radius), `k3-tabs` title + copy/download icon buttons (theme colours); default `theme="dark"` (`okaidia` alias, `material` for M3 adaptive); collapse UI removed
+- Syntax highlighting — Prism removed; lightweight built-in tokenizer in `src/syntax` (all languages in `k3ui.js`). `k3ui/syntax` remains an empty stub for `syntax.use()` compat. `prismjs` / `vendor:prism` dropped
+
 ### Added
 
 - `k3-marquee`: text version styling (`text-size`, `text-font`, `text-weight`), sanitized `html` content (`html` property, `{ html: true }` for `addContent` / `replaceContent`, `k3-sanitize` event), `drag` (grab to move with mouse, pen or touch — links are not followed after a drag), `pause-on-scroll`, `k3-loop` event, templates (`variant`: plain · tonal · filled · outlined) and a fixed `label` slot
 - `sanitizeHTML()` / `sanitizeHTMLDetailed()` — allowlist HTML sanitizer for untrusted strings: inert parsing, DOM rebuilt node by node (no `innerHTML`, no mutation XSS, Trusted Types friendly), dangerous elements dropped with their content, no event handlers / `style` / `id` / `name`, URL scheme checks, forced `noopener noreferrer`, custom elements never instantiated, size / node / depth limits
 - `k3-marquee` `pause-at-items` + `item-pause` — dwell when each item’s start reaches the near edge, then scroll to the next; `k3-item-pause` event; demo #6
-- `k3-codeblock` `theme`: `material` (default — M3 roles, light/dark, no extra code surface) or `okaidia` (fixed Prism dark panel); every token colour is a `--k3-code-*` custom property; source uses JetBrains Mono (`--k3-ref-typeface-code`)
-- Syntax highlighting — `syntax` API and `k3-codeblock` use vendored Prism 1.30 grammars (MIT) in a private instance: no `window.Prism`, no auto-highlighting of the host page. HTML / XML / SVG, CSS, JS, TS, JSX, TSX and JSON ship in k3ui.js; 33 more languages (PHP, SCSS, Sass, SQL / SQLite / MySQL, C, C++, C#, Git, Batch, AutoHotkey, AsciiDoc, Go, Python, HTTP, Markdown, Lua, MongoDB, nginx, Bash, PowerShell, YAML, Diff, Docker, INI, TOML, Java, Kotlin, Rust, Ruby, Swift, GraphQL, Regex) load on demand from `dist/k3ui-syntax.js` (`k3ui/syntax`, 30 kB gzip). Aliases such as `c++`, `c#`, `react`, `sqlite`, `bat`, `ahk`, `ascii`. `npm run vendor:prism` regenerates the grammars
 - `K3UI.init({ theme: { specVersion } })`; playground settings: Material color spec select (2025 / 2021) applied live, persisted and replayed before first paint
 - `k3-halftone` **print mode** — real screen-print halftone of an image (`<img>` / `<canvas>` / `<video>` / `src`): ink separation with grey-component replacement, one rotated screen per ink, tone-accurate dots (area-true lookup table), plates overprinted on paper; presets `poster` · `cmyk` · `riso` · `mono`, custom `inks`, `shape` (circle · ellipse · square · line), `contrast`, `black`, `dot-gain`, `angle`, `misregistration`, `paper`, `grain`, `roughness`, `ink-opacity`, `toBlob()` / `download()`, `k3-render`; animated register drift without re-rendering. `renderHalftone()` engine exported
 - `specVersion` theme option (`'2025'` default · `'2021'`), `<k3-theme spec-version>`, `DEFAULT_COLOR_SPEC`, `AUTO_LIGHT_START_H` / `AUTO_LIGHT_END_H`
@@ -28,8 +31,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - `k3-marquee` rewritten on the MarqueeJS model (Vincent Loy, MIT): time-based scrolling in px/s (`requestAnimationFrame`, same speed at any refresh rate), `direction` up / down, `start="edge"` (enters from the far edge — the screen edge, not the content width) or `filled`, `clone-count`, `separator`, `pause-on-focus` (default on), `paused`, MarqueeJS methods (`start`, `pause`, `resume`, `toggle`, `restart`, `addContent`, `replaceContent`, `getContentList`, `recalculate`), `k3-pause` / `k3-play` events, automatic pause off-screen and in hidden tabs. Previous attributes and `play()` / `stop()` / `durationFromSpeed()` keep working; copies are real DOM clones (no HTML string) refreshed when the content changes; the host takes the full width so a classic pass crosses the whole space
-- Bundle budget 500 → 600 kB gzip: k3ui.js now carries chart.js (≈ 70 kB) and the syntax core + web grammars (≈ 15 kB)
-- `k3-codeblock` tokens use Prism class names (`.token.keyword`…) instead of `.token--keyword`; the rendered `<code>` keeps the author's language class next to the canonical one (`language-html language-markup`)
+- Bundle budget 500 → 600 kB gzip: k3ui.js now carries chart.js (≈ 70 kB); syntax is a small custom highlighter (Prism removed)
+- `k3-codeblock` tokens keep `.token.*` class names; the rendered `<code>` keeps the author's language class next to the canonical one (`language-html language-markup`)
 - `k3-halftone`: any non-image content keeps the CSS dot overlay (previous behaviour, same attributes); `mode="overlay"` forces it for images
 - Material Color Utilities 0.2.7 → 0.4.0 with the **2025 color spec** by default: the Expressive variant keeps the seed hue on primary (the 2021 spec rotated it by +240°, so a purple seed gave a teal UI). Tonal spot / vibrant / neutral also follow the 2025 tones; `specVersion: '2021'` keeps the previous colours
 - Replaced `qr-code-styling`-based QR with in-house encoder + SVG renderer

@@ -1,5 +1,5 @@
 /**
- * Extended language pack — every grammar not bundled in k3ui.js.
- * Built as dist/k3ui-syntax.js (`k3ui/syntax`); loaded on demand by `syntax.load()`.
+ * Legacy entry for `k3ui/syntax` — grammars now ship in the main bundle.
+ * Kept so `import * as extended from 'k3ui/syntax'; syntax.use(extended)` is a no-op.
  */
-export { LANGUAGES } from './vendor/languages.extended.js';
+export const LANGUAGES: ReadonlyArray<readonly [string, (engine: unknown) => void]> = [];

@@ -59,7 +59,7 @@ export const snackbarStyles = css`
     font-family: var(--k3-sys-typescale-body-medium-font, inherit);
     font-size: var(--k3-sys-typescale-body-medium-size, 0.875rem);
     line-height: var(--k3-sys-typescale-body-medium-line-height, 1.25rem);
-    font-weight: var(--k3-sys-typescale-body-medium-weight, 400);
+    font-weight: calc(var(--k3-sys-typescale-body-medium-weight, 400) + 100);
     letter-spacing: var(--k3-sys-typescale-body-medium-tracking, 0.016rem);
     touch-action: pan-y;
     transform: translateY(calc(100% + 0.5rem)) scale(0.92);
@@ -182,7 +182,7 @@ export const snackbarStyles = css`
     background: transparent;
     color: var(--k3-sys-color-inverse-primary);
     font: inherit;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.006rem;
     text-transform: none;
     cursor: pointer;

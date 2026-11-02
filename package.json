@@ -50,8 +50,7 @@
     "check": "npm run lint && npm test && npm run build",
     "preview": "vite preview --config playground/vite.config.ts",
     "preview:qr": "vite preview --config apps/qr-generator/vite.config.ts",
-    "build:syntax": "node scripts/build-syntax.mjs",
-    "vendor:prism": "node scripts/vendor-prism.mjs"
+    "build:syntax": "node scripts/build-syntax.mjs"
   },
   "keywords": [
     "material-design",
@@ -87,7 +86,6 @@
     "esbuild": "^0.25.12",
     "flag-icons": "^7.6.0",
     "jsdom": "^26.0.0",
-    "prismjs": "^1.30.0",
     "sass": "^1.85.1",
     "tailwindcss": "^4.0.14",
     "typescript": "^5.8.2",

@@ -1,68 +1,79 @@
 import { html, nothing, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
-import { K3Element } from '../../core/index.js';
+import { K3Element, prefersReducedMotion } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
 import '../actions/icon-button.js';
+import { showSnackbar } from '../feedback/snackbar-queue.js';
 import '../feedback/tooltip.js';
 import '../navigation/tabs.js';
-import './list.js';
-import './list-item.js';
 import {
   highlightCode,
   loadCodeLanguage,
   rawLanguageFromClassName,
   resolveCodeLanguage,
 } from './codeblock-highlighter.js';
+import { langTabIcon } from './codeblock-lang-icons.js';
 import { CodeBlockSpecs } from './codeblock.specs.js';
 import { codeblockStyles } from './codeblock.styles.js';
 
 export { CodeBlockSpecs } from './codeblock.specs.js';
 export { highlightCode, resolveCodeLanguage, loadCodeLanguage } from './codeblock-highlighter.js';
 
-/** Token colour theme — `material` (M3 adaptive, default) or `okaidia` (fixed Prism dark). */
-export type CodeBlockTheme = 'material' | 'okaidia';
+/** Token colour theme — `dark` (default panel) · `material` (M3 adaptive) · `okaidia` (alias of dark). */
+export type CodeBlockTheme = 'dark' | 'material' | 'okaidia';
 
-type TipHost = HTMLElement & {
-  content: string;
-  show: () => Promise<void>;
-  hide: () => Promise<void>;
+type CodeSample = {
+  label: string;
+  language: string;
+  text: string;
 };
 
 /**
- * Code sample built on `k3-list`:
- * - first item = header (`k3-tabs` title + copy / download)
- * - last item = highlighted source (expandable when `collapsible`)
+ * Code sample:
+ * - `k3-tabs` title (one sample) or switcher (several slotted `<pre><code>`)
+ * - copy / download icon buttons + snackbar confirm
+ * - dark rounded `<pre><code>` panel (no list / no line numbers)
  *
  * @fires k3-copy — `{ text }` after a successful copy
+ * @fires k3-tab — `{ index }` when the active sample tab changes
  */
 export class K3CodeBlock extends K3Element {
   static override styles = [hostReset, ...codeblockStyles];
 
   @property() label = CodeBlockSpecs.defaultLabel;
   @property() language: string = CodeBlockSpecs.defaultLanguage;
+  /**
+   * Kept for markup compat — collapse UI was removed with the list shell.
+   * @deprecated No effect.
+   */
   @property({ type: Boolean, reflect: true })
   collapsible: boolean = CodeBlockSpecs.defaultCollapsible;
+  /** @deprecated No effect. */
   @property({ type: Number, attribute: 'collapsed-height' }) collapsedHeight =
     CodeBlockSpecs.defaultCollapsedHeight;
   @property({ type: Boolean, attribute: 'show-toolbar' }) showToolbar = CodeBlockSpecs.showToolbar;
   @property({ type: Boolean, attribute: 'show-copy' }) showCopy = CodeBlockSpecs.showCopy;
   @property({ type: Boolean, attribute: 'show-download' }) showDownload =
     CodeBlockSpecs.showDownload;
-  /** Raw source when not using the default slot. */
+  /** Raw source when not using the default slot (single-sample mode). */
   @property() code = '';
-  /** Token colours: `okaidia` (default) · `material` (follows the M3 theme). */
-  @property({ reflect: true }) theme: CodeBlockTheme = 'okaidia';
+  /** Token colours: `dark` (default) · `material` · `okaidia` (alias of dark). */
+  @property({ reflect: true }) theme: CodeBlockTheme = 'dark';
+  /** Active sample index when several slotted `<pre>` blocks are present. */
+  @property({ type: Number }) index = 0;
 
-  @state() private contentExpanded = true;
+  @state() private samples: CodeSample[] = [];
+  @state() private activeIndex = 0;
   @state() private highlighted = '';
   @state() private resolvedLang = 'plain';
   /** Language as written by the author (`html`, `c++`…) — kept as a class next to the canonical one. */
   @state() private requestedLang = 'plain';
   @state() private sourceText = '';
 
-  private tipTimers = new Map<string, number>();
+  /** Cancels in-flight panel height springs on rapid tab switches. */
+  private panelAnimGen = 0;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -75,77 +86,170 @@ export class K3CodeBlock extends K3Element {
     }
   }
 
-  override disconnectedCallback(): void {
-    for (const id of this.tipTimers.values()) window.clearTimeout(id);
-    this.tipTimers.clear();
-    super.disconnectedCallback();
-  }
-
   override willUpdate(changed: PropertyValues): void {
+    let rebuilt = false;
     if (
       changed.has('code') ||
       changed.has('language') ||
-      (!this.sourceText && (this.code || this.childElementCount))
+      changed.has('label') ||
+      (!this.samples.length && (this.code || this.childElementCount))
     ) {
-      this.syncSource();
+      this.rebuildSamples();
+      rebuilt = true;
+    }
+    if (rebuilt || (changed.has('index') && this.samples.length)) {
+      const clamped = Math.min(
+        Math.max(0, this.index),
+        Math.max(0, this.samples.length - 1),
+      );
+      if (rebuilt || clamped !== this.activeIndex) this.applySample(clamped);
     }
   }
 
   override firstUpdated(): void {
-    this.syncSource();
-    if (!this.collapsible && this.shouldAutoCollapse()) {
-      queueMicrotask(() => {
-        this.collapsible = true;
-      });
-    }
+    this.rebuildSamples();
+    this.applySample(Math.min(Math.max(0, this.index), Math.max(0, this.samples.length - 1)));
   }
 
-  private shouldAutoCollapse(): boolean {
-    const lines = this.sourceText.replace(/\r/g, '').split('\n').length;
-    return lines > CodeBlockSpecs.defaultCollapsibleMinLines;
-  }
-
-  private findSourceCodeElement(): HTMLElement | null {
+  private collectSlottedSamples(): CodeSample[] {
+    const out: CodeSample[] = [];
     for (const child of this.children) {
+      let codeEl: HTMLElement | null = null;
+      let host: Element = child;
       if (child.tagName === 'PRE') {
         const code = child.querySelector('code');
-        if (code instanceof HTMLElement) return code;
+        if (code instanceof HTMLElement) {
+          codeEl = code;
+          host = child;
+        }
+      } else if (child.tagName === 'CODE' && child instanceof HTMLElement) {
+        codeEl = child;
       }
-      if (child.tagName === 'CODE' && child instanceof HTMLElement) return child;
+      if (!codeEl) continue;
+      const lang =
+        rawLanguageFromClassName(codeEl.className) ||
+        (host.getAttribute('data-language') ?? '').toLowerCase() ||
+        'plain';
+      const label =
+        host.getAttribute('data-label')?.trim() ||
+        codeEl.getAttribute('data-label')?.trim() ||
+        (lang !== 'plain' ? lang.toUpperCase() : 'Code');
+      out.push({ label, language: lang, text: codeEl.textContent ?? '' });
     }
-    return null;
+    return out;
   }
 
-  private syncSource(): void {
-    let text = this.code?.trim() ?? '';
-    let lang = this.language;
-
-    if (!text) {
-      const slotCode = this.findSourceCodeElement();
-      if (slotCode) {
-        text = slotCode.textContent ?? '';
-        if (!lang.trim()) {
-          lang = rawLanguageFromClassName(slotCode.className);
-        }
-      }
+  private rebuildSamples(): void {
+    const slotted = this.collectSlottedSamples();
+    if (slotted.length > 0) {
+      this.samples = slotted;
+    } else {
+      const lang = (this.language.trim() || 'plain').toLowerCase();
+      const label =
+        this.label.trim() || (lang !== 'plain' ? lang.toUpperCase() : 'Code');
+      this.samples = [{ label, language: lang, text: this.code?.trim() ?? '' }];
     }
+  }
 
-    this.sourceText = text;
-    this.requestedLang = (lang.trim() || 'plain').toLowerCase();
+  private applySample(i: number): void {
+    if (!this.samples.length) {
+      this.activeIndex = 0;
+      this.sourceText = '';
+      this.requestedLang = 'plain';
+      this.resolvedLang = 'plain';
+      this.highlighted = '';
+      return;
+    }
+    const clamped = Math.min(Math.max(0, i), this.samples.length - 1);
+    const sample = this.samples[clamped]!;
+    this.activeIndex = clamped;
+    this.sourceText = sample.text;
+    this.requestedLang = (sample.language.trim() || 'plain').toLowerCase();
     this.resolvedLang = resolveCodeLanguage(this.requestedLang);
     this.refreshHighlight();
   }
 
-  /** `language-html language-markup` — the author's name and Prism's canonical id. */
+  private selectSample(i: number, emit: boolean): void {
+    const clamped = Math.min(Math.max(0, i), Math.max(0, this.samples.length - 1));
+    if (clamped === this.activeIndex) {
+      if (clamped !== this.index) this.index = clamped;
+      return;
+    }
+    if (clamped !== this.index) this.index = clamped;
+    if (emit && this.samples.length > 1) {
+      void this.swapSampleAnimated(clamped);
+    } else {
+      this.applySample(clamped);
+    }
+    if (emit) this.emit('k3-tab', { index: clamped });
+  }
+
+  /**
+   * Animate panel block-size when the active sample changes line count.
+   * Uses spatial-fast (menu-like overshoot) under the expressive scheme.
+   */
+  private async swapSampleAnimated(i: number): Promise<void> {
+    const panel = this.renderRoot?.querySelector<HTMLElement>('.panel');
+    if (!panel || prefersReducedMotion()) {
+      this.applySample(i);
+      return;
+    }
+
+    const gen = ++this.panelAnimGen;
+    panel.classList.remove('panel--animating');
+
+    const from = panel.getBoundingClientRect().height;
+    panel.classList.add('panel--sizing');
+    panel.style.blockSize = `${from}px`;
+
+    this.applySample(i);
+    await this.updateComplete;
+    await new Promise<void>((r) => requestAnimationFrame(() => r()));
+    if (gen !== this.panelAnimGen) return;
+
+    /* Natural height of the new content */
+    panel.style.blockSize = 'auto';
+    const to = panel.getBoundingClientRect().height;
+    panel.style.blockSize = `${from}px`;
+    panel.offsetHeight; /* reflow — lock start frame */
+
+    if (Math.abs(to - from) < 1) {
+      panel.style.blockSize = '';
+      panel.classList.remove('panel--sizing');
+      return;
+    }
+
+    panel.classList.add('panel--animating');
+    panel.style.blockSize = `${to}px`;
+
+    const done = (): void => {
+      if (gen !== this.panelAnimGen) return;
+      panel.removeEventListener('transitionend', onEnd);
+      window.clearTimeout(fallback);
+      panel.classList.remove('panel--animating', 'panel--sizing');
+      panel.style.blockSize = '';
+    };
+    const onEnd = (e: TransitionEvent): void => {
+      if (e.target !== panel) return;
+      if (e.propertyName !== 'block-size' && e.propertyName !== 'height') return;
+      done();
+    };
+    panel.addEventListener('transitionend', onEnd);
+    /* spatial-fast ≈ 350ms + overshoot settle */
+    const fallback = window.setTimeout(done, 600);
+  }
+
+  /** `language-html language-markup` — the author's name and canonical id. */
   private languageClass(): string {
     const resolved = this.resolvedLang || 'plain';
     const requested = this.requestedLang || resolved;
-    return requested === resolved ? `language-${resolved}` : `language-${requested} language-${resolved}`;
+    return requested === resolved
+      ? `language-${resolved}`
+      : `language-${requested} language-${resolved}`;
   }
 
   private refreshHighlight(): void {
     this.highlighted = highlightCode(this.sourceText, this.resolvedLang);
-    /* Grammar in the extended pack: show plain text now, highlight once loaded */
     const lang = this.resolvedLang;
     void loadCodeLanguage(lang).then((ready) => {
       if (!ready || lang !== this.resolvedLang) return;
@@ -154,32 +258,29 @@ export class K3CodeBlock extends K3Element {
     });
   }
 
-  private titleLabel(): string {
+  private tabLabels(): string {
+    if (this.samples.length > 1) {
+      return this.samples.map((s) => s.label).join(',');
+    }
     const custom = this.label.trim();
     if (custom) return custom;
-    const lang = this.resolvedLang;
-    if (!lang || lang === 'plain') return 'Code';
-    return lang.toUpperCase();
+    return this.samples[0]?.label || 'Code';
   }
 
-  private async flashTip(part: 'copy' | 'download', message: string): Promise<void> {
-    const tip = this.renderRoot?.querySelector(
-      `k3-tooltip[data-action="${part}"]`,
-    ) as TipHost | null;
-    if (!tip?.show || !tip?.hide) return;
-    const prev = tip.content;
-    tip.content = message;
-    await tip.show();
-    const prevTimer = this.tipTimers.get(part);
-    if (prevTimer) window.clearTimeout(prevTimer);
-    this.tipTimers.set(
-      part,
-      window.setTimeout(() => {
-        this.tipTimers.delete(part);
-        void tip.hide();
-        tip.content = prev;
-      }, 1400),
-    );
+  private tabIcons(): readonly string[] {
+    return this.samples.map((s) => langTabIcon(s.language));
+  }
+
+  private onTabChange = (e: Event): void => {
+    if (e.target !== e.currentTarget) return;
+    if (this.samples.length < 2) return;
+    const i = (e as CustomEvent<{ index?: number }>).detail?.index;
+    if (typeof i !== 'number') return;
+    this.selectSample(i, true);
+  };
+
+  private notify(message: string): void {
+    void showSnackbar({ message, duration: 'short', queue: 'replace' });
   }
 
   private async copyText(): Promise<void> {
@@ -188,10 +289,7 @@ export class K3CodeBlock extends K3Element {
     try {
       await navigator.clipboard.writeText(text);
       this.emit('k3-copy', { text });
-      await this.flashTip(
-        'copy',
-        i18n.t('codeblock.copied', CodeBlockSpecs.accessibility.copiedLabel),
-      );
+      this.notify(i18n.t('codeblock.copied', CodeBlockSpecs.accessibility.copiedLabel));
     } catch {
       /* ignore — clipboard may be blocked */
     }
@@ -200,7 +298,9 @@ export class K3CodeBlock extends K3Element {
   private async downloadText(): Promise<void> {
     const text = this.sourceText;
     if (!text) return;
-    const base = (this.label || 'code').replace(/[^\w.-]+/g, '_') || 'code';
+    const base =
+      (this.samples[this.activeIndex]?.label || this.label || 'code').replace(/[^\w.-]+/g, '_') ||
+      'code';
     const ext =
       CodeBlockSpecs.extensionByLang[this.resolvedLang] ??
       CodeBlockSpecs.extensionByLang.plain;
@@ -215,37 +315,13 @@ export class K3CodeBlock extends K3Element {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    await this.flashTip(
-      'download',
-      i18n.t('codeblock.downloaded', CodeBlockSpecs.accessibility.downloadedLabel),
-    );
-  }
-
-  private onContentExpand = (e: Event): void => {
-    const detail = (e as CustomEvent<{ expanded?: boolean }>).detail;
-    if (typeof detail?.expanded === 'boolean') {
-      this.contentExpanded = detail.expanded;
-    }
-  };
-
-  private stopItemActivate = (e: Event): void => {
-    e.stopPropagation();
-  };
-
-  private renderCode() {
-    return html`
-      <div class="code k3-scroll k3-scroll--x" part="content">
-        <pre><code class=${this.languageClass()}>${unsafeHTML(
-          this.highlighted,
-        )}</code></pre>
-      </div>
-    `;
+    this.notify(i18n.t('codeblock.downloaded', CodeBlockSpecs.accessibility.downloadedLabel));
   }
 
   private renderActions() {
-    if (!this.showToolbar || (!this.showCopy && !this.showDownload)) return nothing;
+    if (!this.showCopy && !this.showDownload) return nothing;
     return html`
-      <div class="actions" slot="trailing" @click=${this.stopItemActivate} @keydown=${this.stopItemActivate}>
+      <div class="actions" part="actions">
         ${this.showCopy
           ? html`
               <k3-tooltip
@@ -300,55 +376,53 @@ export class K3CodeBlock extends K3Element {
     `;
   }
 
-  private onBodyExpand = (e: Event): void => {
-    if (!this.collapsible) {
-      /* Locked open — force expand back if the row was toggled. */
-      const item = e.target as HTMLElement & { expanded?: boolean };
-      if (item && item.expanded === false) item.expanded = true;
-      return;
-    }
-    this.onContentExpand(e);
-  };
+  private renderChrome() {
+    const hasActions = this.showCopy || this.showDownload;
+    if (!this.showToolbar && !hasActions) return nothing;
+    const multi = this.samples.length > 1;
+    return html`
+      <div class="chrome" part="header">
+        ${this.showToolbar
+          ? html`
+              <k3-tabs
+                class=${multi ? 'title-tabs title-tabs--multi' : 'title-tabs'}
+                part="tabs"
+                variant="primary"
+                labels=${this.tabLabels()}
+                .customIcons=${this.tabIcons()}
+                .index=${this.activeIndex}
+                @k3-change=${this.onTabChange}
+              ></k3-tabs>
+            `
+          : html`<span></span>`}
+        ${this.renderActions()}
+      </div>
+    `;
+  }
 
   override render() {
-    const title = this.titleLabel();
-    const canToggle = this.collapsible;
-    const open = !canToggle || this.contentExpanded;
-
+    const hasChrome =
+      this.showToolbar || this.showCopy || this.showDownload;
     return html`
-      <k3-list class="shell" part="list" variant="segmented" aria-label=${title}>
-        <k3-list-item class="header" part="header" lines="three">
-          <k3-tabs
-            class="title-tabs"
-            slot="headline"
-            part="tabs"
-            variant="secondary"
-            labels=${title}
-            index="0"
-            @click=${this.stopItemActivate}
-          ></k3-tabs>
-          ${this.renderActions()}
-        </k3-list-item>
-        <k3-list-item
-          class=${canToggle ? 'body' : 'body body--static'}
-          part="body"
-          expandable
-          ?expanded=${open}
-          @k3-expand=${this.onBodyExpand}
-        >
-          ${canToggle
-            ? html`
-                <span slot="headline" class="body-label">
-                  ${open
-                    ? i18n.t('codeblock.showLess', CodeBlockSpecs.accessibility.expandLess)
-                    : i18n.t('codeblock.showMore', CodeBlockSpecs.accessibility.expandMore)}
-                </span>
-              `
-            : nothing}
-          <div slot="expand">${this.renderCode()}</div>
-        </k3-list-item>
-      </k3-list>
-      <slot hidden @slotchange=${() => this.syncSource()}></slot>
+      <div class=${hasChrome ? 'shell shell--chrome' : 'shell'} part="shell">
+        ${this.renderChrome()}
+        <div class="panel" part="panel">
+          <div class="code k3-scroll k3-scroll--x" part="content">
+            <pre><code class=${this.languageClass()}>${unsafeHTML(
+              this.highlighted,
+            )}</code></pre>
+          </div>
+        </div>
+      </div>
+      <slot
+        hidden
+        @slotchange=${() => {
+          this.rebuildSamples();
+          this.applySample(
+            Math.min(Math.max(0, this.index), Math.max(0, this.samples.length - 1)),
+          );
+        }}
+      ></slot>
     `;
   }
 }
