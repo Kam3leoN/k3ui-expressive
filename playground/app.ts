@@ -184,7 +184,7 @@ const MQ_BODY_CONTAINER = '(min-width: 905px)';
 
 /** Persisted preference — applied only when MQ_BODY_CONTAINER matches */
 let containerOn = true;
-/** Layout grid overlay — settings dialog */
+/** Layout grid overlay — settings sheet */
 let gridOn = docStore.get<boolean>(DocKeys.uiGrid, false);
 
 /** Mobile / tablet: no container concept — always full pane + edge gap. */
@@ -378,7 +378,7 @@ function applyPlaygroundI18n(): void {
   syncThemeControls();
   syncMotionControls();
   syncDirControl();
-  syncSettingsDialog();
+  syncSettingsSheet();
   buildPrimaryNav();
   buildNavMenu();
   buildCatalogGrid();
@@ -434,22 +434,22 @@ function setMsIcon(el: HTMLElement | null, name: string): void {
 }
 
 function syncThemeControls(): void {
-  syncSettingsDialog();
+  syncSettingsSheet();
   syncColorModeButtons();
 }
 
 function syncMotionControls(): void {
-  syncSettingsDialog();
+  syncSettingsSheet();
 }
 
 function syncDirControl(): void {
-  syncSettingsDialog();
+  syncSettingsSheet();
 }
 
 function setMotionScheme(scheme: MotionScheme): void {
   motionScheme = scheme;
   applyThemePersist();
-  syncSettingsDialog();
+  syncSettingsSheet();
 }
 
 type SettingsSheet = HTMLElement & {
@@ -474,7 +474,7 @@ function syncSettingsToggle(
 }
 
 /** Mirror all prefs into the settings sheet controls. */
-function syncSettingsDialog(): void {
+function syncSettingsSheet(): void {
   const tip = document.getElementById('tip-settings') as HTMLElement & {
     content?: string;
   } | null;
@@ -505,7 +505,7 @@ function syncSettingsDialog(): void {
     syncSettingsToggle(el, el.getAttribute('data-settings-motion') === motionScheme);
   });
 
-    const dir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
+  const dir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
   document.querySelectorAll<HTMLElement>('[data-settings-dir]').forEach((el) => {
     syncSettingsToggle(el, el.getAttribute('data-settings-dir') === dir);
   });
@@ -567,7 +567,7 @@ async function openSettingsSheet(): Promise<void> {
   await registry.register('k3-switch');
   await registry.register('k3-select');
   mountSettingsMd2SeedPresets();
-  syncSettingsDialog();
+  syncSettingsSheet();
   applyPlaygroundI18n();
   const sheet = settingsSheet();
   if (sheet && typeof sheet.show === 'function') await sheet.show();
@@ -1950,7 +1950,7 @@ function applyThemePersist(): void {
     specVersion: colorSpec,
   });
   refreshColorDocs(seed);
-  syncSettingsDialog();
+  syncSettingsSheet();
   cacheAppliedTheme();
 }
 
@@ -2734,7 +2734,7 @@ async function boot(): Promise<void> {
   wireDemoPages();
 }
 
-/** App-bar chrome — locale + settings dialog (theme / motion / layout / seed). */
+/** App-bar chrome — locale + settings sheet (theme / motion / layout / seed). */
 function wireShellChrome(): void {
   document.getElementById('locale-menu')?.addEventListener('k3-select', (e) => {
     const v = (e as CustomEvent<{ value?: string }>).detail?.value;
@@ -2754,9 +2754,9 @@ function wireShellChrome(): void {
   applyContainerLayout();
   if (overlay) overlay.hidden = !gridOn;
   if (gridOn) rebuildGridOverlay();
-  syncSettingsDialog();
-  queueMicrotask(syncSettingsDialog);
-  requestAnimationFrame(syncSettingsDialog);
+  syncSettingsSheet();
+  queueMicrotask(syncSettingsSheet);
+  requestAnimationFrame(syncSettingsSheet);
 
   const openSettings = (): void => {
     void openSettingsSheet();
@@ -2859,7 +2859,7 @@ function wireShellChrome(): void {
     docStore.set(DocKeys.uiContainer, containerOn);
     applyContainerLayout();
     rebuildGridOverlay();
-    syncSettingsDialog();
+    syncSettingsSheet();
     flashToggle('playground.ctrl.container', selected);
   });
 
@@ -2872,7 +2872,7 @@ function wireShellChrome(): void {
       overlay.hidden = !gridOn;
       if (gridOn) rebuildGridOverlay();
     }
-    syncSettingsDialog();
+    syncSettingsSheet();
     flashToggle('playground.ctrl.grid', selected);
   });
 
@@ -2880,7 +2880,7 @@ function wireShellChrome(): void {
     const selected = (e as CustomEvent<{ selected?: boolean }>).detail?.selected;
     if (typeof selected !== 'boolean') return;
     setAudioEnabled(selected);
-    syncSettingsDialog();
+    syncSettingsSheet();
     flashToggle('playground.ctrl.audio', selected);
   });
 
@@ -2888,7 +2888,7 @@ function wireShellChrome(): void {
     const selected = (e as CustomEvent<{ selected?: boolean }>).detail?.selected;
     if (typeof selected !== 'boolean') return;
     setMusicEnabled(selected);
-    syncSettingsDialog();
+    syncSettingsSheet();
     flashToggle('playground.ctrl.music', selected);
   });
 
@@ -2907,7 +2907,7 @@ function wireShellChrome(): void {
       const hex = btn.getAttribute('data-settings-seed');
       if (!hex) return;
       applySeedHex(hex);
-      syncSettingsDialog();
+      syncSettingsSheet();
       const tip = btn.closest('k3-tooltip') as HTMLElement & { content?: string } | null;
       const label =
         (typeof tip?.content === 'string' && tip.content.trim()) ||
