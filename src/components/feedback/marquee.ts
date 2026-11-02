@@ -1,15 +1,18 @@
 import { html, nothing, type PropertyValues } from 'lit';
 import { property, query, queryAll, state } from 'lit/decorators.js';
-import { K3Element, prefersReducedMotion } from '../../core/index.js';
+import { K3Element, prefersReducedMotion, isRtl } from '../../core/index.js';
+import { sanitizeHTMLDetailed, type SanitizeOptions } from '../../core/sanitize.js';
 import { hostReset } from '../_shared.js';
 import {
   MarqueeSpecs,
   marqueeOffset,
   marqueeItemStations,
   crossedMarqueeStation,
+  positiveMod,
   type MarqueeDirection,
   type MarqueeMode,
   type MarqueeStart,
+  type MarqueeVariant,
 } from './marquee.specs.js';
 import { marqueeStyles } from './marquee.styles.js';
 
@@ -19,10 +22,18 @@ export {
   marqueeOffset,
   marqueeItemStations,
   crossedMarqueeStation,
+  positiveMod,
   type MarqueeMode,
   type MarqueeDirection,
   type MarqueeStart,
+  type MarqueeVariant,
 } from './marquee.specs.js';
+
+/** Options for text vs sanitized HTML content. */
+export interface MarqueeContentOptions {
+  /** Treat strings as HTML — sanitized with an allowlist (no script, no handlers, safe URLs). */
+  html?: boolean;
+}
 
 type PauseReason = 'api' | 'hover' | 'focus';
 
@@ -93,6 +104,28 @@ export class K3Marquee extends K3Element {
   /** Text shown between copies (e.g. `•`). */
   @property() separator = '';
 
+  /** Text size — a number (px) or a CSS length (`26`, `1.5rem`, `clamp(…)` not allowed). */
+  @property({ attribute: 'text-size' }) textSize: string | number | null = null;
+  /** Text font family (`"Google Sans", system-ui, sans-serif`). */
+  @property({ attribute: 'text-font' }) textFont: string | null = null;
+  /** Text weight (100–900, `normal`, `bold`). */
+  @property({ attribute: 'text-weight' }) textWeight: string | number | null = null;
+  /** Grab the content (mouse, pen, finger) to move it; scrolling resumes on release. */
+  @property({ type: Boolean, reflect: true }) drag = false;
+  /** Pause while the page scrolls, resume shortly after. */
+  @property({ type: Boolean, attribute: 'pause-on-scroll' }) pauseOnScroll = false;
+  /** Band surface: `plain` · `tonal` · `filled` · `outlined`. */
+  @property({ reflect: true }) variant: MarqueeVariant = MarqueeSpecs.variant;
+  /**
+   * HTML you do not control (CMS, API, users) — sanitized with an allowlist before
+   * it replaces the content: no script / style / iframe / svg, no event handlers,
+   * no `style` / `id`, only safe URLs. Fires `k3-sanitize` when something is removed.
+   */
+  @property({ attribute: false }) html: string | null = null;
+  /** Sanitizer limits for `html` / `{ html: true }` content. */
+  @property({ attribute: false }) sanitizeOptions: SanitizeOptions = {};
+
+  @state() private hasLabel = false;
   @state() private copies = 1;
   @state() private reduced = false;
 
@@ -119,6 +152,13 @@ export class K3Marquee extends K3Element {
   private mql?: MediaQueryList;
   private mo?: MutationObserver;
   private contentFrame = 0;
+  private dragging = false;
+  private dragPointer = -1;
+  private dragLast = 0;
+  private dragMoved = 0;
+  private scrolling = false;
+  private scrollTimer = 0;
+  private loopCount = 0;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -133,6 +173,8 @@ export class K3Marquee extends K3Element {
     this.addEventListener('focusin', this.onFocusIn);
     this.addEventListener('focusout', this.onFocusOut);
     document.addEventListener('visibilitychange', this.onVisibility);
+    window.addEventListener('scroll', this.onPageScroll, { capture: true, passive: true });
+    watchDirection(this);
     if (typeof IntersectionObserver !== 'undefined') {
       this.io = new IntersectionObserver((entries) => {
         this.onScreen = entries.some((e) => e.isIntersecting);
@@ -165,6 +207,9 @@ export class K3Marquee extends K3Element {
     this.removeEventListener('focusin', this.onFocusIn);
     this.removeEventListener('focusout', this.onFocusOut);
     document.removeEventListener('visibilitychange', this.onVisibility);
+    window.removeEventListener('scroll', this.onPageScroll, { capture: true });
+    clearTimeout(this.scrollTimer);
+    unwatchDirection(this);
     super.disconnectedCallback();
   }
 
@@ -206,6 +251,7 @@ export class K3Marquee extends K3Element {
   restart(): void {
     this.distance = 0;
     this.lastTime = 0;
+    this.loopCount = 0;
     this.dwellUntil = 0;
     this.skipStation = null;
     this.prevLocal = this.scrollLocal(0);
@@ -220,6 +266,9 @@ export class K3Marquee extends K3Element {
     const sets = this.setEls;
     const first = sets?.[0];
     if (!viewport || !track || !first) return;
+    /* The track is laid out LTR whatever the page direction (stable geometry);
+       the content keeps its own reading direction. */
+    viewport.dataset.contentDir = isRtl(this) ? 'rtl' : 'ltr';
     const vertical = this.isVertical;
     const size = (el: HTMLElement) => (vertical ? el.offsetHeight : el.offsetWidth);
     const pos = (el: HTMLElement) => (vertical ? el.offsetTop : el.offsetLeft);
@@ -234,28 +283,51 @@ export class K3Marquee extends K3Element {
     this.applyTransform();
   }
 
-  /** Append content (an element, or text). */
-  addContent(content: string | Node): void {
-    this.append(typeof content === 'string' ? Object.assign(document.createElement('span'), { textContent: content }) : content);
+  /** Append an item: element, text, or HTML with `{ html: true }` (sanitized). */
+  addContent(content: string | Node, options: MarqueeContentOptions = {}): void {
+    this.append(this.toNode(content, options));
   }
 
-  /** Replace the content (elements, or text items). */
-  replaceContent(items: ReadonlyArray<string | Node>): void {
-    this.replaceChildren(
-      ...items.map((item) =>
-        typeof item === 'string' ? Object.assign(document.createElement('span'), { textContent: item }) : item,
-      ),
-    );
+  /** Replace the items (the `label` slot is kept). Strings are text unless `{ html: true }`. */
+  replaceContent(items: ReadonlyArray<string | Node>, options: MarqueeContentOptions = {}): void {
+    const kept = Array.from(this.children).filter((el) => el.hasAttribute('slot'));
+    this.replaceChildren(...kept, ...items.map((item) => this.toNode(item, options)));
   }
 
-  /** Text of each item, in order. */
+  /** Text of each item, in order (the label is not an item). */
   getContentList(): string[] {
-    return Array.from(this.children, (el) => el.textContent?.trim() ?? '');
+    return Array.from(this.children)
+      .filter((el) => !el.hasAttribute('slot'))
+      .map((el) => el.textContent?.trim() ?? '');
+  }
+
+  /** Text → `<span>`; HTML → sanitized fragment wrapped in one item `<span>`. */
+  private toNode(content: string | Node, options: MarqueeContentOptions): Node {
+    if (typeof content !== 'string') return content;
+    const item = document.createElement('span');
+    if (options.html) item.append(this.sanitize(content));
+    else item.textContent = content;
+    return item;
+  }
+
+  private sanitize(html: string): DocumentFragment {
+    const { fragment, removed } = sanitizeHTMLDetailed(html, this.sanitizeOptions);
+    if (removed.length) this.emit('k3-sanitize', { removed });
+    return fragment;
   }
 
   /** True while the marquee is actually moving. */
   get running(): boolean {
-    return !this.paused && !this.hovered && !this.focused && !this.reduced && this.onScreen && !document.hidden;
+    return (
+      !this.paused &&
+      !this.hovered &&
+      !this.focused &&
+      !this.dragging &&
+      !this.scrolling &&
+      !this.reduced &&
+      this.onScreen &&
+      !document.hidden
+    );
   }
 
   /* ── Internals ──────────────────────────────────────────────────────── */
@@ -326,7 +398,7 @@ export class K3Marquee extends K3Element {
 
   /** Copies are deep clones of the slotted content — hidden from assistive tech, not focusable. */
   private fillClones(): void {
-    const slot = this.renderRoot.querySelector('slot');
+    const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot:not([name])');
     const nodes = slot?.assignedNodes({ flatten: true }) ?? [];
     this.renderRoot.querySelectorAll<HTMLElement>('.set.clone').forEach((set) => {
       set.replaceChildren(...nodes.map((n) => n.cloneNode(true)));
@@ -362,14 +434,14 @@ export class K3Marquee extends K3Element {
   private scrollLocal(distance = this.distance): number {
     if (this.mode === 'classic') {
       const lap = this.viewportSize + this.setSize;
-      return lap > 0 ? distance % lap : 0;
+      return lap > 0 ? positiveMod(distance, lap) : 0;
     }
     if (this.period <= 0) return 0;
     if (this.startFrom === 'edge') {
       if (distance < this.viewportSize) return -1; /* still entering — no stations yet */
-      return (distance - this.viewportSize) % this.period;
+      return positiveMod(distance - this.viewportSize, this.period);
     }
-    return distance % this.period;
+    return positiveMod(distance, this.period);
   }
 
   /** Item start offsets inside one set (prefer a clone — real nodes, not a slot). */
@@ -474,8 +546,92 @@ export class K3Marquee extends K3Element {
     }
 
     this.applyTransform();
+    this.emitLoops();
     this.updateStateAttr();
     this.frame = requestAnimationFrame(this.tick);
+  };
+
+  /** `k3-loop` once per completed lap (`count` = laps since start / restart). */
+  private emitLoops(): void {
+    const lap = this.mode === 'classic' ? this.viewportSize + this.setSize : this.period;
+    if (lap <= 0) return;
+    const entry = this.mode === 'infinite' && this.startFrom === 'edge' ? this.viewportSize : 0;
+    const count = Math.floor((this.distance - entry) / lap);
+    if (count > this.loopCount) {
+      this.loopCount = count;
+      this.emit('k3-loop', { count });
+    }
+  }
+
+  /* ── Drag (mouse, pen, touch) ─────────────────────────────────────────── */
+
+  private onDragStart = (e: PointerEvent): void => {
+    if (!this.drag || this.reduced || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    const viewport = this.viewportEl;
+    if (!viewport) return;
+    this.dragging = true;
+    this.dragPointer = e.pointerId;
+    this.dragLast = this.isVertical ? e.clientY : e.clientX;
+    this.dragMoved = 0;
+    viewport.setPointerCapture?.(e.pointerId);
+    viewport.dataset.dragging = '';
+    this.syncLoop();
+  };
+
+  private onDragMove = (e: PointerEvent): void => {
+    if (!this.dragging || e.pointerId !== this.dragPointer) return;
+    const at = this.isVertical ? e.clientY : e.clientX;
+    const delta = at - this.dragLast;
+    this.dragLast = at;
+    this.dragMoved += Math.abs(delta);
+    /* Pulling the content along its travel direction advances it */
+    const forward = this.direction === 'left' || this.direction === 'up' ? -delta : delta;
+    this.distance += forward;
+    this.applyTransform();
+  };
+
+  private onDragEnd = (e: PointerEvent): void => {
+    if (!this.dragging || e.pointerId !== this.dragPointer) return;
+    this.dragging = false;
+    this.dragPointer = -1;
+    const viewport = this.viewportEl;
+    if (viewport) {
+      if (viewport.hasPointerCapture?.(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
+      delete viewport.dataset.dragging;
+    }
+    /* Item stations restart from where the user left the content */
+    this.dwellUntil = 0;
+    this.skipStation = null;
+    this.prevLocal = this.scrollLocal();
+    this.lastTime = 0;
+    this.syncLoop();
+  };
+
+  /** A drag is not a click: links inside are not followed after moving the content. */
+  private onClickCapture = (e: MouseEvent): void => {
+    if (this.dragMoved > 5) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    this.dragMoved = 0;
+  };
+
+  private onPageScroll = (): void => {
+    if (!this.pauseOnScroll) return;
+    this.scrolling = true;
+    this.syncLoop();
+    clearTimeout(this.scrollTimer);
+    this.scrollTimer = window.setTimeout(() => {
+      this.scrolling = false;
+      this.syncLoop();
+    }, 180);
+  };
+
+  private onLabelSlotChange = (e: Event): void => {
+    const slot = e.target as HTMLSlotElement;
+    this.hasLabel = slot.assignedNodes({ flatten: true }).some(
+      (n) => n.nodeType === Node.ELEMENT_NODE || (n.textContent ?? '').trim() !== '',
+    );
   };
 
   private applyTransform(): void {
@@ -502,6 +658,18 @@ export class K3Marquee extends K3Element {
   override willUpdate(changed: PropertyValues): void {
     super.willUpdate(changed);
     if (changed.has('gap')) this.style.setProperty('--k3-marquee-gap', `${Math.max(0, this.gap)}px`);
+    if (changed.has('textSize')) {
+      const size = cssLength(this.textSize);
+      setVar(this, '--k3-marquee-font-size', size);
+      /* A fixed inherited line-height (px) would clip bigger text — use a ratio */
+      setVar(this, '--k3-marquee-line-height', size ? '1.3' : null);
+    }
+    if (changed.has('textFont')) setVar(this, '--k3-marquee-font-family', cssFontFamily(this.textFont));
+    if (changed.has('textWeight')) setVar(this, '--k3-marquee-font-weight', cssFontWeight(this.textWeight));
+    if (changed.has('html') && this.html != null) {
+      const kept = Array.from(this.children).filter((el) => el.hasAttribute('slot'));
+      this.replaceChildren(...kept, this.sanitize(this.html));
+    }
     if (changed.has('mode') || changed.has('startFrom') || changed.has('direction')) {
       this.distance = 0;
       this.dwellUntil = 0;
@@ -547,7 +715,22 @@ export class K3Marquee extends K3Element {
       ? html`<span class="sep" aria-hidden="true">${this.separator}</span>`
       : nothing;
     return html`
-      <div class="viewport" part="viewport" data-axis=${axis} data-direction=${this.direction} data-state="paused">
+      <div class="band" part="band">
+      <div class="label" part="label" ?hidden=${!this.hasLabel}>
+        <slot name="label" @slotchange=${this.onLabelSlotChange}></slot>
+      </div>
+      <div
+        class="viewport"
+        part="viewport"
+        data-axis=${axis}
+        data-direction=${this.direction}
+        data-state="paused"
+        @pointerdown=${this.onDragStart}
+        @pointermove=${this.onDragMove}
+        @pointerup=${this.onDragEnd}
+        @pointercancel=${this.onDragEnd}
+        @click=${{ handleEvent: this.onClickCapture, capture: true }}
+      >
         <div class="track" part="track">
           <div class="set" part="set"><slot @slotchange=${this.onSlotChange}></slot></div>
           ${Array.from(
@@ -556,7 +739,64 @@ export class K3Marquee extends K3Element {
           )}
         </div>
       </div>
+      </div>
     `;
+  }
+}
+
+/* ── Text style values (validated: anything else falls back to inherit) ── */
+
+function setVar(el: HTMLElement, name: string, value: string | null): void {
+  if (value) el.style.setProperty(name, value);
+  else el.style.removeProperty(name);
+}
+
+/** `26` → `26px`; `1.5rem`, `120%`… kept; anything else (functions, var(), url()) refused. */
+export function cssLength(raw: string | number | null | undefined): string | null {
+  if (raw == null || raw === '') return null;
+  const v = String(raw).trim();
+  if (/^\d+(\.\d+)?$/.test(v)) return `${v}px`;
+  if (/^\d+(\.\d+)?(px|rem|em|%|vw|vh|vmin|vmax|pt|ch|ex|lh)$/i.test(v)) return v.toLowerCase();
+  return null;
+}
+
+/** Font family list: names, quotes, commas, hyphens only (no `;`, `{`, `url(`…). */
+export function cssFontFamily(raw: string | null | undefined): string | null {
+  const v = (raw ?? '').trim();
+  if (!v || v.length > 200) return null;
+  return /^[\p{L}\p{N}\s"',._-]+$/u.test(v) ? v : null;
+}
+
+/** 1–1000, `normal`, `bold`, `lighter`, `bolder`. */
+export function cssFontWeight(raw: string | number | null | undefined): string | null {
+  if (raw == null || raw === '') return null;
+  const v = String(raw).trim().toLowerCase();
+  if (/^(normal|bold|lighter|bolder)$/.test(v)) return v;
+  const n = Number(v);
+  return Number.isInteger(n) && n >= 1 && n <= 1000 ? String(n) : null;
+}
+
+/* ── Page direction: one observer for every marquee ────────────────────── */
+
+const directionWatchers = new Set<K3Marquee>();
+let directionObserver: MutationObserver | null = null;
+
+/** Re-measure when the page flips LTR ↔ RTL (`dir` on <html> or <body>). */
+function watchDirection(el: K3Marquee): void {
+  directionWatchers.add(el);
+  if (directionObserver || typeof MutationObserver === 'undefined') return;
+  directionObserver = new MutationObserver(() => {
+    directionWatchers.forEach((m) => requestAnimationFrame(() => m.recalculate()));
+  });
+  directionObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['dir'] });
+  if (document.body) directionObserver.observe(document.body, { attributes: true, attributeFilter: ['dir'] });
+}
+
+function unwatchDirection(el: K3Marquee): void {
+  directionWatchers.delete(el);
+  if (directionWatchers.size === 0) {
+    directionObserver?.disconnect();
+    directionObserver = null;
   }
 }
 

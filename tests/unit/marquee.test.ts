@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import {
+import { positiveMod,
   marqueeOffset,
   durationFromSpeed,
   marqueeItemStations,
@@ -143,5 +143,82 @@ describe('k3-marquee API', () => {
     expect(clone.getAttribute('aria-hidden')).toBe('true');
     expect(clone.hasAttribute('inert')).toBe(true);
     host.remove();
+  });
+});
+
+describe('k3-marquee — text style, safe HTML, label, templates', () => {
+  const mount = async (html: string) => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    document.body.appendChild(host);
+    const el = host.firstElementChild as K3Marquee & Record<string, unknown>;
+    await el.updateComplete;
+    return { el, host };
+  };
+
+  it('applies text size / font / weight, ignores unsafe values', async () => {
+    const { el, host } = await mount('<k3-marquee text-size="26" text-font="Georgia, serif" text-weight="700"><span>a</span></k3-marquee>');
+    expect(el.style.getPropertyValue('--k3-marquee-font-size')).toBe('26px');
+    expect(el.style.getPropertyValue('--k3-marquee-font-family')).toBe('Georgia, serif');
+    expect(el.style.getPropertyValue('--k3-marquee-font-weight')).toBe('700');
+    el.setAttribute('text-size', 'url(javascript:alert(1))');
+    el.setAttribute('text-font', 'x; background:url(evil)');
+    await el.updateComplete;
+    expect(el.style.getPropertyValue('--k3-marquee-font-size')).toBe('');
+    expect(el.style.getPropertyValue('--k3-marquee-font-family')).toBe('');
+    host.remove();
+  });
+
+  it('sanitizes the html property and reports removals', async () => {
+    const { el, host } = await mount('<k3-marquee><span slot="label">Live</span><span>old</span></k3-marquee>');
+    const removed: string[][] = [];
+    el.addEventListener('k3-sanitize', (e) => removed.push((e as CustomEvent).detail.removed));
+    (el as unknown as { html: string }).html = '<b>Hi</b><img src="javascript:alert(1)" onerror="alert(1)"><script>alert(1)</script>';
+    await el.updateComplete;
+    expect(el.querySelector('b')?.textContent).toBe('Hi');
+    expect(el.querySelector('script')).toBeNull();
+    expect(el.querySelector('img')?.hasAttribute('onerror')).toBe(false);
+    expect(el.querySelector('img')?.hasAttribute('src')).toBe(false);
+    expect(el.querySelector('[slot="label"]')?.textContent).toBe('Live');
+    expect(removed[0]).toEqual(expect.arrayContaining(['attr:onerror', 'url:src', 'tag:script']));
+    host.remove();
+  });
+
+  it('adds text or sanitized HTML items and keeps the label out of the list', async () => {
+    const { el, host } = await mount('<k3-marquee><span slot="label">Live</span></k3-marquee>');
+    const m = el as unknown as K3Marquee & {
+      addContent(c: string, o?: { html?: boolean }): void;
+      replaceContent(i: string[], o?: { html?: boolean }): void;
+    };
+    m.addContent('<i>text</i>');
+    m.addContent('<i>html</i><a href="javascript:x">bad</a>', { html: true });
+    expect(m.getContentList()).toEqual(['<i>text</i>', 'htmlbad']);
+    expect(el.querySelector('i')?.textContent).toBe('html');
+    expect(el.querySelector('a')?.hasAttribute('href')).toBe(false);
+    m.replaceContent(['one', 'two']);
+    expect(m.getContentList()).toEqual(['one', 'two']);
+    expect(el.querySelector('[slot="label"]')).toBeTruthy();
+    host.remove();
+  });
+
+  it('shows the label slot only when filled; reflects variant and drag', async () => {
+    const { el, host } = await mount('<k3-marquee variant="tonal" drag><span>a</span></k3-marquee>');
+    expect(el.shadowRoot!.querySelector('.label')!.hasAttribute('hidden')).toBe(true);
+    const label = document.createElement('span');
+    label.slot = 'label';
+    label.textContent = 'Live';
+    el.append(label);
+    await new Promise((r) => setTimeout(r, 20));
+    await el.updateComplete;
+    expect(el.shadowRoot!.querySelector('.label')!.hasAttribute('hidden')).toBe(false);
+    expect(el.getAttribute('variant')).toBe('tonal');
+    expect(el.hasAttribute('drag')).toBe(true);
+    host.remove();
+  });
+
+  it('wraps negative distances (dragging backwards) seamlessly', () => {
+    expect(positiveMod(-30, 100)).toBe(70);
+    expect(marqueeOffset(-30, { mode: 'infinite', start: 'filled', viewport: 600, period: 100, setSize: 80 })).toBe(-70);
+    expect(marqueeOffset(-30, { mode: 'infinite', start: 'edge', viewport: 600, period: 100, setSize: 80 })).toBe(600);
   });
 });

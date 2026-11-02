@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- `k3-marquee`: text version styling (`text-size`, `text-font`, `text-weight`), sanitized `html` content (`html` property, `{ html: true }` for `addContent` / `replaceContent`, `k3-sanitize` event), `drag` (grab to move with mouse, pen or touch — links are not followed after a drag), `pause-on-scroll`, `k3-loop` event, templates (`variant`: plain · tonal · filled · outlined) and a fixed `label` slot
+- `sanitizeHTML()` / `sanitizeHTMLDetailed()` — allowlist HTML sanitizer for untrusted strings: inert parsing, DOM rebuilt node by node (no `innerHTML`, no mutation XSS, Trusted Types friendly), dangerous elements dropped with their content, no event handlers / `style` / `id` / `name`, URL scheme checks, forced `noopener noreferrer`, custom elements never instantiated, size / node / depth limits
 - `k3-marquee` `pause-at-items` + `item-pause` — dwell when each item’s start reaches the near edge, then scroll to the next; `k3-item-pause` event; demo #6
 - `k3-codeblock` `theme`: `material` (default — M3 roles, light/dark, no extra code surface) or `okaidia` (fixed Prism dark panel); every token colour is a `--k3-code-*` custom property; source uses JetBrains Mono (`--k3-ref-typeface-code`)
 - Syntax highlighting — `syntax` API and `k3-codeblock` use vendored Prism 1.30 grammars (MIT) in a private instance: no `window.Prism`, no auto-highlighting of the host page. HTML / XML / SVG, CSS, JS, TS, JSX, TSX and JSON ship in k3ui.js; 33 more languages (PHP, SCSS, Sass, SQL / SQLite / MySQL, C, C++, C#, Git, Batch, AutoHotkey, AsciiDoc, Go, Python, HTTP, Markdown, Lua, MongoDB, nginx, Bash, PowerShell, YAML, Diff, Docker, INI, TOML, Java, Kotlin, Rust, Ruby, Swift, GraphQL, Regex) load on demand from `dist/k3ui-syntax.js` (`k3ui/syntax`, 30 kB gzip). Aliases such as `c++`, `c#`, `react`, `sqlite`, `bat`, `ahk`, `ascii`. `npm run vendor:prism` regenerates the grammars
@@ -35,6 +37,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- `k3-marquee` in RTL pages: the continuous loop showed gaps and the edge start was off-screen (the track inherited the page direction). The strip geometry is now physical in both directions, each copy keeps the page reading direction, and the layout is re-measured when `dir` changes; text set with `text-size` keeps a proportional line height (bigger text was clipped)
 - Playground: colours flipped at load / refresh for customised themes — `<k3-theme>` re-applied its static attributes over the saved theme; it is now synced before it upgrades, and returning visitors replay their cached theme before first paint
 - `K3UI.keyboard` / `K3UI.mouse` were typed on the global but missing at runtime
 - `k3-sheet` drag-to-dismiss threw a ReferenceError (`isRtl` undefined)

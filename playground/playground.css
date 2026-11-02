@@ -4297,6 +4297,19 @@ k3-fab .ms-fill-icon {
   gap: var(--k3-sys-spacing-space200);
 }
 .marquee-lab-controls k3-select,
-.marquee-lab-controls k3-text-field {
+.marquee-lab-controls k3-text-field,
+.marquee-lab-controls k3-slider {
   inline-size: 100%;
+}
+.marquee-lab-preview {
+  display: grid;
+  gap: var(--k3-sys-spacing-space150, 0.75rem);
+  align-content: start;
+  min-inline-size: 0;
+}
+.marquee-lab-note {
+  margin: 0;
+  color: var(--k3-sys-color-on-surface-variant);
+  font-size: var(--k3-sys-typescale-body-small-size, 0.75rem);
+  line-height: var(--k3-sys-typescale-body-small-line-height, 1rem);
 }

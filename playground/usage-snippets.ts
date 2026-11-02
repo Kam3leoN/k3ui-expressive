@@ -853,10 +853,18 @@ end?.addEventListener("k3-change", () => {
   <span>Headline three</span>
 </k3-marquee>`,
     jsExtra: `const marquee = document.querySelector("k3-marquee");
+marquee.textSize = 26;                       // text version: px or CSS length
+marquee.textFont = '"Google Sans", sans-serif';
+marquee.drag = true;                         // grab to move (mouse, pen, touch)
 pauseButton.addEventListener("click", () => marquee.toggle());
-marquee.pauseOnHover = false;      // hover no longer pauses
-marquee.speed = 120;               // px/s, applied live
-marquee.addContent("New item");    // copies refresh automatically`,
+
+// HTML you do not control: sanitized (no script, no handlers, safe URLs only)
+marquee.html = cmsHtml;
+marquee.addEventListener("k3-sanitize", (e) => console.warn(e.detail.removed));
+marquee.addContent("<b>New</b> item", { html: true });
+
+// Fixed badge + template:
+// <k3-marquee variant="tonal"><span slot="label">Live</span>…</k3-marquee>`,
   },
   confetti: {
     components: ['k3-confetti', 'k3-button'],

@@ -209,3 +209,4 @@ export {
   type LazyTrigger,
   type WhenTriggeredOptions,
 } from './lazy.js';
+export { sanitizeHTML, sanitizeHTMLDetailed, type SanitizeOptions, type SanitizeResult } from './sanitize.js';

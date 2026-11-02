@@ -7,6 +7,8 @@ export type MarqueeMode = 'infinite' | 'classic';
 export type MarqueeDirection = 'left' | 'right' | 'up' | 'down';
 /** Infinite mode only: `filled` = track already covered · `edge` = enters from the far edge. */
 export type MarqueeStart = 'filled' | 'edge';
+/** Surface style of the band. */
+export type MarqueeVariant = 'plain' | 'tonal' | 'filled' | 'outlined';
 
 export const MarqueeSpecs = {
   mode: 'infinite' as MarqueeMode,
@@ -16,6 +18,7 @@ export const MarqueeSpecs = {
   duration: 20 as number,
   gap: 80 as number,
   pauseOnHover: false as boolean,
+  variant: 'plain' as MarqueeVariant,
   pauseOnFocus: true as boolean,
   autoplay: true as boolean,
   /** Pause when each item’s start reaches the near edge. */
@@ -41,21 +44,27 @@ export function durationFromSpeed(trackWidthPx: number, speedPxPerSec: number): 
  * - infinite + edge:   enters from `viewport`, then loops like filled
  * - classic:           single pass from `viewport` to `-setSize`, then again
  */
+/** `a mod n` in `[0, n)` (also for negative `a`). */
+export function positiveMod(a: number, n: number): number {
+  return n > 0 ? ((a % n) + n) % n : 0;
+}
+
 export function marqueeOffset(
   distance: number,
   o: { mode: MarqueeMode; start: MarqueeStart; viewport: number; period: number; setSize: number },
 ): number {
-  const d = Math.max(0, distance);
+  /* distance can be negative after dragging backwards — wrap with a positive modulo */
+  const d = Number.isFinite(distance) ? distance : 0;
   if (o.mode === 'classic') {
     const lap = o.viewport + o.setSize;
-    return lap > 0 ? o.viewport - (d % lap) : 0;
+    return lap > 0 ? o.viewport - positiveMod(d, lap) : 0;
   }
   if (o.period <= 0) return 0;
   if (o.start === 'edge') {
-    if (d < o.viewport) return o.viewport - d;
-    return -((d - o.viewport) % o.period);
+    if (d < o.viewport) return o.viewport - Math.max(0, d);
+    return -positiveMod(d - o.viewport, o.period);
   }
-  return -(d % o.period);
+  return -positiveMod(d, o.period);
 }
 
 /**

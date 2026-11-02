@@ -52,6 +52,7 @@ import {
 } from './core/index.js';
 import { showSnackbar, snackbarQueue } from './components/feedback/snackbar-queue.js';
 
+export { sanitizeHTML, sanitizeHTMLDetailed, type SanitizeOptions, type SanitizeResult } from './core/sanitize.js';
 export { VERSION } from './version.js';
 export { init, type InitOptions, type K3UIGlobal } from './bootstrap/init.js';
 export { debug } from './debug/logger.js';

@@ -9590,13 +9590,16 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
             <h2 data-i18n="doc.marquee.section.lab">Playground</h2>
             <p data-i18n="doc.marquee.section.lab.blurb">Tune the options — the ticker updates live.</p>
             <div class="marquee-lab">
+              <div class="marquee-lab-preview">
               <div class="marquee-lab-stage" id="mq-stage">
-                <k3-marquee id="mq-lab" speed="80" gap="48" direction="left" start="filled">
+                <k3-marquee id="mq-lab" speed="80" gap="48" direction="left" start="filled" text-size="26">
                   <span data-i18n="doc.marquee.text.item1">Headline one — pause here</span>
                   <span data-i18n="doc.marquee.text.item2">Headline two — then here</span>
                   <span data-i18n="doc.marquee.text.item3">Headline three — and again</span>
                   <span data-i18n="doc.marquee.text.item4">Headline four — loop</span>
                 </k3-marquee>
+              </div>
+                <p class="marquee-lab-note" id="mq-sanitize-note" role="status" hidden></p>
               </div>
               <div class="marquee-lab-controls">
                 <k3-select id="mq-dir" variant="outlined" value="left" label="Direction" data-i18n-label="doc.marquee.lab.direction">
@@ -9609,6 +9612,14 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
                 <k3-select id="mq-content" variant="outlined" value="text" label="Content" data-i18n-label="doc.marquee.lab.content">
                   <k3-menu-item value="text" data-i18n="doc.marquee.lab.content.text">Text</k3-menu-item>
                   <k3-menu-item value="image" data-i18n="doc.marquee.lab.content.image">Image</k3-menu-item>
+                  <k3-menu-item value="html" data-i18n="doc.marquee.lab.content.html">HTML (sanitized)</k3-menu-item>
+                </k3-select>
+                <k3-slider id="mq-text-size" min="12" max="64" step="1" value="26" label="Text size" data-i18n-label="doc.marquee.lab.textSize"></k3-slider>
+                <k3-select id="mq-font" variant="outlined" value="theme" label="Font" data-i18n-label="doc.marquee.lab.font">
+                  <k3-menu-item value="theme" data-i18n="doc.marquee.lab.font.theme">Theme (Google Sans)</k3-menu-item>
+                  <k3-menu-item value="system" data-i18n="doc.marquee.lab.font.system">System</k3-menu-item>
+                  <k3-menu-item value="serif" data-i18n="doc.marquee.lab.font.serif">Serif</k3-menu-item>
+                  <k3-menu-item value="mono" data-i18n="doc.marquee.lab.font.mono">Monospace</k3-menu-item>
                 </k3-select>
                 <k3-switch id="mq-hover">
                   <span data-i18n="doc.marquee.lab.pauseOnHover">Pause on hover</span>
@@ -9616,8 +9627,23 @@ await K3UI.init({ components: ["k3-button"] });</code></pre>
                 <k3-switch id="mq-pause-items">
                   <span data-i18n="doc.marquee.lab.pauseAtItems">Pause at each item</span>
                 </k3-switch>
+                <k3-switch id="mq-drag">
+                  <span data-i18n="doc.marquee.lab.drag">Drag to move</span>
+                </k3-switch>
+                <k3-switch id="mq-pause-scroll">
+                  <span data-i18n="doc.marquee.lab.pauseOnScroll">Pause while the page scrolls</span>
+                </k3-switch>
                 <k3-switch id="mq-fade" selected>
                   <span data-i18n="doc.marquee.lab.fade">Edge fade</span>
+                </k3-switch>
+                <k3-select id="mq-variant" variant="outlined" value="plain" label="Style" data-i18n-label="doc.marquee.lab.variant">
+                  <k3-menu-item value="plain" data-i18n="doc.marquee.lab.variant.plain">Plain</k3-menu-item>
+                  <k3-menu-item value="tonal" data-i18n="doc.marquee.lab.variant.tonal">Tonal</k3-menu-item>
+                  <k3-menu-item value="filled" data-i18n="doc.marquee.lab.variant.filled">Filled</k3-menu-item>
+                  <k3-menu-item value="outlined" data-i18n="doc.marquee.lab.variant.outlined">Outlined</k3-menu-item>
+                </k3-select>
+                <k3-switch id="mq-label">
+                  <span data-i18n="doc.marquee.lab.label">“Live” badge</span>
                 </k3-switch>
                 <k3-switch id="mq-bg-custom">
                   <span data-i18n="doc.marquee.lab.bgCustom">Custom background</span>

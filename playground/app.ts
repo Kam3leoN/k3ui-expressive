@@ -1966,7 +1966,13 @@ function wireMarqueeDemos(): void {
     gap: number;
     speed: number;
     restart(): void;
-    replaceContent(items: ReadonlyArray<string | Node>): void;
+    replaceContent(items: ReadonlyArray<string | Node>, options?: { html?: boolean }): void;
+    textSize: string | number | null;
+    textFont: string | null;
+    drag: boolean;
+    pauseOnScroll: boolean;
+    variant: string;
+    html: string | null;
   };
   const marquee = document.getElementById('mq-lab') as Mq | null;
   const stage = document.getElementById('mq-stage');
@@ -1983,6 +1989,35 @@ function wireMarqueeDemos(): void {
   const bgHex = document.getElementById('mq-bg-hex') as (HTMLElement & { value?: string; hidden?: boolean }) | null;
   const fgCustom = document.getElementById('mq-fg-custom') as (HTMLElement & { selected?: boolean }) | null;
   const fgHex = document.getElementById('mq-fg-hex') as (HTMLElement & { value?: string; hidden?: boolean }) | null;
+  const textSize = document.getElementById('mq-text-size') as (HTMLElement & { value?: number; hidden?: boolean }) | null;
+  const font = document.getElementById('mq-font') as (HTMLElement & { value?: string; hidden?: boolean }) | null;
+  const drag = document.getElementById('mq-drag') as (HTMLElement & { selected?: boolean }) | null;
+  const pauseScroll = document.getElementById('mq-pause-scroll') as (HTMLElement & { selected?: boolean }) | null;
+  const variant = document.getElementById('mq-variant') as (HTMLElement & { value?: string }) | null;
+  const badge = document.getElementById('mq-label') as (HTMLElement & { selected?: boolean }) | null;
+  const note = document.getElementById('mq-sanitize-note');
+
+  const FONTS: Record<string, string> = {
+    theme: '"Google Sans", "Google Sans Text", system-ui, sans-serif',
+    system: 'system-ui, sans-serif',
+    serif: 'Georgia, "Times New Roman", serif',
+    mono: '"Google Sans Code", ui-monospace, monospace',
+  };
+  const esc = (text: string): string =>
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  /* Rich HTML + a deliberately hostile tail — the sanitizer strips it (see the note) */
+  const htmlSample = (): string =>
+    `<strong>k3ui</strong> · <em>${esc(t('doc.marquee.html.rich'))}</em> · <mark>${esc(t('doc.marquee.html.safe'))}</mark> · ` +
+    `<a href="https://github.com/Kam3leoN/k3ui-expressive" target="_blank">GitHub</a> · ` +
+    `<img src="javascript:alert(1)" onerror="alert(1)"><script>alert(1)<\/script>` +
+    `<a href="javascript:alert(1)" onclick="alert(1)">${esc(t('doc.marquee.html.trap'))}</a>`;
+
+  marquee.addEventListener('k3-sanitize', (e) => {
+    if (!note) return;
+    const removed = ((e as CustomEvent<{ removed: string[] }>).detail?.removed ?? []).join(', ');
+    note.textContent = t('doc.marquee.lab.sanitized', { list: removed });
+    note.hidden = false;
+  });
 
   const LOGOS = ['nova', 'orbit', 'pixel', 'lumen', 'vertex', 'quanta'] as const;
 
@@ -2015,7 +2050,7 @@ function wireMarqueeDemos(): void {
   const apply = (): void => {
     const direction = dir?.value === 'right' ? 'right' : 'left';
     const loop = continuous?.selected !== false;
-    const kind = content?.value === 'image' ? 'image' : 'text';
+    const kind = content?.value === 'image' ? 'image' : content?.value === 'html' ? 'html' : 'text';
     const fadeOn = fade?.selected !== false;
     const useBgCustom = !!bgCustom?.selected;
     const useFgCustom = !!fgCustom?.selected;
@@ -2029,7 +2064,31 @@ function wireMarqueeDemos(): void {
     marquee.style.setProperty('--k3-marquee-fade', fadeOn ? '8%' : '0%');
     marquee.setAttribute('data-fade', fadeOn ? 'on' : 'off');
     stage.dataset.fade = fadeOn ? 'on' : 'off';
-    marquee.replaceContent(kind === 'image' ? imageNodes() : textNodes());
+    /* Text version: size / font (26 px by default, like the page sample) */
+    const textual = kind !== 'image';
+    if (textSize) textSize.hidden = !textual;
+    if (font) font.hidden = !textual;
+    marquee.textSize = textual ? Number(textSize?.value ?? 26) : null;
+    marquee.textFont = textual ? (FONTS[font?.value ?? 'theme'] ?? null) : null;
+    marquee.drag = !!drag?.selected;
+    marquee.pauseOnScroll = !!pauseScroll?.selected;
+    marquee.variant = variant?.value ?? 'plain';
+    if (note && kind !== 'html') note.hidden = true;
+    if (kind === 'html') {
+      marquee.html = null;
+      marquee.html = htmlSample();
+    } else {
+      marquee.html = null;
+      marquee.replaceContent(kind === 'image' ? imageNodes() : textNodes());
+    }
+    marquee.querySelector('[slot="label"]')?.remove();
+    if (badge?.selected) {
+      const live = document.createElement('span');
+      live.slot = 'label';
+      live.dataset.i18n = 'doc.marquee.label.live';
+      live.textContent = t(live.dataset.i18n);
+      marquee.prepend(live);
+    }
 
     /* BG: custom + valid hex → hex; otherwise Material surface-container */
     if (bgHex) bgHex.hidden = !useBgCustom;
@@ -2070,6 +2129,13 @@ function wireMarqueeDemos(): void {
   fgCustom?.addEventListener('k3-change', apply);
   fgHex?.addEventListener('k3-change', apply);
   fgHex?.addEventListener('k3-input', apply);
+  textSize?.addEventListener('k3-input', apply);
+  textSize?.addEventListener('k3-change', apply);
+  font?.addEventListener('k3-change', apply);
+  drag?.addEventListener('k3-change', apply);
+  pauseScroll?.addEventListener('k3-change', apply);
+  variant?.addEventListener('k3-change', apply);
+  badge?.addEventListener('k3-change', apply);
   apply();
 }
 
