@@ -459,13 +459,6 @@ export const DOC_COMPONENTS: DocComponent[] = [
     titleKey: 'doc.halftone.title',
     blurbKey: 'doc.halftone.blurb',
   },
-  {
-    id: 'glow-particles',
-    category: 'Animation',
-    title: 'Glow particles',
-    titleKey: 'doc.glow-particles.title',
-    blurbKey: 'doc.glow-particles.blurb',
-  },
   // Containment
   {
     id: 'avatar',

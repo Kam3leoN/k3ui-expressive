@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "K3ui — Material 3 Expressive web components (Lit + TypeScript + SCSS + Tailwind)",
   "author": "Kam3leoN",
-  "license": "MIT",
+  "license": "MIT AND GPL-3.0-only",
   "type": "module",
   "main": "./dist/k3ui.js",
   "module": "./dist/k3ui.js",
@@ -21,6 +21,7 @@
       "default": "./dist/k3ui-syntax.js"
     },
     "./k3ui.css": "./dist/k3ui.css",
+    "./holo-effects.css": "./dist/holo-effects/k3ui-holo-effects.css",
     "./fonts.css": "./dist/fonts/fonts.css",
     "./fonts-ui.css": "./dist/fonts/fonts-ui.css",
     "./fonts-code.css": "./dist/fonts/fonts-code.css",
@@ -35,9 +36,10 @@
   "scripts": {
     "dev": "vite --config playground/vite.config.ts",
     "dev:qr": "vite --config apps/qr-generator/vite.config.ts",
-    "build": "npm run build:lib && npm run build:syntax && npm run build:fonts && npm run build:tokens && npm run budget:bundle",
+    "build": "npm run build:lib && npm run build:syntax && npm run build:fonts && npm run build:tokens && npm run build:holo-effects && npm run budget:bundle",
     "build:lib": "vite build",
     "build:fonts": "node scripts/copy-fonts.mjs",
+    "build:holo-effects": "node scripts/build-holo-effects.mjs",
     "build:playground": "vite build --config playground/vite.config.ts",
     "build:qr": "vite build --config apps/qr-generator/vite.config.ts",
     "build:tokens": "node scripts/export-tokens.mjs",

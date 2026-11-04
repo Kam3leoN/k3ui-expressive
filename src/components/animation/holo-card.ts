@@ -18,8 +18,27 @@ export const HoloCardSpecs = {
   motionRange: 20,
 } as const;
 
-/** `prism` (built in) · `none` · any other name for an external effect stylesheet. */
-export type HoloCardEffect = 'prism' | 'none' | (string & {});
+/**
+ * `prism` (built in) · `none` · the 13 foils of the optional `k3ui/holo-effects.css`
+ * add-on (GPL-3.0) · any other name for your own `::part()` stylesheet.
+ */
+export type HoloCardEffect =
+  | 'prism'
+  | 'none'
+  | 'holo'
+  | 'reverse'
+  | 'cosmos'
+  | 'rainbow'
+  | 'rainbow-alt'
+  | 'secret'
+  | 'v'
+  | 'vmax'
+  | 'vstar'
+  | 'full-art'
+  | 'shiny'
+  | 'radiant'
+  | 'full-art-wave'
+  | (string & {});
 
 type HoloState = 'rotateX' | 'rotateY' | 'pointerX' | 'pointerY' | 'backgroundX' | 'backgroundY' | 'opacity';
 
@@ -43,11 +62,19 @@ const REST: Record<HoloState, number> = {
  * </k3-holo-card>
  * ```
  *
- * Built-in effect: `prism`. Any other `effect` value paints no foil, so an
- * external stylesheet can style `::part(shine)` / `::part(glare)` (and their
- * `::before` / `::after`) from the host variables `--k3-holo-pointer-x|y`,
- * `--k3-holo-pointer-from-center|left|top`, `--k3-holo-background-x|y`,
- * `--k3-holo-opacity`, `--k3-holo-seed-x|y`.
+ * Built-in effect: `prism`. Thirteen more foils (`holo`, `reverse`, `cosmos`,
+ * `rainbow`, `rainbow-alt`, `secret`, `v`, `vmax`, `vstar`, `full-art`, `shiny`,
+ * `radiant`, `full-art-wave`) ship in the optional `k3ui/holo-effects.css`
+ * add-on — GPL-3.0, kept outside the MIT bundle:
+ *
+ * ```js
+ * import 'k3ui/holo-effects.css';
+ * ```
+ *
+ * Any other `effect` value paints no foil, so your own stylesheet can style
+ * `::part(card|shine|glare)` (and their `::before` / `::after`) from the host
+ * variables `--k3-holo-pointer-x|y`, `--k3-holo-pointer-from-center|left|top`,
+ * `--k3-holo-background-x|y`, `--k3-holo-opacity`, `--k3-holo-seed-x|y`.
  *
  * @slot - Card artwork (`<img>`, `<picture>`, `<svg>` …)
  * @csspart card — tilted card, clips the light layers

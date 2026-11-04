@@ -72,7 +72,6 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-text-scramble', load: () => import('../components/animation/text-scramble.js') },
   { tag: 'k3-heart-burst', load: () => import('../components/animation/heart-burst.js') },
   { tag: 'k3-halftone', load: () => import('../components/animation/halftone.js') },
-  { tag: 'k3-glow-particles', load: () => import('../components/animation/glow-particles.js') },
   { tag: 'k3-holo-card', load: () => import('../components/animation/holo-card.js') },
   { tag: 'k3-scratch-card', load: () => import('../components/animation/scratch-card.js') },
   { tag: 'k3-lenticular-card', load: () => import('../components/animation/lenticular-card.js') },

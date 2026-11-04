@@ -286,10 +286,6 @@ export {
   type HalftoneTone,
 } from './components/animation/halftone.js';
 export {
-  K3GlowParticles,
-  GlowParticlesSpecs,
-} from './components/animation/glow-particles.js';
-export {
   K3HoloCard,
   HoloCardSpecs,
   type HoloCardEffect,

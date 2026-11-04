@@ -1259,7 +1259,6 @@ function buildNavSheet(destId: string): void {
       'text-scramble': 'shuffle',
       'heart-burst': 'favorite',
       halftone: 'grid_on',
-      'glow-particles': 'flare',
     };
     const ul = document.createElement('ul');
     ul.className = 'shell-sheet-nav';
@@ -1476,7 +1475,6 @@ function fillNavMenu(destId?: string | null): {
       'text-scramble': 'shuffle',
       'heart-burst': 'favorite',
       halftone: 'grid_on',
-      'glow-particles': 'flare',
     };
     menu.replaceChildren(
       ...componentsInCategory('Animation').map((c) => {
@@ -3597,7 +3595,7 @@ function wireHalftoneLab(): void {
   document.getElementById('ht-download')?.addEventListener('k3-click', () => void lab.download('k3ui-halftone.png'));
 }
 
-/** Holo card — select switches foil model (trading / photo / playground foils). */
+/** Holo card — connected group switches foil model (prism + add-on foils; Golden/Silver use secret). */
 let holoCardDemoWired = false;
 function wireHoloCardDemo(): void {
   if (holoCardDemoWired) return;
@@ -3613,69 +3611,30 @@ function wireHoloCardDemo(): void {
     altKey: string;
   };
 
+  const cardModel = (
+    effect: string,
+    src = '/cards/cristal-aurore.svg',
+    altKey = 'doc.card-holo.alt.crystal',
+  ): HoloModel => ({ effect, layout: 'portrait', maxRotate: 15, src, width: 630, height: 880, altKey });
+
+  /* prism is built in; the other foils come from addons/holo-effects (secret = Golden / Silver art) */
   const models: Record<string, HoloModel> = {
-    'prism-card': {
-      effect: 'prism',
-      layout: 'portrait',
-      maxRotate: 15,
-      src: '/cards/cristal-aurore.svg',
-      width: 630,
-      height: 880,
-      altKey: 'doc.card-holo.alt.crystal',
-    },
-    'prism-photo': {
-      effect: 'prism',
-      layout: 'landscape',
-      maxRotate: 8,
-      src: '/landscapes/mountains.jpg',
-      width: 960,
-      height: 540,
-      altKey: 'doc.card-holo.alt.mountains',
-    },
-    'cosmos-card': {
-      effect: 'cosmos',
-      layout: 'portrait',
-      maxRotate: 15,
-      src: '/cards/cristal-aurore.svg',
-      width: 630,
-      height: 880,
-      altKey: 'doc.card-holo.alt.crystal',
-    },
-    'radiant-card': {
-      effect: 'radiant',
-      layout: 'portrait',
-      maxRotate: 15,
-      src: '/cards/cristal-aurore.svg',
-      width: 630,
-      height: 880,
-      altKey: 'doc.card-holo.alt.crystal',
-    },
-    'ice-card': {
-      effect: 'ice',
-      layout: 'portrait',
-      maxRotate: 15,
-      src: '/cards/cristal-aurore.svg',
-      width: 630,
-      height: 880,
-      altKey: 'doc.card-holo.alt.crystal',
-    },
-    'none-card': {
-      effect: 'none',
-      layout: 'portrait',
-      maxRotate: 15,
-      src: '/cards/cristal-aurore.svg',
-      width: 630,
-      height: 880,
-      altKey: 'doc.card-holo.alt.crystal',
-    },
+    'prism-card': cardModel('prism'),
+    ...Object.fromEntries(
+      ['holo', 'reverse', 'cosmos', 'rainbow', 'rainbow-alt', 'v', 'vmax', 'vstar', 'full-art', 'shiny', 'radiant', 'full-art-wave'].map(
+        (effect) => [`${effect}-card`, cardModel(effect)],
+      ),
+    ),
+    'golden-card': cardModel('secret', '/cards/cristal-or.svg', 'doc.card-holo.alt.gold'),
+    'silver-card': cardModel('secret', '/cards/cristal-argent.svg', 'doc.card-holo.alt.silver'),
   };
 
   const card = document.getElementById('demo-holo-card') as
     | (HTMLElement & { effect: string; maxRotate: number })
     | null;
   const img = document.getElementById('demo-holo-img') as HTMLImageElement | null;
-  const select = document.getElementById('demo-holo-model');
-  if (!card || !img || !select) return;
+  const group = document.getElementById('demo-holo-model');
+  if (!card || !img || !group) return;
 
   const apply = (id: string): void => {
     const model = models[id] ?? models['prism-card'];
@@ -3691,13 +3650,14 @@ function wireHoloCardDemo(): void {
     img.alt = t(model.altKey);
   };
 
-  select.addEventListener('k3-change', ((e: CustomEvent<{ value?: string }>) => {
-    const v = e.detail?.value;
-    if (typeof v === 'string' && v) apply(v);
-  }) as EventListener);
+  group.addEventListener('k3-change', (e) => {
+    const d = (e as CustomEvent<{ values?: string[]; selected?: HTMLElement }>).detail;
+    const v = d?.values?.[0] ?? d?.selected?.getAttribute('value') ?? null;
+    if (v && models[v]) apply(v);
+  });
 
-  const initial = select.getAttribute('value') || 'prism-card';
-  apply(initial);
+  const selected = group.querySelector<HTMLElement>('k3-button[selected], k3-button[value="prism-card"]');
+  apply(selected?.getAttribute('value') || 'prism-card');
 }
 
 /** Scratch card — connected groups for brush / metal + reset. */
@@ -3740,6 +3700,19 @@ function wireScratchCardDemo(): void {
   document.getElementById('demo-scratch-reset')?.addEventListener('k3-click', () => {
     card.reset();
   });
+
+  /* Live progress, left of the reset button */
+  const progress = document.getElementById('demo-scratch-progress');
+  let percent = 0;
+  const showProgress = (): void => {
+    if (progress) progress.textContent = t('doc.card-scratch.progress', { percent: Math.round(percent) });
+  };
+  card.addEventListener('k3-scratch', ((e: CustomEvent<{ percent: number }>) => {
+    percent = e.detail?.percent ?? 0;
+    showProgress();
+  }) as EventListener);
+  document.addEventListener('k3-locale-change', showProgress);
+  showProgress();
 }
 
 /** Iso filter — periodic-table tiles + group chips. */

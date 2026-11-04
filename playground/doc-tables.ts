@@ -853,24 +853,15 @@ const COMPONENT_API: Record<
       ['screen', 'Overlay dot screen'],
     ],
   },
-  'glow-particles': {
-    properties: [
-      ['count', 'number', '48', 'Particle count'],
-      ['color', 'string', '#7dd3fc', 'Glow color'],
-      ['speed', 'number', '0.35', 'Drift speed multiplier'],
-      ['glow', 'number', '18', 'Soft blur radius (px)'],
-      ['interactive', 'boolean', 'false', 'Attract toward pointer'],
-      ['autoplay', 'boolean', 'true', 'Start on connect'],
-    ],
-    methods: [
-      ['play / stop / restart', '() => void', 'Animation control'],
-    ],
-    slots: [['(default)', 'Foreground content over the canvas']],
-    'css-parts': [['canvas', 'Particle canvas']],
-  },
   'card-holo': {
     properties: [
-      ['effect', "'prism'|'none'|string", 'prism', 'Built-in foil; any other name for ::part styles'],
+      ['effect', "'prism'|'none'|string", 'prism', 'Built-in foil; 13 more with k3ui/holo-effects.css (GPL-3.0)'],
+      [
+        'effect (add-on)',
+        "'holo'|'reverse'|'cosmos'|'rainbow'|'rainbow-alt'|'secret'|'v'|'vmax'|'vstar'|'full-art'|'shiny'|'radiant'|'full-art-wave'",
+        '—',
+        'Foils of k3ui/holo-effects.css',
+      ],
       ['max-rotate', 'number', '15', 'Maximum tilt (deg), 0 = flat'],
       ['reset-delay', 'number', '250', 'Delay before settling back (ms)'],
       ['motion-range', 'number', '20', 'Device tilt reaching the card edge (deg)'],

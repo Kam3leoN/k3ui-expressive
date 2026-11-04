@@ -949,13 +949,6 @@ el.play();`,
 print.addEventListener("k3-render", (e) => console.log(e.detail.dots, "dots"));
 await print.download("poster.png"); // composited PNG`,
   },
-  'glow-particles': {
-    components: ['k3-glow-particles'],
-    html: `<k3-glow-particles count="56" color="#7dd3fc" interactive style="min-block-size:14rem">
-  <strong>Glow</strong>
-</k3-glow-particles>`,
-    jsExtra: `document.querySelector('k3-glow-particles')?.restart();`,
-  },
   'card-holo': {
     components: ['k3-holo-card'],
     html: `<k3-holo-card class="trading-card" effect="prism">
@@ -967,22 +960,30 @@ await print.download("poster.png"); // composited PNG`,
   <img src="photo.jpg" alt="Snowy peaks at dusk" />
 </k3-holo-card>
 
-<!-- External foil (any effect name other than prism) -->
-<k3-holo-card effect="cosmos" class="trading-card">
+<!-- Add-on foils (k3ui/holo-effects.css): holo · reverse · cosmos · rainbow · rainbow-alt ·
+     secret · v · vmax · vstar · full-art · shiny · radiant · full-art-wave -->
+<k3-holo-card class="trading-card" effect="cosmos">
   <img src="card.png" width="630" height="880" alt="Aurora crystal card" />
 </k3-holo-card>`,
     css: `.trading-card {
   inline-size: 15rem;
   --k3-holo-card-radius: 4.75% / 3.5%;
   --k3-holo-card-intensity: 1;
+  /* Artwork window of your card (reverse; shiny / radiant when clipped) */
+  --k3-holo-art-window: inset(9.85% 8% 52.85% 8%);
+  /* none = foil on the whole card; var(--k3-holo-art-window) = artwork only */
+  --k3-holo-art-clip: none;
 }
 
-/* Your own foil, painted from outside */
-k3-holo-card[effect="cosmos"]::part(shine) {
+/* Or your own foil, painted from outside */
+k3-holo-card[effect="mine"]::part(shine) {
   background: radial-gradient(circle at var(--k3-holo-pointer-x) var(--k3-holo-pointer-y), #fff8, transparent 60%);
   mix-blend-mode: overlay;
 }`,
-    jsExtra: `// Follow the phone tilt (call from a tap — iOS asks first)
+    jsExtra: `// 13 more foils — GPL-3.0 add-on, outside the MIT bundle (ships its ./img folder)
+import "k3ui/holo-effects.css";
+
+// Follow the phone tilt (call from a tap — iOS asks first)
 const card = document.querySelector('k3-holo-card');
 button.addEventListener('click', async () => {
   if (!(await card.enableMotion())) console.info('No motion sensor here');

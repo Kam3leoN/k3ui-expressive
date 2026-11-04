@@ -123,9 +123,21 @@ Three decorative cards for collectible or reward UIs — mouse, touch, keyboard 
 </k3-lenticular-card>
 ```
 
-`k3-holo-card` ships one foil, `prism`. Other foils can be painted from outside through
-`::part(shine)` / `::part(glare)` and the `--k3-holo-*` variables — keep effects taken from
-GPL projects in a separate stylesheet, outside this MIT package.
+`k3-holo-card` ships one foil, `prism`. Thirteen more — `holo`, `reverse`, `cosmos`, `rainbow`,
+`rainbow-alt`, `secret`, `v`, `vmax`, `vstar`, `full-art`, `shiny`, `radiant`, `full-art-wave` — come
+in an optional add-on adapted from [pokemon-cards-css](https://github.com/simeydotme/pokemon-cards-css):
+
+```js
+import 'k3ui/holo-effects.css'; // dist/holo-effects/ — CSS + img/ + LICENSE
+```
+
+```html
+<k3-holo-card effect="cosmos"><img src="card.png" alt="Aurora crystal" /></k3-holo-card>
+```
+
+The add-on is **GPL-3.0** (its source lives in `addons/holo-effects/`): it is never bundled into
+`k3ui.js` / `k3ui.css`, which stay MIT — load it only if your project accepts the GPL. Your own foils
+can also paint `::part(card|shine|glare)` from the `--k3-holo-*` variables.
 
 ## Syntax highlighting
 

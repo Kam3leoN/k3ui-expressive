@@ -10144,80 +10144,6 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </div>
         </article>
 
-        <!-- ANIMATION: GLOW PARTICLES -->
-        <article class="comp-page" data-page="glow-particles" id="page-glow-particles" hidden>
-          <header class="section-head">
-            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
-            <h1 data-i18n="doc.glow-particles.title">Glow particles</h1>
-            <p data-i18n="doc.glow-particles.blurb">
-              Canvas 2D lookalike of Figma Community Glowing particles — soft drifting dots.
-            </p>
-            <p class="doc-intro" data-i18n="doc.glow-particles.intro">
-              Fullscreen-in-host canvas with soft radial particles. Count, color, speed, and glow are tunable.
-              interactive gently attracts dots toward the pointer. Honors prefers-reduced-motion (static frame).
-              No WebGL / WebGPU.
-            </p>
-          </header>
-          <div class="demo-block">
-            <h2 data-i18n="doc.glow-particles.section.demo">Demo</h2>
-            <p data-i18n="doc.glow-particles.section.demo.blurb">
-              Default drift · interactive pointer pull · warm palette.
-            </p>
-            <div class="demo-frame demo-frame--cases grid-3" data-demo-enhance="off">
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--glow">
-                  <k3-glow-particles count="40" color="#7dd3fc" style="--k3-glow-particles-min-block-size: 11rem">
-                    <strong data-i18n="doc.glow-particles.demo.caption">Glow</strong>
-                  </k3-glow-particles>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">1</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--glow">
-                  <k3-glow-particles
-                    count="64"
-                    color="#a5b4fc"
-                    interactive
-                    style="--k3-glow-particles-min-block-size: 11rem"
-                  >
-                    <strong data-i18n="doc.glow-particles.demo.interactive">Move the pointer</strong>
-                  </k3-glow-particles>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">2</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--glow">
-                  <k3-glow-particles
-                    count="36"
-                    color="#fbbf24"
-                    speed="0.45"
-                    glow="22"
-                    style="--k3-glow-particles-min-block-size: 11rem; --k3-glow-particles-bg: #1a1208"
-                  >
-                    <strong data-i18n="doc.glow-particles.demo.caption">Glow</strong>
-                  </k3-glow-particles>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">3</span>
-              </div>
-            </div>
-            <ol class="variant-guide">
-              <li>
-                <span class="pill-num">1</span
-                ><span class="variant-label" data-i18n="doc.glow-particles.guide.default">Default · cyan</span>
-              </li>
-              <li>
-                <span class="pill-num">2</span
-                ><span class="variant-label" data-i18n="doc.glow-particles.guide.interactive">Interactive</span>
-              </li>
-              <li>
-                <span class="pill-num">3</span
-                ><span class="variant-label" data-i18n="doc.glow-particles.guide.warm">Warm · amber</span>
-              </li>
-            </ol>
-          </div>
-        </article>
-
-
         <!-- CONTAINMENT: CARD HOLOGRAPHIC -->
         <article class="comp-page" data-page="card-holo" id="page-card-holo" hidden>
           <header class="section-head">
@@ -10229,36 +10155,75 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             <p class="doc-intro" data-i18n="doc.card-holo.intro">
               k3-holo-card tilts its artwork in 3D on a damped spring — mouse, touch, or device tilt after
               enableMotion(). The built-in prism effect blends rainbow bands, grain and sparkles, brighter around the
-              pointer. Other effects can be painted from outside through ::part(shine) and ::part(glare), driven by the
-              --k3-holo-* variables. Honors reduced motion (no tilt).
+              pointer. Thirteen more foils — holo, reverse, cosmos, rainbow, rainbow alt, secret, V, V-Max, V-Star, full
+              art, shiny, radiant, full art wave — ship in the optional k3ui/holo-effects.css add-on (GPL-3.0, outside the
+              MIT bundle); they paint ::part(shine) and ::part(glare) from the --k3-holo-* variables. Honors reduced
+              motion (no tilt).
             </p>
           </header>
           <div class="demo-block">
             <h2 data-i18n="doc.card-holo.section.demo">Demo</h2>
             <p data-i18n="doc.card-holo.section.demo.blurb">Hover the card, or drag a finger across it. Pick a foil model below.</p>
-            <div class="card-demo-actions">
-              <k3-select
-                id="demo-holo-model"
-                variant="outlined"
-                value="prism-card"
-                label="Model"
-                data-i18n-label="doc.card-holo.model.label"
-              >
-                <k3-menu-item value="prism-card" data-i18n="doc.card-holo.model.prism-card"
-                  >Prism · trading card</k3-menu-item
+            <div class="card-demo-actions card-demo-actions--holo">
+              <div class="card-demo-holo-scroll k3-scroll k3-scroll--x">
+                <k3-button-group
+                  id="demo-holo-model"
+                  variant="connected"
+                  shape="round"
+                  selection="single"
+                  size="sm"
+                  sync
+                  required
+                  label="Model"
+                  data-i18n-label="doc.card-holo.model.label"
                 >
-                <k3-menu-item value="prism-photo" data-i18n="doc.card-holo.model.prism-photo"
-                  >Prism · photo · gentle tilt</k3-menu-item
-                >
-                <k3-menu-item value="cosmos-card" data-i18n="doc.card-holo.model.cosmos-card"
-                  >Cosmos · trading card</k3-menu-item
-                >
-                <k3-menu-item value="radiant-card" data-i18n="doc.card-holo.model.radiant-card"
-                  >Radiant · trading card</k3-menu-item
-                >
-                <k3-menu-item value="ice-card" data-i18n="doc.card-holo.model.ice-card">Ice · trading card</k3-menu-item>
-                <k3-menu-item value="none-card" data-i18n="doc.card-holo.model.none-card">None · trading card</k3-menu-item>
-              </k3-select>
+                  <k3-button variant="outlined" value="prism-card" selected>
+                    <span data-i18n="doc.card-holo.model.prism-card">Prism</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="holo-card">
+                    <span data-i18n="doc.card-holo.model.holo-card">Holo</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="reverse-card">
+                    <span data-i18n="doc.card-holo.model.reverse-card">Reverse</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="cosmos-card">
+                    <span data-i18n="doc.card-holo.model.cosmos-card">Cosmos</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="rainbow-card">
+                    <span data-i18n="doc.card-holo.model.rainbow-card">Rainbow</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="rainbow-alt-card">
+                    <span data-i18n="doc.card-holo.model.rainbow-alt-card">Rainbow alt</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="golden-card">
+                    <span data-i18n="doc.card-holo.model.golden-card">Golden</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="silver-card">
+                    <span data-i18n="doc.card-holo.model.silver-card">Silver</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="v-card">
+                    <span data-i18n="doc.card-holo.model.v-card">V</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="vmax-card">
+                    <span data-i18n="doc.card-holo.model.vmax-card">V-Max</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="vstar-card">
+                    <span data-i18n="doc.card-holo.model.vstar-card">V-Star</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="full-art-card">
+                    <span data-i18n="doc.card-holo.model.full-art-card">Full art</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="shiny-card">
+                    <span data-i18n="doc.card-holo.model.shiny-card">Shiny</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="radiant-card">
+                    <span data-i18n="doc.card-holo.model.radiant-card">Radiant</span>
+                  </k3-button>
+                  <k3-button variant="outlined" value="full-art-wave-card">
+                    <span data-i18n="doc.card-holo.model.full-art-wave-card">Full art wave</span>
+                  </k3-button>
+                </k3-button-group>
+              </div>
             </div>
             <div class="demo-frame demo-frame--cases demo-frame--cards items-end k3-layout-grid" data-demo-enhance="off">
               <div class="demo-case k3-col-full">
@@ -10435,9 +10400,12 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
                   <span data-i18n="doc.card-scratch.cover.gold">Gold</span>
                 </k3-button>
               </k3-button-group>
-              <k3-button id="demo-scratch-reset" variant="tonal" size="sm">
-                <span data-i18n="doc.card-scratch.reset">Reset the cover</span>
-              </k3-button>
+              <div class="card-demo-reset">
+                <span id="demo-scratch-progress" class="card-demo-progress">0% scratched</span>
+                <k3-button id="demo-scratch-reset" variant="tonal" size="sm">
+                  <span data-i18n="doc.card-scratch.reset">Reset the cover</span>
+                </k3-button>
+              </div>
             </div>
             <div class="demo-frame demo-frame--cases demo-frame--cards items-end k3-layout-grid" data-demo-enhance="off">
               <div class="demo-case k3-col-full">

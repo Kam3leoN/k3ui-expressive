@@ -6,11 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- `HoloCardEffect` lists the add-on foil names (autocomplete); the playground-only `cosmos` / `radiant` / `ice` approximations are replaced by the add-on
 - `k3-codeblock` rewritten without `k3-list` / line numbers: dark panel (`#24292e`, 16px radius), `k3-tabs` title + copy/download icon buttons (theme colours); default `theme="dark"` (`okaidia` alias, `material` for M3 adaptive); collapse UI removed
 - Syntax highlighting — Prism removed; lightweight built-in tokenizer in `src/syntax` (all languages in `k3ui.js`). `k3ui/syntax` remains an empty stub for `syntax.use()` compat. `prismjs` / `vendor:prism` dropped
 
 ### Added
 
+- `k3ui/holo-effects.css` — optional add-on with 13 foils for `k3-holo-card` (`holo`, `reverse`, `cosmos`, `rainbow`, `rainbow-alt`, `secret`, `v`, `vmax`, `vstar`, `full-art`, `shiny`, `radiant`, `full-art-wave`), adapted from pokemon-cards-css and pixel-identical to it; painted through `::part(card|shine|glare)` with the `--k3-holo-*` variables, card layout via `--k3-holo-art-window`, `--k3-holo-reverse-clip`, `--k3-holo-art-clip`, `--k3-holo-texture`. **GPL-3.0**: source in `addons/holo-effects/`, built to `dist/holo-effects/` (CSS, images, license) by `npm run build:holo-effects`, never part of `k3ui.js` / `k3ui.css`; package license field is now `MIT AND GPL-3.0-only`
+- Playground *Card holographic*: the model select lists every foil (gold card for `secret`); *Card scratch*: live scratched percentage next to the reset button
 - `k3-holo-card` — holographic trading card: 3D tilt toward the pointer on a damped spring (mouse, touch, device tilt via `enableMotion()`), built-in `prism` foil (rainbow bands, grain, sparkles, glare — textures generated in SVG, no image), `max-rotate`, `reset-delay`, `motion-range`; `::part(card|shine|glare)` and `--k3-holo-*` variables so other foils can be painted from outside
 - `k3-scratch-card` — scratch-off layer over any content: `silver` / `gold` covers drawn in canvas (metal bands, grain, engraved localized label) or an image, four erase styles reproducing scratchcard-js (`line`, `circle`, `spray`, `brush`), `reveal-at`, `reveal-duration`, `revealed`, `reveal()` / `reset()` / `percent`, `k3-scratch` / `k3-reveal` / `k3-error`; sharp on high-density screens, keeps the scratches on resize, finger scratching without scrolling, content hidden from assistive tech until revealed and a “Reveal all” button on keyboard focus
 - `k3-lenticular-card` — lenticular image: each child is a view; tilting the card (pointer, finger, arrow keys, device tilt) switches views, interleaved in stripes under ridged plastic mid-switch; `axis`, `rest-frame`, `transition`, `max-rotate`, `keyboard`, `show()`, `k3-change`, announced to screen readers
