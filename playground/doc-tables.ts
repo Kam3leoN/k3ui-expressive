@@ -868,6 +868,78 @@ const COMPONENT_API: Record<
     slots: [['(default)', 'Foreground content over the canvas']],
     'css-parts': [['canvas', 'Particle canvas']],
   },
+  'card-holo': {
+    properties: [
+      ['effect', "'prism'|'none'|string", 'prism', 'Built-in foil; any other name for ::part styles'],
+      ['max-rotate', 'number', '15', 'Maximum tilt (deg), 0 = flat'],
+      ['reset-delay', 'number', '250', 'Delay before settling back (ms)'],
+      ['motion-range', 'number', '20', 'Device tilt reaching the card edge (deg)'],
+    ],
+    methods: [
+      ['enableMotion', '() => Promise<boolean>', 'Follow the device tilt (call from a tap)'],
+      ['disableMotion', '() => void', 'Back to pointer / touch'],
+      ['motionActive', 'boolean (get)', 'Device tilt drives the card'],
+    ],
+    slots: [['(default)', 'Card artwork (<img>, <picture>, <svg>…)']],
+    'css-parts': [
+      ['card', 'Tilted card, clips the light layers'],
+      ['shine', 'Foil layer (::before / ::after free for effects)'],
+      ['glare', 'Light reflection'],
+    ],
+  },
+  'card-lenticular': {
+    properties: [
+      ['axis', "'x'|'y'", 'x', 'Views change left → right or top → bottom'],
+      ['rest-frame', 'number', '0', 'View shown at rest'],
+      ['transition', 'number', '0.5', 'Switch width, 0 sharp … 1 gradual'],
+      ['max-rotate', 'number', '12', 'Maximum tilt (deg), 0 = flat'],
+      ['reset-delay', 'number', '400', 'Delay before the rest view (ms)'],
+      ['motion-range', 'number', '20', 'Device tilt to the last view (deg)'],
+      ['keyboard', 'boolean', 'true', 'Arrow / Home / End keys ("false" to turn off)'],
+    ],
+    methods: [
+      ['show', '(index) => void', 'Go to a view and stay there'],
+      ['enableMotion', '() => Promise<boolean>', 'Follow the device tilt (call from a tap)'],
+      ['disableMotion', '() => void', 'Back to pointer / touch / keys'],
+      ['index', 'number (get)', 'Most visible view'],
+    ],
+    events: [['k3-change', '{ index, label }', 'The most visible view changed']],
+    slots: [['(default)', 'Views, first to last — each child gets slot="frame-N"']],
+    'css-parts': [
+      ['card', 'Tilted card'],
+      ['frame', 'Wrapper of each view'],
+      ['lens', 'Plastic ridges'],
+    ],
+  },
+  'card-scratch': {
+    properties: [
+      ['type', "'line'|'circle'|'spray'|'brush'", 'line', 'Erase style'],
+      ['radius', 'number', '30', 'Line width · circle radius · spray diameter (px)'],
+      ['spray-points · spray-dot-size', 'number', '30 · 4', 'Spray dots per step · dot size (px)'],
+      ['brush', 'string', "''", 'Brush image URL (empty = built-in)'],
+      ['cover', "'silver'|'gold'|URL", 'silver', 'Scratch layer'],
+      ['label', 'string', 'Scratch here', 'Engraved text (localized; "" = none)'],
+      ['reveal-at', 'number', '50', 'Share (%) revealing the rest on release'],
+      ['reveal-duration', 'number', '0', 'Final fade (ms), 0 = at once'],
+      ['revealed', 'boolean', 'false', 'Everything revealed — set to reveal'],
+    ],
+    methods: [
+      ['reveal', '() => void', 'Reveal everything'],
+      ['reset', '() => void', 'Put an intact cover back'],
+      ['percent', 'number (get)', 'Scratched share, 0 … 100'],
+    ],
+    events: [
+      ['k3-scratch', '{ percent }', 'While scratching, and on reset'],
+      ['k3-reveal', '{ percent: 100 }', 'Once, when everything is revealed'],
+      ['k3-error', "{ reason: 'cover'|'brush' }", 'Image not loaded (silver / built-in brush used)'],
+    ],
+    slots: [['(default)', 'Content to reveal']],
+    'css-parts': [
+      ['content', 'Revealed content'],
+      ['cover', 'Scratch layer (canvas)'],
+      ['reveal', 'Keyboard “Reveal all” button'],
+    ],
+  },
   'charts-bar': {
     properties: [
       ['type', "'bar'|…", 'bar', 'Chart.js type (bar on this page)'],

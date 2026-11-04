@@ -343,6 +343,50 @@ export class K3Menu extends K3Element {
     this._hoverCloseTimer = 0;
   }
 
+  private dismissIgnoreSelectors(): string[] {
+    return this.dismissIgnore
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  /** True if node is (or is inside) a dismiss-ignore host — e.g. `#nav-rail`. */
+  private isDismissIgnoreTarget(node: EventTarget | Node | null): boolean {
+    const sels = this.dismissIgnoreSelectors();
+    if (!sels.length || !(node instanceof Node)) return false;
+    let el: Element | null = node instanceof Element ? node : node.parentElement;
+    while (el) {
+      for (const sel of sels) {
+        try {
+          if (el.matches(sel) || el.closest(sel)) return true;
+        } catch {
+          /* invalid selector */
+        }
+      }
+      const root = el.getRootNode();
+      if (root instanceof ShadowRoot) {
+        el = root.host;
+        continue;
+      }
+      el = el.parentElement;
+    }
+    return false;
+  }
+
+  /** Pointer still over the panel or a dismiss-ignore owner (rail bridge). */
+  private isHoverBridgeActive(): boolean {
+    if (this.matches(':hover')) return true;
+    for (const sel of this.dismissIgnoreSelectors()) {
+      try {
+        const host = document.querySelector(sel);
+        if (host?.matches(':hover')) return true;
+      } catch {
+        /* invalid selector */
+      }
+    }
+    return false;
+  }
+
   private isInMenuTree(node: EventTarget | Node | null): boolean {
     if (!(node instanceof Node)) return false;
     if (this.contains(node)) return true;
@@ -368,6 +412,8 @@ export class K3Menu extends K3Element {
     this._hoverCloseTimer = window.setTimeout(() => {
       this._hoverCloseTimer = 0;
       if (!this.usesHoverOpen || !this.visible) return;
+      /* Gap between rail item and panel — stay open while either is hovered */
+      if (this.isHoverBridgeActive()) return;
       void this.hide('user');
     }, HOVER_CLOSE_MS);
   }
@@ -383,6 +429,8 @@ export class K3Menu extends K3Element {
     if (!this.usesHoverOpen) return;
     if (this._enterLock || !this.visible) return;
     if (this.isInMenuTree(e.relatedTarget)) return;
+    /* Moving back onto the owner (nav-rail) must not dismiss */
+    if (this.isDismissIgnoreTarget(e.relatedTarget)) return;
     this.scheduleHoverClose();
   };
 
@@ -512,10 +560,7 @@ export class K3Menu extends K3Element {
   };
 
   private matchesDismissIgnore(path: EventTarget[]): boolean {
-    const sels = this.dismissIgnore
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const sels = this.dismissIgnoreSelectors();
     if (!sels.length) return false;
     for (const n of path) {
       if (!(n instanceof Element)) continue;

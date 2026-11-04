@@ -105,6 +105,28 @@ own `inks`), each ink gets its own rotated screen and dot sizes follow the tones
 Cross-origin images need CORS (`crossorigin="anonymous"`) — otherwise the component falls back
 to its CSS dot overlay and fires `k3-error`. Any other slotted content keeps that overlay.
 
+## Card effects
+
+Three decorative cards for collectible or reward UIs — mouse, touch, keyboard and, after
+`enableMotion()` (call it from a tap), the device tilt.
+
+```html
+<k3-holo-card><img src="card.png" alt="Aurora crystal" /></k3-holo-card>
+
+<k3-scratch-card cover="gold" type="spray">
+  <img src="prize.png" alt="You won a rare card" />
+</k3-scratch-card>
+
+<k3-lenticular-card>
+  <img src="day.jpg" alt="The city by day" />
+  <img src="night.jpg" alt="The city by night" />
+</k3-lenticular-card>
+```
+
+`k3-holo-card` ships one foil, `prism`. Other foils can be painted from outside through
+`::part(shine)` / `::part(glare)` and the `--k3-holo-*` variables — keep effects taken from
+GPL projects in a separate stylesheet, outside this MIT package.
+
 ## Syntax highlighting
 
 `<k3-codeblock language="php">` uses a lightweight built-in tokenizer (no Prism). Languages

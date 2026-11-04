@@ -692,6 +692,22 @@ k3-fab-menu.shell-github-menu {
 .shell-sheet-children > li {
   min-width: 0;
 }
+/* Cards family — full-width nested accordion inside Containment chips */
+.shell-sheet-children > li.shell-sheet-cards-wrap {
+  grid-column: 1 / -1;
+}
+.shell-sheet-cards-wrap > .shell-sheet-group {
+  width: 100%;
+}
+.shell-sheet-cards-wrap .shell-sheet-group-btn {
+  width: 100%;
+  min-height: 2.5rem;
+  justify-content: space-between;
+  padding-inline: 0.75rem;
+  font-size: var(--k3-sys-typescale-label-large-size, 0.875rem);
+  background: var(--k3-sys-color-surface-container-highest);
+  border-radius: var(--k3-sys-shape-corner-full, 9999px);
+}
 .shell-sheet-children .shell-sheet-link {
   width: 100%;
   min-height: 2.5rem; /* 40dp chip */
@@ -1828,6 +1844,143 @@ k3-avatar [slot='badge'].ms {
 .demo-case-stage--glow > k3-glow-particles {
   display: block;
   width: 100%;
+}
+
+/* Card effects (holo · lenticular · scratch) — stage fills the column; card is centered.
+ * Must beat `.demo-frame--cases.k3-layout-grid .demo-case-stage { display: block }`. */
+.demo-case-stage--card,
+.demo-frame--cases.k3-layout-grid .demo-case-stage--card,
+.demo-frame--demo.k3-layout-grid .demo-case-stage--card {
+  display: grid;
+  place-items: center;
+  justify-items: center;
+  place-content: center;
+  padding-block: var(--k3-sys-spacing-space300);
+  width: 100%;
+  min-width: 0;
+}
+/* Beat the generic `stage > * { width: 100% }` so portrait cards hug content & center */
+.demo-frame--cases.k3-layout-grid .demo-case-stage--card > .demo-card--portrait {
+  width: auto;
+  max-width: min(100%, 15rem);
+  inline-size: min(100%, 15rem);
+  min-width: 0 !important;
+  justify-self: center;
+}
+.demo-frame--cases.k3-layout-grid .demo-case-stage--card > .demo-card--landscape {
+  width: min(100%, 36rem);
+  max-width: 100%;
+  inline-size: min(100%, 36rem);
+  min-width: 0 !important;
+  justify-self: center;
+}
+/* Equal-height cases (pills aligned at the bottom), artwork centered in each */
+.demo-frame--cases.items-end .demo-case-stage--card {
+  place-content: center;
+  align-items: center;
+  justify-items: center;
+}
+.demo-card--portrait {
+  --k3-holo-card-radius: 4.75% / 3.5%;
+  --k3-lenticular-card-radius: 4.75% / 3.5%;
+  --k3-scratch-card-radius: 4.75% / 3.5%;
+}
+.demo-card--landscape {
+  --k3-holo-card-radius: var(--k3-sys-shape-corner-large);
+  --k3-lenticular-card-radius: var(--k3-sys-shape-corner-large);
+  --k3-scratch-card-radius: var(--k3-sys-shape-corner-large);
+}
+.card-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--k3-sys-spacing-space200);
+  margin-block-end: var(--k3-sys-spacing-space200);
+}
+.card-demo-actions--scratch {
+  align-items: center;
+}
+.card-demo-actions > k3-select {
+  min-inline-size: min(100%, 18rem);
+}
+
+/*
+ * Playground-only foil models (built-in is prism only).
+ * Painted via ::part so the select can switch effect="cosmos|radiant|ice".
+ */
+k3-holo-card[effect='cosmos']::part(shine) {
+  mix-blend-mode: color-dodge;
+  background-image:
+    radial-gradient(circle at 20% 30%, hsl(210 100% 70% / 0.55) 0%, transparent 42%),
+    radial-gradient(circle at 80% 20%, hsl(280 100% 72% / 0.45) 0%, transparent 38%),
+    radial-gradient(circle at 50% 80%, hsl(190 100% 65% / 0.4) 0%, transparent 45%),
+    repeating-radial-gradient(
+      circle at var(--k3-holo-pointer-x) var(--k3-holo-pointer-y),
+      hsl(220 100% 80% / 0.35) 0 1px,
+      transparent 1px 6px
+    );
+  filter: brightness(0.95) contrast(1.25) saturate(1.35);
+}
+k3-holo-card[effect='cosmos']::part(glare) {
+  mix-blend-mode: soft-light;
+  background-image: radial-gradient(
+    farthest-corner circle at var(--k3-holo-pointer-x) var(--k3-holo-pointer-y),
+    rgb(180 220 255 / 0.7) 0%,
+    rgb(80 40 160 / 0.25) 55%,
+    transparent 100%
+  );
+}
+k3-holo-card[effect='radiant']::part(shine) {
+  mix-blend-mode: overlay;
+  background-image: conic-gradient(
+    from 20deg at var(--k3-holo-pointer-x) var(--k3-holo-pointer-y),
+    hsl(45 100% 60% / 0.55),
+    hsl(15 100% 58% / 0.45),
+    hsl(320 100% 65% / 0.5),
+    hsl(200 100% 60% / 0.45),
+    hsl(90 90% 55% / 0.5),
+    hsl(45 100% 60% / 0.55)
+  );
+  filter: brightness(1.05) contrast(1.2) saturate(1.5);
+}
+k3-holo-card[effect='radiant']::part(glare) {
+  mix-blend-mode: soft-light;
+  background-image: radial-gradient(
+    farthest-corner circle at var(--k3-holo-pointer-x) var(--k3-holo-pointer-y),
+    rgb(255 240 180 / 0.8) 0%,
+    rgb(255 255 255 / 0.2) 35%,
+    transparent 75%
+  );
+}
+k3-holo-card[effect='ice']::part(shine) {
+  mix-blend-mode: screen;
+  background-image:
+    linear-gradient(
+      115deg,
+      transparent 20%,
+      hsl(190 100% 85% / 0.55) 45%,
+      hsl(210 100% 90% / 0.35) 50%,
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      125deg,
+      hsl(200 80% 70% / 0.2) 0 2px,
+      transparent 2px 10px
+    );
+  background-size: 220% 220%, auto;
+  background-position:
+    var(--k3-holo-background-x) var(--k3-holo-background-y),
+    center;
+  filter: brightness(1.1) contrast(1.15);
+}
+k3-holo-card[effect='ice']::part(glare) {
+  mix-blend-mode: soft-light;
+  background-image: radial-gradient(
+    farthest-corner circle at var(--k3-holo-pointer-x) var(--k3-holo-pointer-y),
+    rgb(220 245 255 / 0.85) 0%,
+    rgb(160 210 240 / 0.25) 40%,
+    transparent 80%
+  );
 }
 
 /* Charts demos */

@@ -509,6 +509,28 @@ export const DOC_COMPONENTS: DocComponent[] = [
     titleKey: 'doc.card.title',
     blurbKey: 'doc.card.blurb',
   },
+  // Cards family — submenu under Containment (Standard + effect demos)
+  {
+    id: 'card-holo',
+    category: 'Containment',
+    title: 'Card holographic',
+    titleKey: 'doc.card-holo.title',
+    blurbKey: 'doc.card-holo.blurb',
+  },
+  {
+    id: 'card-lenticular',
+    category: 'Containment',
+    title: 'Card lenticular',
+    titleKey: 'doc.card-lenticular.title',
+    blurbKey: 'doc.card-lenticular.blurb',
+  },
+  {
+    id: 'card-scratch',
+    category: 'Containment',
+    title: 'Card scratch',
+    titleKey: 'doc.card-scratch.title',
+    blurbKey: 'doc.card-scratch.blurb',
+  },
   {
     id: 'menu',
     category: 'Containment',

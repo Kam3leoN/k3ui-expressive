@@ -10218,6 +10218,248 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
         </article>
 
 
+        <!-- CONTAINMENT: CARD HOLOGRAPHIC -->
+        <article class="comp-page" data-page="card-holo" id="page-card-holo" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.card-holo.title">Card holographic</h1>
+            <p data-i18n="doc.card-holo.blurb">
+              Trading-card foil — the card tilts toward the pointer while a rainbow foil and a glare follow the light.
+            </p>
+            <p class="doc-intro" data-i18n="doc.card-holo.intro">
+              k3-holo-card tilts its artwork in 3D on a damped spring — mouse, touch, or device tilt after
+              enableMotion(). The built-in prism effect blends rainbow bands, grain and sparkles, brighter around the
+              pointer. Other effects can be painted from outside through ::part(shine) and ::part(glare), driven by the
+              --k3-holo-* variables. Honors reduced motion (no tilt).
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.card-holo.section.demo">Demo</h2>
+            <p data-i18n="doc.card-holo.section.demo.blurb">Hover the card, or drag a finger across it. Pick a foil model below.</p>
+            <div class="card-demo-actions">
+              <k3-select
+                id="demo-holo-model"
+                variant="outlined"
+                value="prism-card"
+                label="Model"
+                data-i18n-label="doc.card-holo.model.label"
+              >
+                <k3-menu-item value="prism-card" data-i18n="doc.card-holo.model.prism-card"
+                  >Prism · trading card</k3-menu-item
+                >
+                <k3-menu-item value="prism-photo" data-i18n="doc.card-holo.model.prism-photo"
+                  >Prism · photo · gentle tilt</k3-menu-item
+                >
+                <k3-menu-item value="cosmos-card" data-i18n="doc.card-holo.model.cosmos-card"
+                  >Cosmos · trading card</k3-menu-item
+                >
+                <k3-menu-item value="radiant-card" data-i18n="doc.card-holo.model.radiant-card"
+                  >Radiant · trading card</k3-menu-item
+                >
+                <k3-menu-item value="ice-card" data-i18n="doc.card-holo.model.ice-card">Ice · trading card</k3-menu-item>
+                <k3-menu-item value="none-card" data-i18n="doc.card-holo.model.none-card">None · trading card</k3-menu-item>
+              </k3-select>
+            </div>
+            <div class="demo-frame demo-frame--cases demo-frame--cards items-end k3-layout-grid" data-demo-enhance="off">
+              <div class="demo-case k3-col-full">
+                <div class="demo-case-stage demo-case-stage--card">
+                  <k3-holo-card id="demo-holo-card" class="demo-card demo-card--portrait" effect="prism">
+                    <img
+                      id="demo-holo-img"
+                      src="/cards/cristal-aurore.svg"
+                      width="630"
+                      height="880"
+                      loading="lazy"
+                      decoding="async"
+                      alt="“Aurora crystal” card: a crystal floats above the mountains under an aurora"
+                      data-i18n-alt="doc.card-holo.alt.crystal"
+                    />
+                  </k3-holo-card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CONTAINMENT: CARD LENTICULAR -->
+        <article class="comp-page" data-page="card-lenticular" id="page-card-lenticular" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.card-lenticular.title">Card lenticular</h1>
+            <p data-i18n="doc.card-lenticular.blurb">
+              Like a 3D postcard — tilting the card switches between its views, interleaved in thin stripes.
+            </p>
+            <p class="doc-intro" data-i18n="doc.card-lenticular.intro">
+              k3-lenticular-card stacks its children as views. Moving across the card — mouse, finger, arrow keys, or
+              device tilt after enableMotion() — switches views; mid-switch they interleave in stripes under ridged
+              plastic, like a real lenticular print. k3-change reports the visible view.
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.card-lenticular.section.demo">Demo</h2>
+            <p data-i18n="doc.card-lenticular.section.demo.blurb">Two views left to right · three views top to bottom.</p>
+            <div
+              class="demo-frame demo-frame--cases demo-frame--cards items-end k3-layout-grid k3-demo-cols-2"
+              data-demo-enhance="off"
+            >
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--card">
+                  <k3-lenticular-card class="demo-card demo-card--portrait" transition="0.3">
+                    <img
+                      src="/cards/cristal-jour.svg"
+                      width="630"
+                      height="880"
+                      loading="lazy"
+                      decoding="async"
+                      alt="“Daylight crystal” card: a crystal floats above the mountains under the sun"
+                      data-i18n-alt="doc.card-lenticular.alt.day"
+                    />
+                    <img
+                      src="/cards/cristal-aurore.svg"
+                      width="630"
+                      height="880"
+                      loading="lazy"
+                      decoding="async"
+                      alt="“Aurora crystal” card: a crystal floats above the mountains under an aurora"
+                      data-i18n-alt="doc.card-holo.alt.crystal"
+                    />
+                  </k3-lenticular-card>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--card">
+                  <k3-lenticular-card class="demo-card demo-card--landscape" axis="y" max-rotate="8">
+                    <img
+                      src="/landscapes/forest.jpg"
+                      width="960"
+                      height="540"
+                      loading="lazy"
+                      decoding="async"
+                      alt="Tall pines along a forest path"
+                      data-i18n-alt="doc.card-lenticular.alt.forest"
+                    />
+                    <img
+                      src="/landscapes/meadow.jpg"
+                      width="960"
+                      height="540"
+                      loading="lazy"
+                      decoding="async"
+                      alt="Green meadow with a spiral of stones at sunset"
+                      data-i18n-alt="doc.card-lenticular.alt.meadow"
+                    />
+                    <img
+                      src="/landscapes/lake.jpg"
+                      width="960"
+                      height="540"
+                      loading="lazy"
+                      decoding="async"
+                      alt="Turquoise mountain lake with rowing boats"
+                      data-i18n-alt="doc.card-scratch.alt.lake"
+                    />
+                  </k3-lenticular-card>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.card-lenticular.guide.flip">Two views · flip</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.card-lenticular.guide.vertical">Three views · axis y</span>
+              </li>
+            </ol>
+          </div>
+        </article>
+
+        <!-- CONTAINMENT: CARD SCRATCH -->
+        <article class="comp-page" data-page="card-scratch" id="page-card-scratch" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.card-scratch.title">Card scratch</h1>
+            <p data-i18n="doc.card-scratch.blurb">
+              Scratch-off layer — silver, gold or an image, scratched away with the mouse, a finger or a pen.
+            </p>
+            <p class="doc-intro" data-i18n="doc.card-scratch.intro">
+              k3-scratch-card covers its content with a canvas layer. Four erase styles — line, circle, spray, brush —
+              match scratchcard-js. Past reveal-at percent, releasing the pointer reveals the rest; k3-scratch reports
+              the progress and k3-reveal fires once. The content stays hidden from assistive tech until revealed, and a
+              Reveal all button appears on keyboard focus.
+            </p>
+          </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.card-scratch.section.demo">Demo</h2>
+            <p data-i18n="doc.card-scratch.section.demo.blurb">
+              Pick a brush and a metal, then scratch the cover.
+            </p>
+            <div class="card-demo-actions card-demo-actions--scratch">
+              <k3-button-group
+                id="demo-scratch-type"
+                variant="connected"
+                shape="round"
+                selection="single"
+                size="sm"
+                sync
+                required
+                label="Brush"
+                data-i18n-label="doc.card-scratch.type.label"
+              >
+                <k3-button variant="outlined" value="line" selected>
+                  <span data-i18n="doc.card-scratch.type.line">Line</span>
+                </k3-button>
+                <k3-button variant="outlined" value="spray">
+                  <span data-i18n="doc.card-scratch.type.spray">Spray</span>
+                </k3-button>
+                <k3-button variant="outlined" value="brush">
+                  <span data-i18n="doc.card-scratch.type.brush">Brush</span>
+                </k3-button>
+              </k3-button-group>
+              <k3-button-group
+                id="demo-scratch-cover"
+                variant="connected"
+                shape="round"
+                selection="single"
+                size="sm"
+                sync
+                required
+                label="Metal"
+                data-i18n-label="doc.card-scratch.cover.label"
+              >
+                <k3-button variant="outlined" value="silver" selected>
+                  <span data-i18n="doc.card-scratch.cover.silver">Silver</span>
+                </k3-button>
+                <k3-button variant="outlined" value="gold">
+                  <span data-i18n="doc.card-scratch.cover.gold">Gold</span>
+                </k3-button>
+              </k3-button-group>
+              <k3-button id="demo-scratch-reset" variant="tonal" size="sm">
+                <span data-i18n="doc.card-scratch.reset">Reset the cover</span>
+              </k3-button>
+            </div>
+            <div class="demo-frame demo-frame--cases demo-frame--cards items-end k3-layout-grid" data-demo-enhance="off">
+              <div class="demo-case k3-col-full">
+                <div class="demo-case-stage demo-case-stage--card">
+                  <k3-scratch-card id="demo-scratch-card" class="demo-card demo-card--portrait" type="line" cover="silver">
+                    <img
+                      src="/cards/cristal-aurore.svg"
+                      width="630"
+                      height="880"
+                      loading="lazy"
+                      decoding="async"
+                      alt="“Aurora crystal” card: a crystal floats above the mountains under an aurora"
+                      data-i18n-alt="doc.card-holo.alt.crystal"
+                    />
+                  </k3-scratch-card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+
         <!-- CHARTS: BAR -->
         <article class="comp-page" data-page="charts-bar" id="page-charts-bar" hidden>
           <header class="section-head">
@@ -11939,6 +12181,7 @@ static styles = [
       id="shell-nav-menu"
       class="shell-nav-menu"
       position="end-start"
+      open-on="hover"
       dismiss-ignore="#nav-rail, #nav-bar"
       aria-label="Components"
     ></k3-menu>

@@ -956,6 +956,83 @@ await print.download("poster.png"); // composited PNG`,
 </k3-glow-particles>`,
     jsExtra: `document.querySelector('k3-glow-particles')?.restart();`,
   },
+  'card-holo': {
+    components: ['k3-holo-card'],
+    html: `<k3-holo-card class="trading-card" effect="prism">
+  <img src="card.png" width="630" height="880" alt="Aurora crystal card" />
+</k3-holo-card>
+
+<!-- Gentler tilt on a photo -->
+<k3-holo-card effect="prism" max-rotate="8">
+  <img src="photo.jpg" alt="Snowy peaks at dusk" />
+</k3-holo-card>
+
+<!-- External foil (any effect name other than prism) -->
+<k3-holo-card effect="cosmos" class="trading-card">
+  <img src="card.png" width="630" height="880" alt="Aurora crystal card" />
+</k3-holo-card>`,
+    css: `.trading-card {
+  inline-size: 15rem;
+  --k3-holo-card-radius: 4.75% / 3.5%;
+  --k3-holo-card-intensity: 1;
+}
+
+/* Your own foil, painted from outside */
+k3-holo-card[effect="cosmos"]::part(shine) {
+  background: radial-gradient(circle at var(--k3-holo-pointer-x) var(--k3-holo-pointer-y), #fff8, transparent 60%);
+  mix-blend-mode: overlay;
+}`,
+    jsExtra: `// Follow the phone tilt (call from a tap — iOS asks first)
+const card = document.querySelector('k3-holo-card');
+button.addEventListener('click', async () => {
+  if (!(await card.enableMotion())) console.info('No motion sensor here');
+});`,
+  },
+  'card-lenticular': {
+    components: ['k3-lenticular-card'],
+    html: `<k3-lenticular-card>
+  <img src="day.svg" width="630" height="880" alt="The crystal by day" />
+  <img src="night.svg" width="630" height="880" alt="The crystal by night" />
+</k3-lenticular-card>
+
+<!-- Three views, switched top to bottom -->
+<k3-lenticular-card axis="y" transition="0.3">
+  <img src="forest.jpg" alt="Forest" />
+  <img src="meadow.jpg" alt="Meadow" />
+  <img src="lake.jpg" alt="Lake" />
+</k3-lenticular-card>`,
+    css: `k3-lenticular-card {
+  inline-size: 15rem;
+  --k3-lenticular-card-radius: 4.75% / 3.5%;
+  --k3-lenticular-card-pitch: 4px; /* stripe size */
+}`,
+    jsExtra: `const card = document.querySelector('k3-lenticular-card');
+card.addEventListener('k3-change', (e) => console.log('view', e.detail.index, e.detail.label));
+card.show(1); // go to the second view`,
+  },
+  'card-scratch': {
+    components: ['k3-scratch-card'],
+    html: `<k3-scratch-card type="line" cover="silver">
+  <img src="prize.png" width="630" height="880" alt="You won a rare card" />
+</k3-scratch-card>
+
+<!-- Other brushes / metals -->
+<k3-scratch-card cover="gold" type="spray" radius="50" reveal-at="60">
+  <img src="coast.jpg" alt="Sandy beach at sunrise" />
+</k3-scratch-card>
+
+<k3-scratch-card type="brush" reveal-duration="400" label="">
+  <img src="lake.jpg" alt="Mountain lake" />
+</k3-scratch-card>`,
+    css: `k3-scratch-card {
+  inline-size: 15rem;
+  --k3-scratch-card-radius: 4.75% / 3.5%;
+}`,
+    jsExtra: `const card = document.querySelector('k3-scratch-card');
+card.addEventListener('k3-scratch', (e) => console.log(Math.round(e.detail.percent) + ' %'));
+card.addEventListener('k3-reveal', () => console.log('revealed'));
+// card.type = 'spray' · card.cover = 'gold' · card.reset()`,
+  },
   'charts-bar': {
     components: ['k3-chart'],
     html: `<k3-chart id="revenue" type="bar" height="280"></k3-chart>`,

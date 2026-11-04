@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="630" height="880" viewBox="0 0 630 880">
+  <defs>
+    <linearGradient id="c-pearl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef0f6"/>
+      <stop offset=".35" stop-color="#b9bfd0"/>
+      <stop offset=".65" stop-color="#e3e6ef"/>
+      <stop offset="1" stop-color="#9aa1b7"/>
+    </linearGradient>
+    <linearGradient id="c-panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d78b0"/>
+      <stop offset="1" stop-color="#1f4c78"/>
+    </linearGradient>
+    <linearGradient id="c-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b8fdb"/>
+      <stop offset=".55" stop-color="#86c4ee"/>
+      <stop offset="1" stop-color="#e6f5ff"/>
+    </linearGradient>
+    <linearGradient id="c-aurora" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset=".3" stop-color="#ffffff" stop-opacity=".7"/>
+      <stop offset=".7" stop-color="#ffffff" stop-opacity=".6"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="c-moon" cx=".38" cy=".35" r=".75">
+      <stop offset="0" stop-color="#fffef6"/>
+      <stop offset="1" stop-color="#ffd84f"/>
+    </radialGradient>
+    <radialGradient id="c-glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#9ff3ff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#9ff3ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="c-blur" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+    <clipPath id="c-art"><rect x="48" y="104" width="534" height="400" rx="8"/></clipPath>
+  </defs>
+
+  <rect width="630" height="880" fill="url(#c-pearl)"/>
+  <rect x="22" y="22" width="586" height="836" rx="16" fill="url(#c-panel)"/>
+
+  <text x="52" y="78" font-family="Cinzel, 'Cormorant Garamond', Georgia, serif" font-size="36" font-weight="700" fill="#f3f0ff">Cristal du jour</text>
+  <text x="578" y="76" text-anchor="end" font-family="Figtree, system-ui, sans-serif" font-size="24" fill="#e3e6ef" letter-spacing="2">✦✦✦</text>
+
+  <g clip-path="url(#c-art)">
+    <rect x="48" y="104" width="534" height="400" fill="url(#c-sky)"/>
+    <path d="M30 230 C 140 150, 230 260, 330 190 S 520 140, 610 210 L 610 260 C 520 200, 420 290, 330 250 S 140 220, 30 290 Z" fill="url(#c-aurora)" filter="url(#c-blur)"/>
+    <g fill="#fff" opacity="0"><circle cx="224" cy="145" r="1" opacity="0.39"/><circle cx="334" cy="192" r="1" opacity="0.90"/><circle cx="167" cy="131" r="1.8" opacity="0.39"/><circle cx="103" cy="205" r="2.4" opacity="0.42"/><circle cx="172" cy="249" r="1" opacity="0.70"/><circle cx="261" cy="325" r="1" opacity="0.68"/><circle cx="125" cy="203" r="2.4" opacity="0.42"/><circle cx="216" cy="290" r="1.2" opacity="0.41"/><circle cx="352" cy="153" r="1" opacity="0.68"/><circle cx="89" cy="125" r="1.2" opacity="0.65"/><circle cx="331" cy="281" r="1.8" opacity="0.70"/><circle cx="291" cy="177" r="1.2" opacity="0.77"/><circle cx="182" cy="237" r="2.4" opacity="0.65"/><circle cx="234" cy="210" r="2.4" opacity="0.94"/><circle cx="117" cy="203" r="1.5" opacity="0.44"/><circle cx="309" cy="121" r="1" opacity="0.81"/><circle cx="353" cy="303" r="1.5" opacity="0.55"/><circle cx="237" cy="220" r="1.8" opacity="0.39"/><circle cx="104" cy="171" r="1" opacity="0.39"/><circle cx="419" cy="253" r="1.8" opacity="0.52"/><circle cx="256" cy="258" r="1" opacity="0.91"/><circle cx="240" cy="245" r="1.8" opacity="0.39"/><circle cx="454" cy="140" r="1.2" opacity="0.59"/><circle cx="531" cy="220" r="1.2" opacity="0.62"/><circle cx="341" cy="305" r="1.8" opacity="0.87"/><circle cx="200" cy="203" r="1.5" opacity="0.76"/><circle cx="253" cy="162" r="1" opacity="0.46"/><circle cx="176" cy="163" r="1.8" opacity="0.85"/><circle cx="150" cy="173" r="1.2" opacity="0.60"/><circle cx="247" cy="235" r="1.2" opacity="0.76"/><circle cx="323" cy="247" r="1" opacity="0.62"/><circle cx="507" cy="320" r="2.4" opacity="0.59"/><circle cx="263" cy="135" r="1.8" opacity="0.39"/><circle cx="91" cy="158" r="1.2" opacity="0.42"/></g>
+    <circle cx="462" cy="190" r="92" fill="#fff4d6" opacity=".35"/>
+    <circle cx="462" cy="190" r="56" fill="url(#c-moon)"/>
+    <path d="M48 420 L130 330 L190 380 L270 300 L340 370 L410 320 L500 395 L582 340 L582 504 L48 504 Z" fill="#4a77a8"/>
+    <path d="M48 460 L120 410 L200 450 L300 395 L380 445 L470 410 L582 455 L582 504 L48 504 Z" fill="#2b5583"/>
+    <ellipse cx="315" cy="298" rx="125" ry="125" fill="url(#c-glow)"/>
+    <polygon points="315,180 258,285 315,285" fill="#b6f6ff"/>
+    <polygon points="315,180 372,285 315,285" fill="#6fd0ff"/>
+    <polygon points="258,285 315,285 315,410" fill="#8c7bff"/>
+    <polygon points="372,285 315,285 315,410" fill="#5a48d6"/>
+    <path d="M315 180 V410 M258 285 H372" stroke="#fff" stroke-opacity=".55" stroke-width="2" fill="none"/>
+    <polygon points="210,230 222,252 210,276 198,252" fill="#b6f6ff" opacity=".85"/>
+    <polygon points="424,326 434,344 424,362 414,344" fill="#8c7bff" opacity=".85"/>
+    <polygon points="236,360 243,372 236,384 229,372" fill="#6fd0ff" opacity=".7"/>
+    <ellipse cx="315" cy="472" rx="90" ry="9" fill="#9ff3ff" opacity=".22"/>
+  </g>
+  <rect x="48" y="104" width="534" height="400" rx="8" fill="none" stroke="url(#c-pearl)" stroke-width="6"/>
+
+  <rect x="96" y="520" width="438" height="36" rx="18" fill="url(#c-pearl)"/>
+  <text x="315" y="545" text-anchor="middle" font-family="Figtree, system-ui, sans-serif" font-size="18" font-style="italic" fill="#1f4c78">Gemme céleste, niveau 3</text>
+
+  <rect x="48" y="576" width="534" height="214" rx="10" fill="#fff" fill-opacity=".07" stroke="#fff" stroke-opacity=".18"/>
+  <text x="72" y="624" font-family="Cinzel, 'Cormorant Garamond', Georgia, serif" font-size="26" font-weight="700" fill="#f3f0ff">Éclat prismatique</text>
+  <text font-family="Figtree, system-ui, sans-serif" font-size="19" fill="#d9d4f5">
+    <tspan x="72" y="662">Au grand jour, il boit la lumière</tspan>
+    <tspan x="72" y="690">du soleil pour la rendre la nuit.</tspan>
+  </text>
+  <line x1="72" y1="716" x2="558" y2="716" stroke="#fff" stroke-opacity=".18"/>
+  <text x="72" y="756" font-family="Figtree, system-ui, sans-serif" font-size="17" font-style="italic" fill="#b9b3e0">Taillé un matin clair, au sommet du monde.</text>
+
+  <text x="52" y="830" font-family="Figtree, system-ui, sans-serif" font-size="15" fill="#cfcbea" fill-opacity=".8">Carte de démonstration</text>
+  <text x="578" y="830" text-anchor="end" font-family="Figtree, system-ui, sans-serif" font-size="15" fill="#cfcbea" fill-opacity=".8">001/100</text>
+</svg>

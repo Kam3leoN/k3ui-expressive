@@ -290,6 +290,22 @@ export {
   GlowParticlesSpecs,
 } from './components/animation/glow-particles.js';
 export {
+  K3HoloCard,
+  HoloCardSpecs,
+  type HoloCardEffect,
+} from './components/animation/holo-card.js';
+export {
+  K3ScratchCard,
+  ScratchCardSpecs,
+  type ScratchType,
+  type ScratchMetal,
+} from './components/animation/scratch-card.js';
+export {
+  K3LenticularCard,
+  LenticularCardSpecs,
+  type LenticularAxis,
+} from './components/animation/lenticular-card.js';
+export {
   K3Chart,
   ChartSpecs,
   type K3ChartType,

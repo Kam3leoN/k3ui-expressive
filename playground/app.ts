@@ -73,6 +73,7 @@ import { armNavActive, navItemFromEvent } from '../src/components/navigation/nav
 import type { K3NavItem } from '../src/components/navigation/nav-item.js';
 import type { DocComponent } from './catalog.js';
 import { getSoundFx } from '../src/core/sound-fx.js';
+import { canHoverOpen } from '../src/components/containment/menu.types.js';
 
 /**
  * Shell-critical custom elements — enough for first paint (home + chrome).
@@ -280,6 +281,46 @@ const KEYBOARD_SUBPAGES = [
 
 const KEYBOARD_CHILD_IDS = new Set<string>(KEYBOARD_SUBPAGES.map(([id]) => id));
 
+/**
+ * Cards family — Components → Containment → Cards → (3rd-level flyout)
+ * Standard (#/card) + holographic / lenticular / scratch demos.
+ */
+const CARD_SUBPAGES = [
+  ['card', 'doc.cards.nav.overview'],
+  ['card-holo', 'doc.cards.nav.holo'],
+  ['card-lenticular', 'doc.cards.nav.lenticular'],
+  ['card-scratch', 'doc.cards.nav.scratch'],
+] as const;
+
+const CARD_CHILD_IDS = new Set<string>(CARD_SUBPAGES.map(([id]) => id));
+
+/** Nested `k3-menu-item` — Containment → Cards → children (3rd level). */
+function makeCardsFamilyMenuItem(
+  pageId: string,
+  selectCurrent: boolean,
+): HTMLElement {
+  const resolved = articlePageId(pageId);
+  const cardsParent = document.createElement('k3-menu-item');
+  cardsParent.setAttribute('value', 'card');
+  cardsParent.setAttribute('has-submenu', '');
+  cardsParent.slot = 'submenu';
+  cardsParent.append(t('doc.cards.title'));
+  appendEnSupporting(cardsParent, 'doc.cards.title');
+  if (selectCurrent && isCardFamilyPage(pageId)) {
+    cardsParent.setAttribute('selected', '');
+  }
+  for (const [value, labelKey] of CARD_SUBPAGES) {
+    const child = document.createElement('k3-menu-item');
+    child.setAttribute('value', value);
+    child.slot = 'submenu';
+    child.append(t(labelKey));
+    appendEnSupporting(child, labelKey);
+    if (selectCurrent && resolved === value) child.setAttribute('selected', '');
+    cardsParent.appendChild(child);
+  }
+  return cardsParent;
+}
+
 /** Resolve legacy hashes → title-aligned slugs (Family-Type). */
 function articlePageId(hashId: string): string {
   return resolvePageId(hashId);
@@ -291,6 +332,10 @@ function isColorFamilyPage(hashId: string): boolean {
 
 function isKeyboardFamilyPage(hashId: string): boolean {
   return KEYBOARD_CHILD_IDS.has(articlePageId(hashId));
+}
+
+function isCardFamilyPage(hashId: string): boolean {
+  return CARD_CHILD_IDS.has(articlePageId(hashId));
 }
 
 function setCeProp(el: HTMLElement, prop: string, attr: string, value: string): void {
@@ -338,6 +383,11 @@ function applyPlaygroundI18n(): void {
     const key = el.getAttribute('data-i18n-label');
     if (!key) return;
     setCeProp(el, 'label', 'label', t(key));
+  });
+  document.querySelectorAll<HTMLElement>('[data-i18n-alt]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-alt');
+    if (!key) return;
+    el.setAttribute('alt', t(key));
   });
   document.querySelectorAll<HTMLElement>('[data-i18n-aria-label]').forEach((el) => {
     const key = el.getAttribute('data-i18n-aria-label');
@@ -802,6 +852,8 @@ type ShellNavMenu = HTMLElement & {
   position: string;
   updateComplete: Promise<boolean>;
   armDismissGuard?: (ms?: number) => void;
+  positioningAnchor?: HTMLElement | null;
+  positioningEdge?: HTMLElement | null;
 };
 
 /** Serialize rail menu open/toggle so overlapping clicks cannot fight. */
@@ -1049,10 +1101,78 @@ function buildNavSheet(destId: string): void {
       ul.className = 'shell-sheet-children';
       ul.id = panelId;
       ul.hidden = pageCat !== group.category;
-      for (const c of componentsInCategory(group.category)) {
-        const li = document.createElement('li');
-        li.append(sheetNavLink(c, selectCurrent ? pageId : ''));
-        ul.append(li);
+
+      if (group.category === 'Containment') {
+        const peers = componentsInCategory('Containment').filter(
+          (c) => !CARD_CHILD_IDS.has(c.id),
+        );
+        const wrap = document.createElement('li');
+        wrap.className = 'shell-sheet-cards-wrap';
+        const cardsGroup = document.createElement('div');
+        cardsGroup.className = 'shell-sheet-group';
+        if (selectCurrent && isCardFamilyPage(pageId)) {
+          cardsGroup.classList.add('is-open');
+        }
+        const cardsPanelId = 'shell-sheet-panel-cards';
+        const cardsPanel = document.createElement('ul');
+        cardsPanel.className = 'shell-sheet-children';
+        cardsPanel.id = cardsPanelId;
+        const resolved = articlePageId(pageId);
+        for (const [hash, labelKey] of CARD_SUBPAGES) {
+          const cli = document.createElement('li');
+          const a = document.createElement('a');
+          a.className = 'shell-sheet-link';
+          a.href = `#/${hash}`;
+          a.append(sheetLabel(labelKey));
+          if (selectCurrent && resolved === hash) {
+            a.classList.add('is-active');
+            a.setAttribute('aria-current', 'page');
+          }
+          cli.append(a);
+          cardsPanel.append(cli);
+        }
+        const cardsBtn = document.createElement('button');
+        cardsBtn.type = 'button';
+        cardsBtn.className = 'shell-sheet-group-btn';
+        cardsBtn.setAttribute(
+          'aria-expanded',
+          selectCurrent && isCardFamilyPage(pageId) ? 'true' : 'false',
+        );
+        cardsBtn.setAttribute('aria-controls', cardsPanelId);
+        cardsBtn.append(sheetLabel('doc.cards.title'));
+        const cardsChevron = document.createElement('span');
+        cardsChevron.className = 'ms chevron';
+        setMsIcon(cardsChevron, 'expand_more');
+        cardsBtn.append(cardsChevron);
+        cardsBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const open = !cardsGroup.classList.contains('is-open');
+          cardsGroup.classList.toggle('is-open', open);
+          cardsBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        cardsGroup.append(cardsBtn, cardsPanel);
+        wrap.append(cardsGroup);
+
+        let cardsInserted = false;
+        for (const c of peers) {
+          if (
+            !cardsInserted &&
+            c.title.localeCompare('Cards', 'en', { sensitivity: 'base' }) > 0
+          ) {
+            ul.append(wrap);
+            cardsInserted = true;
+          }
+          const li = document.createElement('li');
+          li.append(sheetNavLink(c, selectCurrent ? pageId : ''));
+          ul.append(li);
+        }
+        if (!cardsInserted) ul.append(wrap);
+      } else {
+        for (const c of componentsInCategory(group.category)) {
+          const li = document.createElement('li');
+          li.append(sheetNavLink(c, selectCurrent ? pageId : ''));
+          ul.append(li);
+        }
       }
       groupEl.append(btn, ul);
       nav.append(groupEl);
@@ -1284,10 +1404,31 @@ function fillNavMenu(destId?: string | null): {
         parent.setAttribute('has-submenu', '');
         parent.append(menuItemIcon(group.icon), t(group.labelKey));
         appendEnSupporting(parent, group.labelKey);
-        for (const c of componentsInCategory(group.category)) {
-          parent.appendChild(
-            leafMenuItem(c, pageId, { slot: 'submenu', selectCurrent }),
+
+        if (group.category === 'Containment') {
+          /* Flat peers except Cards family → one nested flyout under Cartes */
+          const peers = componentsInCategory('Containment').filter(
+            (c) => !CARD_CHILD_IDS.has(c.id),
           );
+          const cardsItem = makeCardsFamilyMenuItem(pageId, selectCurrent);
+          let cardsInserted = false;
+          for (const c of peers) {
+            /* Keep alpha order: insert Cards before the first title after "Cards" */
+            if (!cardsInserted && c.title.localeCompare('Cards', 'en', { sensitivity: 'base' }) > 0) {
+              parent.appendChild(cardsItem);
+              cardsInserted = true;
+            }
+            parent.appendChild(
+              leafMenuItem(c, pageId, { slot: 'submenu', selectCurrent }),
+            );
+          }
+          if (!cardsInserted) parent.appendChild(cardsItem);
+        } else {
+          for (const c of componentsInCategory(group.category)) {
+            parent.appendChild(
+              leafMenuItem(c, pageId, { slot: 'submenu', selectCurrent }),
+            );
+          }
         }
         return parent;
       }),
@@ -1396,6 +1537,7 @@ function fillNavMenu(destId?: string | null): {
  * - Animations → flat list (text-bounce, heart-burst, …)
  * - Resources → Material Symbols browser page
  * - Styles → flat list; Color expands to Roles / Palettes / Additional
+ * - Components → Containment → Cards expands to Standard / Holo / Lenticular / Scratch
  */
 function buildNavMenu(
   opts: { open?: boolean; anchor?: DOMRect | null; destId?: string | null } = {},
@@ -1412,11 +1554,14 @@ function buildNavMenu(
  * Open (or toggle) the rail secondary menu.
  * Toggle is driven by `openMenuDestId` (not `menu.open`) so a document
  * pointerdown dismiss cannot invert the following click.
+ * Hover open passes `{ toggle: false }` — leave closes; same dest stays open.
  */
 async function openShellNavMenu(
   destId?: string | null,
   anchor: DOMRect | null = null,
+  opts: { toggle?: boolean } = {},
 ): Promise<void> {
+  const toggle = opts.toggle !== false;
   const run = async (): Promise<void> => {
     /* Shell already registers these at boot — only wait if missing */
     if (!customElements.get('k3-menu')) await registry.register('k3-menu');
@@ -1428,8 +1573,17 @@ async function openShellNavMenu(
 
     const id = resolveSecondaryDest(destId).id;
 
-    /* Same dest already shown → close (parity with bottom sheet) */
+    /* Same dest already shown → close on click toggle; keep on hover */
     if (openMenuDestId === id) {
+      if (!toggle) {
+        positionShellNavMenu(anchor);
+        syncNavMenuOpenHighlight();
+        if (!menu.open) {
+          menu.hidden = false;
+          await menu.show('menu', { fast: true });
+        }
+        return;
+      }
       openMenuDestId = null;
       syncNavMenuOpenHighlight();
       if (menu.open) await menu.hide('user', { fast: true });
@@ -1447,6 +1601,9 @@ async function openShellNavMenu(
     syncNavMenuOpenHighlight();
     menu.hidden = false;
     positionShellNavMenu(anchor);
+
+    const rail = document.getElementById('nav-rail');
+    if (rail) menu.positioningEdge = rail;
 
     /* Show immediately — items upgrade while the panel is visible */
     menu.armDismissGuard?.(320);
@@ -2477,6 +2634,8 @@ async function boot(): Promise<void> {
       if (articleId === 'countdown') wireCountdownLab();
       if (articleId === 'carousel') wireCarouselLab();
       if (articleId === 'halftone') wireHalftoneLab();
+      if (articleId === 'card-holo') wireHoloCardDemo();
+      if (articleId === 'card-scratch') wireScratchCardDemo();
       if (
         articleId === 'charts-bar' ||
         articleId === 'charts-line' ||
@@ -2507,18 +2666,34 @@ async function boot(): Promise<void> {
      * Primary nav:
      * - destination with href → navigate (Quick Start)
      * - otherwise → open secondary menu (Components / Styles)
+     * Rail + fine pointer: open on hover (submenus follow open-on=hover).
+     * Compact bar / coarse pointer: keep click.
      * Capture + stopPropagation so the rail/bar does not steal `active`
      * before we resolve the destination.
      */
-    const onPrimaryClick = (e: Event): void => {
-      const host = e.currentTarget as HTMLElement;
+    const resolvePrimaryDest = (
+      host: HTMLElement,
+      e: Event,
+    ): { item: Element; dest: (typeof NAV_DESTINATIONS)[number] } | null => {
       const item = navItemFromEvent(e, host);
-      if (!item) return;
+      if (!item) return null;
       const slotted = new Set([...host.querySelectorAll('[slot]')].map((el) => el as Element));
       const items = [...host.querySelectorAll('k3-nav-item')].filter((el) => !slotted.has(el));
       const idx = items.indexOf(item as (typeof items)[number]);
       const dest = NAV_DESTINATIONS[idx];
-      if (idx < 0 || !dest) return;
+      if (idx < 0 || !dest) return null;
+      return { item, dest };
+    };
+
+    const shellNavMode = (): 'bar' | 'rail' =>
+      (document.querySelector('.app')?.getAttribute('data-nav') as 'bar' | 'rail' | null) ??
+      navMode();
+
+    const onPrimaryClick = (e: Event): void => {
+      const host = e.currentTarget as HTMLElement;
+      const hit = resolvePrimaryDest(host, e);
+      if (!hit) return;
+      const { item, dest } = hit;
       e.preventDefault();
       e.stopPropagation();
       if (dest.href) {
@@ -2530,23 +2705,85 @@ async function boot(): Promise<void> {
         }
         return;
       }
-      /*
-       * Use data-nav (source of truth after applyAdaptiveShell), not a fresh
-       * matchMedia — avoids bar/rail disagreeing mid-gesture.
-       */
-      const mode =
-        (document.querySelector('.app')?.getAttribute('data-nav') as 'bar' | 'rail' | null) ??
-        navMode();
+      const mode = shellNavMode();
       if (mode === 'bar') {
         void openShellNavSheet(dest.id);
         return;
       }
-      /* Guard before any await — pointerdown must not dismiss mid-open */
+      /* Hover mode: click opens without toggle-close (leave dismisses) */
+      const hover = canHoverOpen();
       shellNavMenu()?.armDismissGuard?.(320);
-      void openShellNavMenu(dest.id, item.getBoundingClientRect());
+      const menu = shellNavMenu();
+      if (menu) menu.positioningAnchor = item as HTMLElement;
+      void openShellNavMenu(dest.id, item.getBoundingClientRect(), { toggle: !hover });
     };
+
+    /** Grace before closing when the pointer leaves rail ↔ menu. */
+    const RAIL_HOVER_CLOSE_MS = 160;
+    let railHoverCloseTimer = 0;
+    const clearRailHoverClose = (): void => {
+      if (!railHoverCloseTimer) return;
+      window.clearTimeout(railHoverCloseTimer);
+      railHoverCloseTimer = 0;
+    };
+    const scheduleRailHoverClose = (): void => {
+      clearRailHoverClose();
+      railHoverCloseTimer = window.setTimeout(() => {
+        railHoverCloseTimer = 0;
+        if (!canHoverOpen() || shellNavMode() !== 'rail') return;
+        const menu = shellNavMenu();
+        const rail = document.getElementById('nav-rail');
+        if (menu?.matches(':hover') || rail?.matches(':hover')) return;
+        closeShellNavMenu();
+      }, RAIL_HOVER_CLOSE_MS);
+    };
+
+    const onRailPointerOver = (e: PointerEvent): void => {
+      if (!canHoverOpen() || shellNavMode() !== 'rail') return;
+      if (e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
+      const rail = e.currentTarget as HTMLElement;
+      const hit = resolvePrimaryDest(rail, e);
+      if (!hit) return;
+      clearRailHoverClose();
+      const { item, dest } = hit;
+      if (dest.href) {
+        /* Leaf destination — close any open secondary while hovering it */
+        if (openMenuDestId) scheduleRailHoverClose();
+        return;
+      }
+      const menu = shellNavMenu();
+      menu?.armDismissGuard?.(320);
+      if (menu) menu.positioningAnchor = item as HTMLElement;
+      void openShellNavMenu(dest.id, item.getBoundingClientRect(), { toggle: false });
+    };
+
+    const onRailPointerLeave = (e: PointerEvent): void => {
+      if (!canHoverOpen() || shellNavMode() !== 'rail') return;
+      const related = e.relatedTarget;
+      const menu = shellNavMenu();
+      if (related === menu) return;
+      if (related instanceof Element && related.closest('#shell-nav-menu')) return;
+      if (related instanceof Node && menu?.contains(related)) return;
+      if (related instanceof Element) {
+        const root = related.getRootNode();
+        if (root instanceof ShadowRoot && (root.host === menu || menu?.contains(root.host))) {
+          return;
+        }
+      }
+      scheduleRailHoverClose();
+    };
+
     document.getElementById('nav-rail')?.addEventListener('click', onPrimaryClick, true);
     document.getElementById('nav-bar')?.addEventListener('click', onPrimaryClick, true);
+    document.getElementById('nav-rail')?.addEventListener('pointerover', onRailPointerOver);
+    document.getElementById('nav-rail')?.addEventListener('pointerleave', onRailPointerLeave);
+    document.getElementById('shell-nav-menu')?.addEventListener('pointerenter', () => {
+      clearRailHoverClose();
+    });
+    document.getElementById('shell-nav-menu')?.addEventListener('pointerleave', () => {
+      if (!canHoverOpen() || shellNavMode() !== 'rail') return;
+      scheduleRailHoverClose();
+    });
 
     /* Keep sticky audio dock inset in sync with rail compact ↔ expanded. */
     const shellRail = document.getElementById('nav-rail');
@@ -3358,6 +3595,151 @@ function wireHalftoneLab(): void {
   on('ht-animated', 'k3-change', (d) => void (lab.animated = !!d.selected));
   on('ht-light', 'k3-change', (d) => void (lab.tone = d.selected ? 'light' : 'dark'));
   document.getElementById('ht-download')?.addEventListener('k3-click', () => void lab.download('k3ui-halftone.png'));
+}
+
+/** Holo card — select switches foil model (trading / photo / playground foils). */
+let holoCardDemoWired = false;
+function wireHoloCardDemo(): void {
+  if (holoCardDemoWired) return;
+  holoCardDemoWired = true;
+
+  type HoloModel = {
+    effect: string;
+    layout: 'portrait' | 'landscape';
+    maxRotate: number;
+    src: string;
+    width: number;
+    height: number;
+    altKey: string;
+  };
+
+  const models: Record<string, HoloModel> = {
+    'prism-card': {
+      effect: 'prism',
+      layout: 'portrait',
+      maxRotate: 15,
+      src: '/cards/cristal-aurore.svg',
+      width: 630,
+      height: 880,
+      altKey: 'doc.card-holo.alt.crystal',
+    },
+    'prism-photo': {
+      effect: 'prism',
+      layout: 'landscape',
+      maxRotate: 8,
+      src: '/landscapes/mountains.jpg',
+      width: 960,
+      height: 540,
+      altKey: 'doc.card-holo.alt.mountains',
+    },
+    'cosmos-card': {
+      effect: 'cosmos',
+      layout: 'portrait',
+      maxRotate: 15,
+      src: '/cards/cristal-aurore.svg',
+      width: 630,
+      height: 880,
+      altKey: 'doc.card-holo.alt.crystal',
+    },
+    'radiant-card': {
+      effect: 'radiant',
+      layout: 'portrait',
+      maxRotate: 15,
+      src: '/cards/cristal-aurore.svg',
+      width: 630,
+      height: 880,
+      altKey: 'doc.card-holo.alt.crystal',
+    },
+    'ice-card': {
+      effect: 'ice',
+      layout: 'portrait',
+      maxRotate: 15,
+      src: '/cards/cristal-aurore.svg',
+      width: 630,
+      height: 880,
+      altKey: 'doc.card-holo.alt.crystal',
+    },
+    'none-card': {
+      effect: 'none',
+      layout: 'portrait',
+      maxRotate: 15,
+      src: '/cards/cristal-aurore.svg',
+      width: 630,
+      height: 880,
+      altKey: 'doc.card-holo.alt.crystal',
+    },
+  };
+
+  const card = document.getElementById('demo-holo-card') as
+    | (HTMLElement & { effect: string; maxRotate: number })
+    | null;
+  const img = document.getElementById('demo-holo-img') as HTMLImageElement | null;
+  const select = document.getElementById('demo-holo-model');
+  if (!card || !img || !select) return;
+
+  const apply = (id: string): void => {
+    const model = models[id] ?? models['prism-card'];
+    if (!model) return;
+    card.effect = model.effect;
+    card.maxRotate = model.maxRotate;
+    card.classList.toggle('demo-card--portrait', model.layout === 'portrait');
+    card.classList.toggle('demo-card--landscape', model.layout === 'landscape');
+    img.src = model.src;
+    img.width = model.width;
+    img.height = model.height;
+    img.setAttribute('data-i18n-alt', model.altKey);
+    img.alt = t(model.altKey);
+  };
+
+  select.addEventListener('k3-change', ((e: CustomEvent<{ value?: string }>) => {
+    const v = e.detail?.value;
+    if (typeof v === 'string' && v) apply(v);
+  }) as EventListener);
+
+  const initial = select.getAttribute('value') || 'prism-card';
+  apply(initial);
+}
+
+/** Scratch card — connected groups for brush / metal + reset. */
+let scratchCardDemoWired = false;
+function wireScratchCardDemo(): void {
+  if (scratchCardDemoWired) return;
+  scratchCardDemoWired = true;
+
+  const card = document.getElementById('demo-scratch-card') as
+    | (HTMLElement & {
+        type: string;
+        cover: string;
+        radius: number;
+        revealDuration: number;
+        reset(): void;
+      })
+    | null;
+  if (!card) return;
+
+  const groupValue = (e: Event): string | null => {
+    const d = (e as CustomEvent<{ values?: string[]; selected?: HTMLElement }>).detail;
+    return d?.values?.[0] ?? d?.selected?.getAttribute('value') ?? null;
+  };
+
+  document.getElementById('demo-scratch-type')?.addEventListener('k3-change', (e) => {
+    const v = groupValue(e);
+    if (v !== 'line' && v !== 'spray' && v !== 'brush') return;
+    card.type = v;
+    card.radius = v === 'spray' ? 50 : 30;
+    card.revealDuration = v === 'brush' ? 400 : 0;
+    card.reset();
+  });
+
+  document.getElementById('demo-scratch-cover')?.addEventListener('k3-change', (e) => {
+    const v = groupValue(e);
+    if (v !== 'silver' && v !== 'gold') return;
+    card.cover = v;
+  });
+
+  document.getElementById('demo-scratch-reset')?.addEventListener('k3-click', () => {
+    card.reset();
+  });
 }
 
 /** Iso filter — periodic-table tiles + group chips. */
