@@ -933,36 +933,36 @@ const COMPONENT_API: Record<
   },
   'charts-bar': {
     properties: [
-      ['type', "'bar'|…", 'bar', 'Chart.js type (bar on this page)'],
+      ['type', "'bar'|…", 'bar', 'Chart type (bar on this page)'],
       ['data', 'ChartData', '{}', 'labels + datasets'],
       ['options', 'ChartOptions', 'null', 'Merged over K3 theme defaults'],
-      ['height', 'number', '280', 'Frame height (CSS px)'],
-      ['update-mode', 'UpdateMode', 'default', 'Chart.js update mode'],
+      ['height', 'number', '280', 'Frame height (CSS px); unset → --k3-chart-height'],
+      ['update-mode', 'UpdateMode', 'default', 'Update mode on data / options change'],
       ['label', 'string', "''", 'aria-label override'],
     ],
     methods: [
-      ['getChart', '() => Chart|null', 'Underlying Chart.js instance'],
-      ['refresh', '(mode?) => void', 'Force Chart.js update'],
+      ['getChart', '() => Chart|null', 'Underlying chart instance'],
+      ['refresh', '(mode?) => void', 'Force a chart update'],
       ['toBase64Image', '(type?, quality?) => string', 'PNG / JPEG data URL'],
     ],
     'css-parts': [
       ['frame', 'Sized chart frame'],
-      ['canvas', 'Chart.js canvas'],
+      ['canvas', 'Chart canvas'],
     ],
   },
   'charts-line': {
     properties: [
-      ['type', "'line'|…", 'line', 'Chart.js type (line on this page)'],
+      ['type', "'line'|…", 'line', 'Chart type (line on this page)'],
       ['data', 'ChartData', '{}', 'labels + datasets (fill / tension supported)'],
       ['options', 'ChartOptions', 'null', 'Merged over K3 theme defaults'],
-      ['height', 'number', '280', 'Frame height (CSS px)'],
+      ['height', 'number', '280', 'Frame height (CSS px); unset → --k3-chart-height'],
     ],
     methods: [
       ['getChart / refresh / toBase64Image', '—', 'Same as Bar charts'],
     ],
     'css-parts': [
       ['frame', 'Sized chart frame'],
-      ['canvas', 'Chart.js canvas'],
+      ['canvas', 'Chart canvas'],
     ],
   },
   'charts-other': {
@@ -971,18 +971,18 @@ const COMPONENT_API: Record<
         'type',
         "'pie'|'doughnut'|'radar'|'polarArea'|'bubble'|'scatter'",
         'pie',
-        'Non bar/line Chart.js types',
+        'Non bar/line chart types',
       ],
       ['data', 'ChartData', '{}', 'Type-specific datasets'],
       ['options', 'ChartOptions', 'null', 'Merged over K3 theme defaults'],
-      ['height', 'number', '280', 'Frame height (CSS px)'],
+      ['height', 'number', '280', 'Frame height (CSS px); unset → --k3-chart-height'],
     ],
     methods: [
       ['getChart / refresh / toBase64Image', '—', 'Same as Bar charts'],
     ],
     'css-parts': [
       ['frame', 'Sized chart frame'],
-      ['canvas', 'Chart.js canvas'],
+      ['canvas', 'Chart canvas'],
     ],
   },
   breadcrumb: {

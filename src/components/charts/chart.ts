@@ -1,11 +1,17 @@
 import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import type { Chart as ChartInstance, ChartData, ChartOptions, ChartType, UpdateMode } from 'chart.js';
+import type {
+  Chart as ChartInstance,
+  ChartData,
+  ChartOptions,
+  ChartType,
+  UpdateMode,
+} from './chart.register.js';
 import { K3Element, prefersReducedMotion } from '../../core/index.js';
 import { i18n } from '../../i18n/index.js';
 import { hostReset } from '../_shared.js';
-import { ensureChartJsRegistered } from './chart.register.js';
+import { ensureChartEngine } from './chart.register.js';
 import { buildDefaultOptions, mergeChartOptions } from './chart.theme.js';
 import { chartStyles } from './chart.styles.js';
 
@@ -25,26 +31,30 @@ export type K3ChartType =
   | 'scatter';
 
 /**
- * Chart.js wrapper — themed canvas chart for K3ui.
+ * K3ui canvas chart (bars, lines, radar, pie / doughnut, polar, bubble, scatter).
  *
  * ```html
  * <k3-chart type="bar" .data=${data} height="280"></k3-chart>
  * ```
  *
- * @see https://www.chartjs.org/
+ * Without a `height` attribute the frame follows `--k3-chart-height` (default 280px)
+ * so the space can be reserved in CSS before the element upgrades.
  */
 export class K3Chart extends K3Element {
   static override styles = [hostReset, chartStyles];
 
-  /** Chart.js chart type. */
+  /** Chart type. */
   @property({ reflect: true }) type: K3ChartType = ChartSpecs.type as K3ChartType;
-  /** Chart.js data object. */
+  /** Labels and datasets. */
   @property({ attribute: false }) data: ChartData = { labels: [], datasets: [] };
-  /** Partial Chart.js options (merged over K3 theme defaults). */
+  /** Partial options (merged over the K3 theme defaults). */
   @property({ attribute: false }) options: ChartOptions | null = null;
-  /** Frame height in CSS px. */
-  @property({ type: Number }) height: number = ChartSpecs.height;
-  /** Chart.js update mode when data/options change. */
+  /**
+   * Frame height in CSS px. Unset: `--k3-chart-height` (default 280px) — size
+   * charts in CSS that way and the space is reserved even before upgrade.
+   */
+  @property({ type: Number }) height?: number;
+  /** Update mode when data / options change. */
   @property({ attribute: 'update-mode' }) updateMode: UpdateMode | 'default' = 'default';
   /** Accessible name (defaults to i18n). */
   @property() label = '';
@@ -87,12 +97,12 @@ export class K3Chart extends K3Element {
     }
   }
 
-  /** Underlying Chart.js instance (or null). */
+  /** Underlying chart instance (or null). */
   getChart(): ChartInstance | null {
     return this.chart;
   }
 
-  /** Force a Chart.js update with optional mode (not Lit's `update`). */
+  /** Force a chart update with optional mode (not Lit's `update`). */
   refresh(mode?: UpdateMode): void {
     if (!this.chart) return;
     const m = mode ?? (this.updateMode === 'default' ? undefined : this.updateMode);
@@ -120,7 +130,7 @@ export class K3Chart extends K3Element {
     const canvas = this.canvas;
     if (!canvas) return;
     this.destroyChart();
-    const Chart = ensureChartJsRegistered();
+    const Chart = ensureChartEngine();
     const type = this.type as ChartType;
     this.pendingType = this.type;
     const opts = mergeChartOptions(buildDefaultOptions(this, type), this.options ?? undefined);
@@ -156,12 +166,16 @@ export class K3Chart extends K3Element {
   }
 
   override render() {
-    const h = Math.max(80, this.height);
+    /* The height attribute wins; otherwise the frame follows --k3-chart-height */
+    const h =
+      this.height === undefined || !Number.isFinite(this.height)
+        ? null
+        : Math.max(80, this.height);
     return html`
       <div
         class="frame"
         part="frame"
-        style=${styleMap({ '--k3-chart-height': `${h}px` })}
+        style=${styleMap(h === null ? {} : { '--k3-chart-height': `${h}px` })}
       >
         <canvas part="canvas" aria-hidden="true"></canvas>
       </div>

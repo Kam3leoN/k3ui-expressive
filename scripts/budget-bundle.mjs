@@ -10,7 +10,7 @@ const jsPath = path.join(root, 'dist/k3ui.js');
 const cssPath = path.join(root, 'dist/k3ui.css');
 
 // Soft budgets for early 0.0.x — CSS excludes self-hosted fonts (dist/fonts)
-/* Measured: ~604 kB JS (one inlined bundle) incl. chart.js (~70 kB — candidate for an
+/* Measured: ~604 kB JS (one inlined bundle) incl. the chart engine (~70 kB — candidate for an
  * on-demand pack like dist/k3ui-syntax.js), the syntax core + web grammars (~15 kB) and the
  * card effects (~14 kB: holo, scratch, lenticular + their strings) / ~13 kB CSS.
  * Raise only on purpose — and tighten again once components ship as chunks. */

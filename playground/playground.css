@@ -1950,10 +1950,15 @@ k3-avatar [slot='badge'].ms {
 .demo-case-stage--chart > k3-chart {
   display: block;
   width: 100%;
+  /* Sized in CSS: the same space is reserved before the element upgrades */
+  --k3-chart-height: 240px;
   background: var(--k3-sys-color-surface-container-lowest, transparent);
   border-radius: var(--k3-sys-shape-corner-large, 1rem);
   padding: var(--k3-sys-spacing-space200, 0.75rem);
   box-sizing: border-box;
+}
+.demo-frame--charts.grid-3 .demo-case-stage--chart > k3-chart {
+  --k3-chart-height: 220px;
 }
 
 /*

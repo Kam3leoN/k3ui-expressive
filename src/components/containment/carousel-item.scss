@@ -128,13 +128,21 @@ $label-fade-from: 0.55; // label starts appearing past 55 % of large size
   translate: 50% 0;
 }
 
+// Media fills the unmasked content box.
+// `!important` is required: for normal declarations the *light DOM* wins over
+// `::slotted()`, so a global reset such as Tailwind preflight
+// (`img, video { max-width: 100%; height: auto }`) would shrink the media to its
+// intrinsic ratio. For `!important` declarations the shadow (inner) context wins,
+// which makes these sizes immune to page-level resets.
 ::slotted(img),
 ::slotted(video),
 ::slotted(picture) {
-  display: block;
-  inline-size: 100%;
-  block-size: 100%;
-  object-fit: cover;
+  display: block !important;
+  inline-size: 100% !important;
+  block-size: 100% !important;
+  max-inline-size: none !important;
+  max-block-size: none !important;
+  object-fit: cover !important;
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;

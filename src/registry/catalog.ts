@@ -75,7 +75,7 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-holo-card', load: () => import('../components/animation/holo-card.js') },
   { tag: 'k3-scratch-card', load: () => import('../components/animation/scratch-card.js') },
   { tag: 'k3-lenticular-card', load: () => import('../components/animation/lenticular-card.js') },
-  // charts (Chart.js)
+  // charts
   { tag: 'k3-chart', load: () => import('../components/charts/chart.js') },
   // media
   { tag: 'k3-audio-player', load: () => import('../components/media/audio-player.js') },

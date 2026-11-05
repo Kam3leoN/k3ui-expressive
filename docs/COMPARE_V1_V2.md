@@ -54,7 +54,7 @@ Points = (note 0–5 / 5) × poids.
 | Docs | PHP `k3ui-docs.vercel.app` (hors repo) | Playground Vite ~75 pages |
 | Licence | Apache-2.0 | MIT |
 | Version affichée | 0.1.0 (npm **non publié**) | 0.0.1 |
-| Deps runtime | MCU, echarts, gsap, jspdf, QR… | lit, MCU, material-shapes-ts, fontsource |
+| Deps runtime | MCU, chart engine, gsap, jspdf, QR… | lit, MCU, material-shapes-ts, fontsource |
 | Dist JS | Multi-chunk + deferred | Monolithe `dist/k3ui.js` ~304 kB gzip (budget soft 280) |
 | Dist CSS | `k3ui(.min\|.core).css` | `k3ui.css` ~12.3 kB gzip (budget 24) |
 | CI | 0 workflows sur le miroir OLD | Vercel playground |

@@ -1,4 +1,4 @@
-import type { ChartOptions, ChartType } from 'chart.js';
+import type { ChartOptions, ChartType } from './chart.register.js';
 import { prefersReducedMotion } from '../../core/index.js';
 
 function cssVar(el: HTMLElement, name: string, fallback: string): string {
@@ -6,7 +6,7 @@ function cssVar(el: HTMLElement, name: string, fallback: string): string {
   return v || fallback;
 }
 
-/** Default Chart.js options tuned to K3ui system color tokens. */
+/** Default chart options tuned to K3ui system color tokens. */
 export function buildDefaultOptions(
   host: HTMLElement,
   type: ChartType,
@@ -76,7 +76,7 @@ export function buildDefaultOptions(
   return options;
 }
 
-/** Deep-merge Chart.js option objects (arrays replaced, not concatenated). */
+/** Deep-merge chart option objects (arrays replaced, not concatenated). */
 export function mergeChartOptions(
   base: ChartOptions,
   override?: ChartOptions | null,

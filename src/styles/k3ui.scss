@@ -246,6 +246,17 @@
   @include k3-helpers.emit;
 }
 
+/*
+ * Components upgraded after the first paint keep their space meanwhile —
+ * no layout jump. k3-chart reads --k3-chart-height (or its height attribute,
+ * where the browser can read it from CSS).
+ */
+k3-chart:not(:defined) {
+  display: block;
+  block-size: var(--k3-chart-height, 17.5rem);
+  block-size: attr(height px, var(--k3-chart-height, 17.5rem));
+}
+
 @media (forced-colors: active) {
   :root {
     --k3-sys-color-outline: CanvasText;

@@ -24,8 +24,11 @@ import {
 
 let registered = false;
 
-/** Register Chart.js controllers / elements / scales / plugins once (tree-shakeable). */
-export function ensureChartJsRegistered(): typeof Chart {
+/**
+ * Chart engine — the only module that talks to the drawing library.
+ * Registers controllers / elements / scales / plugins once (tree-shakeable).
+ */
+export function ensureChartEngine(): typeof Chart {
   if (!registered) {
     Chart.register(
       BarController,
@@ -54,5 +57,16 @@ export function ensureChartJsRegistered(): typeof Chart {
   return Chart;
 }
 
+/** @deprecated Use `ensureChartEngine` */
+export const ensureChartJsRegistered = ensureChartEngine;
+
 export { Chart };
-export type { ChartConfiguration, ChartData, ChartOptions, ChartType } from 'chart.js';
+export type {
+  ChartConfiguration,
+  ChartData,
+  ChartDataset,
+  ChartOptions,
+  ChartType,
+  Plugin,
+  UpdateMode,
+} from 'chart.js';

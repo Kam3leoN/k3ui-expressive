@@ -9151,7 +9151,7 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
                     label="Full-screen"
                     controls
                     indicators="right"
-                    style="--k3-carousel-height: 20rem; border-radius: var(--k3-sys-shape-corner-extra-large); overflow: hidden"
+                    style="--k3-carousel-height: 20rem; --k3-carousel-full-screen-corner: var(--k3-sys-shape-corner-extra-large)"
                   >
                     <k3-carousel-item label="Mountains">
                       <img loading="lazy" decoding="async" src="/landscapes/mountains.jpg" alt="" />
@@ -10434,7 +10434,7 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             <p class="comp-category" data-i18n="doc.nav.charts">Charts</p>
             <h1 data-i18n="doc.charts-bar.title">Bar charts</h1>
             <p data-i18n="doc.charts-bar.blurb">
-              Vertical, horizontal, stacked, and grouped bars — Chart.js via k3-chart.
+              Vertical, horizontal, stacked, and grouped bars.
             </p>
             <p class="doc-intro" data-i18n="doc.charts-bar.intro">
               Bar charts map categories to lengths. Use type="bar" on k3-chart; set indexAxis to "y"
@@ -10450,25 +10450,25 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             <div class="demo-frame demo-frame--cases grid-2 demo-frame--charts" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-bar-vertical" type="bar" height="240"></k3-chart>
+                  <k3-chart id="demo-bar-vertical" type="bar"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-bar-horizontal" type="bar" height="240"></k3-chart>
+                  <k3-chart id="demo-bar-horizontal" type="bar"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">2</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-bar-stacked" type="bar" height="240"></k3-chart>
+                  <k3-chart id="demo-bar-stacked" type="bar"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">3</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-bar-grouped" type="bar" height="240"></k3-chart>
+                  <k3-chart id="demo-bar-grouped" type="bar"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">4</span>
               </div>
@@ -10488,7 +10488,7 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             <p class="comp-category" data-i18n="doc.nav.charts">Charts</p>
             <h1 data-i18n="doc.charts-line.title">Line charts</h1>
             <p data-i18n="doc.charts-line.blurb">
-              Line, multi-series, tension, and area fills — Chart.js via k3-chart.
+              Line, multi-series, tension, and area fills.
             </p>
             <p class="doc-intro" data-i18n="doc.charts-line.intro">
               Line charts show trends over ordered categories. Use type="line"; enable fill for area
@@ -10503,25 +10503,25 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             <div class="demo-frame demo-frame--cases grid-2 demo-frame--charts" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-line-simple" type="line" height="240"></k3-chart>
+                  <k3-chart id="demo-line-simple" type="line"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-line-multi" type="line" height="240"></k3-chart>
+                  <k3-chart id="demo-line-multi" type="line"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">2</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-line-smooth" type="line" height="240"></k3-chart>
+                  <k3-chart id="demo-line-smooth" type="line"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">3</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-line-area" type="line" height="240"></k3-chart>
+                  <k3-chart id="demo-line-area" type="line"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">4</span>
               </div>
@@ -10541,10 +10541,10 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             <p class="comp-category" data-i18n="doc.nav.charts">Charts</p>
             <h1 data-i18n="doc.charts-other.title">Other charts</h1>
             <p data-i18n="doc.charts-other.blurb">
-              Pie, doughnut, radar, polar, bubble, and scatter — Chart.js via k3-chart.
+              Pie, doughnut, radar, polar, bubble, and scatter.
             </p>
             <p class="doc-intro" data-i18n="doc.charts-other.intro">
-              The remaining Chart.js types wrap the same k3-chart host. Pick type="pie" | "doughnut" |
+              The remaining chart types wrap the same k3-chart host. Pick type="pie" | "doughnut" |
               "radar" | "polarArea" | "bubble" | "scatter". Radial charts use the r scale; bubble/scatter
               use linear x/y.
             </p>
@@ -10555,37 +10555,37 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             <div class="demo-frame demo-frame--cases grid-3 demo-frame--charts" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-other-pie" type="pie" height="220"></k3-chart>
+                  <k3-chart id="demo-other-pie" type="pie"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-other-doughnut" type="doughnut" height="220"></k3-chart>
+                  <k3-chart id="demo-other-doughnut" type="doughnut"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">2</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-other-radar" type="radar" height="220"></k3-chart>
+                  <k3-chart id="demo-other-radar" type="radar"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">3</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-other-polar" type="polarArea" height="220"></k3-chart>
+                  <k3-chart id="demo-other-polar" type="polarArea"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">4</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-other-bubble" type="bubble" height="220"></k3-chart>
+                  <k3-chart id="demo-other-bubble" type="bubble"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">5</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--chart">
-                  <k3-chart id="demo-other-scatter" type="scatter" height="220"></k3-chart>
+                  <k3-chart id="demo-other-scatter" type="scatter"></k3-chart>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">6</span>
               </div>

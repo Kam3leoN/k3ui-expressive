@@ -758,6 +758,24 @@ function componentCatalogCount(): number {
   );
 }
 
+/** Leaf count for a destination badge (utilities / animations / styles / resources). */
+function destinationCatalogCount(destId: string): number {
+  switch (destId) {
+    case 'components':
+      return componentCatalogCount();
+    case 'utilities':
+      return componentsInCategory('Utilities').length;
+    case 'animations':
+      return componentsInCategory('Animation').length;
+    case 'styles':
+      return componentsInCategory('Styles').length;
+    case 'resources':
+      return RESOURCE_PAGES.length;
+    default:
+      return 0;
+  }
+}
+
 /** Rail expanded → horizontal pills · compact rail / bar → vertical. */
 function layoutForNavHost(host: HTMLElement): 'vertical' | 'horizontal' {
   if (host.localName !== 'k3-nav-rail') return 'vertical';
@@ -795,14 +813,14 @@ function syncPrimaryItems(host: HTMLElement): ShellNavItem[] {
     items.push(el);
   }
 
-  const componentCount = String(componentCatalogCount());
   NAV_DESTINATIONS.forEach((dest, i) => {
     const el = items[i]!;
     el.icon = dest.icon;
     el.label = t(dest.labelKey);
     /* Direct pages keep href; menu destinations stay empty (open secondary menu) */
     el.href = dest.href || '';
-    el.badge = dest.id === 'components' ? componentCount : '';
+    const count = destinationCatalogCount(dest.id);
+    el.badge = count > 0 ? String(count) : '';
     el.layout = layout;
   });
   return items;
@@ -2639,7 +2657,7 @@ async function boot(): Promise<void> {
         articleId === 'charts-line' ||
         articleId === 'charts-other'
       ) {
-        await wireChartsDemos();
+        await wireChartDemos();
       }
       if (articleId === 'iso-filter') await wireIsoFilterDemo();
       if (articleId === 'masonry') await wireMasonryDemo();
@@ -3412,7 +3430,7 @@ function wireDemoPages(): void {
   wireConfettiDemo();
   wireTextBounceDemo();
   wireTextScrambleDemo();
-  wireChartsDemos();
+  wireChartDemos();
   wireAudioPlayerDemoRights();
 }
 
@@ -3778,8 +3796,8 @@ async function wireMasonryDemo(): Promise<void> {
   el.layout?.();
 }
 
-/** Chart.js demos — assign data/options after k3-chart upgrades. */
-async function wireChartsDemos(): Promise<void> {
+/** Chart demos — assign data/options after k3-chart upgrades. */
+async function wireChartDemos(): Promise<void> {
   const data = await import('./charts-demo-data.js');
   type ChartEl = HTMLElement & {
     data: unknown;

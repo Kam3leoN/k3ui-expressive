@@ -1,4 +1,4 @@
-import type { ChartData, ChartOptions } from 'chart.js';
+import type { ChartData, ChartOptions } from '../src/index.js';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 

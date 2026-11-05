@@ -320,7 +320,9 @@ export {
   type IsoFilterLayout,
 } from './components/containment/iso-filter.js';
 export {
+  ensureChartEngine,
   ensureChartJsRegistered,
+  Chart as ChartEngine,
   Chart as ChartJs,
   type ChartConfiguration,
   type ChartData,

@@ -430,6 +430,28 @@ export const DOC_COMPONENTS: DocComponent[] = [
     titleKey: 'doc.qr-code.title',
     blurbKey: 'doc.qr-code.blurb',
   },
+  // Charts — bar / line / other (k3-chart pages)
+  {
+    id: 'charts-bar',
+    category: 'Charts',
+    title: 'Bar charts',
+    titleKey: 'doc.charts-bar.title',
+    blurbKey: 'doc.charts-bar.blurb',
+  },
+  {
+    id: 'charts-line',
+    category: 'Charts',
+    title: 'Line charts',
+    titleKey: 'doc.charts-line.title',
+    blurbKey: 'doc.charts-line.blurb',
+  },
+  {
+    id: 'charts-other',
+    category: 'Charts',
+    title: 'Other charts',
+    titleKey: 'doc.charts-other.title',
+    blurbKey: 'doc.charts-other.blurb',
+  },
   // Animation — decorative WAAPI effects (extend with morph / particles later)
   {
     id: 'text-bounce',
