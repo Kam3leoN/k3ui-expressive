@@ -123,6 +123,100 @@ export class K3TextField extends K3Element {
     setFormValue(this.internals, this.noForm ? null : v);
   }
 
+  /** Message set with {@link setCustomValidity} (empty = none). */
+  private customValidity = '';
+
+  /**
+   * Mirror the inner control's constraint validation (required, pattern,
+   * type, min/max length…) into ElementInternals, so `form.checkValidity()`,
+   * `:invalid` and native submit blocking see this field.
+   */
+  private syncValidity(): void {
+    const internals = this.internals;
+    if (typeof internals.setValidity !== 'function') return;
+    const control = this.controlEl;
+    if (this.noForm || !control) {
+      internals.setValidity({});
+      return;
+    }
+    if (this.customValidity) {
+      internals.setValidity({ customError: true }, this.customValidity, control);
+      return;
+    }
+    const v = control.validity;
+    if (v.valid) {
+      internals.setValidity({});
+      return;
+    }
+    internals.setValidity(
+      {
+        badInput: v.badInput,
+        patternMismatch: v.patternMismatch,
+        rangeOverflow: v.rangeOverflow,
+        rangeUnderflow: v.rangeUnderflow,
+        stepMismatch: v.stepMismatch,
+        tooLong: v.tooLong,
+        tooShort: v.tooShort,
+        typeMismatch: v.typeMismatch,
+        valueMissing: v.valueMissing,
+      },
+      control.validationMessage,
+      control,
+    );
+  }
+
+  /** Constraint validation state (same as a native input's). */
+  get validity(): ValidityState {
+    this.syncValidity();
+    return this.internals.validity;
+  }
+
+  get validationMessage(): string {
+    this.syncValidity();
+    return this.internals.validationMessage;
+  }
+
+  get willValidate(): boolean {
+    return this.internals.willValidate;
+  }
+
+  /** The owning `<form>`, if any. */
+  get form(): HTMLFormElement | null {
+    return this.internals.form;
+  }
+
+  checkValidity(): boolean {
+    this.syncValidity();
+    return this.internals.checkValidity();
+  }
+
+  /** Validate and show the browser's message on the inner control. */
+  reportValidity(): boolean {
+    this.syncValidity();
+    return this.internals.reportValidity();
+  }
+
+  /** Custom error (empty string clears it) — same contract as `HTMLInputElement`. */
+  setCustomValidity(message: string): void {
+    this.customValidity = String(message ?? '');
+    this.syncValidity();
+  }
+
+  /** `<form>.reset()` — back to the `value` attribute. */
+  formResetCallback(): void {
+    this.value = this.getAttribute('value') ?? '';
+  }
+
+  /** Disabled `<fieldset>` ancestor. */
+  formDisabledCallback(disabled: boolean): void {
+    this.disabled = disabled;
+  }
+
+  /** Browser back/forward and autofill restore. */
+  formStateRestoreCallback(state: string | File | FormData | null): void {
+    if (typeof state === 'string') this.value = state;
+  }
+
   private isSlotControl(el: Element | null): boolean {
     if (!el) return false;
     const t = el.localName;
@@ -338,6 +432,8 @@ export class K3TextField extends K3Element {
     if (changed.has('value') || changed.has('noForm')) {
       this.writeFormValue(this.noForm ? null : this.value || null);
     }
+    /* Inner control is rendered — its constraints are current now. */
+    this.syncValidity();
     if (this.pendingKeyframes) {
       const frames = this.pendingKeyframes;
       this.pendingKeyframes = undefined;

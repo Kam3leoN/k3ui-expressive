@@ -5,6 +5,8 @@ import { hostReset } from '../_shared.js';
 import { easings } from '../../motion/easings.js';
 import { heartBurstStyles } from './heart-burst.styles.js';
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
 export const HeartBurstSpecs = {
   count: 10,
   durationMin: 900,
@@ -48,7 +50,7 @@ export class K3HeartBurst extends K3Element {
   static override styles = [hostReset, heartBurstStyles];
 
   @property({ reflect: true }) trigger: HeartBurstTrigger = 'hover';
-  @property({ type: Number }) count = HeartBurstSpecs.count;
+  @property({ type: Number }) count: number = HeartBurstSpecs.count;
   @property({ type: Boolean, attribute: 'continuous' }) continuous = true;
   /** Block layout for cards / full-width targets. */
   @property({ type: Boolean, reflect: true }) block = false;
@@ -284,12 +286,19 @@ export class K3HeartBurst extends K3Element {
   }
 
   private spawnParticle(layer: HTMLElement, seed: number): void {
-    const path = ICON_PATHS[this.icon] ?? ICON_PATHS.heart;
+    const path = (Object.hasOwn(ICON_PATHS, this.icon) ? ICON_PATHS[this.icon] : undefined) ?? ICON_PATHS.heart;
     const particle = document.createElement('span');
     particle.className = 'particle';
     particle.setAttribute('aria-hidden', 'true');
     if (this.color) particle.style.color = this.color;
-    particle.innerHTML = `<svg viewBox="0 0 24 24" focusable="false"><path d="${path}"/></svg>`;
+    /* DOM API, not innerHTML — no Trusted Types sink, works under a strict CSP. */
+    const svgEl = document.createElementNS(SVG_NS, 'svg');
+    svgEl.setAttribute('viewBox', '0 0 24 24');
+    svgEl.setAttribute('focusable', 'false');
+    const pathEl = document.createElementNS(SVG_NS, 'path');
+    pathEl.setAttribute('d', path);
+    svgEl.append(pathEl);
+    particle.append(svgEl);
 
     const j = HeartBurstSpecs.jitter;
     const inset = this.clip ? HeartBurstSpecs.particleInset : 0;

@@ -653,6 +653,8 @@ export class K3Tooltip extends K3Element {
 
   private onKeydown = (e: KeyboardEvent): void => {
     if (e.key === 'Escape' && (this.open || this._wantOpen)) {
+      /* One Escape = one layer: a visible tip consumes it (dialog stays open). */
+      if (this.open) e.preventDefault();
       void this.hide();
     }
   };

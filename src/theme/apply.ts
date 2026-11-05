@@ -65,6 +65,9 @@ export type ColorVariant =
 /** Theme Builder contrast — maps to MCU `contrastLevel` −1…1. */
 export type ContrastLevel = 'default' | 'medium' | 'high';
 
+/** {@link ContrastLevel} or `auto` — OS `prefers-contrast` decides. */
+export type ContrastPreference = ContrastLevel | 'auto';
+
 /**
  * Material color spec. `2025` = Material 3 Expressive: the Expressive variant
  * keeps the seed hue on primary (2021 rotated it by +240°). Variants without a
@@ -79,7 +82,8 @@ export interface ThemeOptions {
   mode?: ColorMode;
   motion?: MotionScheme;
   variant?: ColorVariant;
-  contrast?: ContrastLevel;
+  /** `auto` follows `prefers-contrast: more` (→ `high`) and updates live. */
+  contrast?: ContrastPreference;
   /** Material color spec (default `2025`). */
   specVersion?: ColorSpecVersion;
   target?: HTMLElement | Document;
@@ -259,59 +263,78 @@ export function themeCssVars(
   );
 }
 
-let mediaListener: ((e: MediaQueryListEvent) => void) | null = null;
-let autoTimer: ReturnType<typeof setTimeout> | null = null;
-let lastOptions: ThemeOptions = {};
-
-function clearModeListeners(): void {
-  if (mediaListener && typeof matchMedia === 'function') {
-    matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', mediaListener);
-    mediaListener = null;
-  }
-  if (autoTimer != null) {
-    clearTimeout(autoTimer);
-    autoTimer = null;
-  }
+/** Per-target live listeners (OS colour / contrast changes, `auto` clock). */
+interface TargetBinding {
+  cleanup: () => void;
+  /** Last written scheme — skips identical re-applies (e.g. k3-theme connect + first update). */
+  signature: string;
 }
 
-function bindModeListeners(mode: ColorMode, merged: ThemeOptions): void {
-  clearModeListeners();
-  if (mode === 'system' && typeof matchMedia === 'function') {
-    mediaListener = () => themeApi.apply({ ...merged, mode });
-    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', mediaListener);
-    return;
-  }
+const bindings = new WeakMap<HTMLElement, TargetBinding>();
+/** Options of the document-level theme only — a local target never leaks into it. */
+let lastOptions: ThemeOptions = {};
+
+function resolveContrast(contrast: ContrastPreference): ContrastLevel {
+  if (contrast !== 'auto') return contrast in CONTRAST_LEVEL ? contrast : 'default';
+  if (typeof matchMedia === 'function' && matchMedia('(prefers-contrast: more)').matches) return 'high';
+  return 'default';
+}
+
+function bindListeners(target: HTMLElement, merged: ThemeOptions, signature: string): void {
+  bindings.get(target)?.cleanup();
+  const mode = merged.mode ?? 'auto';
+  const contrast = merged.contrast ?? 'default';
+  const cleanups: Array<() => void> = [];
+  const reapply = (): void => themeApi.apply({ ...merged, target });
+
+  const watch = (query: string): void => {
+    if (typeof matchMedia !== 'function') return;
+    const mql = matchMedia(query);
+    if (typeof mql.addEventListener !== 'function') return;
+    mql.addEventListener('change', reapply);
+    cleanups.push(() => mql.removeEventListener('change', reapply));
+  };
+  if (mode === 'system') watch('(prefers-color-scheme: dark)');
+  if (contrast === 'auto') watch('(prefers-contrast: more)');
   if (mode === 'auto' && typeof setTimeout === 'function') {
-    const schedule = (): void => {
-      autoTimer = setTimeout(() => {
-        themeApi.apply({ ...merged, mode: 'auto' });
-      }, msUntilNextAutoSwitch());
-    };
-    schedule();
+    const timer = setTimeout(reapply, msUntilNextAutoSwitch());
+    cleanups.push(() => clearTimeout(timer));
   }
+  bindings.set(target, { signature, cleanup: () => cleanups.forEach((fn) => fn()) });
+}
+
+function resolveTarget(target: ThemeOptions['target']): HTMLElement | null {
+  if (typeof HTMLElement !== 'undefined' && target instanceof HTMLElement) return target;
+  return typeof document !== 'undefined' ? document.documentElement : null;
 }
 
 export const themeApi = {
+  /**
+   * Write the colour scheme (CSS custom properties) and motion scheme on
+   * `target` — `<html>` by default. Document-level calls merge with the
+   * previous ones; a local `target` (e.g. `<k3-theme global="false">`) inherits
+   * them without becoming the default target of later calls.
+   */
   apply(options: ThemeOptions = {}): void {
-    const merged = { ...lastOptions, ...options };
-    lastOptions = merged;
+    const { target: requested, ...rest } = options;
+    const target = resolveTarget(requested);
+    if (!target) return;
+    const isDocument = typeof document !== 'undefined' && target === document.documentElement;
+    const merged: ThemeOptions = { ...lastOptions, ...rest };
+    if (isDocument) lastOptions = merged;
+
     const seed = merged.seed ?? '#6750A4';
     const mode = merged.mode ?? 'auto';
     const motion = merged.motion ?? 'expressive';
     const variant = merged.variant ?? 'expressive';
-    const contrast = merged.contrast ?? 'default';
+    const contrastPref = merged.contrast ?? 'default';
+    const contrast = resolveContrast(contrastPref);
     const spec = merged.specVersion ?? DEFAULT_COLOR_SPEC;
     const resolved = resolveMode(mode);
-    const target =
-      merged.target instanceof HTMLElement
-        ? merged.target
-        : typeof document !== 'undefined'
-          ? document.documentElement
-          : null;
-
-    if (!target) return;
+    const signature = [seed, mode, resolved, motion, variant, contrastPref, contrast, spec].join('|');
 
     try {
+      if (bindings.get(target)?.signature === signature) return;
       const vars = schemeToCssVars(seed, resolved === 'dark', variant, contrast, spec);
       for (const [k, v] of Object.entries(vars)) {
         target.style.setProperty(k, v);
@@ -325,7 +348,7 @@ export const themeApi = {
       target.dataset.k3Contrast = contrast;
       target.style.colorScheme = resolved;
 
-      bindModeListeners(mode, merged);
+      bindListeners(target, { ...merged, target: undefined }, signature);
 
       target.dispatchEvent(
         new CustomEvent('k3-theme-change', {
@@ -342,6 +365,13 @@ export const themeApi = {
     }
   },
 
+  /** Stop live updates (OS / clock) of a local `target` — e.g. a removed `<k3-theme>`. */
+  release(target: HTMLElement): void {
+    bindings.get(target)?.cleanup();
+    bindings.delete(target);
+  },
+
+  /** Options of the document-level theme (local targets excluded). */
   getLastOptions(): ThemeOptions {
     return { ...lastOptions };
   },

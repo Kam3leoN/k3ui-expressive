@@ -54,6 +54,8 @@ export const PAGE_ID_ALIASES: Record<string, string> = {
   'colors-palettes': 'color-palettes',
   'colors-m2': 'color-extras',
   'm2-colors': 'color-extras',
+  /* Styles → Icons removed — full catalog lives under Resources */
+  icons: 'material-symbols',
 };
 
 /** Canonical page id (applies aliases). */
@@ -746,11 +748,11 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.elevation.blurb',
   },
   {
-    id: 'icons',
+    id: 'grid',
     category: 'Styles',
-    title: 'Icons',
-    titleKey: 'doc.icons.title',
-    blurbKey: 'doc.icons.blurb',
+    title: 'Grid',
+    titleKey: 'doc.grid.title',
+    blurbKey: 'doc.grid.blurb',
   },
   {
     id: 'material-symbols',

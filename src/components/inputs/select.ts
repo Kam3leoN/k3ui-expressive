@@ -289,6 +289,34 @@ export class K3Select extends K3Element {
     if (changed.has('value')) {
       setFormValue(this.internals, this.value || null);
     }
+    if (changed.has('value') || changed.has('required')) this.syncValidity();
+  }
+
+  /** `required` with no value → `valueMissing` (blocks native submit, `:invalid`). */
+  private syncValidity(): void {
+    if (typeof this.internals.setValidity !== 'function') return;
+    if (this.required && !this.value) {
+      this.internals.setValidity({ valueMissing: true }, i18n.t('select.required', 'Please select an item in the list.'), this.triggerEl ?? undefined);
+    } else {
+      this.internals.setValidity({});
+    }
+  }
+
+  checkValidity(): boolean {
+    return this.internals.checkValidity();
+  }
+
+  reportValidity(): boolean {
+    return this.internals.reportValidity();
+  }
+
+  /** `<form>.reset()` — back to the `value` attribute. */
+  formResetCallback(): void {
+    this.value = this.getAttribute('value') ?? '';
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this.disabled = disabled;
   }
 
   override render() {

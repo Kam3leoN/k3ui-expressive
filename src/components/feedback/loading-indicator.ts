@@ -1,7 +1,8 @@
 import { html, css, svg } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { K3Element, emitLifecycle } from '../../core/index.js';
+import { K3Element, emitLifecycle, prefersReducedMotion } from '../../core/index.js';
+import { observeActiveVisibility } from '../../core/visibility.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
 import {
@@ -75,6 +76,21 @@ export class K3LoadingIndicator extends K3Element {
         transform-box: fill-box;
         transform-origin: center;
       }
+      /* Background revolution on the compositor — no per-frame Lit render. */
+      .spin {
+        animation: k3-loading-spin var(--k3-loading-spin-duration, ${SPIN_MS}ms) linear infinite;
+      }
+      :host([data-paused]) .spin {
+        animation-play-state: paused;
+      }
+      @keyframes k3-loading-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      :host-context([data-k3-reduce-motion]) .spin {
+        animation: none;
+      }
       path {
         fill: var(--k3-sys-color-primary);
       }
@@ -82,6 +98,9 @@ export class K3LoadingIndicator extends K3Element {
         fill: var(--k3-sys-color-on-primary-container);
       }
       @media (prefers-reduced-motion: reduce) {
+        .spin {
+          animation: none;
+        }
         .spin,
         .kick {
           transform: none !important;
@@ -93,45 +112,55 @@ export class K3LoadingIndicator extends K3Element {
   @property({ type: Boolean, reflect: true }) contained = false;
 
   @state() private pathD = MATERIAL_SHAPE_SVG.SoftBurst;
-  @state() private spinDeg = 0;
   @state() private kickDeg = 0;
 
   private fromIdx = 0;
   private accumulatedKick = 0;
   private raf = 0;
   private timer = 0;
-  private spinRaf = 0;
-  private spinStart = 0;
   private morphStart = 0;
   private reduced = false;
+  /** On screen and tab visible — the morph cycle only runs then. */
+  private active = true;
+  private unobserve: (() => void) | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.reduced =
-      typeof matchMedia === 'function' &&
-      matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.spinStart = performance.now();
-    if (!this.reduced) {
-      this.spinRaf = requestAnimationFrame(this.tickSpin);
-    }
+    this.reduced = prefersReducedMotion();
+    this.active = true;
+    this.unobserve = observeActiveVisibility(this, this.onActiveChange);
     this.scheduleNext();
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
-    if (this.timer) clearTimeout(this.timer);
-    if (this.raf) cancelAnimationFrame(this.raf);
-    if (this.spinRaf) cancelAnimationFrame(this.spinRaf);
+    this.unobserve?.();
+    this.unobserve = null;
+    this.stopCycle();
   }
 
-  private tickSpin = (now: number): void => {
-    const elapsed = (now - this.spinStart) % SPIN_MS;
-    this.spinDeg = (elapsed / SPIN_MS) * 360;
-    this.spinRaf = requestAnimationFrame(this.tickSpin);
+  /** Off-screen / hidden tab: freeze the spin and the morph cycle (no CPU, no events). */
+  private onActiveChange = (active: boolean): void => {
+    if (active === this.active) return;
+    this.active = active;
+    this.toggleAttribute('data-paused', !active);
+    if (active) this.scheduleNext();
+    else this.stopCycle();
   };
 
+  private stopCycle(): void {
+    if (this.timer) clearTimeout(this.timer);
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.timer = 0;
+    this.raf = 0;
+  }
+
   private scheduleNext(): void {
-    this.timer = window.setTimeout(() => this.runMorph(), HOLD_MS);
+    if (this.timer || this.raf || !this.active) return;
+    this.timer = window.setTimeout(() => {
+      this.timer = 0;
+      this.runMorph();
+    }, HOLD_MS);
   }
 
   private runMorph(): void {
@@ -154,8 +183,9 @@ export class K3LoadingIndicator extends K3Element {
       if (u < 1) {
         this.raf = requestAnimationFrame(tick);
       } else {
+        this.raf = 0;
         this.fromIdx = toIdx;
-        this.accumulatedKick = kickBase + KICK_DEG;
+        this.accumulatedKick = (kickBase + KICK_DEG) % 360;
         this.kickDeg = this.accumulatedKick;
         this.pathD = MATERIAL_SHAPE_SVG[to];
         emitLifecycle(this, 'morph-end', { source: 'auto', shape: to });
@@ -169,10 +199,7 @@ export class K3LoadingIndicator extends K3Element {
     return html`
       <div class="box" part="container">
         <svg viewBox="0 0 1 1" role="status" aria-label=${i18n.t('loading.label')} part="shape">
-          <g
-            class="spin"
-            style=${styleMap({ transform: `rotate(${this.spinDeg}deg)` })}
-          >
+          <g class="spin">
             <g
               class="kick"
               style=${styleMap({ transform: `rotate(${this.kickDeg}deg)` })}

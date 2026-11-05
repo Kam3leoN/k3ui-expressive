@@ -8,6 +8,7 @@ import {
   prefersReducedMotion,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
+import { observeActiveVisibility } from '../../core/visibility.js';
 import { i18n } from '../../i18n/index.js';
 import {
   CIRCULAR_SIZE,
@@ -142,6 +143,17 @@ export class K3Progress extends K3Element {
   private animTo = 0;
   private animStart = 0;
   private ro: ResizeObserver | null = null;
+  /** On screen and tab visible — continuous (indeterminate) loops only run then. */
+  private active = true;
+  private unobserveActive: (() => void) | null = null;
+  private onActiveChange = (active: boolean): void => {
+    if (active === this.active) return;
+    this.active = active;
+    if (active) {
+      cancelAnimationFrame(this.raf);
+      this.raf = requestAnimationFrame(this.paint);
+    }
+  };
   private reduceMotion = false;
   private dragging = false;
   private seekBound = false;
@@ -391,7 +403,8 @@ export class K3Progress extends K3Element {
     const oscIndet =
       this.isOscillation && this.indeterminate && !this.reduceMotion;
     if ((this.indeterminate && !this.reduceMotion) || oscIndet) {
-      this.raf = requestAnimationFrame(this.paint);
+      /* Off-screen / hidden tab: stop here, onActiveChange resumes the loop. */
+      if (this.active) this.raf = requestAnimationFrame(this.paint);
     } else if (
       !this.indeterminate &&
       !this.reduceMotion &&
@@ -741,12 +754,16 @@ export class K3Progress extends K3Element {
     this.displayProgress = this.fraction();
     this.animTo = this.displayProgress;
     this.addEventListener('slotchange', this.syncSlots, true);
+    this.active = true;
+    this.unobserveActive = observeActiveVisibility(this, this.onActiveChange);
     this.bindRo();
     this.restartLoop();
   }
 
   override disconnectedCallback(): void {
     cancelAnimationFrame(this.raf);
+    this.unobserveActive?.();
+    this.unobserveActive = null;
     this.ro?.disconnect();
     this.ro = null;
     this.waveAbort?.abort();

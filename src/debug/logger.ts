@@ -67,9 +67,9 @@ export const debug = {
     const params = new URLSearchParams(location.search);
     if (params.has('k3ui-debug')) {
       const v = params.get('k3ui-debug');
-      debug.enable({
-        level: v === 'verbose' || v === '1' ? 'verbose' : (v as DebugLevel) || 'info',
-      });
+      const fromParam: DebugLevel =
+        v === 'verbose' || v === '1' ? 'verbose' : v && Object.hasOwn(ORDER, v) ? (v as DebugLevel) : 'info';
+      debug.enable({ level: fromParam });
     }
   },
 };

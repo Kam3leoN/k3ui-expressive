@@ -1,7 +1,7 @@
 import { html, css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { K3Element } from '../../core/index.js';
-import { themeApi, type ColorMode, type MotionScheme, type ColorVariant, type ContrastLevel, DEFAULT_COLOR_SPEC, type ColorSpecVersion } from '../../theme/apply.js';
+import { themeApi, type ColorMode, type MotionScheme, type ColorVariant, type ContrastPreference, DEFAULT_COLOR_SPEC, type ColorSpecVersion } from '../../theme/apply.js';
 import { hostReset } from '../_shared.js';
 
 export class K3Theme extends K3Element {
@@ -11,8 +11,8 @@ export class K3Theme extends K3Element {
   @property() motion: MotionScheme = 'expressive';
   /** MCU scheme — expressive = M3E 2025/26 default */
   @property({ attribute: 'color-variant' }) colorVariant: ColorVariant = 'expressive';
-  /** Theme Builder contrast — default · medium · high */
-  @property({ attribute: 'contrast' }) contrast: ContrastLevel = 'default';
+  /** Theme Builder contrast — default · medium · high · auto (OS `prefers-contrast`) */
+  @property({ attribute: 'contrast' }) contrast: ContrastPreference = 'default';
   @property({ type: Boolean }) global = true;
   /** Material color spec — `2025` (default, M3 Expressive) or `2021` (legacy hues). */
   @property({ attribute: 'spec-version' }) specVersion: ColorSpecVersion = DEFAULT_COLOR_SPEC;
@@ -24,6 +24,12 @@ export class K3Theme extends K3Element {
 
   override updated(): void {
     this.apply();
+  }
+
+  override disconnectedCallback(): void {
+    /* A local scope stops following OS / clock changes once removed. */
+    if (!this.global) themeApi.release(this);
+    super.disconnectedCallback();
   }
 
   private apply(): void {

@@ -395,10 +395,10 @@ const HIGHLIGHTERS: Record<string, (code: string) => string> = {
 };
 
 export function highlightLanguage(code: string, id: string): string | null {
-  const fn = HIGHLIGHTERS[id];
+  const fn = Object.hasOwn(HIGHLIGHTERS, id) ? HIGHLIGHTERS[id] : undefined;
   return fn ? fn(code) : null;
 }
 
 export function isLanguageReady(id: string): boolean {
-  return id === 'plain' || id in HIGHLIGHTERS;
+  return id === 'plain' || Object.hasOwn(HIGHLIGHTERS, id);
 }

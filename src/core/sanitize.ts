@@ -214,3 +214,117 @@ export function sanitizeHTMLDetailed(html: string, options: SanitizeOptions = {}
 export function sanitizeHTML(html: string, options?: SanitizeOptions): DocumentFragment {
   return sanitizeHTMLDetailed(html, options).fragment;
 }
+
+/* ── SVG icons ────────────────────────────────────────────────────────── */
+
+export interface SanitizeSVGOptions {
+  /**
+   * Keep `id` attributes and local `url(#id)` paint references (gradients,
+   * clip paths). Off by default: an `id` inserted into the light DOM becomes a
+   * `window` property (DOM clobbering). Safe inside a shadow root.
+   */
+  allowIds?: boolean;
+  /** Characters read from the input (default 20 000). */
+  maxLength?: number;
+  /** Elements kept (default 500). */
+  maxNodes?: number;
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/** Shape / paint-server elements only — no script, foreignObject, use, image, a, animate, set, style. */
+const SVG_TAGS: ReadonlyMap<string, string> = new Map(
+  [
+    'svg', 'g', 'path', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'rect', 'defs',
+    'linearGradient', 'radialGradient', 'stop', 'clipPath', 'mask', 'title', 'desc',
+  ].map((t) => [t.toLowerCase(), t]),
+);
+
+const SVG_ATTRS = new Set([
+  'viewbox', 'width', 'height', 'fill', 'fill-rule', 'fill-opacity', 'clip-rule', 'stroke',
+  'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-dasharray',
+  'stroke-dashoffset', 'stroke-opacity', 'opacity', 'd', 'cx', 'cy', 'r', 'rx', 'ry', 'fx', 'fy',
+  'fr', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'points', 'transform', 'offset', 'stop-color',
+  'stop-opacity', 'gradientunits', 'gradienttransform', 'spreadmethod', 'clip-path', 'mask',
+  'clippathunits', 'maskunits', 'maskcontentunits', 'preserveaspectratio', 'vector-effect',
+  'focusable', 'aria-hidden', 'class', 'id',
+]);
+
+/** Attribute names whose SVG spelling is camelCase. */
+const SVG_ATTR_CASE: Readonly<Record<string, string>> = {
+  viewbox: 'viewBox',
+  gradientunits: 'gradientUnits',
+  gradienttransform: 'gradientTransform',
+  spreadmethod: 'spreadMethod',
+  clippathunits: 'clipPathUnits',
+  maskunits: 'maskUnits',
+  maskcontentunits: 'maskContentUnits',
+  preserveaspectratio: 'preserveAspectRatio',
+};
+
+const PAINT_ATTRS = new Set(['fill', 'stroke', 'clip-path', 'mask']);
+const SVG_ID = /^[A-Za-z][\w-]{0,63}$/;
+/** Geometry / numbers / keywords / colours — no parentheses except the vetted ones below. */
+const SVG_PLAIN_VALUE = /^[\w\s.,#%+-]{0,4096}$/;
+const SVG_TRANSFORM = /^(?:\s*(?:matrix|translate|scale|rotate|skewX|skewY)\([\d\s.,eE+-]*\)\s*,?)*$/;
+const SVG_COLOR_FN = /^(?:rgb|rgba|hsl|hsla)\([\d\s.,%/+-]*\)$/i;
+
+function svgAttrValue(name: string, value: string, allowIds: boolean): string | null {
+  const v = value.trim();
+  if (name === 'id') return allowIds && SVG_ID.test(v) ? v : null;
+  if (name === 'transform' || name === 'gradienttransform') return SVG_TRANSFORM.test(v) ? v : null;
+  if (PAINT_ATTRS.has(name) && /^url\(/i.test(v)) {
+    const ref = /^url\(\s*#([A-Za-z][\w-]{0,63})\s*\)$/i.exec(v);
+    return allowIds && ref ? `url(#${ref[1]})` : null;
+  }
+  if ((name === 'fill' || name === 'stroke' || name === 'stop-color') && SVG_COLOR_FN.test(v)) return v;
+  if (name === 'class') {
+    const tokens = v.split(/\s+/).filter((t) => /^[A-Za-z_][\w-]{0,63}$/.test(t)).slice(0, 16);
+    return tokens.length ? tokens.join(' ') : null;
+  }
+  return SVG_PLAIN_VALUE.test(v) ? v : null;
+}
+
+/**
+ * Sanitize an inline SVG icon string and return a detached `<svg>` element
+ * (`null` when the input has none). Same guard rails as {@link sanitizeHTMLDetailed}:
+ * parsed in an inert document, rebuilt with `createElementNS`, shape elements
+ * and presentation attributes only — never `on*`, `style`, `href`, scripts,
+ * `foreignObject`, `use`, `image` or animation elements.
+ */
+export function sanitizeSVG(markup: string, options: SanitizeSVGOptions = {}): SVGSVGElement | null {
+  const { allowIds = false, maxLength = 20_000, maxNodes = 500 } = options;
+  const source = String(markup ?? '').slice(0, maxLength);
+  if (!/<svg[\s>/]/i.test(source)) return null;
+  const doc = new DOMParser().parseFromString(
+    `<!doctype html><html><body>${source}</body></html>`,
+    'text/html',
+  );
+  const root = doc.body.querySelector('svg');
+  if (!root || root.namespaceURI !== SVG_NS) return null;
+  let budget = maxNodes;
+
+  const build = (from: Element, depth: number): Element | null => {
+    const tag = SVG_TAGS.get(from.localName.toLowerCase());
+    if (!tag || from.namespaceURI !== SVG_NS || depth > 32 || budget-- <= 0) return null;
+    const out = document.createElementNS(SVG_NS, tag);
+    for (const attr of Array.from(from.attributes)) {
+      const name = attr.name.toLowerCase();
+      if (!SVG_ATTRS.has(name)) continue;
+      const value = svgAttrValue(name, attr.value, allowIds);
+      if (value != null) out.setAttribute(SVG_ATTR_CASE[name] ?? name, value);
+    }
+    for (const child of Array.from(from.childNodes)) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        if (tag === 'title' || tag === 'desc') out.appendChild(document.createTextNode(child.nodeValue ?? ''));
+        continue;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) continue;
+      const kept = build(child as Element, depth + 1);
+      if (kept) out.appendChild(kept);
+    }
+    return out;
+  };
+
+  return build(root, 0) as SVGSVGElement | null;
+}

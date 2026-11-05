@@ -54,7 +54,7 @@ export class K3CodeBlock extends K3Element {
   @property({ type: Boolean, reflect: true })
   collapsible: boolean = CodeBlockSpecs.defaultCollapsible;
   /** Max panel height (px) while collapsed. */
-  @property({ type: Number, attribute: 'collapsed-height' }) collapsedHeight =
+  @property({ type: Number, attribute: 'collapsed-height' }) collapsedHeight: number =
     CodeBlockSpecs.defaultCollapsedHeight;
   /** Whether the full sample is visible (when `collapsible`). */
   @property({ type: Boolean, reflect: true }) expanded = false;

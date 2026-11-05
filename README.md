@@ -20,10 +20,28 @@ import { K3UI } from 'k3ui';
 import 'k3ui/k3ui.css';
 
 await K3UI.init({
-  locale: 'fr',
-  theme: { seed: '#00639B', mode: 'auto', motion: 'expressive' },
+  locale: 'fr-FR',             // BCP 47 tag or 'fr' / 'en'
+  direction: 'ltr',            // writes <html dir>
+  theme: {
+    seed: '#00639B',
+    mode: 'system',            // light · dark · system (OS) · auto (07:00–18:00 light)
+    variant: 'expressive',
+    contrast: 'auto',          // default · medium · high · auto (OS prefers-contrast)
+    specVersion: '2025',
+    motion: 'expressive',      // expressive · standard
+  },
+  motion: { reduce: 'system' },       // 'always' = reduced for everyone; the OS setting always wins
+  interaction: { ripple: true },
+  overlays: { scrollLock: false },    // true: lock page scroll while a modal dialog / sheet is open
+  haptic: true,
+  debug: false,
 });
 ```
+
+`init()` can be called again at any time: options **deep-merge** with the previous call
+(`K3UI.init({ theme: { mode: 'dark' } })` keeps the seed), calls run one after the other,
+and only what changed is re-applied. Unknown keys and invalid values are ignored with a
+`console.warn`. `getInitOptions()` returns the options in effect.
 
 Manual bootstrap (skip auto-init):
 
@@ -41,7 +59,7 @@ Manual bootstrap (skip auto-init):
 | `npm run dev` | Playground |
 | `npm run build` | `dist/k3ui.js` + `dist/k3ui.css` + `tokens.json` + budget check |
 | `npm test` | Vitest |
-| `npm run test:e2e` | Playwright smoke |
+| `npm run test:e2e` | Playwright: smoke, dialog / sheet keyboard & ARIA, forms, perf budgets (`PW_CHROMIUM_PATH=…` to use a local Chromium, `K3UI_E2E_ALL_BROWSERS=1` for Firefox + WebKit) |
 | `npm run version:bump -- patch` | Bump version + CHANGELOG |
 
 ## Architecture
@@ -59,6 +77,21 @@ Manual bootstrap (skip auto-init):
 | `window.K3UI_OPTIONS` | `window.K3UI_OPTIONS` or `K3UI.init(options)` |
 | SCSS class `.btn` | `<k3-button variant="…">` |
 | Multi-chunk `dist/js` | Single `dist/k3ui.js` |
+
+## Overlays & keyboard
+
+Modal `k3-dialog` and `k3-sheet` move focus into the panel when they open, keep Tab /
+Shift+Tab inside it (slotted controls included), close on Escape and give focus back to the
+element that opened them. Only the top-most modal reacts to Escape; a widget inside it that
+handles Escape itself (menu, select, autocomplete, visible tooltip) calls `preventDefault()`
+and the modal stays open. Closed panels are `inert`.
+
+## Forms
+
+`k3-text-field`, `k3-textarea` and `k3-select` are form-associated: their value is in
+`FormData`, and `required` / `pattern` / `type` / length constraints block native submission
+and match `:invalid`. `checkValidity()`, `reportValidity()`, `setCustomValidity()`,
+`validity` and `form.reset()` behave like native inputs.
 
 ## Registration
 
@@ -138,6 +171,13 @@ import 'k3ui/holo-effects.css'; // dist/holo-effects/ — CSS + img/ + LICENSE
 The add-on is **GPL-3.0** (its source lives in `addons/holo-effects/`): it is never bundled into
 `k3ui.js` / `k3ui.css`, which stay MIT — load it only if your project accepts the GPL. Your own foils
 can also paint `::part(card|shine|glare)` from the `--k3-holo-*` variables.
+
+## Untrusted content
+
+- `sanitizeHTML(html)` / `sanitizeHTMLDetailed(html)` — allowlist sanitizer returning a
+  `DocumentFragment` (inert parsing, DOM rebuilt node by node, Trusted Types friendly).
+- `sanitizeSVG(markup, { allowIds })` — inline SVG icons: shapes and presentation
+  attributes only. `k3-tabs` passes its SVG icons through it.
 
 ## Syntax highlighting
 

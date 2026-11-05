@@ -12,6 +12,7 @@ import {
   LayerPortal,
   haptic,
 } from '../../core/index.js';
+import { overlayStack } from '../../core/overlay-stack.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
 import { dialogStyles } from './dialog.styles.js';
@@ -92,7 +93,8 @@ export class K3Dialog extends K3Element {
   @query('.body') private bodyEl!: HTMLElement;
 
   private trap = new FocusTrap();
-  private onKey?: (e: KeyboardEvent) => void;
+  /** Modal behaviours (focus trap, Escape, scroll lock) are live. */
+  private modalActive = false;
   private compactMq: MediaQueryList | null = null;
   private readonly portal = new LayerPortal();
   /** In-flight enter — shared by show() and `open` attribute. */
@@ -182,11 +184,7 @@ export class K3Dialog extends K3Element {
         markSheetChromeOpening(this);
         await this.playEnter();
         requestAnimationFrame(() => this.syncScrollEdges());
-        this.trap.activate(this.panelEl);
-        this.onKey = (e: KeyboardEvent) => {
-          if (e.key === 'Escape') void this.hide('escape');
-        };
-        window.addEventListener('keydown', this.onKey);
+        this.activateModal();
         /* Surface open — same light tick as sheet / FAB menus */
         haptic.light();
       },
@@ -209,8 +207,7 @@ export class K3Dialog extends K3Element {
       async () => {
         this.visible = false;
         this.open = false;
-        if (this.onKey) window.removeEventListener('keydown', this.onKey);
-        this.trap.deactivate();
+        this.deactivateModal(true);
         haptic.light();
       },
       { source },
@@ -218,6 +215,26 @@ export class K3Dialog extends K3Element {
     if (ok) this.restoreLayer();
     recomputeSheetChromeShift();
     return ok;
+  }
+
+  /**
+   * Focus moves into the panel (first tabbable, else the panel), Tab cycles
+   * inside it — slotted controls included — and only the top-most modal
+   * reacts to Escape. Shared by `show()` and the `open` attribute path.
+   */
+  private activateModal(): void {
+    if (this.modalActive || !this.panelEl) return;
+    this.modalActive = true;
+    this.trap.activate(this.panelEl);
+    overlayStack.push(this, () => void this.hide('escape'));
+  }
+
+  /** @param restore — return focus to the element focused before opening. */
+  private deactivateModal(restore: boolean): void {
+    overlayStack.remove(this);
+    if (!this.modalActive) return;
+    this.modalActive = false;
+    this.trap.deactivate({ restore });
   }
 
   private syncSlots = (): void => {
@@ -281,9 +298,11 @@ export class K3Dialog extends K3Element {
       if (this.open && !this.visible) {
         markSheetChromeOpening(this);
         void this.playEnter().then(() => {
+          if (this.open && this.isConnected) this.activateModal();
           requestAnimationFrame(() => recomputeSheetChromeShift());
         });
       } else if (!this.open && !this.visible) {
+        this.deactivateModal(true);
         clearSheetChromeOpening(this);
         this.restoreLayer();
         recomputeSheetChromeShift();
@@ -304,8 +323,8 @@ export class K3Dialog extends K3Element {
   }
 
   override disconnectedCallback(): void {
-    if (this.onKey) window.removeEventListener('keydown', this.onKey);
-    this.trap.deactivate();
+    /* Reparenting to body (portal) is not a teardown — keep the modal state. */
+    if (!this.portal.isElevating) this.deactivateModal(true);
     this.compactMq?.removeEventListener('change', this.onCompactChange);
     this.compactMq = null;
     /* Reparent to body fires disconnect — keep home markers for restore */
@@ -343,6 +362,8 @@ export class K3Dialog extends K3Element {
         part="container"
         role=${role}
         aria-modal="true"
+        aria-labelledby="headline"
+        ?inert=${!this.visible}
       >
         <header class="header" part="header">
           <button
@@ -363,7 +384,7 @@ export class K3Dialog extends K3Element {
           <div class="header-main">
             <span class="icon" part="icon"><slot name="icon" @slotchange=${this.syncSlots}></slot></span>
             <div class="titles">
-              <div class="headline" part="headline">
+              <div class="headline" id="headline" part="headline">
                 <slot name="headline"></slot>
               </div>
             </div>

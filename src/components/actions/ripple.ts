@@ -32,6 +32,11 @@ const SOFT_EDGE_MINIMUM_SIZE = 75;
 const SOFT_EDGE_CONTAINER_RATIO = 0.35;
 const TOUCH_DELAY_MS = 150;
 
+/** `K3UI.init({ interaction: { ripple: false } })` → `<html data-k3-ripple="off">`. */
+function ripplesDisabledGlobally(): boolean {
+  return typeof document !== 'undefined' && document.documentElement.dataset.k3Ripple === 'off';
+}
+
 const EVENTS = [
   'click',
   'contextmenu',
@@ -139,7 +144,7 @@ export class K3Ripple extends K3Element {
   }
 
   private async handleEvent(event: Event): Promise<void> {
-    if (this.disabled || prefersReducedMotion()) return;
+    if (this.disabled || prefersReducedMotion() || ripplesDisabledGlobally()) return;
     switch (event.type) {
       case 'click':
         this.handleClick();

@@ -27,9 +27,11 @@ import {
 import {
   SPACING_TOKENS,
   ELEVATION_TOKENS,
-  ICON_SIZE_TOKENS,
   SHAPE_CORNER_TOKENS,
   MOTION_DURATION_TOKENS,
+  TYPE_ROLES,
+  TYPE_EMPHASIZED_ROLES,
+  TYPE_FAMILIES,
 } from '../src/tokens/meta.js';
 import {
   componentsByCategory,
@@ -45,10 +47,7 @@ import {
   RESOURCE_PAGES,
   destinationForPage,
 } from './nav-destinations.js';
-import {
-  ensureVariableFonts,
-  mountMaterialSymbols,
-} from './material-symbols.js';
+import { mountMaterialSymbols } from './material-symbols.js';
 import { docStore, DocKeys } from './doc-store.js';
 import { ariaTabs, installTabKeyboard, selectTab } from './aria-tabs.js';
 import {
@@ -1316,7 +1315,6 @@ function buildNavSheet(destId: string): void {
     /* Styles — Color expands to Roles / Palettes / Additional */
     const flatIcons: Record<string, string> = {
       elevation: 'layers',
-      icons: 'mood',
       motion: 'animation',
       shapes: 'shapes',
       spacing: 'space_bar',
@@ -1881,61 +1879,377 @@ function wireLazyDemos(): void {
   replay();
 }
 
-/** Styles → Icons — live FILL / wght / GRAD / opsz (Material Symbols New). */
-let iconsAxesWired = false;
-async function wireIconsAxesDemo(): Promise<void> {
-  const demo = document.getElementById('icons-axes-demo');
-  if (!demo || iconsAxesWired) return;
-  iconsAxesWired = true;
-  await registry.registerAll(['k3-switch', 'k3-slider']);
-  void ensureVariableFonts();
+type CubicBezier = readonly [number, number, number, number];
 
-  const preview = demo.querySelector<HTMLElement>('.icons-axes-preview');
-  const apply = (fill: number, wght: number, grad: number, opsz: number) => {
-    if (!preview) return;
-    preview.style.setProperty('--icons-demo-fill', String(fill));
-    preview.style.setProperty('--icons-demo-wght', String(wght));
-    preview.style.setProperty('--icons-demo-grad', String(grad));
-    preview.style.setProperty('--icons-demo-opsz', String(opsz));
-    preview.style.setProperty('--k3-sys-icon-fill', String(fill));
-    preview.style.setProperty('--k3-sys-icon-weight', String(wght));
-    preview.style.setProperty('--k3-sys-icon-grade', String(grad));
-    preview.style.setProperty('--k3-sys-icon-optical-size', String(opsz));
-    preview.style.fontWeight = String(wght);
-    preview.style.fontVariationSettings = `'FILL' ${fill}, 'wght' ${wght}, 'GRAD' ${grad}, 'opsz' ${opsz}`;
-  };
+/** SVG viewBox for motion curves — must match markup `viewBox="0 -80 100 190"`. */
+const MOTION_VB = { x: 0, y: -80, w: 100, h: 190 } as const;
 
-  let fill = 0;
-  let wght = 400;
-  let grad = 0;
-  let opsz = 48;
-  apply(fill, wght, grad, opsz);
+type MotionBead = {
+  card: HTMLElement;
+  bead: HTMLElement;
+  bezier: CubicBezier;
+  durationMs: number;
+  epoch: number;
+};
 
-  demo.querySelector('#icons-fill-switch')?.addEventListener('k3-change', ((
-    e: CustomEvent<{ selected?: boolean }>,
-  ) => {
-    fill = e.detail?.selected ? 1 : 0;
-    apply(fill, wght, grad, opsz);
-  }) as EventListener);
+function parseCubicBezier(value: string): CubicBezier | null {
+  const m = /cubic-bezier\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/i.exec(
+    value,
+  );
+  if (!m) return null;
+  return [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4])];
+}
 
-  const bind = (id: string, set: (n: number) => void) => {
-    const on = ((e: CustomEvent<{ value?: number }>) => {
-      const v = Number(e.detail?.value);
-      if (!Number.isFinite(v)) return;
-      set(v);
-      apply(fill, wght, grad, opsz);
-    }) as EventListener;
-    demo.querySelector(id)?.addEventListener('k3-input', on);
-    demo.querySelector(id)?.addEventListener('k3-change', on);
-  };
-  bind('#icons-wght', (v) => {
-    wght = v;
+/** Point on CSS cubic-bezier(x1,y1,x2,y2) in SVG plot space (y up → flipped). */
+function cubicBezierPoint(
+  t: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): { x: number; y: number } {
+  const u = 1 - t;
+  const x = 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t;
+  const y = 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t;
+  return { x: x * 100, y: (1 - y) * 100 };
+}
+
+/** Sample CSS cubic-bezier as an SVG path (viewBox allows overshoot above y=0). */
+function cubicBezierPath(x1: number, y1: number, x2: number, y2: number): string {
+  const steps = 48;
+  const pts: string[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const { x, y } = cubicBezierPoint(i / steps, x1, y1, x2, y2);
+    pts.push(`${i === 0 ? 'M' : 'L'}${x.toFixed(2)} ${y.toFixed(2)}`);
+  }
+  return pts.join(' ');
+}
+
+function formatMotionDuration(cssValue: string): string {
+  const s = cssValue.trim();
+  if (!s) return '';
+  if (s.endsWith('ms')) {
+    const n = Number.parseFloat(s);
+    return Number.isFinite(n) ? `${Math.round(n)} ms` : s;
+  }
+  if (s.endsWith('s')) {
+    const n = Number.parseFloat(s) * 1000;
+    return Number.isFinite(n) ? `${Math.round(n)} ms` : s;
+  }
+  return s;
+}
+
+function parseDurationMs(cssValue: string): number {
+  const s = cssValue.trim();
+  if (s.endsWith('ms')) return Number.parseFloat(s) || 500;
+  if (s.endsWith('s')) return (Number.parseFloat(s) || 0.5) * 1000;
+  return 500;
+}
+
+function motionPlaygroundReduced(): boolean {
+  return (
+    document.documentElement.hasAttribute('data-k3-reduce-motion') ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
+/** Styles → Motion — HTML bead travels the cubic-bezier curve; click replays. */
+let motionPlaygroundWired = false;
+let motionBeads: MotionBead[] = [];
+let motionRaf = 0;
+
+function placeMotionBead(bead: MotionBead, t: number): void {
+  const { x, y } = cubicBezierPoint(t, ...bead.bezier);
+  /* Map viewBox units → % of the plot box (SVG is stretched with preserveAspectRatio=none). */
+  const left = ((x - MOTION_VB.x) / MOTION_VB.w) * 100;
+  const top = ((y - MOTION_VB.y) / MOTION_VB.h) * 100;
+  bead.bead.style.left = `${left}%`;
+  bead.bead.style.top = `${top}%`;
+}
+
+function tickMotionPlayground(now: number): void {
+  if (motionPlaygroundReduced()) {
+    for (const bead of motionBeads) placeMotionBead(bead, 1);
+    motionRaf = 0;
+    return;
+  }
+  for (const bead of motionBeads) {
+    const cycle = Math.max(bead.durationMs, 1) * 2;
+    let elapsed = (now - bead.epoch) % cycle;
+    if (elapsed < 0) elapsed += cycle;
+    let t = elapsed / bead.durationMs;
+    if (t > 1) t = 2 - t; /* alternate */
+    placeMotionBead(bead, t);
+  }
+  motionRaf = requestAnimationFrame(tickMotionPlayground);
+}
+
+function ensureMotionPlaygroundRaf(): void {
+  if (!motionRaf && motionBeads.length && !motionPlaygroundReduced()) {
+    motionRaf = requestAnimationFrame(tickMotionPlayground);
+  }
+}
+
+function syncMotionPlaygroundCards(): void {
+  const root = document.getElementById('motion-playground');
+  if (!root) return;
+  const probe = document.createElement('div');
+  document.body.appendChild(probe);
+  const next: MotionBead[] = [];
+  const now = performance.now();
+  for (const card of root.querySelectorAll<HTMLElement>('.motion-card')) {
+    const durVar = card.dataset.durationVar;
+    const easeVar = card.dataset.easingVar;
+    const beadEl = card.querySelector<HTMLElement>('.motion-card__bead');
+    const path = card.querySelector<SVGPathElement>('.motion-card__curve-path');
+    if (!beadEl || !path) continue;
+
+    let durationMs = 500;
+    if (durVar) {
+      probe.style.transitionDuration = `var(${durVar})`;
+      const raw = getComputedStyle(probe).transitionDuration;
+      const label = card.querySelector<HTMLElement>('[data-motion-ms]');
+      if (label) label.textContent = formatMotionDuration(raw);
+      durationMs = parseDurationMs(raw);
+    }
+
+    let bezier: CubicBezier = [0, 0, 1, 1];
+    if (easeVar) {
+      probe.style.transitionTimingFunction = `var(${easeVar})`;
+      bezier =
+        parseCubicBezier(getComputedStyle(probe).transitionTimingFunction) ?? bezier;
+    }
+    path.setAttribute('d', cubicBezierPath(...bezier));
+
+    const prev = motionBeads.find((b) => b.card === card);
+    next.push({
+      card,
+      bead: beadEl,
+      bezier,
+      durationMs,
+      epoch: prev?.epoch ?? now,
+    });
+  }
+  probe.remove();
+  motionBeads = next;
+  if (motionPlaygroundReduced()) {
+    for (const bead of motionBeads) placeMotionBead(bead, 1);
+    if (motionRaf) {
+      cancelAnimationFrame(motionRaf);
+      motionRaf = 0;
+    }
+    return;
+  }
+  ensureMotionPlaygroundRaf();
+}
+
+function wireMotionPlayground(): void {
+  const root = document.getElementById('motion-playground');
+  if (!root) return;
+  syncMotionPlaygroundCards();
+  if (motionPlaygroundWired) return;
+  motionPlaygroundWired = true;
+
+  root.addEventListener('click', (e) => {
+    const card = (e.target as Element | null)?.closest?.('.motion-card') as HTMLElement | null;
+    if (!card || !root.contains(card)) return;
+    const bead = motionBeads.find((b) => b.card === card);
+    if (!bead) return;
+    bead.epoch = performance.now();
+    placeMotionBead(bead, 0);
+    ensureMotionPlaygroundRaf();
   });
-  bind('#icons-grad', (v) => {
-    grad = v;
-  });
-  bind('#icons-opsz', (v) => {
-    opsz = v;
+
+  document.addEventListener('k3-theme-change', () => syncMotionPlaygroundCards());
+  window
+    .matchMedia('(prefers-reduced-motion: reduce)')
+    .addEventListener('change', () => syncMotionPlaygroundCards());
+}
+
+const TYPE_EMPHASIZED = new Set<string>(TYPE_EMPHASIZED_ROLES);
+
+/** Read typescale CSS vars for a role (and optional emphasized weight). */
+function readTypeScaleAttrs(
+  role: string,
+  emphasized: boolean,
+): { size: string; lineHeight: string; weight: string; tracking: string } {
+  const root = getComputedStyle(document.documentElement);
+  const v = (suffix: string) =>
+    root.getPropertyValue(`--k3-sys-typescale-${role}-${suffix}`).trim() || '—';
+  return {
+    size: v('size'),
+    lineHeight: v('line-height'),
+    weight: emphasized ? v('emphasized-weight') : v('weight'),
+    tracking: v('tracking'),
+  };
+}
+
+function buildTypeVariant(role: string, emphasized: boolean): HTMLElement {
+  const cls = emphasized ? `k3-${role}-emphasized` : `k3-${role}`;
+  const attrs = readTypeScaleAttrs(role, emphasized);
+  const variant = document.createElement('div');
+  variant.className = 'type-variant';
+
+  const label = document.createElement('code');
+  label.className = 'type-variant__label';
+  label.textContent = `.${cls}`;
+
+  const sample = document.createElement('p');
+  sample.className = `type-variant__sample ${cls}`;
+  sample.setAttribute(
+    'data-i18n',
+    emphasized ? 'doc.typography.sample.emphasized' : 'doc.typography.sample.default',
+  );
+  sample.textContent = emphasized
+    ? t('doc.typography.sample.emphasized')
+    : t('doc.typography.sample.default');
+
+  const list = document.createElement('ul');
+  list.className = 'type-variant__attrs';
+  list.setAttribute('aria-label', t('doc.typography.attrs'));
+  for (const [key, value] of [
+    ['size', attrs.size],
+    ['line-height', attrs.lineHeight],
+    ['weight', attrs.weight],
+    ['tracking', attrs.tracking],
+  ] as const) {
+    const li = document.createElement('li');
+    li.className = 'type-variant__attr';
+    const k = document.createElement('span');
+    k.className = 'type-variant__attr-key';
+    k.textContent = key;
+    li.append(k, document.createTextNode(` ${value}`));
+    list.append(li);
+  }
+
+  variant.append(label, sample, list);
+  return variant;
+}
+
+/** Styles → Typography — live type scale (roles × default/emphasized). */
+function mountTypographyPlayground(): void {
+  const root = document.getElementById('typography-playground');
+  if (!root || root.dataset.mounted === '1') return;
+  root.dataset.mounted = '1';
+  root.replaceChildren();
+
+  for (const family of TYPE_FAMILIES) {
+    const section = document.createElement('section');
+    section.className = 'type-family';
+    section.setAttribute('aria-labelledby', `type-family-${family.id}`);
+
+    const title = document.createElement('h3');
+    title.id = `type-family-${family.id}`;
+    title.className = 'type-family__title';
+    title.setAttribute('data-i18n', `doc.typography.family.${family.id}`);
+    title.textContent = t(`doc.typography.family.${family.id}`);
+    section.append(title);
+
+    const frame = document.createElement('div');
+    frame.className = 'type-family__roles stack gap-md';
+
+    for (const role of family.roles) {
+      const card = document.createElement('article');
+      card.className = 'type-role';
+      card.dataset.role = role;
+
+      const head = document.createElement('div');
+      head.className = 'type-role__head';
+      const name = document.createElement('span');
+      name.className = 'type-role__name';
+      name.setAttribute('data-i18n', `doc.typography.role.${role}`);
+      name.textContent = t(`doc.typography.role.${role}`);
+      head.append(name);
+      card.append(head);
+
+      const variants = document.createElement('div');
+      variants.className = 'type-role__variants k3-layout-grid k3-demo-cols-2';
+      variants.append(buildTypeVariant(role, false));
+      if (TYPE_EMPHASIZED.has(role)) {
+        variants.append(buildTypeVariant(role, true));
+      } else {
+        const empty = document.createElement('div');
+        empty.className = 'type-variant type-variant--empty';
+        empty.setAttribute('data-i18n', 'doc.typography.emphasized.none');
+        empty.textContent = t('doc.typography.emphasized.none');
+        variants.append(empty);
+      }
+      card.append(variants);
+      frame.append(card);
+    }
+
+    section.append(frame);
+    root.append(section);
+  }
+}
+
+/** Styles → Grid — live column strip + status chips. */
+function syncGridPlayground(): void {
+  const root = document.getElementById('page-grid');
+  if (!root || root.hidden) return;
+
+  const cs = getComputedStyle(document.documentElement);
+  const cols = Number(cs.getPropertyValue('--k3-layout-columns').trim() || '4') || 4;
+  const main = document.getElementById('doc-main');
+  const containerActive = main?.classList.contains('k3-container') ?? true;
+  const w = window.innerWidth;
+  const bp = w >= 1440 ? 'xl' : w >= 1240 ? 'lg' : w >= 905 ? 'md' : w >= 600 ? 'sm' : 'xs';
+
+  const elCols = document.getElementById('grid-live-columns');
+  const elGutter = document.getElementById('grid-live-gutter');
+  const elBp = document.getElementById('grid-live-bp');
+  const elContainer = document.getElementById('grid-live-container');
+  if (elCols) elCols.textContent = String(cols);
+  if (elGutter) elGutter.textContent = '8dp';
+  if (elBp) elBp.textContent = bp;
+  if (elContainer) {
+    elContainer.textContent =
+      w < 905 ? 'N/A' : containerActive ? 'ON' : 'OFF';
+  }
+
+  const row = document.getElementById('grid-demo-columns-row');
+  if (row && Number(row.dataset.cols ?? '0') !== cols) {
+    row.dataset.cols = String(cols);
+    row.replaceChildren();
+    for (let i = 1; i <= cols; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell k3-col-span-1';
+      cell.textContent = String(i);
+      row.append(cell);
+    }
+  }
+}
+
+let gridPlaygroundWired = false;
+
+function wireGridPlayground(): void {
+  syncGridPlayground();
+  if (gridPlaygroundWired) return;
+  gridPlaygroundWired = true;
+  window.addEventListener('resize', () => syncGridPlayground(), { passive: true });
+  document.addEventListener('k3-theme-change', () => syncGridPlayground());
+  /* Container toggle lives in settings — reuse store changes via class MutationObserver */
+  const main = document.getElementById('doc-main');
+  if (main) {
+    new MutationObserver(() => syncGridPlayground()).observe(main, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  }
+}
+
+let typographyPlaygroundWired = false;
+
+function wireTypographyPlayground(): void {
+  mountTypographyPlayground();
+  if (typographyPlaygroundWired) return;
+  typographyPlaygroundWired = true;
+  /* Remount on locale so samples + labels refresh (attrs stay token-driven). */
+  document.addEventListener('k3-locale-change', () => {
+    const root = document.getElementById('typography-playground');
+    if (!root) return;
+    root.dataset.mounted = '0';
+    mountTypographyPlayground();
   });
 }
 
@@ -1966,17 +2280,31 @@ async function fillStyleTokenDemos(): Promise<void> {
     });
   }
 
-  void wireIconsAxesDemo();
-
-  const icons = document.getElementById('icons-scale');
-  if (icons && !icons.querySelector('k3-table')) {
-    mountTableIn(icons, {
+  const grid = document.getElementById('grid-scale');
+  if (grid && !grid.querySelector('k3-table')) {
+    mountTableIn(grid, {
       id: 'specs',
       title: 'Specs',
       columns: 'Token, Value, Notes',
-      rows: ICON_SIZE_TOKENS.map((i) => [i.name, `${i.dp} dp`, `${i.css} · opsz ${i.opsz}`]),
+      rows: [
+        ['--k3-layout-columns', '4 · 8 · 12', 'breakpoint tracks'],
+        ['--k3-layout-gutter', 'space100 · 8dp', '.k3-layout-grid gap'],
+        ['--k3-layout-full-gap', '20dp', 'edge inset'],
+        ['--k3-layout-body-max', 'none → 840 → fluid → 1280', '.k3-container'],
+        ['.k3-layout-grid', 'display: grid', 'column tracks + gutter'],
+        ['.k3-container / .k3-container-none', 'body max vs full-bleed', '≥905 only'],
+        ['.k3-col-span-1…12', 'grid-column: span N', 'uneven packs'],
+        ['.k3-col-start-1…12', 'grid-column-start: N', 'absolute offsets'],
+        ['.k3-col-full', '1 / -1', 'full row'],
+        ['.k3-demo-cols-2|3|4', 'equal share of columns', 'demo frames'],
+        ['.k3-layout-grid-overlay', 'viz tracks', 'Settings → Grid'],
+      ],
     });
   }
+
+  wireMotionPlayground();
+  wireTypographyPlayground();
+  wireGridPlayground();
 
   const motion = document.getElementById('motion-scale');
   if (motion && !motion.querySelector('k3-table')) {
@@ -2012,15 +2340,26 @@ async function fillStyleTokenDemos(): Promise<void> {
 
   const type = document.getElementById('type-scale');
   if (type && !type.querySelector('k3-table')) {
+    const rows: string[][] = [];
+    for (const role of TYPE_ROLES) {
+      rows.push([
+        role,
+        `.k3-${role}`,
+        `size · line-height · weight · tracking`,
+      ]);
+      if (TYPE_EMPHASIZED.has(role)) {
+        rows.push([
+          `${role} · emphasized`,
+          `.k3-${role}-emphasized`,
+          `var(--k3-sys-typescale-${role}-emphasized-weight)`,
+        ]);
+      }
+    }
     mountTableIn(type, {
       id: 'specs',
       title: 'Specs',
       columns: 'Token, Value, Notes',
-      rows: [
-        ['roles', 'display · headline · title · body · label', ''],
-        ['attrs', 'size · line-height · weight · tracking', ''],
-        ['emphasized', 'Expressive weight steps', ''],
-      ],
+      rows,
     });
   }
 }
@@ -2618,7 +2957,7 @@ async function boot(): Promise<void> {
       if (
         articleId === 'spacing' ||
         articleId === 'elevation' ||
-        articleId === 'icons' ||
+        articleId === 'grid' ||
         articleId === 'motion' ||
         articleId === 'shapes' ||
         articleId === 'typography' ||

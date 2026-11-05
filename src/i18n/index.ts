@@ -9,18 +9,34 @@ type Dict = Record<string, string>;
 const catalogs: Record<LocaleCode, Dict> = { en, fr };
 let current: LocaleCode = 'en';
 
+/**
+ * Map a BCP 47 tag (`fr-FR`, `en_US`, `FR`) to a bundled catalog, or `null`
+ * when the language has no catalog.
+ */
+export function normalizeLocale(tag: string | null | undefined): LocaleCode | null {
+  const lang = String(tag ?? '').trim().toLowerCase().split(/[-_]/)[0];
+  return lang === 'en' || lang === 'fr' ? lang : null;
+}
+
 function detectLocale(): LocaleCode {
   if (typeof navigator === 'undefined') return 'en';
-  const lang = (navigator.language || 'en').slice(0, 2).toLowerCase();
-  return lang === 'fr' ? 'fr' : 'en';
+  return normalizeLocale(navigator.language) ?? 'en';
 }
+
+const own = (dict: Dict, key: string): string | undefined =>
+  Object.hasOwn(dict, key) ? dict[key] : undefined;
 
 export const i18n = {
   get locale(): LocaleCode {
     return current;
   },
-  setLocale(locale: LocaleCode): void {
-    if (locale !== 'en' && locale !== 'fr') return;
+  /** Accepts a catalog code or any BCP 47 tag of it (`fr-FR` → `fr`). Unknown languages are ignored. */
+  setLocale(tag: LocaleCode | (string & {})): void {
+    const locale = normalizeLocale(tag);
+    if (!locale) {
+      debug.warn('i18n', `no catalog for locale "${String(tag)}" — keeping ${current}`);
+      return;
+    }
     current = locale;
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale;
@@ -43,7 +59,7 @@ export const i18n = {
    * Optional `{name}` placeholders via `vars`.
    */
   t(key: string, fallback?: string, vars?: Record<string, string | number>): string {
-    let s = catalogs[current][key] ?? catalogs.en[key] ?? fallback ?? key;
+    let s = own(catalogs[current], key) ?? own(catalogs.en, key) ?? fallback ?? key;
     if (vars) {
       for (const [name, value] of Object.entries(vars)) {
         s = s.replaceAll(`{${name}}`, String(value));
@@ -58,8 +74,8 @@ export const i18n = {
    */
   enUs(key: string): string | undefined {
     if (current === 'en') return undefined;
-    const local = (catalogs[current][key] ?? catalogs.en[key] ?? key).trim();
-    const en = (catalogs.en[key] ?? key).trim();
+    const local = (own(catalogs[current], key) ?? own(catalogs.en, key) ?? key).trim();
+    const en = (own(catalogs.en, key) ?? key).trim();
     if (!en) return undefined;
     if (local.localeCompare(en, undefined, { sensitivity: 'accent' }) === 0) {
       return undefined;

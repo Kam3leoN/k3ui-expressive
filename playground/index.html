@@ -11729,137 +11729,365 @@ static styles = [
               Elevation levels 0–5 combine shadow stacks with surface tint for tonal lift. Use lower levels for resting surfaces and higher ones for temporary overlays. Prefer tokens and .k3-elevation-* utilities over hand-authored box-shadows so dark mode stays correct.
             </p>
           </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.elevation.section.demo">Playground</h2>
+            <p data-i18n="doc.elevation.section.demo.blurb">
+              Six surface cards — one per level — so you can compare the shadows side by side.
+            </p>
+            <div
+              class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+              data-demo-enhance="off"
+            >
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--elevation">
+                  <div class="elevation-card k3-elevation-0">
+                    <span class="elevation-card__level" data-i18n="doc.elevation.level.0"
+                      >Level 0</span
+                    >
+                    <code class="elevation-card__token">.k3-elevation-0</code>
+                  </div>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--elevation">
+                  <div class="elevation-card k3-elevation-1">
+                    <span class="elevation-card__level" data-i18n="doc.elevation.level.1"
+                      >Level 1</span
+                    >
+                    <code class="elevation-card__token">.k3-elevation-1</code>
+                  </div>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--elevation">
+                  <div class="elevation-card k3-elevation-2">
+                    <span class="elevation-card__level" data-i18n="doc.elevation.level.2"
+                      >Level 2</span
+                    >
+                    <code class="elevation-card__token">.k3-elevation-2</code>
+                  </div>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--elevation">
+                  <div class="elevation-card k3-elevation-3">
+                    <span class="elevation-card__level" data-i18n="doc.elevation.level.3"
+                      >Level 3</span
+                    >
+                    <code class="elevation-card__token">.k3-elevation-3</code>
+                  </div>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">4</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--elevation">
+                  <div class="elevation-card k3-elevation-4">
+                    <span class="elevation-card__level" data-i18n="doc.elevation.level.4"
+                      >Level 4</span
+                    >
+                    <code class="elevation-card__token">.k3-elevation-4</code>
+                  </div>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">5</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--elevation">
+                  <div class="elevation-card k3-elevation-5">
+                    <span class="elevation-card__level" data-i18n="doc.elevation.level.5"
+                      >Level 5</span
+                    >
+                    <code class="elevation-card__token">.k3-elevation-5</code>
+                  </div>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">6</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.elevation.level.0">Level 0</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.elevation.level.1">Level 1</span>
+              </li>
+              <li>
+                <span class="pill-num">3</span
+                ><span class="variant-label" data-i18n="doc.elevation.level.2">Level 2</span>
+              </li>
+              <li>
+                <span class="pill-num">4</span
+                ><span class="variant-label" data-i18n="doc.elevation.level.3">Level 3</span>
+              </li>
+              <li>
+                <span class="pill-num">5</span
+                ><span class="variant-label" data-i18n="doc.elevation.level.4">Level 4</span>
+              </li>
+              <li>
+                <span class="pill-num">6</span
+                ><span class="variant-label" data-i18n="doc.elevation.level.5">Level 5</span>
+              </li>
+            </ol>
+          </div>
           <div class="surface surface-flush stack gap-lg">
             <div id="elevation-scale" class="token-scale" aria-label="Elevation levels"></div>
           </div>
         </article>
 
-        <!-- STYLES: ICONS -->
-        <article class="comp-page" data-page="icons" id="page-icons" hidden>
+        <!-- STYLES: GRID -->
+        <article class="comp-page" data-page="grid" id="page-grid" hidden>
           <header class="section-head">
             <p class="comp-category" data-i18n="doc.nav.styles">Styles</p>
-            <h1 data-i18n="doc.icons.title">Icons</h1>
-            <p data-i18n="doc.icons.blurb">
-              Material Symbols — sizes 20·24·40·48, FILL / wght / GRAD / opsz axes.
+            <h1 data-i18n="doc.grid.title">Grid</h1>
+            <p data-i18n="doc.grid.blurb">
+              Responsive CSS Grid — 4 · 8 · 12 columns, 8dp gutter, container &amp; spans.
             </p>
-            <p class="doc-intro" data-i18n="doc.icons.intro">
-              Material Symbols power every ligature icon in K3ui. Prefer data-k3-icon with notranslate markup, keep names in the playground font subset, and tune FILL / wght / GRAD / opsz axes via tokens. Never put spaces inside a ligature name or Chrome Translate will break the glyph.
+            <p class="doc-intro" data-i18n="doc.grid.intro">
+              K3ui uses a fluid Material 3 layout grid: column count follows breakpoints (4 → 8 → 12), gutters stay at space100 (8dp), and .k3-container caps the body width from 905dp up. Prefer .k3-layout-grid with .k3-col-span-* / .k3-col-start-* / .k3-demo-cols-* so demos stay aligned with the overlay toggle.
             </p>
           </header>
-          <div class="surface surface-flush stack gap-lg">
+
+          <div class="grid-live" aria-live="polite">
+            <span class="grid-live__chip">
+              <span class="grid-live__key" data-i18n="doc.grid.live.columns">Columns</span>
+              <strong id="grid-live-columns">12</strong>
+            </span>
+            <span class="grid-live__chip">
+              <span class="grid-live__key" data-i18n="doc.grid.live.gutter">Gutter</span>
+              <strong id="grid-live-gutter">8dp</strong>
+            </span>
+            <span class="grid-live__chip">
+              <span class="grid-live__key" data-i18n="doc.grid.live.breakpoint">Breakpoint</span>
+              <strong id="grid-live-bp">lg</strong>
+            </span>
+            <span class="grid-live__chip">
+              <span class="grid-live__key" data-i18n="doc.grid.live.container">Container</span>
+              <strong id="grid-live-container">ON</strong>
+            </span>
+          </div>
+
+          <div class="demo-block">
+            <h2 data-i18n="doc.grid.section.columns">Columns</h2>
+            <p data-i18n="doc.grid.section.columns.blurb">
+              One cell per track — the count updates with the viewport (4 / 8 / 12).
+            </p>
             <div
-              id="icons-axes-demo"
-              class="icons-axes-demo demo-block"
+              id="grid-demo-columns"
+              class="demo-frame grid-demo-frame"
               data-demo-enhance="off"
             >
-              <div class="icons-axes-preview" aria-hidden="true">
-                <span
-                  class="ms notranslate icons-axes-glyph"
-                  translate="no"
-                  lang="zxx"
-                  data-k3-icon="home"
-                ></span>
-                <span
-                  class="ms notranslate icons-axes-glyph"
-                  translate="no"
-                  lang="zxx"
-                  data-k3-icon="favorite"
-                ></span>
-                <span
-                  class="ms notranslate icons-axes-glyph"
-                  translate="no"
-                  lang="zxx"
-                  data-k3-icon="settings"
-                ></span>
-                <span
-                  class="ms notranslate icons-axes-glyph"
-                  translate="no"
-                  lang="zxx"
-                  data-k3-icon="palette"
-                ></span>
-              </div>
-              <div class="ms-axes icons-axes-controls">
-                <div class="ms-axis-row ms-axis-row--switch">
-                  <div class="ms-axis-head">
-                    <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.fill"
-                      >Fill</span
-                    >
-                  </div>
-                  <k3-switch id="icons-fill-switch" aria-label="Fill"></k3-switch>
+              <div class="k3-layout-grid grid-demo" id="grid-demo-columns-row"></div>
+            </div>
+          </div>
+
+          <div class="demo-block">
+            <h2 data-i18n="doc.grid.section.container">Container</h2>
+            <p data-i18n="doc.grid.section.container.blurb">
+              .k3-container centers content with --k3-layout-body-max (≥905). Below that, the pane is always full-bleed with --k3-layout-full-gap (20dp). Toggle Container in Settings when the viewport is large enough.
+            </p>
+            <div class="stack gap-md">
+              <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+                <p class="grid-demo-caption">
+                  <code>.k3-container</code> · body-max (marges latérales) + full-gap
+                </p>
+                <div class="k3-layout-grid grid-demo">
+                  <div class="grid-cell grid-cell--muted k3-col-span-2" aria-hidden="true">margin</div>
+                  <div class="grid-cell grid-cell--accent k3-col-span-8">.k3-container · body-max</div>
+                  <div class="grid-cell grid-cell--muted k3-col-span-2" aria-hidden="true">margin</div>
                 </div>
-                <div class="ms-axes-sliders">
-                  <div class="ms-axis-row">
-                    <div class="ms-axis-head">
-                      <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.weight"
-                        >Weight</span
-                      >
-                    </div>
-                    <k3-slider
-                      id="icons-wght"
-                      min="100"
-                      max="700"
-                      step="100"
-                      value="400"
-                      stops
-                      value-indicator
-                      size="sm"
-                      aria-label="Weight"
-                    ></k3-slider>
-                    <div class="ms-axis-range" aria-hidden="true">
-                      <span>100</span>
-                      <span>700</span>
-                    </div>
-                  </div>
-                  <div class="ms-axis-row">
-                    <div class="ms-axis-head">
-                      <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.grade"
-                        >Grade</span
-                      >
-                    </div>
-                    <k3-slider
-                      id="icons-grad"
-                      min="-50"
-                      max="200"
-                      step="25"
-                      value="0"
-                      stops
-                      value-indicator
-                      size="sm"
-                      aria-label="Grade"
-                    ></k3-slider>
-                    <div class="ms-axis-range" aria-hidden="true">
-                      <span data-i18n="doc.material-symbols.axis.grade.low">−25 (low)</span>
-                      <span data-i18n="doc.material-symbols.axis.grade.high"
-                        >200 (high emphasis)</span
-                      >
-                    </div>
-                  </div>
-                  <div class="ms-axis-row">
-                    <div class="ms-axis-head">
-                      <span class="ms-axis-title" data-i18n="doc.material-symbols.axis.optical"
-                        >Optical Size</span
-                      >
-                    </div>
-                    <k3-slider
-                      id="icons-opsz"
-                      min="20"
-                      max="48"
-                      step="4"
-                      value="48"
-                      stops
-                      value-indicator
-                      size="sm"
-                      aria-label="Optical Size"
-                    ></k3-slider>
-                    <div class="ms-axis-range" aria-hidden="true">
-                      <span>20px</span>
-                      <span>48px</span>
-                    </div>
-                  </div>
+              </div>
+              <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+                <p class="grid-demo-caption">
+                  <code>.k3-container-none</code> · full-bleed + full-gap 20dp
+                </p>
+                <div class="k3-layout-grid k3-demo-cols-3 grid-demo">
+                  <div class="grid-cell">full width</div>
+                  <div class="grid-cell">edge gap</div>
+                  <div class="grid-cell">20dp</div>
                 </div>
               </div>
             </div>
-            <div id="icons-scale" class="token-scale" aria-label="Icon sizes"></div>
+          </div>
+
+          <div class="demo-block">
+            <h2 data-i18n="doc.grid.section.spans">Spans</h2>
+            <p data-i18n="doc.grid.section.spans.blurb">
+              Columns live inside .k3-layout-grid. Use .k3-col-span-* or .k3-col-full — spans that exceed the current column count simply fill the row.
+            </p>
+            <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+              <div class="k3-layout-grid grid-demo">
+                <div class="grid-cell k3-col-full">.k3-col-full · 12</div>
+                <div class="grid-cell k3-col-span-6">.k3-col-span-6</div>
+                <div class="grid-cell k3-col-span-6">.k3-col-span-6</div>
+                <div class="grid-cell k3-col-span-8">.k3-col-span-8</div>
+                <div class="grid-cell k3-col-span-4">.k3-col-span-4</div>
+                <div class="grid-cell k3-col-span-3">.k3-col-span-3</div>
+                <div class="grid-cell k3-col-span-3">.k3-col-span-3</div>
+                <div class="grid-cell k3-col-span-3">.k3-col-span-3</div>
+                <div class="grid-cell k3-col-span-3">.k3-col-span-3</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-block">
+            <h2 data-i18n="doc.grid.section.packs">Equal packs</h2>
+            <p data-i18n="doc.grid.section.packs.blurb">
+              .k3-demo-cols-2|3|4 — each child spans an equal share of --k3-layout-columns (e.g. 6 of 12, 4 of 8, 2 of 4).
+            </p>
+            <div class="stack gap-md">
+              <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+                <div class="k3-layout-grid k3-demo-cols-2 grid-demo">
+                  <div class="grid-cell">cols-2</div>
+                  <div class="grid-cell">cols-2</div>
+                </div>
+              </div>
+              <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+                <div class="k3-layout-grid k3-demo-cols-3 grid-demo">
+                  <div class="grid-cell">cols-3</div>
+                  <div class="grid-cell">cols-3</div>
+                  <div class="grid-cell">cols-3</div>
+                </div>
+              </div>
+              <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+                <div class="k3-layout-grid k3-demo-cols-4 grid-demo">
+                  <div class="grid-cell">cols-4</div>
+                  <div class="grid-cell">cols-4</div>
+                  <div class="grid-cell">cols-4</div>
+                  <div class="grid-cell">cols-4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-block">
+            <h2 data-i18n="doc.grid.section.offsets">Offsets</h2>
+            <p data-i18n="doc.grid.section.offsets.blurb">
+              Absolute start from the inline-start edge — .k3-col-start-* + .k3-col-span-*. For a relative gap, insert an empty span instead.
+            </p>
+            <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+              <div class="k3-layout-grid grid-demo">
+                <div class="grid-cell k3-col-full">.k3-col-full</div>
+                <div class="grid-cell k3-col-start-7 k3-col-span-6">.k3-col-start-7 · span-6</div>
+                <div class="grid-cell k3-col-span-4">.k3-col-span-4</div>
+                <div class="grid-cell k3-col-start-9 k3-col-span-4">.k3-col-start-9 · span-4</div>
+                <div class="grid-cell k3-col-start-4 k3-col-span-3">.k3-col-start-4 · span-3</div>
+                <div class="grid-cell k3-col-start-7 k3-col-span-3">.k3-col-start-7 · span-3</div>
+                <div class="grid-cell k3-col-start-10 k3-col-span-3">.k3-col-start-10 · span-3</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-block">
+            <h2 data-i18n="doc.grid.section.gaps">Gaps</h2>
+            <p data-i18n="doc.grid.section.gaps.blurb">
+              Default gap is --k3-layout-gutter (space100 = 8dp). Override per grid with .k3-gap-* spacing helpers when you need a denser or looser pack.
+            </p>
+            <div class="stack gap-md">
+              <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+                <p class="grid-demo-caption">
+                  <code>.k3-layout-grid</code> · gutter
+                </p>
+                <div class="k3-layout-grid k3-demo-cols-4 grid-demo">
+                  <div class="grid-cell">1</div>
+                  <div class="grid-cell">2</div>
+                  <div class="grid-cell">3</div>
+                  <div class="grid-cell">4</div>
+                </div>
+              </div>
+              <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+                <p class="grid-demo-caption">
+                  <code>.k3-gap-0</code>
+                </p>
+                <div class="k3-layout-grid k3-demo-cols-4 k3-gap-0 grid-demo">
+                  <div class="grid-cell">1</div>
+                  <div class="grid-cell">2</div>
+                  <div class="grid-cell">3</div>
+                  <div class="grid-cell">4</div>
+                </div>
+              </div>
+              <div class="demo-frame grid-demo-frame" data-demo-enhance="off">
+                <p class="grid-demo-caption">
+                  <code>.k3-gap-300</code>
+                </p>
+                <div class="k3-layout-grid k3-demo-cols-4 k3-gap-300 grid-demo">
+                  <div class="grid-cell">1</div>
+                  <div class="grid-cell">2</div>
+                  <div class="grid-cell">3</div>
+                  <div class="grid-cell">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-block">
+            <h2 data-i18n="doc.grid.section.responsive">Breakpoints</h2>
+            <p data-i18n="doc.grid.section.responsive.blurb">
+              Unlike prefix-based grids (s / m / l), K3ui changes the track count. The same .k3-col-span-6 is half the row at every breakpoint that has at least 6 columns.
+            </p>
+            <div class="surface surface-flush">
+              <div class="grid-bp-table-wrap k3-scroll" tabindex="0">
+                <table class="grid-bp-table">
+                  <thead>
+                    <tr>
+                      <th scope="col" data-i18n="doc.grid.bp.token">Token</th>
+                      <th scope="col">&lt;600</th>
+                      <th scope="col">≥600</th>
+                      <th scope="col">≥905</th>
+                      <th scope="col">≥1240</th>
+                      <th scope="col">≥1440</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">--k3-layout-columns</th>
+                      <td>4</td>
+                      <td>8</td>
+                      <td>12</td>
+                      <td>12</td>
+                      <td>12</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">--k3-layout-gutter</th>
+                      <td colspan="5">space100 · 8dp</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">--k3-layout-body-max</th>
+                      <td>none</td>
+                      <td>none</td>
+                      <td>840</td>
+                      <td>100vw − 400</td>
+                      <td>1280</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">--k3-layout-full-gap</th>
+                      <td colspan="5">20dp</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" data-i18n="doc.grid.bp.container">Container toggle</th>
+                      <td colspan="2" data-i18n="doc.grid.bp.container.off">N/A (always full)</td>
+                      <td colspan="3" data-i18n="doc.grid.bp.container.on">Settings → Container</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="demo-frame grid-demo-frame" data-demo-enhance="off" style="margin-block-start: var(--k3-sys-spacing-space300)">
+              <div class="k3-layout-grid grid-demo">
+                <div class="grid-cell k3-col-full">.k3-col-full</div>
+                <div class="grid-cell k3-col-span-6">.k3-col-span-6</div>
+                <div class="grid-cell k3-col-span-6">.k3-col-span-6</div>
+                <div class="grid-cell k3-col-span-4">.k3-col-span-4</div>
+                <div class="grid-cell k3-col-span-4">.k3-col-span-4</div>
+                <div class="grid-cell k3-col-span-4">.k3-col-span-4</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface surface-flush stack gap-lg">
+            <div id="grid-scale" class="token-scale" aria-label="Grid tokens"></div>
           </div>
         </article>
 
@@ -12043,6 +12271,244 @@ static styles = [
               Motion tokens cover Expressive spatial and effects durations, easings, and springs. Honor prefers-reduced-motion and data-k3-reduce-motion so animations ease or disable. Use motion to clarify hierarchy — not to decorate every state change.
             </p>
           </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.motion.section.demo">Playground</h2>
+            <p data-i18n="doc.motion.section.demo.blurb">
+              Six duration presets — cubic-bezier curve plus a travelling dot. Click a card to replay.
+            </p>
+            <div
+              id="motion-playground"
+              class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+              data-demo-enhance="off"
+            >
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--motion">
+                  <button
+                    type="button"
+                    class="motion-card"
+                    data-motion="spatial-fast"
+                    data-duration-var="--k3-sys-motion-duration-spatial-fast"
+                    data-easing-var="--k3-sys-motion-easing-spatial-fast"
+                  >
+                    <span class="motion-card__head">
+                      <span class="motion-card__title" data-i18n="doc.motion.preset.spatial-fast"
+                        >Spatial fast</span
+                      >
+                      <span class="motion-card__ms" data-motion-ms></span>
+                    </span><span class="motion-card__plot">
+                      <svg
+                        class="motion-card__curve"
+                        viewBox="0 -80 100 190"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
+                        <path class="motion-card__curve-path" d="" />
+                      </svg>
+                      <span class="motion-card__bead" aria-hidden="true"></span>
+                    </span>
+                    <code class="motion-card__token">duration-spatial-fast</code>
+                  </button>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--motion">
+                  <button
+                    type="button"
+                    class="motion-card"
+                    data-motion="spatial-default"
+                    data-duration-var="--k3-sys-motion-duration-spatial-default"
+                    data-easing-var="--k3-sys-motion-easing-spatial"
+                  >
+                    <span class="motion-card__head">
+                      <span class="motion-card__title" data-i18n="doc.motion.preset.spatial-default"
+                        >Spatial default</span
+                      >
+                      <span class="motion-card__ms" data-motion-ms></span>
+                    </span><span class="motion-card__plot">
+                      <svg
+                        class="motion-card__curve"
+                        viewBox="0 -80 100 190"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
+                        <path class="motion-card__curve-path" d="" />
+                      </svg>
+                      <span class="motion-card__bead" aria-hidden="true"></span>
+                    </span>
+                    <code class="motion-card__token">duration-spatial-default</code>
+                  </button>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--motion">
+                  <button
+                    type="button"
+                    class="motion-card"
+                    data-motion="spatial-slow"
+                    data-duration-var="--k3-sys-motion-duration-spatial-slow"
+                    data-easing-var="--k3-sys-motion-easing-spatial-slow"
+                  >
+                    <span class="motion-card__head">
+                      <span class="motion-card__title" data-i18n="doc.motion.preset.spatial-slow"
+                        >Spatial slow</span
+                      >
+                      <span class="motion-card__ms" data-motion-ms></span>
+                    </span><span class="motion-card__plot">
+                      <svg
+                        class="motion-card__curve"
+                        viewBox="0 -80 100 190"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
+                        <path class="motion-card__curve-path" d="" />
+                      </svg>
+                      <span class="motion-card__bead" aria-hidden="true"></span>
+                    </span>
+                    <code class="motion-card__token">duration-spatial-slow</code>
+                  </button>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--motion">
+                  <button
+                    type="button"
+                    class="motion-card"
+                    data-motion="effects-fast"
+                    data-duration-var="--k3-sys-motion-duration-effects-fast"
+                    data-easing-var="--k3-sys-motion-easing-effects-fast"
+                  >
+                    <span class="motion-card__head">
+                      <span class="motion-card__title" data-i18n="doc.motion.preset.effects-fast"
+                        >Effects fast</span
+                      >
+                      <span class="motion-card__ms" data-motion-ms></span>
+                    </span><span class="motion-card__plot">
+                      <svg
+                        class="motion-card__curve"
+                        viewBox="0 -80 100 190"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
+                        <path class="motion-card__curve-path" d="" />
+                      </svg>
+                      <span class="motion-card__bead" aria-hidden="true"></span>
+                    </span>
+                    <code class="motion-card__token">duration-effects-fast</code>
+                  </button>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">4</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--motion">
+                  <button
+                    type="button"
+                    class="motion-card"
+                    data-motion="effects-default"
+                    data-duration-var="--k3-sys-motion-duration-effects-default"
+                    data-easing-var="--k3-sys-motion-easing-effects"
+                  >
+                    <span class="motion-card__head">
+                      <span
+                        class="motion-card__title"
+                        data-i18n="doc.motion.preset.effects-default"
+                        >Effects default</span
+                      >
+                      <span class="motion-card__ms" data-motion-ms></span>
+                    </span><span class="motion-card__plot">
+                      <svg
+                        class="motion-card__curve"
+                        viewBox="0 -80 100 190"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
+                        <path class="motion-card__curve-path" d="" />
+                      </svg>
+                      <span class="motion-card__bead" aria-hidden="true"></span>
+                    </span>
+                    <code class="motion-card__token">duration-effects-default</code>
+                  </button>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">5</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage demo-case-stage--motion">
+                  <button
+                    type="button"
+                    class="motion-card"
+                    data-motion="effects-slow"
+                    data-duration-var="--k3-sys-motion-duration-effects-slow"
+                    data-easing-var="--k3-sys-motion-easing-effects"
+                  >
+                    <span class="motion-card__head">
+                      <span class="motion-card__title" data-i18n="doc.motion.preset.effects-slow"
+                        >Effects slow</span
+                      >
+                      <span class="motion-card__ms" data-motion-ms></span>
+                    </span><span class="motion-card__plot">
+                      <svg
+                        class="motion-card__curve"
+                        viewBox="0 -80 100 190"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
+                        <path class="motion-card__curve-path" d="" />
+                      </svg>
+                      <span class="motion-card__bead" aria-hidden="true"></span>
+                    </span>
+                    <code class="motion-card__token">duration-effects-slow</code>
+                  </button>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">6</span>
+              </div>
+            </div>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.motion.preset.spatial-fast"
+                  >Spatial fast</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.motion.preset.spatial-default"
+                  >Spatial default</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">3</span
+                ><span class="variant-label" data-i18n="doc.motion.preset.spatial-slow"
+                  >Spatial slow</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">4</span
+                ><span class="variant-label" data-i18n="doc.motion.preset.effects-fast"
+                  >Effects fast</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">5</span
+                ><span class="variant-label" data-i18n="doc.motion.preset.effects-default"
+                  >Effects default</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">6</span
+                ><span class="variant-label" data-i18n="doc.motion.preset.effects-slow"
+                  >Effects slow</span
+                >
+              </li>
+            </ol>
+          </div>
           <div class="surface surface-flush stack gap-lg">
             <div id="motion-scale" class="token-scale" aria-label="Motion tokens"></div>
           </div>
@@ -12127,6 +12593,18 @@ static styles = [
               The type scale runs from display to label with size, line-height, weight, tracking, and emphasized styles. Apply .k3-* type classes or tokens so headings and body copy stay consistent across locales and density modes.
             </p>
           </header>
+          <div class="demo-block">
+            <h2 data-i18n="doc.typography.section.demo">Playground</h2>
+            <p data-i18n="doc.typography.section.demo.blurb">
+              Fifteen type roles — default and emphasized side by side, with size · line-height · weight · tracking.
+            </p>
+            <div
+              id="typography-playground"
+              class="type-playground"
+              data-demo-enhance="off"
+              aria-label="Type scale playground"
+            ></div>
+          </div>
           <div class="surface surface-flush stack gap-lg">
             <div id="type-scale" class="token-scale" aria-label="Type scale"></div>
           </div>

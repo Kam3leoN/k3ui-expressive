@@ -67,7 +67,8 @@ export const syntax = {
   resolve(language: string | null | undefined): string {
     const key = (language ?? '').trim().toLowerCase();
     if (!key) return 'plain';
-    return ALIASES[key] ?? key;
+    /* Own keys only — `constructor` / `__proto__` must not resolve to Object internals. */
+    return Object.hasOwn(ALIASES, key) ? ALIASES[key]! : key;
   },
 
   isReady(language: string): boolean {
@@ -77,7 +78,7 @@ export const syntax = {
 
   isKnown(language: string): boolean {
     const id = this.resolve(language);
-    return id === 'plain' || id in LANGUAGE_MANIFEST || isLanguageReady(id);
+    return id === 'plain' || Object.hasOwn(LANGUAGE_MANIFEST, id) || isLanguageReady(id);
   },
 
   /**

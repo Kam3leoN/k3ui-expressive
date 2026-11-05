@@ -26,7 +26,8 @@ export {
   type LifecyclePhase,
   type LifecycleDetail,
 } from './lifecycle.js';
-export { FocusTrap } from './focus-trap.js';
+export { FocusTrap, tabbableElements } from './focus-trap.js';
+export { overlayStack, type OverlayEntry } from './overlay-stack.js';
 export {
   annotateFocusNavResult,
   buildFocusNavLoop,
@@ -209,4 +210,11 @@ export {
   type LazyTrigger,
   type WhenTriggeredOptions,
 } from './lazy.js';
-export { sanitizeHTML, sanitizeHTMLDetailed, type SanitizeOptions, type SanitizeResult } from './sanitize.js';
+export {
+  sanitizeHTML,
+  sanitizeHTMLDetailed,
+  sanitizeSVG,
+  type SanitizeOptions,
+  type SanitizeResult,
+  type SanitizeSVGOptions,
+} from './sanitize.js';

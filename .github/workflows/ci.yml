@@ -20,3 +20,35 @@ jobs:
       - run: npm run build
       - run: npm run build:playground
       - run: npm run build:qr
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Keyboard / ARIA / forms / performance budgets (Chromium)
+      - run: npm run test:e2e
+        env:
+          CI: '1'
+
+  # Same specs on Firefox + WebKit — informative until they have been green once.
+  e2e-cross-browser:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:e2e
+        env:
+          CI: '1'
+          K3UI_E2E_ALL_BROWSERS: '1'

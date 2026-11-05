@@ -2,8 +2,8 @@ import { html, css, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { K3Element, emitLifecycle, waitForMotion, isRtl } from '../../core/index.js';
+import { sanitizeSVG } from '../../core/sanitize.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
 
@@ -158,6 +158,7 @@ export class K3Tabs extends K3Element {
   /**
    * Per-tab icons for primary variant (JS only — SVGs contain commas).
    * Each entry is either inline `<svg>…</svg>` (`fill="currentColor"`) or an MS ligature.
+   * SVG markup goes through `sanitizeSVG` (shapes + presentation attributes only).
    */
   @property({ attribute: false }) customIcons: readonly string[] = [];
 
@@ -166,6 +167,8 @@ export class K3Tabs extends K3Element {
   @state() private indWidth = 0;
 
   private ro?: ResizeObserver;
+  /** Sanitized SVG per tab slot — stable nodes, so re-renders do not re-parse. */
+  private svgIcons = new Map<number, { raw: string; node: SVGSVGElement | null }>();
 
   override firstUpdated(): void {
     const list = this.renderRoot.querySelector('.tabs');
@@ -241,11 +244,39 @@ export class K3Tabs extends K3Element {
     this.emit('k3-change', { index: i });
   }
 
-  private renderIcon(raw: string | undefined) {
+  /**
+   * WAI-ARIA tabs pattern (automatic activation): one tab stop, arrows move
+   * between tabs (mirrored in RTL), Home / End jump to the ends.
+   */
+  private onTabKeydown(e: KeyboardEvent, i: number, count: number): void {
+    const rtl = isRtl(this);
+    let next = -1;
+    if (e.key === 'ArrowRight') next = rtl ? i - 1 : i + 1;
+    else if (e.key === 'ArrowLeft') next = rtl ? i + 1 : i - 1;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = count - 1;
+    else return;
+    e.preventDefault();
+    next = (next + count) % count;
+    const tabs = this.shadowRoot?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    tabs?.[next]?.focus();
+    void this.select(next);
+  }
+
+  private svgIcon(i: number, raw: string): SVGSVGElement | null {
+    const hit = this.svgIcons.get(i);
+    if (hit?.raw === raw) return hit.node;
+    /* Inside this shadow root ids cannot clobber `window` — keep gradients working. */
+    const node = sanitizeSVG(raw, { allowIds: true });
+    this.svgIcons.set(i, { raw, node });
+    return node;
+  }
+
+  private renderIcon(raw: string | undefined, i: number) {
     if (!raw) return nothing;
     if (raw.includes('<svg')) {
       return html`<span class="icon--svg" part="icon" aria-hidden="true"
-        >${unsafeHTML(raw)}</span
+        >${this.svgIcon(i, raw) ?? nothing}</span
       >`;
     }
     return html`<span
@@ -280,10 +311,12 @@ export class K3Tabs extends K3Element {
               role="tab"
               ?active=${i === this.current}
               aria-selected=${String(i === this.current)}
+              tabindex=${i === this.current ? '0' : '-1'}
               @click=${() => this.select(i)}
+              @keydown=${(e: KeyboardEvent) => this.onTabKeydown(e, i, labels.length)}
             >
               <span class="content" part="content">
-                ${primary ? this.renderIcon(icon) : nothing}
+                ${primary ? this.renderIcon(icon, i) : nothing}
                 <span class="label" part="label">${label}</span>
               </span>
             </button>

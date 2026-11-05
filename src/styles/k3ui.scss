@@ -192,6 +192,85 @@
     letter-spacing: var(--k3-sys-typescale-label-small-tracking);
   }
 
+  /* Emphasized (Expressive) — same metrics, heavier weight token */
+  .k3-display-large-emphasized {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-display-large-size);
+    line-height: var(--k3-sys-typescale-display-large-line-height);
+    font-weight: var(--k3-sys-typescale-display-large-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-display-large-tracking);
+  }
+  .k3-headline-large-emphasized {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-headline-large-size);
+    line-height: var(--k3-sys-typescale-headline-large-line-height);
+    font-weight: var(--k3-sys-typescale-headline-large-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-headline-large-tracking);
+  }
+  .k3-headline-small-emphasized {
+    font-family: var(--k3-ref-typeface-brand);
+    font-size: var(--k3-sys-typescale-headline-small-size);
+    line-height: var(--k3-sys-typescale-headline-small-line-height);
+    font-weight: var(--k3-sys-typescale-headline-small-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-headline-small-tracking);
+  }
+  .k3-title-large-emphasized {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-title-large-size);
+    line-height: var(--k3-sys-typescale-title-large-line-height);
+    font-weight: var(--k3-sys-typescale-title-large-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-title-large-tracking);
+  }
+  .k3-title-medium-emphasized {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-title-medium-size);
+    line-height: var(--k3-sys-typescale-title-medium-line-height);
+    font-weight: var(--k3-sys-typescale-title-medium-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-title-medium-tracking);
+  }
+  .k3-title-small-emphasized {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-title-small-size);
+    line-height: var(--k3-sys-typescale-title-small-line-height);
+    font-weight: var(--k3-sys-typescale-title-small-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-title-small-tracking);
+  }
+  .k3-body-large-emphasized {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-body-large-size);
+    line-height: var(--k3-sys-typescale-body-large-line-height);
+    font-weight: var(--k3-sys-typescale-body-large-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-body-large-tracking);
+  }
+  .k3-body-medium-emphasized {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-body-medium-size);
+    line-height: var(--k3-sys-typescale-body-medium-line-height);
+    font-weight: var(--k3-sys-typescale-body-medium-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-body-medium-tracking);
+  }
+  .k3-label-large-emphasized {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-label-large-size);
+    line-height: var(--k3-sys-typescale-label-large-line-height);
+    font-weight: var(--k3-sys-typescale-label-large-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-label-large-tracking);
+  }
+  .k3-label-medium-emphasized {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-label-medium-size);
+    line-height: var(--k3-sys-typescale-label-medium-line-height);
+    font-weight: var(--k3-sys-typescale-label-medium-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-label-medium-tracking);
+  }
+  .k3-label-small-emphasized {
+    font-family: var(--k3-ref-typeface-plain);
+    font-size: var(--k3-sys-typescale-label-small-size);
+    line-height: var(--k3-sys-typescale-label-small-line-height);
+    font-weight: var(--k3-sys-typescale-label-small-emphasized-weight);
+    letter-spacing: var(--k3-sys-typescale-label-small-tracking);
+  }
+
   /* Drag affordance — ⋮⋮ grip (Material Symbols: drag_indicator) */
   .k3-drag-handle {
     display: inline-grid;

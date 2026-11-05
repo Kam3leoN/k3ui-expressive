@@ -110,6 +110,30 @@ export const TYPE_ROLES = [
   'label-small',
 ] as const;
 
+/** Roles that ship an Expressive emphasized-weight token (+ `.k3-*-emphasized`). */
+export const TYPE_EMPHASIZED_ROLES = [
+  'display-large',
+  'headline-large',
+  'headline-medium',
+  'headline-small',
+  'title-large',
+  'title-medium',
+  'title-small',
+  'body-large',
+  'body-medium',
+  'label-large',
+  'label-medium',
+  'label-small',
+] as const;
+
+export const TYPE_FAMILIES = [
+  { id: 'display', roles: ['display-large', 'display-medium', 'display-small'] },
+  { id: 'headline', roles: ['headline-large', 'headline-medium', 'headline-small'] },
+  { id: 'title', roles: ['title-large', 'title-medium', 'title-small'] },
+  { id: 'body', roles: ['body-large', 'body-medium', 'body-small'] },
+  { id: 'label', roles: ['label-large', 'label-medium', 'label-small'] },
+] as const;
+
 export const MOTION_DURATION_TOKENS = [
   'short1',
   'short2',

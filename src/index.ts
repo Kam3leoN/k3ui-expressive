@@ -52,9 +52,16 @@ import {
 } from './core/index.js';
 import { showSnackbar, snackbarQueue } from './components/feedback/snackbar-queue.js';
 
-export { sanitizeHTML, sanitizeHTMLDetailed, type SanitizeOptions, type SanitizeResult } from './core/sanitize.js';
+export {
+  sanitizeHTML,
+  sanitizeHTMLDetailed,
+  sanitizeSVG,
+  type SanitizeOptions,
+  type SanitizeResult,
+  type SanitizeSVGOptions,
+} from './core/sanitize.js';
 export { VERSION } from './version.js';
-export { init, type InitOptions, type K3UIGlobal } from './bootstrap/init.js';
+export { init, getInitOptions, type InitOptions, type K3UIGlobal } from './bootstrap/init.js';
 export { debug } from './debug/logger.js';
 export { i18n } from './i18n/index.js';
 export {
@@ -73,6 +80,7 @@ export {
   AUTO_LIGHT_START_H,
   AUTO_LIGHT_END_H,
   type ColorSpecVersion,
+  type ContrastPreference,
 } from './theme/apply.js';
 export {
   DEFAULT_MOOD_LEGEND,
@@ -137,6 +145,8 @@ export {
   ICON_SIZE_TOKENS,
   SHAPE_CORNER_TOKENS,
   TYPE_ROLES,
+  TYPE_EMPHASIZED_ROLES,
+  TYPE_FAMILIES,
   MOTION_DURATION_TOKENS,
   type M3StyleCategory,
 } from './tokens/meta.js';

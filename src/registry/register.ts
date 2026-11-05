@@ -64,7 +64,10 @@ export async function registerWhen(
   options: WhenTriggeredOptions = {},
 ): Promise<string[]> {
   await whenTriggered(root, trigger, options);
-  const tags = pendingCustomElements(root).filter(isKnown);
+  const pending = pendingCustomElements(root);
+  /* `root` itself may be the lazy k3 element (`registerWhen(cardEl, 'visible')`). */
+  if (root.localName.includes('-') && !customElements.get(root.localName)) pending.unshift(root.localName);
+  const tags = [...new Set(pending)].filter(isKnown);
   await registerAll(tags);
   return tags;
 }

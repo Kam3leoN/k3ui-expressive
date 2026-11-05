@@ -132,7 +132,7 @@ export class K3QrCode extends K3Element {
   @property({ attribute: 'eye-ball-style' }) eyeBallStyle: QrEyeBallStyle = 'default';
 
   /** Dots colour (gradient start). */
-  @property() color = QrCodeSpecs.defaultColor;
+  @property() color: string = QrCodeSpecs.defaultColor;
   @property() gradient: QrGradient = 'none';
   /** Gradient end colour. */
   @property({ attribute: 'gradient-color' }) gradientColor = '';
@@ -142,7 +142,7 @@ export class K3QrCode extends K3Element {
   /** Finder centre colour (empty → dots paint). */
   @property({ attribute: 'eye-ball-color' }) eyeBallColor = '';
   /** Background colour or `transparent`. */
-  @property() background = QrCodeSpecs.defaultBackground;
+  @property() background: string = QrCodeSpecs.defaultBackground;
   /** Background corner radius in modules (no frame). */
   @property({ type: Number }) radius = 0;
 

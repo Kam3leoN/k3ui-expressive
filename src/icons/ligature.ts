@@ -44,9 +44,17 @@ export function protectIconLigatures(root: ParentNode = document): number {
   return n;
 }
 
-/** Keep protecting icons added after boot (catalog, nav rebuilds, …). */
+/** One observer per root — `K3UI.init()` may run several times. */
+const watchers = new WeakMap<ParentNode, MutationObserver>();
+
+/**
+ * Keep protecting icons added after boot (catalog, nav rebuilds, …).
+ * Idempotent: a root already watched returns its existing observer.
+ */
 export function watchIconLigatures(root: ParentNode = document): MutationObserver | null {
   if (typeof MutationObserver === 'undefined') return null;
+  const existing = watchers.get(root);
+  if (existing) return existing;
   protectIconLigatures(root);
   const mo = new MutationObserver((mutations) => {
     for (const m of mutations) {
@@ -62,5 +70,12 @@ export function watchIconLigatures(root: ParentNode = document): MutationObserve
   });
   const target = root instanceof Document ? root.documentElement : (root as Node);
   mo.observe(target, { childList: true, subtree: true });
+  watchers.set(root, mo);
   return mo;
+}
+
+/** Stop watching `root` (tests, micro-frontends unmounting K3UI). */
+export function unwatchIconLigatures(root: ParentNode = document): void {
+  watchers.get(root)?.disconnect();
+  watchers.delete(root);
 }

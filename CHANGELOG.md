@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed — audit 2026-11 (see `docs/AUDIT_2026-11.md`)
+
+- **Dialog / modal sheet keyboard access**: focus now moves into the panel on open, Tab / Shift+Tab cycle through shadow *and* slotted controls, Escape returns focus to the trigger. `FocusTrap` walks the composed tree (it only saw the shadow panel, so Tab left the modal). Closed panels are `inert` (their controls were reachable with Tab) and the panel is named by its headline (`aria-labelledby`)
+- **Escape closes one layer at a time**: modal dialogs / sheets share an overlay stack — only the top-most closes; an Escape consumed by an inner menu, select or visible tooltip (`preventDefault()`) no longer also closes the dialog
+- **XSS**: `k3-tabs` `icons` / `customIcons` SVG markup was rendered with `unsafeHTML`; it now goes through the new `sanitizeSVG()`
+- `K3UI.init()` deep-merges successive calls (a later `theme: { mode }` kept no seed), no longer resets a theme set with `K3UI.theme.apply()`, and runs concurrent calls one after the other (auto-bootstrap + app call)
+- `K3UI.init()` leaked one document-wide `MutationObserver` per call (icon ligature guard) — now one per root
+- `theme.apply({ target })` (e.g. `<k3-theme global="false">`) stored the local target as the default of every later global call, and replaced the document's OS / clock listeners; targets now keep their own state (`theme.release(target)`)
+- `k3-text-field` / `k3-textarea`: `required`, `pattern`, `type`, `minlength`… now reach the form (`ElementInternals.setValidity`): native submit blocking, `:invalid`, `form.checkValidity()`; `checkValidity()`, `reportValidity()`, `setCustomValidity()`, `validity`, `validationMessage`, `form`, form reset / disabled fieldset / state restore. `k3-select` `required` reports `valueMissing`
+- `k3-loading-indicator` re-rendered on every animation frame forever (background spin in JS) — the spin is a compositor CSS animation; spin and morph cycle pause off-screen and in hidden tabs (no `k3-morph-*` events there)
+- `k3-progress` indeterminate canvas loop kept painting off-screen — paused until visible
+- Audio player: the on-demand Material Color Utilities import pulled the whole package namespace into `k3ui.js` (−20 kB raw)
+- `k3-heart-burst` particles built with `innerHTML` (Trusted Types sink) — DOM API now
+- `syntax.resolve('constructor' | '__proto__')` returned Object internals; `i18n.t()` the same for prototype keys
+- `registry.registerWhen(el)` skipped `el` itself when it is the lazy k3 element
+- `?k3ui-debug=<unknown>` silenced the logger instead of using `info`
+- Public property types: `k3-codeblock` `collapsedHeight`, `k3-qr-code` `color` / `background`, `k3-heart-burst` `count` were typed as their default literal (`150`, `"#000000"`…), rejecting any other value in TypeScript — also the cause of the failing `npm run lint`
+
+### Added — audit 2026-11
+
+- `K3UI.init()` options `direction`, `theme.contrast: 'auto'` (OS `prefers-contrast`, live), `motion.reduce` (`system` · `always`), `interaction.ripple`, `overlays.scrollLock` (opt-in); unknown keys / invalid values warn and are ignored; `__proto__` & co. never merged. `getInitOptions()`
+- `locale` accepts BCP 47 tags (`fr-FR` → `fr`); `normalizeLocale()`
+- `k3-tabs` WAI-ARIA keyboard pattern: roving tabindex, ←/→ (mirrored in RTL), Home / End
+- `sanitizeSVG(markup, { allowIds })` — allowlist SVG icon sanitizer (shapes + presentation attributes; no handlers, `style`, `href`, `use`, `image`, `foreignObject`, animation; ids only on request)
+- Core: `overlayStack`, `tabbableElements()`, shared on-screen signal (`src/core/visibility.ts`, one `IntersectionObserver` for all subscribers)
+- Tests: 37 unit tests (focus trap, overlay stack, SVG sanitizer, init config, theme targets, tabs, forms, robustness) and Playwright specs for dialog / sheet keyboard & ARIA, nested Escape, forms and performance budgets. `PW_CHROMIUM_PATH` / `K3UI_E2E_ALL_BROWSERS` in `playwright.config.ts`; CI runs e2e (Chromium, + informative Firefox / WebKit job)
+
 ### Changed
 
 - `k3-chart` — engine helpers renamed `ensureChartEngine()` / `ChartEngine` (aliases `ensureChartJsRegistered` / `ChartJs` kept); docs and playground present the charts as k3ui charts only; without a `height` attribute the frame follows `--k3-chart-height` (default 280px)

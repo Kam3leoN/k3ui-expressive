@@ -659,11 +659,6 @@ export const COMPONENT_SPECS: Record<string, SpecRow[]> = {
     { token: 'shadow', value: 'ambient + key stack' },
     { token: 'tint', value: 'surface-tint tonal lift' },
   ],
-  icons: [
-    { token: 'family', value: 'Material Symbols Rounded' },
-    { token: 'sizes', value: '20 · 24 · 40 · 48 dp' },
-    { token: 'axes', value: 'FILL · wght · GRAD · opsz' },
-  ],
   motion: [
     { token: 'schemes', value: 'expressive · standard' },
     { token: 'spatial', value: 'fast 350 · default 500 · slow 650' },

@@ -289,10 +289,10 @@ function activeLyric(lines: LyricLine[], t: number): number {
 }
 
 /** MCU is heavy — load on demand (dynamic color / artwork seed only). */
-type McuModule = typeof import('@material/material-color-utilities');
+type McuModule = typeof import('./audio-player.mcu.js');
 let mcuMod: Promise<McuModule> | null = null;
 function loadMcu(): Promise<McuModule> {
-  return (mcuMod ??= import('@material/material-color-utilities'));
+  return (mcuMod ??= import('./audio-player.mcu.js'));
 }
 
 /** Scheme MCU local (même recette que `theme.apply`, sans toucher au thème global). */

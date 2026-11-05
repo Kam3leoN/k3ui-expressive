@@ -74,74 +74,141 @@
  * Reusable layout grid — use everywhere content must sit on columns
  * (playground demos, doc-nav, catalog, cards…). Same tracks + gutter as
  * `.k3-layout-grid-overlay` so container ON/OFF stay aligned.
+ *
+ * In `@layer components` so `@layer utilities` gap helpers (`.k3-gap-*`)
+ * can override the default gutter when both classes are present.
  */
-.k3-layout-grid {
-  display: grid;
-  grid-template-columns: repeat(var(--k3-layout-columns), minmax(0, 1fr));
-  gap: var(--k3-layout-gutter);
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+@layer components {
+  .k3-layout-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--k3-layout-columns), minmax(0, 1fr));
+    gap: var(--k3-layout-gutter);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Gap-only utility when the parent already defines columns */
+  .k3-layout-gap {
+    gap: var(--k3-layout-gutter);
+  }
 }
 
-/* Gap-only utility when the parent already defines columns */
-.k3-layout-gap {
-  gap: var(--k3-layout-gutter);
-}
+@layer components {
+  /*
+   * Equal column packs — parent = `.k3-layout-grid` (same tracks as overlay).
+   * Children each take an equal share of `--k3-layout-columns`:
+   *   2 → half (6 of 12 · 4 of 8 · 2 of 4)
+   *   3 → third (4 of 12 · …)
+   *   4 → quarter (3 of 12 · 2 of 8 · 1 of 4)
+   * Use on demo frames: `demo-frame--cases k3-layout-grid k3-demo-cols-2`
+   */
+  .k3-demo-cols-2 > *,
+  .k3-demo-cols-3 > *,
+  .k3-demo-cols-4 > * {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 
-/*
- * Equal column packs — parent = `.k3-layout-grid` (same tracks as overlay).
- * Children each take an equal share of `--k3-layout-columns`:
- *   2 → half (6 of 12 · 4 of 8 · 2 of 4)
- *   3 → third (4 of 12 · …)
- *   4 → quarter (3 of 12 · 2 of 8 · 1 of 4)
- * Use on demo frames: `demo-frame--cases k3-layout-grid k3-demo-cols-2`
- */
-.k3-demo-cols-2 > *,
-.k3-demo-cols-3 > *,
-.k3-demo-cols-4 > * {
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
+  .k3-demo-cols-2 > * {
+    grid-column-end: span max(1, calc(var(--k3-layout-columns) / 2));
+  }
 
-.k3-demo-cols-2 > * {
-  grid-column: span max(1, calc(var(--k3-layout-columns) / 2));
-}
+  .k3-demo-cols-3 > * {
+    grid-column-end: span max(1, calc(var(--k3-layout-columns) / 3));
+  }
 
-.k3-demo-cols-3 > * {
-  grid-column: span max(1, calc(var(--k3-layout-columns) / 3));
-}
+  .k3-demo-cols-4 > * {
+    grid-column-end: span max(1, calc(var(--k3-layout-columns) / 4));
+  }
 
-.k3-demo-cols-4 > * {
-  grid-column: span max(1, calc(var(--k3-layout-columns) / 4));
-}
+  /*
+   * Explicit span helpers — use grid-column-END so they compose with
+   * `.k3-col-start-*`. (`grid-column: span N` sets *start* to span N, so a
+   * later grid-column-start would wipe the span down to 1 track.)
+   */
+  .k3-col-span-1 {
+    grid-column-end: span 1;
+  }
+  .k3-col-span-2 {
+    grid-column-end: span 2;
+  }
+  .k3-col-span-3 {
+    grid-column-end: span 3;
+  }
+  .k3-col-span-4 {
+    grid-column-end: span 4;
+  }
+  .k3-col-span-5 {
+    grid-column-end: span 5;
+  }
+  .k3-col-span-6 {
+    grid-column-end: span 6;
+  }
+  .k3-col-span-7 {
+    grid-column-end: span 7;
+  }
+  .k3-col-span-8 {
+    grid-column-end: span 8;
+  }
+  .k3-col-span-9 {
+    grid-column-end: span 9;
+  }
+  .k3-col-span-10 {
+    grid-column-end: span 10;
+  }
+  .k3-col-span-11 {
+    grid-column-end: span 11;
+  }
+  .k3-col-span-12 {
+    grid-column-end: span 12;
+  }
+  .k3-col-full {
+    grid-column: 1 / -1;
+  }
 
-/* Explicit span helpers when you need an uneven pack */
-.k3-col-span-1 {
-  grid-column: span 1;
-}
-.k3-col-span-2 {
-  grid-column: span 2;
-}
-.k3-col-span-3 {
-  grid-column: span 3;
-}
-.k3-col-span-4 {
-  grid-column: span 4;
-}
-.k3-col-span-6 {
-  grid-column: span 6;
-}
-.k3-col-span-8 {
-  grid-column: span 8;
-}
-.k3-col-span-12 {
-  grid-column: span 12;
-}
-.k3-col-full {
-  grid-column: 1 / -1;
+  /*
+   * Absolute column start (1-indexed, from the inline-start edge).
+   * Pair with .k3-col-span-* — e.g. `.k3-col-start-7.k3-col-span-6`.
+   */
+  .k3-col-start-1 {
+    grid-column-start: 1;
+  }
+  .k3-col-start-2 {
+    grid-column-start: 2;
+  }
+  .k3-col-start-3 {
+    grid-column-start: 3;
+  }
+  .k3-col-start-4 {
+    grid-column-start: 4;
+  }
+  .k3-col-start-5 {
+    grid-column-start: 5;
+  }
+  .k3-col-start-6 {
+    grid-column-start: 6;
+  }
+  .k3-col-start-7 {
+    grid-column-start: 7;
+  }
+  .k3-col-start-8 {
+    grid-column-start: 8;
+  }
+  .k3-col-start-9 {
+    grid-column-start: 9;
+  }
+  .k3-col-start-10 {
+    grid-column-start: 10;
+  }
+  .k3-col-start-11 {
+    grid-column-start: 11;
+  }
+  .k3-col-start-12 {
+    grid-column-start: 12;
+  }
 }
 
 /* Overlay visualization */

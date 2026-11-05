@@ -20,7 +20,7 @@ const SKIP_HOST =
   '.color-tone-row, .color-role-swatch, .token-scale, .catalog-grid, .shell-sheet-link, [data-demo-enhance="off"]';
 
 const SKIP_PAGE =
-  '[data-page="home"], [data-page="quick-start"], [data-page^="color-"], [data-page="elevation"], [data-page="icons"], [data-page="motion"], [data-page="shapes"], [data-page="spacing"], [data-page="typography"]';
+  '[data-page="home"], [data-page="quick-start"], [data-page^="color-"], [data-page="elevation"], [data-page="motion"], [data-page="shapes"], [data-page="spacing"], [data-page="typography"]';
 
 /** Components that need full-width stacked cases (not equal horizontal columns). */
 const WIDE_TAG = new Set([

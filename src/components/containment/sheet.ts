@@ -18,7 +18,9 @@ import {
   isRtl as readRtl,
   type DragController,
   type DragDetail,
+  FocusTrap,
 } from '../../core/index.js';
+import { overlayStack } from '../../core/overlay-stack.js';
 import { enterSheetBottom, enterSheetSide } from '../../motion/enter.js';
 import { i18n } from '../../i18n/index.js';
 import { hostReset } from '../_shared.js';
@@ -391,6 +393,28 @@ export class K3Sheet extends K3Element {
   private elevating = false;
   /** In-flight enter — shared by show() and `open` attribute. */
   private enterPromise: Promise<void> | null = null;
+  private readonly trap = new FocusTrap();
+  /** Modal behaviours (focus trap, Escape stack, scroll lock) are live. */
+  private modalActive = false;
+
+  /**
+   * Modal sheet: focus enters the panel, Tab cycles inside it (slotted
+   * controls included) and only the top-most modal answers Escape.
+   * Standard (non-modal) sheets keep page focus untouched.
+   */
+  private activateModal(): void {
+    if (this.modalActive || !this.modal || !this.sheetEl) return;
+    this.modalActive = true;
+    this.trap.activate(this.sheetEl);
+    overlayStack.push(this, () => void this.hide('escape'));
+  }
+
+  private deactivateModal(restore: boolean): void {
+    overlayStack.remove(this);
+    if (!this.modalActive) return;
+    this.modalActive = false;
+    this.trap.deactivate({ restore });
+  }
 
   /**
    * Escape ancestor stacking contexts (e.g. scrollport z-index:0) so the
@@ -480,6 +504,7 @@ export class K3Sheet extends K3Element {
         /* Kick FAB/STT hide before enter — fades during elevate/paint (no await). */
         markSheetChromeOpening(this);
         await this.playEnter();
+        this.activateModal();
       },
       { source: 'api' },
     );
@@ -506,6 +531,7 @@ export class K3Sheet extends K3Element {
         this.dragging = false;
         this.settling = false;
         this.clearDragTransform();
+        this.deactivateModal(true);
         if (source === 'drag') haptic.light();
       },
       { source },
@@ -516,8 +542,9 @@ export class K3Sheet extends K3Element {
     return ok;
   }
 
+  /** Standard (non-modal) sheets — modal ones go through the overlay stack. */
   private onKey = (e: KeyboardEvent): void => {
-    if (!this.visible) return;
+    if (!this.visible || this.modalActive || e.defaultPrevented) return;
     if (e.key === 'Escape') void this.hide('escape');
   };
 
@@ -732,6 +759,7 @@ export class K3Sheet extends K3Element {
     this.drag = null;
     /* Reparent to body fires disconnect — keep host + home markers */
     if (!this.elevating) {
+      this.deactivateModal(true);
       unregisterSheetChromeHost(this);
       this.homeParent = null;
       this.homeNext = null;
@@ -745,9 +773,11 @@ export class K3Sheet extends K3Element {
       if (this.open && !this.visible) {
         markSheetChromeOpening(this);
         void this.playEnter().then(() => {
+          if (this.open && this.isConnected) this.activateModal();
           requestAnimationFrame(() => recomputeSheetChromeShift());
         });
       } else if (!this.open && !this.visible) {
+        this.deactivateModal(true);
         clearSheetChromeOpening(this);
         this.restoreLayer();
         recomputeSheetChromeShift();
@@ -801,6 +831,8 @@ export class K3Sheet extends K3Element {
         part="container"
         role="dialog"
         aria-modal=${this.modal ? 'true' : 'false'}
+        aria-labelledby="headline"
+        ?inert=${!this.visible}
         data-draggable=${this.draggable ? 'true' : 'false'}
       >
         ${isBottom && this.draggable
@@ -819,7 +851,7 @@ export class K3Sheet extends K3Element {
             ></div>`
           : html`<div class="handle" part="handle" aria-hidden="true"></div>`}
         <div class="header" part="header">
-          <div class="headline" part="headline"><slot name="headline"></slot></div>
+          <div class="headline" id="headline" part="headline"><slot name="headline"></slot></div>
           ${this.closeAction
         ? html`<button
                 type="button"

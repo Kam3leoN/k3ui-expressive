@@ -3922,48 +3922,383 @@ k3-avatar [slot='badge'].ms {
   margin-inline: 0;
 }
 
-/* Styles → Icons live axes preview */
-.icons-axes-demo {
+/* Styles → Elevation visual playground (levels 0–5) */
+.demo-case-stage--elevation {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: var(--k3-sys-spacing-space400, 2rem);
+  overflow: visible;
+  width: 100%;
+  box-sizing: border-box;
+}
+.elevation-card {
   display: flex;
   flex-direction: column;
-  gap: var(--k3-sys-spacing-space300, 1.5rem);
-  width: 100%;
-}
-.icons-axes-preview {
-  display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: var(--k3-sys-spacing-space400, 2rem);
-  min-height: 5rem;
-  padding: var(--k3-sys-spacing-space400, 2rem);
+  gap: var(--k3-sys-spacing-space100, 0.5rem);
+  inline-size: 100%;
+  min-block-size: 7.5rem;
+  padding: var(--k3-sys-spacing-space300, 1.5rem);
   border-radius: var(--k3-sys-shape-corner-large, 1rem);
+  background: var(--k3-sys-color-surface-container-lowest, #fff);
+  color: var(--k3-sys-color-on-surface);
+  box-sizing: border-box;
+  text-align: center;
+}
+.elevation-card__level {
+  font: var(--k3-sys-typescale-title-medium-weight, 500)
+    var(--k3-sys-typescale-title-medium-size, 1rem) /
+    var(--k3-sys-typescale-title-medium-line-height, 1.5rem)
+    var(--k3-ref-typeface-brand, inherit);
+  letter-spacing: var(--k3-sys-typescale-title-medium-tracking, 0.01em);
+}
+.elevation-card__token {
+  font: var(--k3-sys-typescale-label-medium-weight, 500)
+    var(--k3-sys-typescale-label-medium-size, 0.75rem) /
+    var(--k3-sys-typescale-label-medium-line-height, 1rem) ui-monospace, monospace;
+  color: var(--k3-sys-color-on-surface-variant);
+}
+
+/* Styles → Grid playground (Materialize-style demos on K3 layout grid) */
+.grid-live {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--k3-sys-spacing-space100, 0.5rem);
+  margin-block: var(--k3-sys-spacing-space200, 0.75rem) var(--k3-sys-spacing-space300, 1.5rem);
+}
+.grid-live__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--k3-sys-spacing-space50, 0.25rem);
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--k3-sys-shape-corner-full, 9999px);
   background: var(--k3-sys-color-surface-container);
   color: var(--k3-sys-color-on-surface);
-  --icons-demo-fill: 0;
-  --icons-demo-wght: 400;
-  --icons-demo-grad: 0;
-  --icons-demo-opsz: 48;
-  --k3-sys-icon-fill: var(--icons-demo-fill);
-  --k3-sys-icon-weight: var(--icons-demo-wght);
-  --k3-sys-icon-grade: var(--icons-demo-grad);
-  --k3-sys-icon-optical-size: var(--icons-demo-opsz);
+  font: var(--k3-sys-typescale-label-large-weight, 500)
+    var(--k3-sys-typescale-label-large-size, 0.875rem) /
+    var(--k3-sys-typescale-label-large-line-height, 1.25rem)
+    var(--k3-ref-typeface-plain, inherit);
 }
-.icons-axes-preview .icons-axes-glyph.ms {
-  font-size: calc(var(--k3-sys-icon-optical-size, 24) * 1px);
-  width: 1em;
-  height: 1em;
-  font-weight: inherit;
-  font-variation-settings: inherit;
+.grid-live__key {
+  color: var(--k3-sys-color-on-surface-variant);
 }
-.icons-axes-preview .icons-axes-glyph.ms[data-k3-icon]::before {
-  font-variation-settings: inherit;
-  font-weight: inherit;
-  font-size: inherit;
+.grid-live__chip strong {
+  font-weight: var(--k3-sys-typescale-label-large-emphasized-weight, 600);
+  font-variant-numeric: tabular-nums;
+  color: var(--k3-sys-color-primary);
 }
-.icons-axes-controls {
+/*
+ * Grid system demos — `.demo-frame.grid-demo-frame` (NOT `--cases`: that
+ * forces flex on children and kills `.k3-layout-grid`).
+ *
+ * Same breakout recipe as `.demo-frame--cases`: cancel `.main` full-gap,
+ * then re-pad with full-gap so inner `.k3-layout-grid` tracks match the
+ * overlay columns exactly (margin edge + gutters).
+ */
+.grid-demo-frame {
+  display: block;
+  overflow: visible;
+  margin-inline: calc(-1 * var(--k3-layout-full-gap, 1.25rem));
+  width: calc(100% + 2 * var(--k3-layout-full-gap, 1.25rem));
+  max-width: none;
+  padding-inline: var(--k3-layout-full-gap, 1.25rem);
+  padding-block: var(--k3-sys-spacing-space300, 1.5rem);
+  box-sizing: border-box;
+}
+.grid-demo-frame > .k3-layout-grid,
+.grid-demo-frame .grid-demo.k3-layout-grid {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+/* Caption sits on the same inset as the grid (inside full-gap pad). */
+.grid-demo-frame > .grid-demo-caption {
   margin-inline: 0;
+}
+.grid-demo {
+  width: 100%;
+  min-width: 0;
+}
+.grid-demo-caption {
+  margin: 0 0 var(--k3-sys-spacing-space100, 0.5rem);
+  font: var(--k3-sys-typescale-label-medium-weight, 500)
+    var(--k3-sys-typescale-label-medium-size, 0.75rem) /
+    var(--k3-sys-typescale-label-medium-line-height, 1rem) ui-monospace, monospace;
+  color: var(--k3-sys-color-on-surface-variant);
+}
+.grid-cell {
+  display: grid;
+  place-items: center;
+  min-block-size: 2.75rem;
+  padding: var(--k3-sys-spacing-space100, 0.5rem) var(--k3-sys-spacing-space150, 0.75rem);
+  border-radius: var(--k3-sys-shape-corner-small, 0.5rem);
+  background: var(--k3-sys-color-primary-container);
+  color: var(--k3-sys-color-on-primary-container);
+  font: var(--k3-sys-typescale-label-medium-weight, 500)
+    var(--k3-sys-typescale-label-medium-size, 0.75rem) /
+    var(--k3-sys-typescale-label-medium-line-height, 1rem) ui-monospace, monospace;
+  text-align: center;
+  box-sizing: border-box;
+}
+.grid-cell--accent {
+  background: var(--k3-sys-color-primary);
+  color: var(--k3-sys-color-on-primary);
+}
+.grid-cell--muted {
+  background: var(--k3-sys-color-surface-container-highest);
+  color: var(--k3-sys-color-on-surface-variant);
+}
+.grid-bp-table-wrap {
+  overflow-x: auto;
+  --k3-scroll-track-inset: var(--k3-sys-shape-corner-medium, 0.75rem);
+  border-radius: var(--k3-sys-shape-corner-medium, 0.75rem);
+  background: var(--k3-sys-color-surface-container-lowest, #fff);
+}
+.grid-bp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--k3-sys-typescale-body-small-weight, 400)
+    var(--k3-sys-typescale-body-small-size, 0.75rem) /
+    var(--k3-sys-typescale-body-small-line-height, 1rem)
+    var(--k3-ref-typeface-plain, inherit);
+  color: var(--k3-sys-color-on-surface);
+}
+.grid-bp-table th,
+.grid-bp-table td {
+  padding: var(--k3-sys-spacing-space150, 0.75rem) var(--k3-sys-spacing-space200, 0.75rem);
+  text-align: start;
+  border-bottom: 1px solid var(--k3-sys-color-outline-variant);
+  white-space: nowrap;
+}
+.grid-bp-table thead th {
+  font: var(--k3-sys-typescale-label-medium-weight, 500)
+    var(--k3-sys-typescale-label-medium-size, 0.75rem) /
+    var(--k3-sys-typescale-label-medium-line-height, 1rem)
+    var(--k3-ref-typeface-plain, inherit);
+  color: var(--k3-sys-color-on-surface-variant);
+  background: var(--k3-sys-color-surface-container);
+}
+.grid-bp-table tbody th {
+  font-weight: var(--k3-sys-typescale-label-large-weight, 500);
+  font-family: ui-monospace, monospace;
+  color: var(--k3-sys-color-primary);
+}
+.grid-bp-table tbody tr:last-child th,
+.grid-bp-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Styles → Typography playground (roles × default/emphasized + attrs) */
+.type-playground {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space400, 2rem);
+}
+.type-family {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space200, 0.75rem);
+}
+.type-family__title {
+  margin: 0;
+  font: var(--k3-sys-typescale-title-small-weight, 500)
+    var(--k3-sys-typescale-title-small-size, 0.875rem) /
+    var(--k3-sys-typescale-title-small-line-height, 1.25rem)
+    var(--k3-ref-typeface-plain, inherit);
+  letter-spacing: var(--k3-sys-typescale-title-small-tracking, 0.00625rem);
+  color: var(--k3-sys-color-on-surface-variant);
+  text-transform: capitalize;
+}
+.type-role {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space150, 0.75rem);
+  padding: var(--k3-sys-spacing-space300, 1.5rem);
+  border-radius: var(--k3-sys-shape-corner-large, 1rem);
+  background: var(--k3-sys-color-surface-container-lowest, #fff);
+  color: var(--k3-sys-color-on-surface);
+  box-sizing: border-box;
+}
+.type-role__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--k3-sys-spacing-space100, 0.5rem);
+}
+.type-role__name {
+  font: var(--k3-sys-typescale-label-large-weight, 500)
+    var(--k3-sys-typescale-label-large-size, 0.875rem) /
+    var(--k3-sys-typescale-label-large-line-height, 1.25rem)
+    var(--k3-ref-typeface-plain, inherit);
+  color: var(--k3-sys-color-on-surface-variant);
+}
+.type-role__variants {
+  align-items: start;
+}
+.type-variant {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space100, 0.5rem);
+  min-width: 0;
+}
+.type-variant__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space50, 0.25rem);
+  font: var(--k3-sys-typescale-label-small-weight, 500)
+    var(--k3-sys-typescale-label-small-size, 0.6875rem) /
+    var(--k3-sys-typescale-label-small-line-height, 1rem) ui-monospace, monospace;
+  color: var(--k3-sys-color-primary);
+}
+.type-variant__sample {
+  margin: 0;
+  color: var(--k3-sys-color-on-surface);
+  overflow-wrap: anywhere;
+}
+.type-variant__attrs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--k3-sys-spacing-space50, 0.25rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.type-variant__attr {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25em;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--k3-sys-shape-corner-full, 9999px);
+  background: var(--k3-sys-color-surface-container);
+  font: var(--k3-sys-typescale-label-small-weight, 500)
+    var(--k3-sys-typescale-label-small-size, 0.6875rem) /
+    var(--k3-sys-typescale-label-small-line-height, 1rem) ui-monospace, monospace;
+  color: var(--k3-sys-color-on-surface-variant);
+}
+.type-variant__attr-key {
+  color: var(--k3-sys-color-outline);
+}
+.type-variant--empty {
+  justify-content: center;
+  min-block-size: 3rem;
+  padding: var(--k3-sys-spacing-space200, 0.75rem);
+  border-radius: var(--k3-sys-shape-corner-medium, 0.75rem);
+  background: var(--k3-sys-color-surface-container);
+  color: var(--k3-sys-color-on-surface-variant);
+  font: var(--k3-sys-typescale-body-small-weight, 400)
+    var(--k3-sys-typescale-body-small-size, 0.75rem) /
+    var(--k3-sys-typescale-body-small-line-height, 1rem)
+    var(--k3-ref-typeface-plain, inherit);
+}
+
+/* Styles → Motion visual playground (spatial + effects presets) */
+.demo-case-stage--motion {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: var(--k3-sys-spacing-space200, 0.75rem);
+  overflow: visible;
+  width: 100%;
+  box-sizing: border-box;
+}
+.motion-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space200, 0.75rem);
+  inline-size: 100%;
+  margin: 0;
+  padding: var(--k3-sys-spacing-space300, 1.5rem);
+  border: none;
+  border-radius: var(--k3-sys-shape-corner-large, 1rem);
+  background: var(--k3-sys-color-surface-container-lowest, #fff);
+  color: var(--k3-sys-color-on-surface);
+  box-shadow: var(--k3-sys-elevation-level1);
+  box-sizing: border-box;
+  text-align: start;
+  cursor: pointer;
+  font: inherit;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.motion-card:focus-visible {
+  outline: 2px solid var(--k3-sys-color-secondary);
+  outline-offset: 2px;
+}
+.motion-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--k3-sys-spacing-space100, 0.5rem);
+}
+.motion-card__title {
+  font: var(--k3-sys-typescale-title-small-weight, 500)
+    var(--k3-sys-typescale-title-small-size, 0.875rem) /
+    var(--k3-sys-typescale-title-small-line-height, 1.25rem)
+    var(--k3-ref-typeface-brand, inherit);
+}
+.motion-card__ms {
+  font: var(--k3-sys-typescale-label-medium-weight, 500)
+    var(--k3-sys-typescale-label-medium-size, 0.75rem) /
+    var(--k3-sys-typescale-label-medium-line-height, 1rem) ui-monospace, monospace;
+  color: var(--k3-sys-color-primary);
+}
+.motion-card__plot {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 7.5rem;
+  border-radius: var(--k3-sys-shape-corner-small, 0.5rem);
+  background: var(--k3-sys-color-surface-container);
+  overflow: hidden;
+}
+.motion-card__curve {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.motion-card__curve-grid {
+  fill: none;
+  stroke: var(--k3-sys-color-outline-variant);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.55;
+}
+.motion-card__curve-path {
+  fill: none;
+  stroke: var(--k3-sys-color-primary);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+/* HTML bead — perfect CSS circle (never follows SVG stretch) */
+.motion-card__bead {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 1.125rem; /* 18px — readable against the curve stroke */
+  height: 1.125rem;
+  z-index: 1;
+  aspect-ratio: 1 / 1;
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--k3-sys-color-surface-container-lowest, #fff);
+  border-radius: 50%;
+  background: var(--k3-sys-color-primary);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: left, top;
+}
+.motion-card__token {
+  font: var(--k3-sys-typescale-label-small-weight, 500)
+    var(--k3-sys-typescale-label-small-size, 0.6875rem) /
+    var(--k3-sys-typescale-label-small-line-height, 1rem) ui-monospace, monospace;
+  color: var(--k3-sys-color-on-surface-variant);
 }
 
 .ms-icon-loading,
