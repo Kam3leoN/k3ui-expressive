@@ -262,7 +262,7 @@ export class K3Fab extends K3Element {
   }
 
   override render() {
-    const name = this.ariaLabel || this.getAttribute('aria-label') || undefined;
+    const name = this.forwardedAria('aria-label') || this.ariaLabel || undefined;
     return html`
       <button
         part="container"
@@ -276,6 +276,9 @@ export class K3Fab extends K3Element {
         ?disabled=${this.disabled}
         type="button"
         aria-label=${name ?? nothing}
+        aria-expanded=${this.forwardedAria('aria-expanded') ?? nothing}
+        aria-haspopup=${this.forwardedAria('aria-haspopup') ?? nothing}
+        aria-controls=${this.forwardedAria('aria-controls') ?? nothing}
         @pointerdown=${() => {
           if (this.disabled) return;
           this.setAttribute('data-pressed', '');

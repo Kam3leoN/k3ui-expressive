@@ -39,13 +39,13 @@ describe('k3-alert', () => {
     );
     expect(el.variant).toBe('error');
     expect(el.shape).toBe('square');
-    const aside = el.shadowRoot!.querySelector('aside.base')!;
+    const aside = el.shadowRoot!.querySelector('.base')!;
     expect(aside.getAttribute('role')).toBe('alert');
   });
 
   it('uses status role for non-critical variants', async () => {
     const el = await mount(`<k3-alert variant="info" label="Info">Hi</k3-alert>`);
-    const aside = el.shadowRoot!.querySelector('aside.base')!;
+    const aside = el.shadowRoot!.querySelector('.base')!;
     expect(aside.getAttribute('role')).toBe('status');
   });
 

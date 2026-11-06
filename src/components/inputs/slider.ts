@@ -1095,6 +1095,8 @@ export class K3Slider extends K3Element {
       showIcon && !this.range && !this.centered && activePx < iconNeedPx;
     const endStop = this.endStopPct();
     const label = this.label.trim();
+    /* Accessible name of the handles: `label`, else the host's aria-label (not shown) */
+    const a11yName = label || this.forwardedAria('aria-label') || '';
     /* Sticky: active → leading edge · inactive → just past handle (not far end). */
     const iconEdgeKey = this.minAtTop ? 'top' : 'bottom';
     const iconPosStyle = !showIcon
@@ -1255,7 +1257,7 @@ export class K3Slider extends K3Element {
                     aria-valuenow=${Math.round(this.valueStart)}
                     aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
                     aria-disabled=${this.disabled ? 'true' : 'false'}
-                    aria-label=${label || i18n.t('slider.minimum', 'Minimum')}
+                    aria-label=${a11yName || i18n.t('slider.minimum', 'Minimum')}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'start')}
                   >
                     <span class="thumb" part="thumb" aria-hidden="true"></span>
@@ -1277,7 +1279,7 @@ export class K3Slider extends K3Element {
                     aria-valuenow=${Math.round(this.valueEnd)}
                     aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
                     aria-disabled=${this.disabled ? 'true' : 'false'}
-                    aria-label=${label || i18n.t('slider.maximum', 'Maximum')}
+                    aria-label=${a11yName || i18n.t('slider.maximum', 'Maximum')}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'end')}
                   >
                     <span class="thumb" part="thumb" aria-hidden="true"></span>
@@ -1301,7 +1303,7 @@ export class K3Slider extends K3Element {
                     aria-valuenow=${ariaNow}
                     aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
                     aria-disabled=${this.disabled ? 'true' : 'false'}
-                    aria-label=${label || nothing}
+                    aria-label=${a11yName || nothing}
                     @keydown=${(e: KeyboardEvent) => this.onHandleKey(e, 'value')}
                   >
                     <span class="thumb" part="thumb" aria-hidden="true"></span>

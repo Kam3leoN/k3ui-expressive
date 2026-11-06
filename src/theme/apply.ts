@@ -15,6 +15,7 @@ import {
   type DynamicColor,
 } from '@material/material-color-utilities';
 import { debug } from '../debug/logger.js';
+import { yieldToMain } from '../core/yield.js';
 import { COLOR_ROLES, type ColorRoleKey } from './roles.js';
 import { buildSemanticCssVars } from './semantic.js';
 import { sysColorCssVars, applyMotionSchemeVars } from './css-vars.js';
@@ -218,6 +219,42 @@ function buildScheme(
   }
 }
 
+type SchemeArgs = [seed: string, dark: boolean, variant: ColorVariant, contrast: ContrastLevel, spec: ColorSpecVersion];
+
+/** Recently computed schemes — re-applying a theme (or a prepared one) is free. */
+const schemeCache = new Map<string, Record<string, string>>();
+const SCHEME_CACHE_MAX = 8;
+
+function cacheScheme(key: string, vars: Record<string, string>): Record<string, string> {
+  schemeCache.delete(key);
+  schemeCache.set(key, vars);
+  if (schemeCache.size > SCHEME_CACHE_MAX) schemeCache.delete(schemeCache.keys().next().value!);
+  return vars;
+}
+
+/**
+ * Computes the scheme role by role. `pause` (async callers) runs between
+ * batches so a first, cold computation never becomes one long task.
+ */
+function* schemeVarsSteps(...[seed, dark, variant, contrast, spec]: SchemeArgs): Generator<void, Record<string, string>> {
+  const scheme = buildScheme(seed, dark, variant, contrast, spec);
+  yield;
+  const vars: Record<string, string> = {};
+  const colors = MaterialDynamicColors as unknown as Record<string, DynamicColor | undefined>;
+  let n = 0;
+  for (const key of [...COLOR_ROLES, ...COLOR_KEY_ROLES]) {
+    const dc = colors[key];
+    if (!dc) continue;
+    const hex = hexFromArgb(dc.getArgb(scheme));
+    Object.assign(vars, sysColorCssVars(key, hex));
+    if (++n % 4 === 0) yield;
+  }
+  yield;
+  /* Extended semantics — same tone recipe as Error, fixed hue anchors */
+  Object.assign(vars, buildSemanticCssVars(dark));
+  return vars;
+}
+
 function schemeToCssVars(
   seed: string,
   dark: boolean,
@@ -225,19 +262,26 @@ function schemeToCssVars(
   contrast: ContrastLevel,
   spec: ColorSpecVersion = DEFAULT_COLOR_SPEC,
 ): Record<string, string> {
-  const scheme = buildScheme(seed, dark, variant, contrast, spec);
-  const vars: Record<string, string> = {};
+  const args: SchemeArgs = [seed, dark, variant, contrast, spec];
+  const key = args.join('|');
+  const hit = schemeCache.get(key);
+  if (hit) return hit;
+  const steps = schemeVarsSteps(...args);
+  let r = steps.next();
+  while (!r.done) r = steps.next();
+  return cacheScheme(key, r.value);
+}
 
-  const colors = MaterialDynamicColors as unknown as Record<string, DynamicColor | undefined>;
-  for (const key of [...COLOR_ROLES, ...COLOR_KEY_ROLES]) {
-    const dc = colors[key];
-    if (!dc) continue;
-    const hex = hexFromArgb(dc.getArgb(scheme));
-    Object.assign(vars, sysColorCssVars(key, hex));
-  }
-  /* Extended semantics — same tone recipe as Error, fixed hue anchors */
-  Object.assign(vars, buildSemanticCssVars(dark));
-  return vars;
+async function schemeToCssVarsAsync(args: SchemeArgs, pause: () => Promise<void>): Promise<void> {
+  const key = args.join('|');
+  if (schemeCache.has(key)) return;
+  const steps = schemeVarsSteps(...args);
+  let r: IteratorResult<void, Record<string, string>>;
+  do {
+    await pause();
+    r = steps.next();
+  } while (!r.done);
+  cacheScheme(key, r.value);
 }
 
 /**
@@ -254,13 +298,13 @@ export function themeCssVars(
     specVersion?: ColorSpecVersion;
   } = {},
 ): Record<string, string> {
-  return schemeToCssVars(
+  return { ...schemeToCssVars(
     options.seed ?? '#6750A4',
     options.dark ?? false,
     options.variant ?? 'expressive',
     options.contrast ?? 'default',
     options.specVersion ?? DEFAULT_COLOR_SPEC,
-  );
+  ) };
 }
 
 /** Per-target live listeners (OS colour / contrast changes, `auto` clock). */
@@ -360,6 +404,32 @@ export const themeApi = {
         'theme',
         `seed=${seed} mode=${mode}→${resolved} motion=${motion} variant=${variant} contrast=${contrast}`,
       );
+    } catch (err) {
+      debug.error('theme', err);
+    }
+  },
+
+  /**
+   * Compute the scheme `apply(options)` would write, in short slices between
+   * which `pause()` runs (default: `yieldToMain`). The following `apply()` with
+   * the same options reuses it — no long task on a cold start (`K3UI.init()`).
+   */
+  async prepare(
+    options: ThemeOptions = {},
+    pause: () => Promise<void> = yieldToMain,
+  ): Promise<void> {
+    const { target: _target, ...rest } = options;
+    const merged: ThemeOptions = { ...lastOptions, ...rest };
+    const contrast = resolveContrast(merged.contrast ?? 'default');
+    const args: SchemeArgs = [
+      merged.seed ?? '#6750A4',
+      resolveMode(merged.mode ?? 'auto') === 'dark',
+      merged.variant ?? 'expressive',
+      contrast,
+      merged.specVersion ?? DEFAULT_COLOR_SPEC,
+    ];
+    try {
+      await schemeToCssVarsAsync(args, pause);
     } catch (err) {
       debug.error('theme', err);
     }

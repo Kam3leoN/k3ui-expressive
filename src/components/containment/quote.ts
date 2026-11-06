@@ -40,7 +40,7 @@ const tiltConverter = {
  * not clash with the ARIA `role` IDL. ARIA `figure` lives on the inner `.wrap`.
  *
  * ```html
- * <k3-quote author="Rodrigo" role="Python educator" layout="author-start" tilt>
+ * <k3-quote author="Rodrigo" job-title="Python educator" layout="author-start" tilt>
  *   <k3-avatar slot="avatar" initials="R"></k3-avatar>
  *   I've been presenting my talks with …
  *   <a slot="action" href="#">Read more</a>
@@ -56,10 +56,15 @@ export class K3Quote extends K3Element {
 
   /**
    * Job title / subtitle (or use `slot="role"`).
-   * Reflected as attribute `role` to match the public HTML API.
+   * Legacy attribute `role` — prefer `job-title`: a `role` attribute on the
+   * host is read by assistive tech as an (invalid) ARIA role.
    */
   @property({ attribute: 'role' })
   job = '';
+
+  /** Job title / subtitle — attribute `job-title` (wins over the legacy `role`). */
+  @property({ attribute: 'job-title' })
+  jobTitle = '';
 
   /**
    * Column order: `author-start` (avatar left) or `author-end` (avatar right).
@@ -98,6 +103,7 @@ export class K3Quote extends K3Element {
   /** @param job - Subtitle / job title */
   setRole(job: string): void {
     this.job = job;
+    if (this.jobTitle) this.jobTitle = job;
   }
 
   /** @param layout - author-start | author-end */
@@ -147,7 +153,7 @@ export class K3Quote extends K3Element {
 
   override render() {
     const authorFallback = this.author.trim();
-    const jobFallback = this.job.trim();
+    const jobFallback = (this.jobTitle || this.job).trim();
     const showName = this.hasAuthorSlot || !!authorFallback;
     const showJob = this.hasRoleSlot || !!jobFallback;
 

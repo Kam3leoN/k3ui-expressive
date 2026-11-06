@@ -162,22 +162,6 @@ export class K3List extends K3Element {
 
       if (this.dismissible && !item.dismissible) item.dismissible = true;
     });
-
-    /* Role on host */
-    if (
-      this.selection === 'single' ||
-      this.selection === 'multiple' ||
-      this.selection === 'switch'
-    ) {
-      this.setAttribute('role', 'listbox');
-      this.setAttribute(
-        'aria-multiselectable',
-        this.selection === 'single' ? 'false' : 'true',
-      );
-    } else {
-      this.setAttribute('role', 'list');
-      this.removeAttribute('aria-multiselectable');
-    }
   }
 
   /** Mark expand-slot nested lists as embedded (radii inherit via CSS vars). */
@@ -460,13 +444,20 @@ export class K3List extends K3Element {
     const canUp = idx > 0;
     const canDown = idx >= 0 && idx < list.length - 1;
     const canDismiss = !!(this.dismissible || this.menuItem?.dismissible);
+    /*
+     * The list role lives on this container — not on the host — so the
+     * row-actions menu rendered beside it is not an (invalid) child of the list.
+     */
+    const selectable =
+      this.selection === 'single' || this.selection === 'multiple' || this.selection === 'switch';
 
     return html`
       <div
         class="list k3-scroll"
         part="container"
-        role=${this.selection !== 'none' ? 'presentation' : 'presentation'}
-        aria-label=${this.label || nothing}
+        role=${selectable ? 'listbox' : 'list'}
+        aria-multiselectable=${selectable ? (this.selection === 'single' ? 'false' : 'true') : nothing}
+        aria-label=${this.forwardedAria('aria-label') || this.label || nothing}
       >
         <slot @slotchange=${this.onSlotChange}></slot>
       </div>

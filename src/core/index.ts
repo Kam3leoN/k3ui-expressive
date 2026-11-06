@@ -28,6 +28,7 @@ export {
 } from './lifecycle.js';
 export { FocusTrap, tabbableElements } from './focus-trap.js';
 export { overlayStack, type OverlayEntry } from './overlay-stack.js';
+export { yieldToMain } from './yield.js';
 export {
   annotateFocusNavResult,
   buildFocusNavLoop,

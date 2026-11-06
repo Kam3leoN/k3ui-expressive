@@ -164,6 +164,10 @@ $label-fade-from: 0.55; // label starts appearing past 55 % of large size
   font-weight: var(--k3-sys-typescale-title-medium-weight);
   letter-spacing: var(--k3-sys-typescale-title-medium-tracking);
   background: linear-gradient(to top, rgb(0 0 0 / 0.55), transparent);
+  /* Legible on bright images too (the scrim fades out toward the top) */
+  text-shadow:
+    0 0 1px #000,
+    0 1px 3px rgb(0 0 0 / 0.9);
   opacity: clamp(
     0,
     calc((var(--_k3-ci-progress, 1) - #{$label-fade-from}) / #{1 - $label-fade-from}),

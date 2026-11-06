@@ -231,6 +231,27 @@ k3-doc-nav {
   margin-top: 2.5rem;
   box-sizing: border-box;
 }
+/* Footer prev/next nav appears with its upgrade — no empty box that later grows (CLS). */
+k3-doc-nav:not(:defined) {
+  display: none;
+}
+
+/*
+ * Deep link (#/dialog…) on first load: show the page-loading veil instead of
+ * flashing the home page until the app opens the requested page (CLS / LCP).
+ * The inline script in index.html sets the flag; app.ts clears it.
+ */
+html[data-k3-deeplink] #page-home,
+html[data-k3-deeplink] #doc-nav {
+  display: none;
+}
+/* Same cascade layer as Tailwind's `[hidden] { display: none !important }` (base),
+   where the more specific selector wins. */
+@layer base {
+  html[data-k3-deeplink] .doc-page-loading[hidden] {
+    display: flex !important;
+  }
+}
 
 /* Adaptive shell — rail (≥600) + content | bar (&lt;600); secondary nav = M3E menu */
 .app {
@@ -247,6 +268,12 @@ k3-doc-nav {
  */
 :not(:defined) {
   visibility: hidden;
+}
+
+/* Closed overlay surfaces: their light DOM is never in flow — skip its layout until upgrade. */
+k3-sheet:not(:defined):not([open]),
+k3-dialog:not(:defined):not([open]) {
+  display: none;
 }
 
 /* Reserve the upgraded size of shell chrome so booting never shifts content (CLS). */
@@ -1348,6 +1375,7 @@ k3-avatar [slot='badge'].ms {
   max-width: 100%;
   box-sizing: border-box;
 }
+
 .catalog-cat-title {
   margin: 0 0 0.75rem;
   font-size: var(--k3-sys-typescale-title-medium-size);
@@ -2321,7 +2349,6 @@ k3-avatar [slot='badge'].ms {
 .color-role-hex,
 .color-role-var {
   font-size: 0.625rem;
-  opacity: 0.85;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2334,10 +2361,8 @@ k3-avatar [slot='badge'].ms {
   font-size: 0.5625rem;
   font-weight: 600;
   line-height: 1.2;
-  background: color-mix(in srgb, currentColor 16%, transparent);
-}
-.color-contrast.is-large {
-  opacity: 0.9;
+  /* Outline, not a tint: the badge text keeps the full role-pair contrast */
+  box-shadow: inset 0 0 0 1px currentColor;
 }
 .color-contrast.is-fail {
   background: color-mix(in srgb, #ff1744 35%, transparent);
@@ -2347,6 +2372,7 @@ k3-avatar [slot='badge'].ms {
   flex-direction: column;
   gap: 1.5rem;
 }
+.color-palette-block h2,
 .color-palette-block h3 {
   margin: 0 0 0.5rem;
   font-size: var(--k3-sys-typescale-title-small-size);

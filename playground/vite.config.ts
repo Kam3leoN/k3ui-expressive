@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { build as esbuild } from 'esbuild';
+import { catalogGridHtml } from './catalog.js';
 import {
   DEFAULT_THEME,
   THEME_CACHE_KEY,
@@ -107,6 +109,50 @@ function prerenderI18n(html: string): string {
   );
 }
 
+/** Home catalog cards in the default locale — same markup the app builds. */
+function prerenderCatalog(html: string): string {
+  const dict = (loc: string): Record<string, string> =>
+    JSON.parse(readFileSync(resolve(__dirname, `../src/i18n/locales/${loc}.json`), 'utf8')) as Record<
+      string,
+      string
+    >;
+  const main = dict(DEFAULT_LOCALE);
+  const en = dict('en');
+  /* Same lookup order as i18n.t(): locale → English → key */
+  const t = (key: string): string =>
+    (Object.hasOwn(main, key) ? main[key] : Object.hasOwn(en, key) ? en[key] : key) ?? key;
+  return html.replace(
+    '<div id="catalog-grid" class="catalog-grid"></div>',
+    `<div id="catalog-grid" class="catalog-grid" data-prerendered="${DEFAULT_LOCALE}">${catalogGridHtml(t, '', t('playground.search.placeholder'))}</div>`,
+  );
+}
+
+/*
+ * Every doc page except the active one (home) leaves index.html: the bodies go
+ * to a JSON file (`{ pageId: html }`) the app fetches after first paint and
+ * stamps one page per task. The first frame only downloads, parses, styles and
+ * upgrades the shell + home (HTML ≈ 490 kB → ≈ 90 kB). Empty `<article>`s stay
+ * as anchors, so routing and `data-page` lookups are unchanged.
+ */
+const PAGES_META = 'k3-doc-pages';
+let deferredPages: { json: string; url: string } | null = null;
+
+function deferInactivePages(html: string, build: boolean): string {
+  const pages: Record<string, string> = {};
+  const out = html.replace(
+    /(<article class="comp-page"(?![^>]*\bis-active\b)[^>]*\bdata-page="([^"]+)"[^>]*>)([\s\S]*?)(<\/article>)/g,
+    (_m, open: string, id: string, body: string, close: string) => {
+      pages[id] = body;
+      return `${open}${close}`;
+    },
+  );
+  const json = JSON.stringify(pages);
+  const hash = createHash('sha256').update(json).digest('hex').slice(0, 10);
+  const url = build ? `/assets/doc-pages-${hash}.json` : '/@k3-doc-pages.json';
+  deferredPages = { json, url };
+  return out.replace('</head>', `    <meta name="${PAGES_META}" content="${url}" />\n  </head>`);
+}
+
 export default defineConfig({
   root: resolve(__dirname),
   publicDir: resolve(__dirname, 'public'),
@@ -114,12 +160,28 @@ export default defineConfig({
     tailwindcss(),
     {
       name: 'k3-lh-html',
+      configureServer(server) {
+        /* Dev: serve the page bodies extracted by the last index.html transform */
+        server.middlewares.use('/@k3-doc-pages.json', (_req, res) => {
+          res.setHeader('Content-Type', 'application/json');
+          res.end(deferredPages?.json ?? '{}');
+        });
+      },
+      writeBundle(options) {
+        if (!deferredPages || !options.dir) return;
+        const file = resolve(options.dir, deferredPages.url.replace(/^\//, ''));
+        mkdirSync(resolve(file, '..'), { recursive: true });
+        writeFileSync(file, deferredPages.json);
+      },
       transformIndexHtml: {
         order: 'post',
         async handler(html, ctx) {
           const bundle = ctx.bundle;
-          if (!bundle) return html;
-          let out = compactHtml(prerenderI18n(html)).replace('</head>', `${await prepaintTheme()}  </head>`);
+          if (!bundle) return deferInactivePages(html, false);
+          let out = deferInactivePages(compactHtml(prerenderCatalog(prerenderI18n(html))), true).replace(
+            '</head>',
+            `${await prepaintTheme()}  </head>`,
+          );
           const font = Object.keys(bundle).find((k) =>
             k.includes('google-sans-latin-400-normal'),
           );

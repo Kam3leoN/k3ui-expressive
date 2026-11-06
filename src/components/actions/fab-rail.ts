@@ -529,6 +529,7 @@ export class K3FabRail extends K3Element {
             variant="primary"
             ?round=${expanded}
             ?disabled=${this.disabled}
+            aria-label=${this.getAttribute('aria-label') || i18n.t('fabMenu.toggle', 'Menu')}
             aria-expanded=${String(this.menuOpen)}
             aria-haspopup="menu"
             @k3-click=${this.toggle}

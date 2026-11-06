@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Lighthouse — playground (see `docs/LIGHTHOUSE_2026-11.md`)
+
+- Playground home: desktop **100 / 100 / 100 / 100** (was 95 perf); mobile perf 68 → 88–96 (TBT 1 900 → 210–470 ms, LCP 2.1 → 1.5 s, SI 4.3 → 1.6 s), A11y / BP / SEO 100. Deep-linked pages 85–91 → 94–98, all A11y 100
+- `index.html` ships the shell + home only (490 → 70 kB); other pages go to `assets/doc-pages-<hash>.json`, stamped after first paint in short tasks; catalog grid prerendered at build; app requested after the static LCP; deep links show the loading veil (no flash of home, CLS 1.3 → 0); holo-effects CSS loads with its page
+- Accessibility (library): host `aria-label` / `aria-expanded` / `aria-haspopup` / `aria-controls` now reach the inner `<button>` of `k3-button`, `k3-fab`, `k3-icon-button` (unnamed icon buttons); `k3-slider` names its handles from the host `aria-label`; `k3-fab-dial` / `k3-fab-rail` triggers named; `k3-text-field` inner control named by its label; `k3-select` items are `option`s; `k3-list` role + name on its item container, selection indicator `inert`; `k3-mood-calendar` grid rows / cells, years `group`; `k3-alert` status container is a `div`; `k3-text-bounce` readable text without `aria-label` on `<p>`; `k3-quote` `job-title` attribute (`role` kept); carousel label text-shadow
+- Performance (library): `k3-button-group` no forced layout on first render; `k3-fab-menu` no style read while closed; `k3-scroll-to-top` one scroll read per frame; nav rail / bar selection without forced `offsetWidth`; `k3-loading-indicator` starts its cycle only once visible; `K3UI.init()` slices the cold colour-scheme computation (`theme.prepare()`, scheme cache) and yields between steps — `yieldToMain()` (scheduler.yield / MessageChannel, works with fake timers)
+- Tests: 11 unit tests (ARIA forwarding, roles, names, fake-timer init) and e2e `playground-load.spec.ts` (deep link veil, CLS, stamped pages). `tests/unit/alert.test.ts` queries `.base` instead of `aside.base` (internal element changed)
+
 ### Fixed — audit 2026-11 (see `docs/AUDIT_2026-11.md`)
 
 - **Dialog / modal sheet keyboard access**: focus now moves into the panel on open, Tab / Shift+Tab cycle through shadow *and* slotted controls, Escape returns focus to the trigger. `FocusTrap` walks the composed tree (it only saw the shadow panel, so Tab left the modal). Closed panels are `inert` (their controls were reachable with Tab) and the panel is named by its headline (`aria-labelledby`)

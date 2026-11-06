@@ -18,6 +18,7 @@ import { gestures, defineGestureElements } from '../core/gestures/index.js';
 import { keyboard } from '../core/keyboard.js';
 import { mouse } from '../core/mouse.js';
 import { overlayStack } from '../core/overlay-stack.js';
+import { yieldToMain } from '../core/yield.js';
 import { watchIconLigatures } from '../icons/ligature.js';
 import { showSnackbar, snackbarQueue } from '../components/feedback/snackbar-queue.js';
 // Styles are imported from src/index.ts / playground — keep runtime free of CSS side-effects.
@@ -176,6 +177,7 @@ function mergeDeep<T extends Record<string, unknown>>(base: T, patch: Record<str
 
 /* ── Bootstrap ────────────────────────────────────────────────────────── */
 
+
 let initialized = false;
 let lastOptions: InitOptions = {};
 /** Serializes `init()` calls — the auto-bootstrap and an app call often overlap. */
@@ -218,11 +220,16 @@ async function runInit(input?: InitOptions): Promise<K3UIGlobal> {
    * resets a theme set with `K3UI.theme.apply()`.
    */
   if (!initialized || patch.theme) {
-    themeApi.apply({ ...(initialized ? patch.theme : opts.theme) } as ThemeOptions);
+    const theme = { ...(initialized ? patch.theme : opts.theme) } as ThemeOptions;
+    /* Cold MCU computation in slices, then a synchronous (cached) write. */
+    await themeApi.prepare(theme, yieldToMain);
+    themeApi.apply(theme);
   }
 
   if (patch.overlays?.scrollLock !== undefined) overlayStack.setScrollLock(patch.overlays.scrollLock);
 
+  /* Let the browser breathe between the colour scheme and the component upgrades. */
+  await yieldToMain();
   await registry.registerAll(patch.components ?? (initialized ? [] : 'all'));
 
   if (patch.haptic !== undefined) {

@@ -120,16 +120,16 @@ export class K3LoadingIndicator extends K3Element {
   private timer = 0;
   private morphStart = 0;
   private reduced = false;
-  /** On screen and tab visible — the morph cycle only runs then. */
-  private active = true;
+  /** On screen and tab visible — the morph cycle only starts once that is known. */
+  private active = false;
   private unobserve: (() => void) | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.reduced = prefersReducedMotion();
-    this.active = true;
+    this.active = false;
+    /* First report starts the cycle — hidden / off-screen instances never morph. */
     this.unobserve = observeActiveVisibility(this, this.onActiveChange);
-    this.scheduleNext();
   }
 
   override disconnectedCallback(): void {
@@ -141,7 +141,10 @@ export class K3LoadingIndicator extends K3Element {
 
   /** Off-screen / hidden tab: freeze the spin and the morph cycle (no CPU, no events). */
   private onActiveChange = (active: boolean): void => {
-    if (active === this.active) return;
+    if (active === this.active) {
+      if (!active) this.toggleAttribute('data-paused', true);
+      return;
+    }
     this.active = active;
     this.toggleAttribute('data-paused', !active);
     if (active) this.scheduleNext();

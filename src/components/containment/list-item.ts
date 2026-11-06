@@ -437,16 +437,16 @@ export class K3ListItem extends K3Element {
     const show = this.showSelIndicator;
     if (!show) return nothing;
     if (this.selection === 'multiple') {
-      return html`<span class="sel-indicator has" part="selection-indicator" aria-hidden="true">
+      return html`<span class="sel-indicator has" part="selection-indicator" aria-hidden="true" inert>
         <k3-checkbox ?checked=${this.selected} tabindex="-1"></k3-checkbox>
       </span>`;
     }
     if (this.selection === 'switch') {
-      return html`<span class="sel-indicator has" part="selection-indicator" aria-hidden="true">
+      return html`<span class="sel-indicator has" part="selection-indicator" aria-hidden="true" inert>
         <k3-switch ?selected=${this.selected} tabindex="-1"></k3-switch>
       </span>`;
     }
-    return html`<span class="sel-indicator has" part="selection-indicator" aria-hidden="true">
+    return html`<span class="sel-indicator has" part="selection-indicator" aria-hidden="true" inert>
       <k3-radio ?checked=${this.selected} tabindex="-1"></k3-radio>
     </span>`;
   }

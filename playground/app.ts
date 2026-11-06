@@ -2,6 +2,8 @@
 import { init } from '../src/bootstrap/init.js';
 import type { ColorSpecVersion } from '../src/theme/apply.js';
 import { registry } from '../src/registry/register.js';
+import { yieldToMain } from '../src/core/yield.js';
+import { catalog as COMPONENT_CATALOG } from '../src/registry/catalog.js';
 import { buildDynamicPalettes } from '../src/theme/palettes.js';
 import {
   COLOR_ROLE_GROUPS,
@@ -34,7 +36,7 @@ import {
   TYPE_FAMILIES,
 } from '../src/tokens/meta.js';
 import {
-  componentsByCategory,
+  catalogGridHtml,
   componentsInCategory,
   orderedComponents,
   neighborComponents,
@@ -1400,6 +1402,7 @@ function fillNavMenu(destId?: string | null): {
   const menu = shellNavMenu();
   const openDest = resolveSecondaryDest(destId);
   const pageId = currentPageId();
+  builtNavMenuKey = navMenuKey(destId);
   const pageDest = destinationForPage(pageId, (id) => findComponent(id)?.category);
   const selectCurrent = pageDest?.id === openDest.id;
   const pageCat =
@@ -1561,7 +1564,23 @@ function buildNavMenu(
     pendingMenuAnchor = null;
     return;
   }
+  /* Never opened yet: openShellNavMenu() fills it on first use (100+ items off the boot path). */
+  if (!shellNavMenu()?.firstElementChild) return;
+  /* Locale sync / page changes call this often: rebuild only when its inputs changed. */
+  const key = navMenuKey(opts.destId);
+  if (key === builtNavMenuKey && shellNavMenu()?.firstElementChild) return;
   fillNavMenu(opts.destId);
+}
+
+/** Inputs of fillNavMenu() — destination, page, locale, nav layout. */
+let builtNavMenuKey = '';
+function navMenuKey(destId?: string | null): string {
+  return [
+    resolveSecondaryDest(destId).id,
+    currentPageId(),
+    window.K3UI?.i18n.locale ?? '',
+    document.querySelector('.app')?.getAttribute('data-nav') ?? '',
+  ].join('|');
 }
 
 /**
@@ -1638,38 +1657,21 @@ async function openShellNavMenu(
   await shellMenuLock;
 }
 
+/** Markup currently in #catalog-grid (skips identical rebuilds — locale sync runs it often). */
+let catalogHtml: string | null = null;
+
 function buildCatalogGrid(filter = ''): void {
   const grid = document.getElementById('catalog-grid');
   if (!grid) return;
-  const q = filter.trim().toLowerCase();
-  const byCat = componentsByCategory();
-  const blocks: string[] = [];
-  for (const [cat, comps] of byCat) {
-    const visible = q
-      ? comps.filter((c) => {
-        const title = t(c.titleKey).toLowerCase();
-        const blurb = t(c.blurbKey).toLowerCase();
-        return title.includes(q) || blurb.includes(q) || c.id.includes(q) || cat.toLowerCase().includes(q);
-      })
-      : comps;
-    if (!visible.length) continue;
-    blocks.push(`<section class="catalog-cat">
-      <h2 class="catalog-cat-title">${cat}</h2>
-      <div class="catalog-cards">
-        ${visible
-          .map(
-            (c) => `<a class="catalog-card" href="#/${c.id}">
-            <span class="catalog-card-title">${t(c.titleKey)}</span>
-            <span class="catalog-card-blurb">${t(c.blurbKey)}</span>
-          </a>`,
-          )
-          .join('')}
-      </div>
-    </section>`);
+  const html = catalogGridHtml(t, filter, t('playground.search.placeholder'));
+  if (html === catalogHtml) return;
+  /* Build-time prerender (default locale): keep those nodes — they are the LCP. */
+  if (catalogHtml === null && !filter.trim() && grid.dataset.prerendered === window.K3UI?.i18n.locale) {
+    catalogHtml = html;
+    return;
   }
-  grid.innerHTML =
-    blocks.join('') ||
-    `<p class="hint">${t('playground.search.placeholder')}</p>`;
+  catalogHtml = html;
+  grid.innerHTML = html;
 }
 
 /** Shell FAB menu — open GitHub repo / profile in a new tab. */
@@ -1703,7 +1705,16 @@ function warmCatalogOnIntent(): void {
       typeof window.requestIdleCallback === 'function'
         ? (cb) => window.requestIdleCallback(() => cb(), { timeout: 4000 })
         : (cb) => window.setTimeout(cb, 200);
-    idle(() => void registry.registerAll('all'));
+    /* One component per task: each definition upgrades every instance on the site. */
+    idle(() => {
+      void (async () => {
+        for (const { tag } of COMPONENT_CATALOG) {
+          if (customElements.get(tag)) continue;
+          await registry.register(tag);
+          await yieldToMain();
+        }
+      })();
+    });
   };
   for (const type of events) window.addEventListener(type, warm, { capture: true, passive: true });
 }
@@ -2836,7 +2847,7 @@ function renderExtraPalettes(): void {
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(' ');
     return `<div class="color-palette-block">
-      <h3>${label}</h3>
+      <h2>${label}</h2>
       <div class="color-tone-row color-m2-row">${cells}</div>
     </div>`;
   }).join('');
@@ -2856,7 +2867,7 @@ function renderColorPalettes(seed: string): void {
           ${swatches
             .map((s) => {
               const hex = s.hex.toUpperCase();
-              return `<button type="button" class="color-swatch color-copy-target" style="background:${hex};color:${s.onHex}" data-copy-hex="${hex}" title="${hex}">
+              return `<button type="button" class="color-swatch color-copy-target" style="background:${hex};color:${swatchLabelColor(hex)}" data-copy-hex="${hex}" title="${hex}">
               <span>${s.tone}</span>
             </button>`;
             })
@@ -2867,6 +2878,82 @@ function renderColorPalettes(seed: string): void {
       .join('');
   } catch (err) {
     console.error(err);
+  }
+}
+
+
+/** Custom elements upgraded (and first-rendered) per task while stamping pages. */
+const UPGRADES_PER_TASK = 6;
+
+const isCustom = (el: Element): boolean => el.localName.includes('-');
+const customCount = (el: Element): number =>
+  (isCustom(el) ? 1 : 0) + [...el.querySelectorAll('*')].filter(isCustom).length;
+
+/**
+ * Append `nodes` to `parent` like the HTML parser streams a page: plain
+ * containers holding many components go in first, then their children, and
+ * the main thread is released every few component upgrades. A custom
+ * element always arrives with its children (no partial slot content).
+ */
+async function streamInto(parent: Node, nodes: Node[], state: { upgrades: number }): Promise<void> {
+  for (const node of nodes) {
+    if (node instanceof Element) {
+      const count = customCount(node);
+      if (!isCustom(node) && count > UPGRADES_PER_TASK) {
+        const children = [...node.childNodes];
+        node.replaceChildren();
+        parent.appendChild(node);
+        await streamInto(node, children, state);
+        continue;
+      }
+      parent.appendChild(node);
+      state.upgrades += count;
+    } else {
+      parent.appendChild(node);
+    }
+    if (state.upgrades >= UPGRADES_PER_TASK) {
+      state.upgrades = 0;
+      await yieldToMain();
+    }
+  }
+}
+
+/** Page bodies moved out of index.html at build (playground/vite.config.ts). */
+async function fetchDocPages(): Promise<Record<string, string>> {
+  const url = document.querySelector<HTMLMetaElement>('meta[name="k3-doc-pages"]')?.content;
+  if (!url) return {};
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return (await res.json()) as Record<string, string>;
+    } catch {
+      /* offline blip — retry below */
+    }
+    await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+  }
+  console.error(`[playground] could not load ${url}`);
+  return {};
+}
+
+/**
+ * index.html ships the shell and the home page only; the other doc pages are
+ * fetched and put back here — the requested page first — one page per task,
+ * so component upgrades never pile up into one long task. Everything that
+ * wires demos runs afterwards, on the same DOM as before.
+ */
+async function stampDocPages(firstPageId?: string): Promise<void> {
+  const pages = await fetchDocPages();
+  const ids = Object.keys(pages);
+  const first = ids.indexOf(firstPageId ?? '');
+  if (first > 0) ids.unshift(...ids.splice(first, 1));
+  for (const id of ids) {
+    const article = document.querySelector<HTMLElement>(`.comp-page[data-page="${CSS.escape(id)}"]`);
+    if (article && !article.firstElementChild) {
+      const tpl = document.createElement('template');
+      tpl.innerHTML = pages[id]!;
+      await streamInto(article, [...tpl.content.childNodes], { upgrades: 0 });
+    }
+    await yieldToMain();
   }
 }
 
@@ -2896,18 +2983,23 @@ async function boot(): Promise<void> {
     cacheAppliedTheme();
     const ver = document.getElementById('ver');
     if (ver) ver.textContent = `v${api.version}`;
+    /* Boot in short tasks: each step's component renders stay in its own task. */
+    await yieldToMain();
 
     applyAdaptiveShell();
     containerOn = docStore.get(DocKeys.uiContainer, true);
     applyContainerLayout();
     buildPrimaryNav();
+    await yieldToMain();
     buildNavMenu();
+    await yieldToMain();
     buildCatalogGrid();
     rebuildGridOverlay();
     setDocumentDir(docStore.get(DocKeys.uiDir, 'ltr'));
     applyAnimationsPreference();
     /* Re-apply persisted theme (seed already restored into seeds[seedIdx]) */
     applyThemePersist();
+    await yieldToMain();
     /* After CE upgrade + adoptMenuItems (flags live in split shadow menu) */
     const paintLocaleFlags = (): void => mountLocaleFlags(currentLocale());
     paintLocaleFlags();
@@ -2916,14 +3008,25 @@ async function boot(): Promise<void> {
     applyPlaygroundI18n();
     document.addEventListener('k3-locale-change', () => applyPlaygroundI18n());
     wireShellGithubMenu();
+    /* Shell + home are interactive — now the deferred doc pages (short tasks). */
+    await yieldToMain();
+    /* Defined before the pages arrive: their dialogs / tooltips / switches upgrade
+       in the same small batches as the rest of each page. */
+    await registry.registerAll([...SHELL_DEFERRED]);
+    await stampDocPages(articlePageId(currentPageId()));
     wireQuickStartTabs();
     wireCodeSamples();
     ariaTabs();
     installTabKeyboard();
-    /* Demo frames → equal cases + horizontal nums (skip matrix / fab-menu) */
-    enhanceAllDemos();
+    await yieldToMain();
+    /* Demo frames → equal cases + horizontal nums (skip matrix / fab-menu) — page by page */
+    for (const page of document.querySelectorAll<HTMLElement>('.comp-page')) {
+      enhanceAllDemos(page);
+      await yieldToMain();
+    }
     /* Usage HTML/CSS/JS mounts with the page (ensureDocTables) — not 97 pages at boot */
     applyPlaygroundI18n();
+    await yieldToMain();
 
     /** Register only CE tags present on a page (avoids upgrading every demo at boot). */
     const ensurePageComponents = async (pageId: string): Promise<void> => {
@@ -2989,7 +3092,11 @@ async function boot(): Promise<void> {
       if (articleId === 'countdown') wireCountdownLab();
       if (articleId === 'carousel') wireCarouselLab();
       if (articleId === 'halftone') wireHalftoneLab();
-      if (articleId === 'card-holo') wireHoloCardDemo();
+      if (articleId === 'card-holo') {
+        /* Optional holo foils for k3-holo-card (GPL-3.0 add-on, outside k3ui.js) */
+        await import('../addons/holo-effects/holo-effects.scss');
+        wireHoloCardDemo();
+      }
       if (articleId === 'card-scratch') wireScratchCardDemo();
       if (
         articleId === 'charts-bar' ||
@@ -3003,15 +3110,26 @@ async function boot(): Promise<void> {
     };
 
     const initialPage = currentPageId();
+    /* Deep link: upgrade the page's components behind the veil, before it is shown —
+       otherwise they resize in view (CLS). Page wiring still runs once visible. */
+    const initialArticle = articlePageId(initialPage);
+    if (initialArticle !== 'home') {
+      const page = document.querySelector(`.comp-page[data-page="${CSS.escape(initialArticle)}"]`);
+      const tags = new Set(
+        [...(page?.querySelectorAll('*') ?? [])].map((el) => el.localName).filter((t) => t.startsWith('k3-')),
+      );
+      if (tags.size) await registry.registerAll([...tags]);
+    }
     /* Veil for real CE registration — home is near-instant; deep links show the loader */
     await navigateDocPage(initialPage, ensurePageComponents);
+    /* Requested page is on screen — drop the pre-paint deep-link veil. */
+    document.documentElement.removeAttribute('data-k3-deeplink');
 
     window.addEventListener('hashchange', () => {
       void navigateDocPage(currentPageId(), ensurePageComponents);
     });
 
     afterFirstPaint(() => {
-      void registry.registerAll([...SHELL_DEFERRED]);
       /* Material Symbols variable fonts (several MB, Google CDN) load on demand
          when their pages open — never prefetched for every visitor. */
       warmCatalogOnIntent();
@@ -3242,12 +3360,14 @@ async function boot(): Promise<void> {
     document.documentElement.classList.add('k3-ready');
   } catch (err) {
     console.error(err);
+    document.documentElement.removeAttribute('data-k3-deeplink');
     if (errBox) {
       errBox.hidden = false;
       errBox.textContent = `K3ui init failed: ${err instanceof Error ? err.message : String(err)}`;
     }
     return;
   }
+  await yieldToMain();
 
   type SnackEl = HTMLElement & {
     show: () => Promise<boolean>;
@@ -3322,7 +3442,9 @@ async function boot(): Promise<void> {
   document.getElementById('sheet-side-close')?.addEventListener('click', () => void sheetSide?.hide());
   document.getElementById('sheet-start-close')?.addEventListener('click', () => void sheetStart?.hide());
 
+  await yieldToMain();
   wireShellChrome();
+  await yieldToMain();
   wireDemoPages();
 }
 

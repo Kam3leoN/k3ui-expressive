@@ -39,6 +39,10 @@ export const moodCalendarStyles = css`
     max-width: 100%;
   }
 
+  .aria-row,
+  .aria-cell {
+    display: contents;
+  }
   .year-grid {
     display: grid;
     grid-template-columns: 2.5rem repeat(31, minmax(1.75rem, 1fr));

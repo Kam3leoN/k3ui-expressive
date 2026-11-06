@@ -148,7 +148,7 @@ export class K3IconButton extends K3Element {
 
   override render() {
     const name = this.label.trim();
-    const a11yLabel = name || undefined;
+    const a11yLabel = name || this.forwardedAria('aria-label');
     return html`
       <button
         part="container"
@@ -162,6 +162,9 @@ export class K3IconButton extends K3Element {
         value=${ifDefined(this.value || undefined)}
         role=${this.radio ? 'radio' : nothing}
         aria-label=${ifDefined(a11yLabel)}
+        aria-expanded=${ifDefined(this.forwardedAria('aria-expanded'))}
+        aria-haspopup=${ifDefined(this.forwardedAria('aria-haspopup'))}
+        aria-controls=${ifDefined(this.forwardedAria('aria-controls'))}
         aria-checked=${this.radio ? (this.selected ? 'true' : 'false') : nothing}
         aria-pressed=${
           this.isToggleControl && !this.radio

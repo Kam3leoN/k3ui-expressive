@@ -181,7 +181,10 @@ export class K3TextBounce extends K3Element {
   }
 
   override render() {
-    return html`<p class="stage" aria-label=${this.text}>
+    /* Readable text for assistive tech; the animated letters are decorative.
+       (aria-label is not allowed on a <p> without a role.) */
+    return html`<p class="stage">
+      <span class="sr-only">${this.text}</span>
       ${this.chars.map((ch) =>
         ch === ' '
           ? html`<span class="char char--space" aria-hidden="true">&nbsp;</span>`

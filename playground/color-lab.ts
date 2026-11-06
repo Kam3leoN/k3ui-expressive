@@ -86,7 +86,10 @@ export function contrastGrade(ratio: number): ContrastGrade {
   return 'fail';
 }
 
-/** Readable label color on a swatch. */
+/**
+ * Readable label color on a swatch — black or white, whichever contrasts more
+ * (one of the two always reaches ≥ 4.58:1, WCAG AA for small text).
+ */
 export function swatchLabelColor(hex: string): string {
-  return relativeLuminance(hex) > 0.45 ? '#1d1b20' : '#ffffff';
+  return contrastRatio(hex, '#000000') >= contrastRatio(hex, '#ffffff') ? '#000000' : '#ffffff';
 }

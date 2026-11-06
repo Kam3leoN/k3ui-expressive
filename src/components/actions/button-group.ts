@@ -230,6 +230,12 @@ export class K3ButtonGroup extends K3Element {
       return;
     }
 
+    /*
+     * Nothing was pinned (no press since the last clear): skip the snap and its
+     * forced reflow — first render / variant changes used to lay out the whole
+     * document once per group.
+     */
+    if (!this.restWidths && !this.pressTouched.length) return;
     this.setAttribute('data-press-snap', '');
     for (const el of list) this.clearChildWidth(el);
     group?.style.removeProperty('width');

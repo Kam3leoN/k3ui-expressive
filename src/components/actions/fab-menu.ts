@@ -405,9 +405,14 @@ export class K3FabMenu extends K3Element {
     const list = this.items;
     const n = list.length;
     this.warnItemCountIfNeeded();
-    const origin = fabMenuIsTrailingRight(this.placement, this.rtl)
-      ? 'right center'
-      : 'left center';
+    /* Scale origin only matters while items move — a closed menu skips the
+       getComputedStyle (forced style recalc) on every upgrade / slot change. */
+    const origin =
+      phase === 'closed'
+        ? null
+        : fabMenuIsTrailingRight(this.placement, this.rtl)
+          ? 'right center'
+          : 'left center';
     const menuAbove = this.menuSide === 'above';
 
     /* *-start → icon at end of line (outer edge); *-end → icon at inline-start */
@@ -415,7 +420,7 @@ export class K3FabMenu extends K3Element {
 
     for (let i = 0; i < n; i++) {
       const el = list[i]!;
-      el.style.setProperty('--k3-fab-menu-origin', origin);
+      if (origin) el.style.setProperty('--k3-fab-menu-origin', origin);
       if (phase === 'opening' || phase === 'closing') {
         el.style.setProperty(
           '--k3-fab-menu-item-delay',

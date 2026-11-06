@@ -47,12 +47,17 @@ export function armNavActive(
     return { cancel: () => undefined };
   }
 
+  /*
+   * Inactive state paints in one frame, the target arms in the next — the
+   * pill transition runs without a forced synchronous layout (offsetWidth).
+   */
   void Promise.all(items.map((el) => el.updateComplete)).then(() => {
     if (cancelled) return;
-    for (const el of items) void el.offsetWidth;
     raf = requestAnimationFrame(() => {
-      apply();
-      raf = 0;
+      raf = requestAnimationFrame(() => {
+        apply();
+        raf = 0;
+      });
     });
   });
 

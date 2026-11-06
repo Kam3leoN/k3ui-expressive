@@ -221,11 +221,13 @@ export class K3MoodCalendar extends K3Element {
           year: y,
         })}
       >
-        <div class="corner" aria-hidden="true"></div>
-        ${Array.from({ length: 31 }, (_, i) => {
-          const d = i + 1;
-          return html`<div class="day-head" role="columnheader">${d}</div>`;
-        })}
+        <div class="aria-row" role="row">
+          <div class="corner" aria-hidden="true"></div>
+          ${Array.from({ length: 31 }, (_, i) => {
+            const d = i + 1;
+            return html`<div class="day-head" role="columnheader">${d}</div>`;
+          })}
+        </div>
         ${MONTH_LABELS.map((label, mi) => {
           const dim = daysInMonth(y, mi);
           const cells = [];
@@ -289,9 +291,12 @@ export class K3MoodCalendar extends K3Element {
               </button>
             `);
           }
+          /* row / gridcell wrappers are display: contents — the CSS grid stays flat */
           return html`
-            <div class="month-label" role="rowheader">${label}</div>
-            ${cells}
+            <div class="aria-row" role="row">
+              <div class="month-label" role="rowheader">${label}</div>
+              ${cells.map((cell) => html`<div class="aria-cell" role="gridcell">${cell}</div>`)}
+            </div>
           `;
         })}
       </div>
@@ -307,7 +312,7 @@ export class K3MoodCalendar extends K3Element {
 
     return html`
       <p class="section-label">${i18n.t('mood-calendar.years', 'Years')}</p>
-      <div class="years" role="tablist">
+      <div class="years" role="group" aria-label=${i18n.t('mood-calendar.years', 'Years')}>
         ${this.years.map(
           (y) => html`
             <k3-button

@@ -792,13 +792,23 @@ export const DOC_COMPONENTS: DocComponent[] = [
 ];
 
 /** Alphabetical by English `title` (Family Type). */
+/* One collator — `localeCompare(…, options)` builds a new one per comparison. */
+const titleCollator = new Intl.Collator('en', { sensitivity: 'base' });
+
 export function compareDocTitle(a: DocComponent, b: DocComponent): number {
-  return a.title.localeCompare(b.title, 'en', { sensitivity: 'base' });
+  return titleCollator.compare(a.title, b.title);
 }
 
-/** Components in a category, sorted Family → Type (alpha). */
+const byCategory = new Map<string, readonly DocComponent[]>();
+
+/** Components in a category, sorted Family → Type (alpha). Fresh array, memoized sort. */
 export function componentsInCategory(category: string): DocComponent[] {
-  return DOC_COMPONENTS.filter((c) => c.category === category).sort(compareDocTitle);
+  let sorted = byCategory.get(category);
+  if (!sorted) {
+    sorted = DOC_COMPONENTS.filter((c) => c.category === category).sort(compareDocTitle);
+    byCategory.set(category, sorted);
+  }
+  return [...sorted];
 }
 
 export function componentsByCategory(): Map<string, DocComponent[]> {
@@ -839,4 +849,38 @@ export function neighborComponents(id: string): {
     prev: list[i - 1],
     next: list[i + 1],
   };
+}
+
+/**
+ * Home catalog cards markup — shared by the app (search / locale changes) and
+ * the build, which prerenders the default locale so the cards are in the first
+ * frame (they are the LCP element on wide screens).
+ */
+export function catalogGridHtml(t: (key: string) => string, filter = '', emptyHint = ''): string {
+  const q = filter.trim().toLowerCase();
+  const blocks: string[] = [];
+  for (const [cat, comps] of componentsByCategory()) {
+    const visible = q
+      ? comps.filter((c) => {
+        const title = t(c.titleKey).toLowerCase();
+        const blurb = t(c.blurbKey).toLowerCase();
+        return title.includes(q) || blurb.includes(q) || c.id.includes(q) || cat.toLowerCase().includes(q);
+      })
+      : comps;
+    if (!visible.length) continue;
+    blocks.push(`<section class="catalog-cat">
+      <h2 class="catalog-cat-title">${cat}</h2>
+      <div class="catalog-cards">
+        ${visible
+          .map(
+            (c) => `<a class="catalog-card" href="#/${c.id}">
+            <span class="catalog-card-title">${t(c.titleKey)}</span>
+            <span class="catalog-card-blurb">${t(c.blurbKey)}</span>
+          </a>`,
+          )
+          .join('')}
+      </div>
+    </section>`);
+  }
+  return blocks.join('') || `<p class="hint">${emptyHint}</p>`;
 }

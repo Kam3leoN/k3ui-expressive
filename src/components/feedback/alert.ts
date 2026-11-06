@@ -145,7 +145,7 @@ export class K3Alert extends K3Element {
     const withHeader = this.showHeader();
 
     return html`
-      <aside
+      <div
         class=${classMap({
           base: true,
           'base--with-header': withHeader,
@@ -192,7 +192,7 @@ export class K3Alert extends K3Element {
               : nothing}
           </div>
         </div>
-      </aside>
+      </div>
     `;
   }
 }

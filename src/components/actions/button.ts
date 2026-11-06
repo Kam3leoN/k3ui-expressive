@@ -440,6 +440,10 @@ export class K3Button extends K3Element {
         role=${this.radio ? 'radio' : nothing}
         aria-checked=${this.radio ? (this.selected ? 'true' : 'false') : nothing}
         aria-pressed=${this.radio ? nothing : this.selected ? 'true' : 'false'}
+        aria-label=${this.forwardedAria('aria-label') ?? nothing}
+        aria-expanded=${this.forwardedAria('aria-expanded') ?? nothing}
+        aria-haspopup=${this.forwardedAria('aria-haspopup') ?? nothing}
+        aria-controls=${this.forwardedAria('aria-controls') ?? nothing}
         @pointerdown=${this.onPointerDown}
         @pointerup=${this.onPointerUp}
         @pointerleave=${this.onPointerUp}

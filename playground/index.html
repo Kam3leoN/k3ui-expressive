@@ -72,6 +72,10 @@
             '--k3-nav-chrome-inset-block-end',
             bar ? 'calc(4rem + env(safe-area-inset-bottom, 0px))' : '0px',
           );
+          /* Deep link: veil instead of a flash of the home page (cleared by app.ts) */
+          if (/^#\/?(?!home$)[a-z0-9-]+$/i.test(location.hash)) {
+            document.documentElement.setAttribute('data-k3-deeplink', '');
+          }
         })(document.currentScript.parentElement);
       </script>
       <!-- Desktop / tablet ≥600dp: navigation rail (theme + motion at foot, like m3.material.io) -->
@@ -1427,7 +1431,6 @@ import 'k3ui/k3ui.css';
                   type="button"
                   class="code-copy"
                   data-i18n="doc.usage.copy"
-                  aria-label="Copy code"
                 >
                   Copy
                 </button>
@@ -2187,7 +2190,7 @@ fav?.addEventListener("k3-change", (e) => {
             <p class="doc-intro" data-i18n="doc.button-group.intro">
               Button groups present related choices as a single control. Standard groups keep a visible gap and morph round↔square on select; connected groups sit nearly flush with shared seams. Use single selection for exclusive modes and multi for independent toggles. Match size to the surrounding chrome and keep the group label for accessibility.
             </p>
-            <p class="hint" style="margin: 0; opacity: 0.7; font-size: 0.875rem">
+            <p class="hint" style="margin: 0; font-size: 0.875rem">
               <a
                 href="https://m3.material.io/components/button-groups/specs"
                 target="_blank"
@@ -2538,13 +2541,13 @@ fav?.addEventListener("k3-change", (e) => {
                       required
                       label="Connected round XS"
                     >
-                      <k3-button variant="tonal" selected>
+                      <k3-button variant="tonal" selected aria-label="Star">
                         <span slot="icon" class="ms">star</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Favorite">
                         <span slot="icon" class="ms">favorite</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Mood">
                         <span slot="icon" class="ms">mood</span>
                       </k3-button>
                     </k3-button-group>
@@ -2572,13 +2575,13 @@ fav?.addEventListener("k3-change", (e) => {
                       required
                       label="Connected round SM"
                     >
-                      <k3-button variant="tonal" selected>
+                      <k3-button variant="tonal" selected aria-label="Star">
                         <span slot="icon" class="ms">star</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Favorite">
                         <span slot="icon" class="ms">favorite</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Mood">
                         <span slot="icon" class="ms">mood</span>
                       </k3-button>
                     </k3-button-group>
@@ -2606,13 +2609,13 @@ fav?.addEventListener("k3-change", (e) => {
                       required
                       label="Connected round MD"
                     >
-                      <k3-button variant="tonal" selected>
+                      <k3-button variant="tonal" selected aria-label="Star">
                         <span slot="icon" class="ms">star</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Favorite">
                         <span slot="icon" class="ms">favorite</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Mood">
                         <span slot="icon" class="ms">mood</span>
                       </k3-button>
                     </k3-button-group>
@@ -2640,13 +2643,13 @@ fav?.addEventListener("k3-change", (e) => {
                       required
                       label="Connected round LG"
                     >
-                      <k3-button variant="tonal" selected>
+                      <k3-button variant="tonal" selected aria-label="Star">
                         <span slot="icon" class="ms">star</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Favorite">
                         <span slot="icon" class="ms">favorite</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Mood">
                         <span slot="icon" class="ms">mood</span>
                       </k3-button>
                     </k3-button-group>
@@ -2674,13 +2677,13 @@ fav?.addEventListener("k3-change", (e) => {
                       required
                       label="Connected round XL"
                     >
-                      <k3-button variant="tonal" selected>
+                      <k3-button variant="tonal" selected aria-label="Star">
                         <span slot="icon" class="ms">star</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Favorite">
                         <span slot="icon" class="ms">favorite</span>
                       </k3-button>
-                      <k3-button variant="tonal">
+                      <k3-button variant="tonal" aria-label="Mood">
                         <span slot="icon" class="ms">mood</span>
                       </k3-button>
                     </k3-button-group>
@@ -5533,7 +5536,7 @@ fav?.addEventListener("k3-change", (e) => {
                   ><span data-i18n="doc.progress.control.value">Value</span>
                   <span id="progress-lab-value-pct">65%</span></label
                 >
-                <k3-slider id="progress-lab-slider" value="65" min="0" max="100"></k3-slider>
+                <k3-slider id="progress-lab-slider" value="65" min="0" max="100" aria-label="Progress"></k3-slider>
               </div>
             </div>
           </div>
@@ -7666,7 +7669,7 @@ fav?.addEventListener("k3-change", (e) => {
             <div class="row wrap gap-lg items-start">
               <div class="surface-rail">
                 <k3-nav-rail size="compact" appearance="standard" collapsible active="3">
-                  <k3-fab slot="fab" size="default" variant="primary">
+                  <k3-fab slot="fab" size="default" variant="primary" aria-label="Timer">
                     <span class="ms" slot="icon">timer</span>
                   </k3-fab>
                   <k3-extended-fab slot="fab" size="medium" variant="primary">
@@ -7681,7 +7684,7 @@ fav?.addEventListener("k3-change", (e) => {
               </div>
               <div class="surface-rail surface-rail-large">
                 <k3-nav-rail size="large" appearance="standard" collapsible expanded active="2">
-                  <k3-fab slot="fab" size="default" variant="primary">
+                  <k3-fab slot="fab" size="default" variant="primary" aria-label="Timer">
                     <span class="ms" slot="icon">timer</span>
                   </k3-fab>
                   <k3-extended-fab slot="fab" size="medium" variant="primary">
@@ -8774,7 +8777,7 @@ fav?.addEventListener("k3-change", (e) => {
             <div class="demo-frame demo-frame--cases grid-2" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage" style="width: 100%; padding: 0.75rem">
-                  <k3-quote author="Alex" role="Product designer" layout="author-start" tilt>
+                  <k3-quote author="Alex" job-title="Product designer" layout="author-start" tilt>
                     <k3-avatar slot="avatar" initials="AL" size="lg"></k3-avatar>
                     <span data-i18n="doc.quote.demo.body1"
                       >Dynamic theme tokens keep this testimonial card on-brand without hard-coded
@@ -8797,7 +8800,7 @@ fav?.addEventListener("k3-change", (e) => {
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage" style="width: 100%; padding: 0.75rem">
-                  <k3-quote author="Sam" role="Frontend engineer" layout="author-end" tilt>
+                  <k3-quote author="Sam" job-title="Frontend engineer" layout="author-end" tilt>
                     <k3-avatar slot="avatar" initials="SM" size="lg"></k3-avatar>
                     <span data-i18n="doc.quote.demo.body2"
                       >Invert the columns with layout author-end — citation first, avatar on the
@@ -12121,7 +12124,7 @@ static styles = [
                 aria-hidden="true"
               ></span>
             </k3-text-field>
-            <div id="ms-groups" class="ms-groups k3-scroll" role="listbox" aria-label="Categories"></div>
+            <div id="ms-groups" class="ms-groups k3-scroll" role="group" aria-label="Categories"></div>
             <!-- Axes above style tabs — Weight · Grade · Optical (Fill = FAB) -->
             <div class="ms-axes" id="ms-axes" aria-label="Variable font axes">
               <div class="ms-axes-sliders">
@@ -12232,7 +12235,7 @@ static styles = [
             <p id="ms-icon-empty" class="ms-icon-empty" hidden data-i18n="doc.material-symbols.empty">
               Icon not found
             </p>
-            <div id="ms-icon-grid" class="ms-icon-grid" role="list"></div>
+            <div id="ms-icon-grid" class="ms-icon-grid"></div>
             <!-- Fixed above shell GitHub fab-menu (scroll-to-top already covers “back to top”) -->
             <k3-fab
               id="ms-fill-fab"

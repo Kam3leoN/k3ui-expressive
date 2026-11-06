@@ -490,6 +490,9 @@ export class K3TextField extends K3Element {
       maxlength: this.maxLength ?? undefined,
       'aria-invalid': this.error ? 'true' : 'false',
       'aria-describedby': describedBy,
+      /* The visible label is a styled span (dual float labels), not a <label for>:
+         name the inner control explicitly — host `aria-label` when there is none. */
+      'aria-label': this.label || this.getAttribute('aria-label') || undefined,
     } as const;
 
     if (this.multiline) {
@@ -507,6 +510,7 @@ export class K3TextField extends K3Element {
           maxlength=${ifDefined(shared.maxlength)}
           aria-invalid=${shared['aria-invalid']}
           aria-describedby=${ifDefined(shared['aria-describedby'])}
+          aria-label=${ifDefined(shared['aria-label'])}
           @input=${this.onInput}
           @change=${this.onChange}
           @focus=${this.onFocus}
@@ -531,6 +535,7 @@ export class K3TextField extends K3Element {
         maxlength=${ifDefined(shared.maxlength)}
         aria-invalid=${shared['aria-invalid']}
         aria-describedby=${ifDefined(shared['aria-describedby'])}
+        aria-label=${ifDefined(shared['aria-label'])}
         @input=${this.onInput}
         @change=${this.onChange}
         @focus=${this.onFocus}

@@ -66,7 +66,7 @@ export function createUsageSection(snip: UsageSnippet): HTMLElement {
   copy.type = 'button';
   copy.className = 'code-copy';
   copy.dataset.i18n = 'doc.usage.copy';
-  copy.setAttribute('aria-label', 'Copy code');
+  /* Accessible name = the localized visible text (label-in-name, WCAG 2.5.3) */
   copy.textContent = 'Copy';
   toolbar.append(tabs, copy);
 

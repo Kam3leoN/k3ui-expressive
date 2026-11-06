@@ -244,11 +244,27 @@ export class K3ScrollToTop extends K3Element {
     this.progressOffset = this.circumference;
     this.applyCssVars();
     this.bindScrollRoot(this.resolveScrollRoot());
-    queueMicrotask(() => this.updateFromScroll());
+    this.scheduleScrollSync();
+  }
+
+  private syncFrame: number | null = null;
+
+  /**
+   * Read scroll metrics on the next frame, once — several property changes at
+   * upgrade used to force a synchronous layout each (scrollHeight).
+   */
+  private scheduleScrollSync(): void {
+    if (this.syncFrame != null) return;
+    this.syncFrame = requestAnimationFrame(() => {
+      this.syncFrame = null;
+      if (this.isConnected) this.updateFromScroll();
+    });
   }
 
   override disconnectedCallback(): void {
     this.unbindScrollRoot();
+    if (this.syncFrame != null) cancelAnimationFrame(this.syncFrame);
+    this.syncFrame = null;
     if (this.rafId != null) cancelAnimationFrame(this.rafId);
     this.rafId = null;
     super.disconnectedCallback();
@@ -264,7 +280,7 @@ export class K3ScrollToTop extends K3Element {
     super.updated(changed);
     if (changed.has('scrollContainer')) {
       this.bindScrollRoot(this.resolveScrollRoot());
-      this.updateFromScroll();
+      this.scheduleScrollSync();
     }
     if (
       changed.has('size') ||
@@ -274,7 +290,7 @@ export class K3ScrollToTop extends K3Element {
     ) {
       this.circumference = this.computeCircumference();
       this.applyCssVars();
-      this.updateFromScroll();
+      this.scheduleScrollSync();
     }
   }
 

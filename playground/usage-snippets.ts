@@ -718,7 +718,7 @@ document.getElementById("dlg")?.show?.();`,
   },
   quote: {
     components: ['k3-quote', 'k3-avatar', 'k3-button'],
-    html: `<k3-quote author="Alex" role="Product designer" layout="author-start" tilt>
+    html: `<k3-quote author="Alex" job-title="Product designer" layout="author-start" tilt>
   <k3-avatar slot="avatar" initials="AL"></k3-avatar>
   K3ui tokens make themed testimonial cards effortless.
   <k3-button slot="action" variant="text" size="sm">

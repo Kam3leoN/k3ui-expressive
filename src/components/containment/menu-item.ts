@@ -406,6 +406,8 @@ export class K3MenuItem extends K3Element {
 
     const showSub = this.showSub;
     const hasTrailing = this.hasTrailingSlot || !!this.shortcut || showSub;
+    /* Direct child of k3-select: its panel is a listbox, so items are options (ARIA parent/child roles) */
+    const asOption = this.parentElement?.localName === 'k3-select';
     const showCheck = this.checkable && this.selected;
     const showIcon = showCheck || this.hasIcon;
 
@@ -414,12 +416,13 @@ export class K3MenuItem extends K3Element {
         type="button"
         class=${classMap({ item: true, 'k3-state-layer': true })}
         part="container"
-        role=${this.checkable ? 'menuitemradio' : 'menuitem'}
+        role=${asOption ? 'option' : this.checkable ? 'menuitemradio' : 'menuitem'}
         ?disabled=${this.disabled}
         aria-disabled=${this.disabled ? 'true' : 'false'}
         aria-haspopup=${showSub ? 'menu' : nothing}
         aria-expanded=${showSub ? String(this.submenuOpen) : nothing}
-        aria-checked=${this.checkable ? (this.selected ? 'true' : 'false') : nothing}
+        aria-checked=${!asOption && this.checkable ? (this.selected ? 'true' : 'false') : nothing}
+        aria-selected=${asOption ? (this.selected ? 'true' : 'false') : nothing}
         @click=${this.onClick}
         @pointerenter=${() => {
           if (showSub && this.submenuUsesHoverOpen()) this.openSubmenu();
