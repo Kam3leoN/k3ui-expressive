@@ -21,6 +21,9 @@ const PAGE_TAGS: Record<string, string[]> = {
   'field-group': ['k3-field-group'],
   'pin-field': ['k3-pin-field'],
   select: ['k3-select'],
+  checkbox: ['k3-checkbox'],
+  radio: ['k3-radio'],
+  switch: ['k3-switch'],
   /* extend as pages leave PENDING_PAGES */
 };
 
@@ -40,7 +43,10 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'textarea' &&
     id !== 'field-group' &&
     id !== 'pin-field' &&
-    id !== 'select',
+    id !== 'select' &&
+    id !== 'checkbox' &&
+    id !== 'radio' &&
+    id !== 'switch',
 );
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');

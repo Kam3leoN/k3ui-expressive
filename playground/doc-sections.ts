@@ -246,28 +246,52 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: 'Single exposed-dropdown layout' },
   },
   'checkbox': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['--k3-checkbox-size', '1.125rem', '18dp box'],
+      ['box-shadow inset', '2px on-surface-variant', 'Unchecked stroke'],
+    ],
+    keyboard: [
+      ['Space / Enter', 'Toggle (native button role)'],
+      ['Tab', 'Move focus'],
+    ],
+    focus: 'doc.checkbox.focus',
+    motion: [
+      ['Check-in', 'Icon scale + clip-path short2', 'Instant when reduced'],
+    ],
+    a11y: 'doc.checkbox.a11y',
+    versions: { na: 'Single control — no alternate layouts' },
   },
   'radio': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['--k3-radio-size', '1.25rem', '20dp outer'],
+      ['--k3-radio-inner', '0.75rem', '12dp inner'],
+    ],
+    keyboard: [
+      ['Space / Enter', 'Select (and clear siblings with same name)'],
+      ['Tab', 'Move focus'],
+    ],
+    focus: 'doc.radio.focus',
+    motion: [
+      ['Select', 'Inner scale spatial-fast', 'Instant when reduced'],
+    ],
+    a11y: 'doc.radio.a11y',
+    versions: { na: 'Single control — group via shared name' },
   },
   'switch': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['track', '52×32', 'Track size'],
+      ['--k3-switch-travel', 'spatial-fast spring', 'Thumb travel'],
+    ],
+    keyboard: [
+      ['Space / Enter', 'Toggle selected'],
+      ['Tab', 'Move focus'],
+    ],
+    focus: 'doc.switch.focus',
+    motion: [
+      ['Toggle', 'Thumb FastSpatial spring + haptic', 'Instant when reduced'],
+    ],
+    a11y: 'doc.switch.a11y',
+    versions: { na: 'Single on/off control' },
   },
   'chip': {
     theming: { na: "Pending gabarit migration" },

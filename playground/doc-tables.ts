@@ -1336,6 +1336,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['disabled', 'boolean', 'false', 'Disables'],
       ['name', 'string', "''", 'Form name'],
       ['value', 'string', 'on', 'Form value'],
+      ['accessibleLabel', 'string', "''", 'Accessible name (attr aria-label)'],
     ],
     events: [['k3-change', 'selected', 'Toggled']],
   },

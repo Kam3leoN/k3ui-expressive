@@ -4705,10 +4705,80 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Checkboxes toggle independent options on or off, including an indeterminate state for partial selection in trees and bulk actions. Pair each box with a clear label, group related boxes, and avoid using a single checkbox as the only way to submit a form.
             </p>
           </header>
-          <div class="surface row wrap gap-lg">
-            <k3-checkbox checked>Updates</k3-checkbox>
-            <k3-checkbox>Unchecked</k3-checkbox>
-            <k3-checkbox indeterminate>Indeterminate</k3-checkbox>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.checkbox.option.checked">checked / indeterminate</h3>
+              <p data-i18n="doc.checkbox.option.checked.desc">
+                Checked, unchecked, or indeterminate for partial selection.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-checkbox checked>Updates</k3-checkbox>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-checkbox>Unchecked</k3-checkbox>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-checkbox indeterminate>Indeterminate</k3-checkbox>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-checkbox disabled>Disabled</k3-checkbox>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-checkbox checked disabled>Checked disabled</k3-checkbox>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.checkbox.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.checkbox.state.checked-disabled"
+                    >checked + disabled</span
+                  >
+                </li>
+              </ol>
+            </div>
           </div>
         </article>
 
@@ -4724,9 +4794,62 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Radio buttons let people pick exactly one option from a short list. Keep the set small, share a name across the group, and place the selected indicator so it stays visually centered. Prefer a select when the list grows beyond a handful of choices.
             </p>
           </header>
-          <div class="surface row wrap gap-lg">
-            <k3-radio name="plan" value="free" checked>Free</k3-radio>
-            <k3-radio name="plan" value="pro">Pro</k3-radio>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.radio.option.name">name</h3>
+              <p data-i18n="doc.radio.option.name.desc">
+                Shared name groups options so only one can be selected.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-radio name="plan" value="free" checked>Free</k3-radio>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-radio name="plan" value="pro">Pro</k3-radio>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-radio name="plan-dis" value="x" disabled>Disabled</k3-radio>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.radio.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+              </ol>
+            </div>
           </div>
         </article>
 
@@ -4740,7 +4863,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Switches turn a single setting on or off with immediate effect. Use them for preferences that apply instantly — not for actions that need confirmation. Label the setting, not the state words “on/off”, and keep switches out of dense form rows where a checkbox would read more clearly.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.switch.option.selected">selected</h3>
+              <p data-i18n="doc.switch.option.selected.desc">
+                Off (default) versus selected (on).
+              </p>
+            </header>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
@@ -4751,9 +4883,51 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 ><span class="variant-label" data-i18n="playground.switch.on">On</span>
               </li>
             </ol>
-            <div class="row wrap gap-lg items-center">
-              <k3-switch>Bluetooth</k3-switch>
-              <k3-switch selected>Wi‑Fi</k3-switch>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-switch>Bluetooth</k3-switch>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-switch selected>Wi‑Fi</k3-switch>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-switch disabled>Disabled</k3-switch>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.switch.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+              </ol>
             </div>
           </div>
         </article>

@@ -23,10 +23,13 @@
 | `field-group` | `docs(field-group): gabarit complet` | Examples (label) + States |
 | `pin-field` | `docs(pin-field): gabarit complet` | Examples (variant, mask) + States |
 | `select` | `docs(select): gabarit complet` | Examples (variant) + States |
+| `checkbox` | `docs(checkbox): gabarit complet` | Examples + States |
+| `radio` | `docs(radio): gabarit complet` | Examples (name) + States |
+| `switch` | `docs(switch): gabarit complet` | Examples (selected) + States |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — prochain : `checkbox`, `radio`, `switch`, …
+Voir `PENDING_PAGES` — prochain : `chip`, `autocomplete`, `counter`, …
 
 ## Décisions humaines
 
