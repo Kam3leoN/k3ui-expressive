@@ -379,12 +379,21 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: "Pending gabarit migration" },
   },
   'date-picker': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['surface', 'dialog / popover', 'Docked vs modal chrome'],
+      ['calendar cells', 'sys primary', 'Selected / range highlight'],
+    ],
+    keyboard: [
+      ['Arrow keys', 'Move focus in calendar grid'],
+      ['Enter / Space', 'Select day'],
+      ['Escape', 'Dismiss (close-start cancelable)'],
+    ],
+    focus: 'doc.date-picker.focus',
+    motion: [
+      ['Open / close', 'Overlay enter/exit', 'Instant when reduced'],
+    ],
+    a11y: 'doc.date-picker.a11y',
+    versions: 'doc.date-picker.versions.blurb',
   },
   'mood-calendar': {
     theming: { na: "Pending gabarit migration" },

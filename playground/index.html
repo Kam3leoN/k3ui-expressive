@@ -5896,10 +5896,14 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </header>
 
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
           <div class="surface stack gap-lg">
             <!-- Basic: docked / filled / modal -->
             <header class="section-head sub">
-              <h2 data-i18n="doc.date-picker.section.basic">Basic</h2>
+              <h3 data-i18n="doc.date-picker.option.variant">variant</h3>
             </header>
             <p class="hint" data-i18n="doc.date-picker.hint.basic">
               Docked anchors under the field. Modal is better on small screens or when the date is
@@ -6005,7 +6009,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
             <!-- Bounds + blackout -->
             <header class="section-head sub">
-              <h2 data-i18n="doc.date-picker.section.bounds">Bounds &amp; blackouts</h2>
+              <h3 data-i18n="doc.date-picker.option.bounds">Bounds &amp; blackouts</h3>
             </header>
             <p class="hint" data-i18n="doc.date-picker.hint.bounds">
               <code>min-date</code> / <code>max-date</code> grey out days outside the window.
@@ -6093,7 +6097,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
             <!-- Range -->
             <header class="section-head sub">
-              <h2 data-i18n="doc.date-picker.section.range">Range</h2>
+              <h3 data-i18n="doc.date-picker.option.range">range</h3>
             </header>
             <p class="hint" data-i18n="doc.date-picker.hint">
               Range is always modal (scroll months). Use one Du/Au field or two Start/End fields —
@@ -6236,6 +6240,46 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               clearable
               label="Select dates"
             ></k3-date-picker>
+          </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-date-picker label="Disabled" disabled></k3-date-picker>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-date-picker label="Clearable" clearable value="2026-08-17"></k3-date-picker>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.date-picker.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.date-picker.state.clearable"
+                    >clearable</span
+                  >
+                </li>
+              </ol>
+            </div>
           </div>
         </article>
 

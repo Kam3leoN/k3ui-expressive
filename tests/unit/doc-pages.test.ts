@@ -28,6 +28,7 @@ const PAGE_TAGS: Record<string, string[]> = {
   counter: ['k3-counter'],
   autocomplete: ['k3-autocomplete'],
   slider: ['k3-slider'],
+  'date-picker': ['k3-date-picker'],
   /* extend as pages leave PENDING_PAGES */
 };
 
@@ -54,7 +55,8 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'chip' &&
     id !== 'counter' &&
     id !== 'autocomplete' &&
-    id !== 'slider',
+    id !== 'slider' &&
+    id !== 'date-picker',
 );
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');

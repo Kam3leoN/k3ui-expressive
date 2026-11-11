@@ -30,10 +30,11 @@
 | `counter` | `docs(counter): gabarit complet` | Examples (size, step) + States |
 | `autocomplete` | `docs(autocomplete): gabarit complet` | Examples + States |
 | `slider` | `docs(slider): gabarit complet` | Examples (playground) + States + Versions |
+| `date-picker` | `docs(date-picker): gabarit complet` | Examples + States + Versions |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — prochain : `date-picker`, `mood-calendar`, `time-picker`, …
+Voir `PENDING_PAGES` — prochain : `mood-calendar`, `time-picker` (fin Inputs), …
 
 ## Décisions humaines
 
