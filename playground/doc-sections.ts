@@ -353,12 +353,22 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: "Pending gabarit migration" },
   },
   'slider': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['color', 'primary|secondary|tertiary|error', 'Active track / handle role'],
+      ['size', 'xs–xl', 'Track and handle scale'],
+    ],
+    keyboard: [
+      ['Arrow keys', 'Nudge value by step'],
+      ['Home / End', 'Min / max'],
+      ['PageUp / PageDown', 'Larger step when supported'],
+    ],
+    focus: 'doc.slider.focus',
+    motion: [
+      ['Drag', 'Handle follows pointer', 'Instant when reduced'],
+      ['Value indicator', 'Bubble while dragging', 'Hidden when reduced'],
+    ],
+    a11y: 'doc.slider.a11y',
+    versions: 'doc.slider.versions.blurb',
   },
   'rating': {
     theming: { na: "Pending gabarit migration" },

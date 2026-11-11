@@ -5303,8 +5303,12 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </header>
 
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
           <header class="section-head sub">
-            <h2 data-i18n="doc.slider.section.playground">Playground</h2>
+            <h3 data-i18n="doc.slider.option.playground">Playground</h3>
             <p data-i18n="doc.slider.section.playground.blurb">
               Horizontal and vertical side by side · size · stops · inset icon · label · indicator · ± ·
               toolbar.
@@ -5591,6 +5595,34 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 <legend data-i18n="doc.slider.control.topToBottom">Top → bottom</legend>
                 <k3-switch id="sl-sw-ttb" aria-label="Top to bottom"></k3-switch>
               </fieldset>
+            </div>
+          </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-slider value="40" min="0" max="100" size="md" disabled label="Disabled"></k3-slider>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.slider.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+              </ol>
             </div>
           </div>
         </article>

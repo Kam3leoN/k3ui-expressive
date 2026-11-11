@@ -29,10 +29,11 @@
 | `chip` | `docs(chip): gabarit complet` | Examples (variant…) + States + Versions |
 | `counter` | `docs(counter): gabarit complet` | Examples (size, step) + States |
 | `autocomplete` | `docs(autocomplete): gabarit complet` | Examples + States |
+| `slider` | `docs(slider): gabarit complet` | Examples (playground) + States + Versions |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — prochain : `slider`, `date-picker`, `mood-calendar`, …
+Voir `PENDING_PAGES` — prochain : `date-picker`, `mood-calendar`, `time-picker`, …
 
 ## Décisions humaines
 
