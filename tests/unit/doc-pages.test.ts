@@ -17,6 +17,7 @@ const PAGE_TAGS: Record<string, string[]> = {
   buttons: ['k3-button'],
   'text-field': ['k3-text-field'],
   dialog: ['k3-dialog'],
+  /* extend as pages leave PENDING_PAGES */
 };
 
 const CATALOG_IDS = DOC_COMPONENTS.filter(
@@ -27,7 +28,9 @@ const CATALOG_IDS = DOC_COMPONENTS.filter(
  * Pages not yet migrated to the full gabarit. Remove an id when its page ships.
  * Empty → étape D (clôture).
  */
-export const PENDING_PAGES: string[] = CATALOG_IDS.filter((id) => id !== 'buttons');
+export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
+  (id) => id !== 'buttons' && id !== 'text-field',
+);
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');
 

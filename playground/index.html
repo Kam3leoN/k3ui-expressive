@@ -3562,7 +3562,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Text fields collect short user input. Outlined is the default for forms, filled suits denser surfaces, and standard (underline) stays the quietest. Pair labels, supporting text, and error text carefully; use leading or trailing icons for search, clear, or validation, and never rely on placeholder alone for the field’s name.
             </p>
           </header>
-          <div class="surface surface-flush stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.text-field.option.variant">variant</h3>
+              <p data-i18n="doc.text-field.option.variant.desc">
+                Outlined · filled · standard — same API, different chrome.
+              </p>
+            </header>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
@@ -3585,7 +3594,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </ol>
             <div class="grid-3">
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.outlined">Outlined</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.outlined">Outlined</h3></header>
             <k3-text-field
               variant="outlined"
                   data-i18n-label="playground.demo.text-field.email.label"
@@ -3646,7 +3655,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             ></k3-text-field>
               </div>
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.filled">Filled</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.filled">Filled</h3></header>
                 <k3-text-field
                   variant="filled"
                   data-i18n-label="playground.demo.text-field.email.label"
@@ -3707,7 +3716,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 ></k3-text-field>
               </div>
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.standard">Standard</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.standard">Standard</h3></header>
                 <k3-text-field
                   variant="standard"
                   data-i18n-label="playground.demo.text-field.email.label"
@@ -3767,6 +3776,70 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                   disabled
                 ></k3-text-field>
               </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-text-field
+                      variant="outlined"
+                      label="Disabled"
+                      value="Locked"
+                      disabled
+                    ></k3-text-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-text-field
+                      variant="outlined"
+                      label="Readonly"
+                      value="Read only"
+                      readonly
+                    ></k3-text-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-text-field
+                      variant="outlined"
+                      label="Username"
+                      value="taken"
+                      error="Already taken"
+                    ></k3-text-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.text-field.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.text-field.state.readonly"
+                    >readonly</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.text-field.state.error">error</span>
+                </li>
+              </ol>
             </div>
           </div>
         </article>

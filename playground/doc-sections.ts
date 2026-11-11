@@ -165,12 +165,22 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: "Pending gabarit migration" },
   },
   'text-field': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['--k3-text-field-max-width', '26rem', 'Host max width (ISO ranges fit)'],
+      ['--k3-tf-h', '3.5rem', 'Field height (56dp)'],
+      ['--k3-tf-outline', 'sys outline / primary', 'Stroke color by state'],
+    ],
+    keyboard: [
+      ['Tab', 'Focus field'],
+      ['Escape (clearable)', 'Does not clear — use clear button'],
+    ],
+    focus: 'doc.text-field.focus',
+    motion: [
+      ['Label float', 'WAAPI float on populate / focus', 'Instant when reduced'],
+      ['Outline cutout', 'Notch scaleX short3', 'Respects reduced motion'],
+    ],
+    a11y: 'doc.text-field.a11y',
+    versions: { na: 'Variants are chrome only — same element' },
   },
   'textarea': {
     theming: { na: "Pending gabarit migration" },
