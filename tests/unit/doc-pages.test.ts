@@ -55,6 +55,17 @@ const PAGE_TAGS: Record<string, string[]> = {
   alert: ['k3-alert'],
   tooltip: ['k3-tooltip'],
   badge: ['k3-badge'],
+  avatar: ['k3-avatar', 'k3-avatar-group'],
+  bubble: ['k3-bubble'],
+  quote: ['k3-quote'],
+  codeblock: ['k3-codeblock'],
+  carousel: ['k3-carousel'],
+  coverflow: ['k3-coverflow'],
+  card: ['k3-card'],
+  menu: ['k3-menu', 'k3-menu-item'],
+  list: ['k3-list', 'k3-list-item'],
+  table: ['k3-table'],
+  sheet: ['k3-sheet'],
   /* extend as pages leave PENDING_PAGES */
 };
 
@@ -108,7 +119,18 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'snackbar' &&
     id !== 'alert' &&
     id !== 'tooltip' &&
-    id !== 'badge',
+    id !== 'badge' &&
+    id !== 'avatar' &&
+    id !== 'bubble' &&
+    id !== 'quote' &&
+    id !== 'codeblock' &&
+    id !== 'carousel' &&
+    id !== 'coverflow' &&
+    id !== 'card' &&
+    id !== 'menu' &&
+    id !== 'list' &&
+    id !== 'table' &&
+    id !== 'sheet',
 );
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');

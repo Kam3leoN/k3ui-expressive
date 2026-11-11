@@ -57,10 +57,28 @@
 | `alert` | `docs(alert): gabarit complet` | Examples (variant/shape/dismissible) |
 | `tooltip` | `docs(tooltip): gabarit complet` | Examples (position/variant) + Versions |
 | `badge` | `docs(badge): gabarit complet` | Examples (dot/value/position) + States |
+| `avatar` | `docs(avatar): gabarit complet` | Examples (variant/status/size/…) + States |
+| `bubble` | `docs(bubble): gabarit complet` | Examples (placement/color) + States |
+| `quote` | `docs(quote): gabarit complet` | Examples (layout/tilt) + States |
+| `codeblock` | `docs(codeblock): gabarit complet` | Examples (collapsible/language) + States |
+| `carousel` | `docs(carousel): gabarit complet` | Examples (layouts) + States + Versions |
+| `coverflow` | `docs(coverflow): gabarit complet` | Examples (effect/orientation) + States + Versions |
+| `card` | `docs(card): gabarit complet` | Examples (variant/interactive/media/…) + States |
+| `menu` | `docs(menu): gabarit complet` | Examples (open-on/variant/density) + States + Versions |
+| `list` | `docs(list): gabarit complet` | Examples (variant/selection/expand/…) + States |
+| `table` | `docs(table): gabarit complet` | Examples (variant/columns) + States |
+| `sheet` | `docs(sheet): gabarit complet` | Examples (placement/width/side) + States + Versions |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — lot Containment ensuite. `marquee` / `countdown` / `sound-fx` restent k3ux (hors lot Feedback k3ui).
+Voir `PENDING_PAGES` — lot Navigation ensuite. Pages `product: k3ux` (dont `iso-filter`, `masonry`, composants feedback/anim/charts retirés du tree) restent PENDING jusqu’au lot UX ; noter composants absents de `src/components` comme bloqués pour gabarit k3ui.
+
+## Bloqués / hors lot k3ui (rester PENDING)
+
+| Page | Raison |
+| --- | --- |
+| `iso-filter`, `masonry` | `product: k3ux` + composants retirés de `src/components/containment/` |
+| `signature`, `rating`, `wheel-picker`, `countdown`, `marquee`, `sound-fx`, `confetti`, `text-bounce`, `text-scramble`, `heart-burst`, `halftone`, `card-holo`, `card-lenticular`, `card-scratch`, `audio-player`, `qr-code`, `charts-*` | `product: k3ux` (et/ou sources retirées du tree) — lot UX |
 
 ## Décisions humaines
 

@@ -8310,10 +8310,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Avatars identify people or entities with an image, initials, or both. Add presence status when online state matters, stack or grid groups for teams, and keep sizes sm · md · lg consistent in a view. Interactive avatars can open menus; respect LTR/RTL for badge and stack direction.
             </p>
           </header>
-
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.basic">Basic</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h3 data-i18n="doc.avatar.option.variant">variant / src</h3>
+              <p data-i18n="doc.avatar.option.variant.desc">
+                Image, outlined, elevated, or initials fallback.
+              </p>
             </header>
             <div class="avatar-demo-row">
               <k3-avatar
@@ -8336,7 +8342,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.initials">Letter initials</h2>
+              <h3 data-i18n="doc.avatar.option.tone">tone / shape / initials</h3>
+              <p data-i18n="doc.avatar.option.tone.desc">
+                Semantic tones and circle · rounded · square.
+              </p>
             </header>
             <div class="avatar-demo-row">
               <k3-avatar name="Jean Dupont" tone="primary"></k3-avatar>
@@ -8350,7 +8359,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.status">Presence status</h2>
+              <h3 data-i18n="doc.avatar.option.status">status</h3>
+              <p data-i18n="doc.avatar.option.status.desc">
+                Presence badge — online · offline · idle · away · dnd · busy.
+              </p>
             </header>
             <div class="avatar-demo-row">
               <k3-avatar
@@ -8388,7 +8400,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.badge-icon">Badge + icon</h2>
+              <h3 data-i18n="doc.avatar.option.badge">badge-icon / slot=badge</h3>
+              <p data-i18n="doc.avatar.option.badge.desc">
+                Symbol inside status, or custom badge slot.
+              </p>
             </header>
             <div class="avatar-demo-row">
               <k3-avatar
@@ -8423,7 +8438,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.stack">Stacked group</h2>
+              <h3 data-i18n="doc.avatar.option.layout-stack">layout=stack</h3>
+              <p data-i18n="doc.avatar.option.layout-stack.desc">
+                Overlapping avatar group.
+              </p>
             </header>
             <k3-avatar-group layout="stack" size="md">
               <k3-avatar
@@ -8444,7 +8462,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.stack-count">Stacked + count / icon</h2>
+              <h3 data-i18n="doc.avatar.option.max">max / group-count</h3>
+              <p data-i18n="doc.avatar.option.max.desc">
+                Overflow +N or custom count icon.
+              </p>
             </header>
             <div class="avatar-demo-stack">
               <k3-avatar-group layout="stack" size="md" max="3">
@@ -8466,7 +8487,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.grid">Grid</h2>
+              <h3 data-i18n="doc.avatar.option.layout-grid">layout=grid</h3>
+              <p data-i18n="doc.avatar.option.layout-grid.desc">
+                Equal grid of faces.
+              </p>
             </header>
             <k3-avatar-group class="avatar-demo-grid" layout="grid" size="md">
               <k3-avatar name="G1" src="https://api.dicebear.com/9.x/avataaars/svg?seed=G1"></k3-avatar>
@@ -8482,7 +8506,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.sizes">Sizes</h2>
+              <h3 data-i18n="doc.avatar.option.size">size</h3>
+              <p data-i18n="doc.avatar.option.size.desc">
+                sm · md · lg (32 · 40 · 56).
+              </p>
             </header>
             <div class="avatar-demo-row avatar-demo-row--baseline">
               <k3-avatar size="sm" name="Small" src="https://api.dicebear.com/9.x/avataaars/svg?seed=sm"></k3-avatar>
@@ -8496,7 +8523,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.menu">Menu trigger</h2>
+              <h3 data-i18n="doc.avatar.option.interactive">interactive</h3>
+              <p data-i18n="doc.avatar.option.interactive.desc">
+                Button face as menu trigger.
+              </p>
             </header>
             <k3-menu position="bottom-start" close-on-select aria-label="Account">
               <k3-avatar
@@ -8507,15 +8537,15 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 status="online"
               ></k3-avatar>
               <k3-menu-item value="profile">
-                <span slot="icon" class="ms">person</span>
+                <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="person" aria-hidden="true"></span>
                 Profile
               </k3-menu-item>
               <k3-menu-item value="settings">
-                <span slot="icon" class="ms">settings</span>
+                <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="settings" aria-hidden="true"></span>
                 Settings
               </k3-menu-item>
               <k3-menu-item value="logout">
-                <span slot="icon" class="ms">logout</span>
+                <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="logout" aria-hidden="true"></span>
                 Log out
               </k3-menu-item>
             </k3-menu>
@@ -8523,7 +8553,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg" dir="rtl">
             <header class="section-head sub">
-              <h2 data-i18n="doc.avatar.section.rtl">RTL</h2>
+              <h3 data-i18n="doc.avatar.option.rtl">dir=rtl</h3>
+              <p data-i18n="doc.avatar.option.rtl.desc">
+                Status and stack mirror in RTL.
+              </p>
             </header>
             <div class="avatar-demo-row">
               <k3-avatar
@@ -8539,7 +8572,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </k3-avatar-group>
             </div>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.avatar.states.blurb">
+              Interactive avatars are focusable buttons. Non-interactive faces are presentational — convey meaning via name/alt.
+            </p>
+          </div>
+</article>
 
         <!-- CARD -->
         <article class="comp-page" data-page="coverflow" id="page-coverflow" hidden>
@@ -8553,8 +8596,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Cover flow shows a row of covers in 3D.
             </p>
           </header>
-
-          <div class="demo-block">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<header class="section-head sub">
+              <h3 data-i18n="doc.coverflow.option.effect">effect / orientation / mode</h3>
+              <p data-i18n="doc.coverflow.option.effect.desc">
+                Coverflow or slide · horizontal/vertical · lightbox or flip · arrows · bullets.
+              </p>
+            </header>
+<div class="demo-block">
             <div class="coverflow-toolbar">
               <k3-button-group
                 id="cf-opts"
@@ -8680,7 +8732,25 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </div>
             </div>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.coverflow.states.blurb">
+              No disabled host state. Lightbox and flip are item/host options.
+            </p>
+          </div>
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.coverflow.versions.blurb">
+              coverflow vs slide effect; horizontal vs vertical orientation.
+            </p>
+          </div>
+</article>
 
         <article class="comp-page" data-page="card" id="page-card" hidden>
           <header class="section-head">
@@ -8693,9 +8763,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Cards group related content and actions. Filled suits quiet containers, outlined adds a border for separation, and elevated lifts primary content. Interactive cards can morph the border on hover; media slots work best with cover-fit imagery and a clear headline.
             </p>
           </header>
-          <div class="surface surface-flush stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.card.section.variants">Variants</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<div class="surface surface-flush stack gap-lg">
+            <header class="section-head sub">
+              <h3 data-i18n="doc.card.option.variant">variant</h3>
+              <p data-i18n="doc.card.option.variant.desc">
+                filled · outlined · elevated surfaces.
+              </p>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--cases grid-3">
@@ -8738,7 +8815,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="playground.demo.section.interactive">Interactive — border morph</h2>
+              <h3 data-i18n="doc.card.option.interactive">interactive</h3>
+              <p data-i18n="doc.card.option.interactive.desc">
+                Hover border morph + focus ring.
+              </p>
             </header>
             <p class="hint">Hover / focus : outline 1→2 dp + corner medium→large.</p>
             <div class="demo-block">
@@ -8779,7 +8859,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="playground.demo.section.media">Media</h2>
+              <h3 data-i18n="doc.card.option.media">media / media-layout</h3>
+              <p data-i18n="doc.card.option.media.desc">
+                Bleed or inset media header.
+              </p>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--cases grid-2">
@@ -8825,9 +8908,9 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.card.section.pricing">Pricing</h2>
-              <p data-i18n="doc.card.section.pricing.blurb">
-                Price · reduction (strikethrough) · percent as k3-chip.
+              <h3 data-i18n="doc.card.option.price">price / price-was / price-percent</h3>
+              <p data-i18n="doc.card.option.price.desc">
+                Tariff row or price slots.
               </p>
             </header>
             <div class="demo-block">
@@ -8903,9 +8986,9 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.card.section.horizontal">Horizontal</h2>
-              <p data-i18n="doc.card.section.horizontal.blurb">
-                Media at the start; stacks to vertical under 600 dp.
+              <h3 data-i18n="doc.card.option.orientation">orientation</h3>
+              <p data-i18n="doc.card.option.orientation.desc">
+                Horizontal media at start; stacks &lt;600dp.
               </p>
             </header>
             <div class="demo-block">
@@ -8981,9 +9064,9 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.card.section.anatomy">Anatomy</h2>
-              <p data-i18n="doc.card.section.anatomy.blurb">
-                Headline · subhead · supporting · actions · optional avatar &amp; overflow.
+              <h3 data-i18n="doc.card.option.slots">slots</h3>
+              <p data-i18n="doc.card.option.slots.desc">
+                Avatar, headline, subhead, actions anatomy.
               </p>
             </header>
             <div class="demo-block">
@@ -9058,9 +9141,9 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.card.section.dnd">Collection · drag &amp; dismiss</h2>
-              <p data-i18n="doc.card.section.dnd.blurb">
-                Coplanar resting elevation · lift when dragged · swipe / a11y menu to dismiss.
+              <h3 data-i18n="doc.card.option.sortable">drag-handle / dismissible</h3>
+              <p data-i18n="doc.card.option.sortable.desc">
+                Sortable collection and swipe dismiss.
               </p>
             </header>
             <div class="demo-block">
@@ -9140,7 +9223,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.card.states.blurb">
+              disabled blocks interaction. interactive enables hover morph, focus ring, and k3-click. dragged elevates for sortable sets.
+            </p>
+          </div>
+</article>
 
         <!-- LIST -->
         <article class="comp-page" data-page="list" id="page-list" hidden>
@@ -9157,13 +9250,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Selection modes: single (radio), multiple (checkbox), or hide the indicator.
             </p>
           </header>
-
-          <header class="section-head sub">
-            <h2 data-i18n="doc.list.section.variants">Variants</h2>
-            <p data-i18n="doc.list.section.variants.blurb">
-              Standard (continuous) · Segmented (M3E gaps + corner morph).
-            </p>
-          </header>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<header class="section-head sub">
+              <h3 data-i18n="doc.list.option.variant">variant</h3>
+              <p data-i18n="doc.list.option.variant.desc">
+                standard (continuous) · segmented (M3E gaps).
+              </p>
+            </header>
           <div class="demo-block">
             <div class="demo-frame demo-frame--cases grid-2">
               <div class="demo-case">
@@ -9224,11 +9320,11 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.list.section.content">Content modes</h2>
-            <p data-i18n="doc.list.section.content.blurb">
-              Default · overline · supporting text · leading media.
-            </p>
-          </header>
+              <h3 data-i18n="doc.list.option.leading">leading / lines</h3>
+              <p data-i18n="doc.list.option.leading.desc">
+                Avatar · image · video · overline · supporting.
+              </p>
+            </header>
           <div class="demo-block">
             <div class="demo-frame demo-frame--cases grid-2">
               <div class="demo-case">
@@ -9318,11 +9414,11 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.list.section.selection">Selection</h2>
-            <p data-i18n="doc.list.section.selection.blurb">
-              Checkboxes · switches · radio buttons (M3 selection controls).
-            </p>
-          </header>
+              <h3 data-i18n="doc.list.option.selection">selection</h3>
+              <p data-i18n="doc.list.option.selection.desc">
+                none · single · multiple · switch.
+              </p>
+            </header>
           <div class="demo-block">
             <div class="demo-frame demo-frame--cases grid-3">
               <div class="demo-case">
@@ -9395,12 +9491,11 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.list.section.accordion">Expand</h2>
-            <p data-i18n="doc.list.section.accordion.blurb">
-              M3E expand lives on List — standard (continuous) or segmented
-              (2 dp gaps). Exclusive (`accordion`) = one row open.
-            </p>
-          </header>
+              <h3 data-i18n="doc.list.option.expandable">expandable / accordion</h3>
+              <p data-i18n="doc.list.option.expandable.desc">
+                Expand rows; exclusive when accordion.
+              </p>
+            </header>
           <div class="demo-block">
             <div class="demo-frame demo-frame--cases grid-2">
               <div class="demo-case">
@@ -9489,11 +9584,11 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.list.section.dnd">Drag · dismiss</h2>
-            <p data-i18n="doc.list.section.dnd.blurb">
-              Sortable reorder · swipe dismiss · long-press / context menu a11y.
-            </p>
-          </header>
+              <h3 data-i18n="doc.list.option.sortable">sortable / dismissible</h3>
+              <p data-i18n="doc.list.option.sortable.desc">
+                Reorder and swipe dismiss.
+              </p>
+            </header>
           <div class="demo-block">
             <div class="demo-frame demo-frame--cases demo-frame--stack">
               <div class="demo-case">
@@ -9538,7 +9633,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </li>
             </ol>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.list.states.blurb">
+              disabled / selected on items. Selection modes drive radio, checkbox, or switch chrome.
+            </p>
+          </div>
+</article>
 
         <!-- APP BAR -->
         <article class="comp-page" data-page="app-bar" id="page-app-bar" hidden>
@@ -10446,7 +10551,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Tables present structured data with clear headers, alignment, and optional status chips. Use outlined or filled surfaces, keep numeric columns end-aligned, and prefer resource links for external references. Generated rows work well for token dumps; handcrafted markup suits rowspan and rich cells.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<header class="section-head sub">
+              <h3 data-i18n="doc.table.option.variant">variant / slotted table</h3>
+              <p data-i18n="doc.table.option.variant.desc">
+                Outlined or filled frame with native table markup.
+              </p>
+            </header>
+<div class="surface stack gap-lg">
             <ol class="variant-guide">
               <li><span class="pill-num">1</span><span class="variant-label">header tint</span></li>
               <li><span class="pill-num">2</span><span class="variant-label">status chips</span></li>
@@ -10517,7 +10632,12 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </tbody>
               </table>
             </k3-table>
-            <header class="section-head sub"><h2 data-i18n="playground.demo.section.table.generated">Generated · status auto</h2></header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.table.option.columns">columns / rows / density</h3>
+              <p data-i18n="doc.table.option.columns.desc">
+                Generated CSV headers + JSON rows; compact density.
+              </p>
+            </header>
             <k3-table
               variant="outlined"
               columns="Name, Role, Status"
@@ -10531,7 +10651,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               rows='[["row.height","56 dp"],["pad.inline","16 dp"],["shape","medium 12 dp"],["header","surface-container"]]'
             ></k3-table>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.table.states.blurb">
+              No disabled host state — presentation only.
+            </p>
+          </div>
+</article>
 
         <!-- MENU -->
         <article class="comp-page" data-page="menu" id="page-menu" hidden>
@@ -10547,12 +10677,15 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Menus list actions or options from a trigger. Prefer vertical Expressive for new UI, with standard or vibrant color, density steps, and optional supporting text — not nested controls. Animate enter/exit with opacity and scale from the trigger; submenus follow the same motion after placement.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.menu.section.open-on">Open trigger</h2>
-              <p data-i18n="doc.menu.section.open-on.blurb">
-                <code>open-on="click"</code> (default) or <code>open-on="hover"</code> —
-                propagates to nested submenus.
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h3 data-i18n="doc.menu.option.open-on">open-on</h3>
+              <p data-i18n="doc.menu.option.open-on.desc">
+                click (default) or hover — propagates to submenus.
               </p>
             </header>
             <div class="demo-block">
@@ -10598,6 +10731,12 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </ol>
             </div>
 
+            <header class="section-head sub">
+              <h3 data-i18n="doc.menu.option.variant">variant / color</h3>
+              <p data-i18n="doc.menu.option.variant.desc">
+                vertical Expressive · baseline · standard / vibrant surfaces.
+              </p>
+            </header>
             <ol class="variant-guide">
               <li><span class="pill-num">1</span><span class="variant-label">Menu Standard</span></li>
               <li><span class="pill-num">2</span><span class="variant-label">Menu Vibrant</span></li>
@@ -10694,10 +10833,9 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.menu.section.supporting">Two lines (supporting-text)</h2>
-              <p data-i18n="doc.menu.section.supporting.blurb">
-                M3’s caution is about nested actions (buttons, switches), not a second text
-                line. Use the supporting-text slot — one action per item.
+              <h3 data-i18n="doc.menu.option.supporting-text">supporting-text</h3>
+              <p data-i18n="doc.menu.option.supporting-text.desc">
+                Second line under the label (no nested controls).
               </p>
             </header>
             <div class="row wrap gap-md items-start">
@@ -10726,10 +10864,9 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.menu.section.density">Density</h2>
-              <p data-i18n="doc.menu.section.density.blurb">
-                On web, density levels control spacing between elements. Increasing density
-                decreases top and bottom padding (0 = default, −3 = densest).
+              <h3 data-i18n="doc.menu.option.density">density</h3>
+              <p data-i18n="doc.menu.option.density.desc">
+                M3 density 0 · -1 · -2 · -3.
               </p>
             </header>
             <div class="row wrap gap-md items-start">
@@ -10787,7 +10924,25 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </k3-menu>
             </div>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.menu.states.blurb">
+              Items may be disabled. Open/close lifecycle traps focus in the panel.
+            </p>
+          </div>
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.menu.versions.blurb">
+              Vertical Expressive (recommended) vs baseline chrome.
+            </p>
+          </div>
+</article>
 
         <!-- SHEET -->
         <article class="comp-page" data-page="sheet" id="page-sheet" hidden>
@@ -10801,7 +10956,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Sheets present supplementary surfaces — bottom sheets at 640 dp or full height, and side sheets for wider layouts. Use a 48 dp drag handle, modal scrim when focus must stay in the sheet, and clear open/close lifecycle hooks so the host page restores scroll and focus.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<header class="section-head sub">
+              <h3 data-i18n="doc.sheet.option.placement">placement / width / side</h3>
+              <p data-i18n="doc.sheet.option.placement.desc">
+                Bottom standard/full · side start/end · modal scrim.
+              </p>
+            </header>
+<div class="surface stack gap-lg">
             <ol class="variant-guide">
               <li><span class="pill-num">1</span><span class="variant-label">bottom 640</span></li>
               <li><span class="pill-num">2</span><span class="variant-label">bottom full</span></li>
@@ -10851,7 +11016,25 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               >
             </k3-sheet>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.sheet.states.blurb">
+              open controls visibility. modal adds scrim + focus trap; Escape and drag dismiss when enabled.
+            </p>
+          </div>
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.sheet.versions.blurb">
+              Bottom sheet vs side sheet layouts.
+            </p>
+          </div>
+</article>
 
 
         <!-- CONTAINMENT: BUBBLE -->
@@ -10868,7 +11051,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               body color for emphasis or semantic tone.
             </p>
           </header>
-          <div class="demo-block">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<header class="section-head sub">
+              <h3 data-i18n="doc.bubble.option.placement">placement / color</h3>
+              <p data-i18n="doc.bubble.option.placement.desc">
+                start · end alignment and body color tones.
+              </p>
+            </header>
+<div class="demo-block">
             <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage">
@@ -10903,7 +11096,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <li><span class="pill-num">3</span><span class="variant-label">Semantic color</span></li>
             </ol>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.bubble.states.blurb">
+              No disabled/error host states — placement and color are the primary options.
+            </p>
+          </div>
+</article>
 
         <!-- CONTAINMENT: QUOTE -->
         <article class="comp-page" data-page="quote" id="page-quote" hidden>
@@ -10919,7 +11122,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               deepens the tilt on hover only. Add an optional action link for “Read more”.
             </p>
           </header>
-          <div class="demo-block">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<header class="section-head sub">
+              <h3 data-i18n="doc.quote.option.layout">layout / tilt</h3>
+              <p data-i18n="doc.quote.option.layout.desc">
+                author-start · author-end columns; optional tilt.
+              </p>
+            </header>
+<div class="demo-block">
             <div class="demo-frame demo-frame--cases grid-2" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage" style="width: 100%; padding: 0.75rem">
@@ -10983,7 +11196,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </li>
             </ol>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.quote.states.blurb">
+              Tilt deepens on hover when tilt is set; no disabled state on the host.
+            </p>
+          </div>
+</article>
 
         <!-- CONTAINMENT: CODE BLOCK -->
         <article class="comp-page" data-page="codeblock" id="page-codeblock" hidden>
@@ -10999,7 +11222,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Pass source via the default slot or the code property.
             </p>
           </header>
-          <div class="demo-block">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<header class="section-head sub">
+              <h3 data-i18n="doc.codeblock.option.collapsible">collapsible</h3>
+              <p data-i18n="doc.codeblock.option.collapsible.desc">
+                Faded preview with Show / Hide code; multi-tab samples via slotted pre.
+              </p>
+            </header>
+<div class="demo-block">
             <div
               class="demo-frame demo-frame--cases k3-layout-grid"
               data-demo-enhance="off"
@@ -11047,14 +11280,29 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             </ol>
           </div>
           <div class="demo-block">
-            <h2 data-i18n="doc.codeblock.section.languages">Languages</h2>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.codeblock.option.language">language</h3>
+              <p data-i18n="doc.codeblock.option.language.desc">
+                Grammar id — all ship in the main bundle.
+              </p>
+            </header>
             <p data-i18n="doc.codeblock.section.languages.blurb">Pick a language — all grammars ship in the main bundle.</p>
             <div class="codeblock-gallery">
               <k3-select id="codeblock-lang" variant="outlined" label="Language" data-i18n-label="doc.codeblock.lang.label"></k3-select>
               <k3-codeblock id="codeblock-gallery" label="PHP" language="php"></k3-codeblock>
             </div>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.codeblock.states.blurb">
+              Copy / download fire events on success. Collapsed preview uses collapsed-height until expanded.
+            </p>
+          </div>
+</article>
 
         <!-- CONTAINMENT: CAROUSEL -->
         <article class="comp-page" data-page="carousel" id="page-carousel" hidden>
@@ -11072,8 +11320,17 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               pattern — no autoplay.
             </p>
           </header>
-
-          <div class="demo-block" id="carousel-multi-lab">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+<header class="section-head sub">
+              <h3 data-i18n="doc.carousel.option.layout">layout=multi-browse</h3>
+              <p data-i18n="doc.carousel.option.layout.desc">
+                Multi-browse with controls, bottom indicators, and loop.
+              </p>
+            </header>
+<div class="demo-block" id="carousel-multi-lab">
             <div
               class="carousel-lab-controls"
               style="margin-block-end: var(--k3-sys-spacing-space200); max-width: 14rem"
@@ -11151,11 +11408,11 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.carousel.section.hero">Hero</h2>
-            <p data-i18n="doc.carousel.section.hero.blurb">
-              One large item with small peeks — align start or center.
-            </p>
-          </header>
+              <h3 data-i18n="doc.carousel.option.layout-hero">layout=hero</h3>
+              <p data-i18n="doc.carousel.option.layout-hero.desc">
+                One large item with small peeks — align start or center.
+              </p>
+            </header>
           <div class="demo-block">
             <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
               <div class="demo-case">
@@ -11236,11 +11493,11 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.carousel.section.uncontained">Uncontained</h2>
-            <p data-i18n="doc.carousel.section.uncontained.blurb">
-              Same-size items cut off at the edge — free scroll, no snap.
-            </p>
-          </header>
+              <h3 data-i18n="doc.carousel.option.layout-uncontained">layout=uncontained</h3>
+              <p data-i18n="doc.carousel.option.layout-uncontained.desc">
+                Same-size items cut off at the edge — free scroll.
+              </p>
+            </header>
           <div class="demo-block">
             <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
               <div class="demo-case">
@@ -11286,11 +11543,11 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.carousel.section.fullscreen">Full-screen</h2>
-            <p data-i18n="doc.carousel.section.fullscreen.blurb">
-              One edge-to-edge item at a time — vertical snap.
-            </p>
-          </header>
+              <h3 data-i18n="doc.carousel.option.layout-fullscreen">layout=full-screen</h3>
+              <p data-i18n="doc.carousel.option.layout-fullscreen.desc">
+                Vertical paging for immersive media.
+              </p>
+            </header>
           <div class="demo-block">
             <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
               <div class="demo-case">
@@ -11332,7 +11589,25 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               </li>
             </ol>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.carousel.states.blurb">
+              No disabled host state. Focal index updates on settle (k3-change).
+            </p>
+          </div>
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.carousel.versions.blurb">
+              multi-browse · hero · uncontained · full-screen layouts.
+            </p>
+          </div>
+</article>
 
         <!-- CONTAINMENT: ISO FILTER -->
         <article class="comp-page" data-page="iso-filter" id="page-iso-filter" hidden>
