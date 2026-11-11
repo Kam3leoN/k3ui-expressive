@@ -26,10 +26,11 @@
 | `checkbox` | `docs(checkbox): gabarit complet` | Examples + States |
 | `radio` | `docs(radio): gabarit complet` | Examples (name) + States |
 | `switch` | `docs(switch): gabarit complet` | Examples (selected) + States |
+| `chip` | `docs(chip): gabarit complet` | Examples (variant…) + States + Versions |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — prochain : `chip`, `autocomplete`, `counter`, …
+Voir `PENDING_PAGES` — prochain : `autocomplete`, `counter`, `slider`, …
 
 ## Décisions humaines
 

@@ -294,12 +294,21 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: 'Single on/off control' },
   },
   'chip': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['elevated', 'elevation 1', 'Lift without outline (not input)'],
+      ['status tones', 'semantic colors', 'available · success · error · …'],
+    ],
+    keyboard: [
+      ['Enter / Space', 'Activate / toggle filter'],
+      ['Backspace / Delete', 'Remove when removable / input'],
+      ['Arrow keys (in chip-set)', 'Move between chips'],
+    ],
+    focus: 'doc.chip.focus',
+    motion: [
+      ['Select / remove', 'State-layer + haptic', 'Instant when reduced'],
+    ],
+    a11y: 'doc.chip.a11y',
+    versions: 'doc.chip.versions.blurb',
   },
   'autocomplete': {
     theming: { na: "Pending gabarit migration" },

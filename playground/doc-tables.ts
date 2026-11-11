@@ -1387,13 +1387,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['avatar', 'Leading avatar (24 · input)'],
       ['trailing', 'Trailing icon (filter → menu button)'],
     ],
-    methods: [
-      [
-        'k3-chip-set › selectedValues()',
-        '() => string[]',
-        'Selected values in the set',
-      ],
-    ],
+    methods: { na: 'No public methods on k3-chip — use k3-chip-set.selectedValues()' },
     /* chip-set host attrs (documented on Chips page) */
     options: [
       [

@@ -4946,9 +4946,13 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </header>
 
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.chip.section.types">Variants</h2>
+              <h3 data-i18n="doc.chip.option.variant">variant</h3>
               <p data-i18n="doc.chip.section.types.blurb">
                 Assist · filter · input · suggestion — four contexts.
               </p>
@@ -4992,7 +4996,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.chip.section.elevated">Elevated</h2>
+              <h3 data-i18n="doc.chip.option.elevated">elevated</h3>
               <p data-i18n="doc.chip.section.elevated.blurb">
                 Assist · filter · suggestion — elevation 1, no outline. Input stays flat.
               </p>
@@ -5009,7 +5013,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.chip.section.set">Chip set</h2>
+              <h3 data-i18n="doc.chip.option.chip-set">k3-chip-set</h3>
               <p data-i18n="doc.chip.section.set.blurb">
                 Group with multi or exclusive selection · arrow keys.
               </p>
@@ -5038,7 +5042,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.chip.section.sortable">Sortable</h2>
+              <h3 data-i18n="doc.chip.option.sortable">sortable</h3>
               <p data-i18n="doc.chip.section.sortable.blurb">
                 Drag to reorder — shared <code>attachSortable</code> / <code>K3UI.dnd</code>.
               </p>
@@ -5053,7 +5057,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.chip.section.input">Input chip</h2>
+              <h3 data-i18n="doc.chip.option.input">variant=input</h3>
               <p data-i18n="doc.chip.section.input.blurb">
                 Clearable — pad start 16 · end 8. With avatar 24 — pad start 4.
               </p>
@@ -5083,7 +5087,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.chip.section.filter">Filter chip</h2>
+              <h3 data-i18n="doc.chip.option.filter">variant=filter</h3>
               <p data-i18n="doc.chip.section.filter.blurb">
                 Container · label · leading icon · trailing icon.
               </p>
@@ -5129,7 +5133,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.chip.section.status">Status</h2>
+              <h3 data-i18n="doc.chip.option.status">status</h3>
               <p data-i18n="doc.chip.section.status.blurb">
                 Colored label pills (table Available / Unavailable) — not notification badges.
               </p>
@@ -5156,7 +5160,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.chip.section.forced">Forced tones</h2>
+              <h3 data-i18n="doc.chip.option.forced">Forced tones</h3>
               <p data-i18n="doc.chip.section.forced.blurb">
                 Semantic status — success · error · info · note · warning.
               </p>
@@ -5189,6 +5193,58 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <k3-chip status="info">Info</k3-chip>
               <k3-chip status="note">Note</k3-chip>
               <k3-chip status="warning">Warning</k3-chip>
+            </div>
+          </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-chip variant="filter" selected>Selected</k3-chip>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-chip variant="assist" disabled>Disabled</k3-chip>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-chip variant="input" removable>Removable</k3-chip>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.chip.state.selected"
+                    >selected</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.chip.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.chip.state.removable"
+                    >removable</span
+                  >
+                </li>
+              </ol>
             </div>
           </div>
         </article>
