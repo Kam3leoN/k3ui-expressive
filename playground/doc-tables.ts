@@ -1236,10 +1236,10 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
     properties: [
       ['label', 'string', "''", 'Legend (cuts top border)'],
       ['supporting-text', 'string', "''", 'Helper under group'],
-      ['error', 'string', "''", 'Error — replaces supporting + outline'],
-      ['disabled', 'boolean', 'false', 'Disables fieldset + children'],
+      ['error', 'string', "''", 'Error — replaces supporting + error chrome'],
+      ['disabled', 'boolean', 'false', 'Disables fieldset + known children'],
     ],
-    events: [],
+    events: { na: 'No custom events — children emit their own' },
     slots: [['(default)', 'k3-text-field · k3-select · k3-checkbox · …']],
     'css-parts': [
       ['fieldset', 'Fieldset shell'],
@@ -1251,6 +1251,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
   'pin-field': {
     properties: [
       ['label', 'string', "''", 'Static label above cells'],
+      ['name', 'string', "''", 'Form name'],
       ['value', 'string', "''", 'Joined code'],
       ['length', 'number', '6', 'Cell count (2–12)'],
       ['charset', "'numeric'|'alpha'|'alphanumeric'", 'numeric', 'Allowed characters'],
@@ -1260,20 +1261,23 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['variant', "'filled'|'outlined'|'standard'", 'outlined', 'Cell chrome'],
       ['supporting-text', 'string', "''", 'Helper'],
       ['error', 'string', "''", 'Error message (red borders)'],
-      ['success-text', 'string', "''", 'Success helper (green borders when active)'],
+      ['success-text', 'string', "''", 'Success helper (with success())'],
       ['disabled', 'boolean', 'false', 'Disables'],
+      ['readonly', 'boolean', 'false', 'Read-only cells'],
+      ['required', 'boolean', 'false', 'Required'],
+      ['autocomplete', "'one-time-code'|'off'|''", 'one-time-code', 'Native autocomplete'],
     ],
     methods: [
       ['success', '(message?: string) => void', 'Mark PIN correct — green borders'],
       ['clearSuccess', '() => void', 'Clear success chrome'],
     ],
     events: [
-      ['k3-input', 'value', 'Each change'],
-      ['k3-change', 'value', 'Commit'],
-      ['k3-complete', 'value', 'All cells filled'],
-      ['k3-success', 'value, message', 'After success()'],
+      ['k3-input', '{ value }', 'Each change'],
+      ['k3-change', '{ value }', 'Commit'],
+      ['k3-complete', '{ value }', 'All cells filled'],
+      ['k3-success', '{ value, message }', 'After success()'],
     ],
-    slots: [],
+    slots: { na: 'No slots — cells are generated' },
     'css-parts': [
       ['label', 'Static label'],
       ['row', 'Cell row'],

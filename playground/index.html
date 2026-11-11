@@ -4046,56 +4046,95 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Field groups wrap related inputs in a fieldset with a legend so assistive tech announces the shared context. Use them for address blocks, credentials, or any cluster that shares validation. Errors on the group should explain the whole set; field-level errors stay on the individual control.
             </p>
           </header>
-          <div class="surface surface-flush stack gap-lg">
-            <ol class="variant-guide">
-              <li>
-                <span class="pill-num">1</span
-                ><span class="variant-label" data-i18n="playground.demo.field-group.form.label"
-                  >Form</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">2</span
-                ><span class="variant-label" data-i18n="playground.demo.with-error"
-                  >With error</span
-                >
-              </li>
-            </ol>
-            <div class="grid-2">
-              <div class="stack gap-md">
-                <k3-field-group data-i18n-label="playground.demo.field-group.form.label">
-                  <k3-text-field
-                    variant="outlined"
-                    data-i18n-label="playground.demo.variant.outlined"
-                  ></k3-text-field>
-                  <k3-text-field
-                    variant="filled"
-                    data-i18n-label="playground.demo.variant.filled"
-                  ></k3-text-field>
-                  <k3-text-field
-                    variant="standard"
-                    data-i18n-label="playground.demo.variant.standard"
-                  ></k3-text-field>
-                </k3-field-group>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.field-group.option.label">label</h3>
+              <p data-i18n="doc.field-group.option.label.desc">
+                Legend text that cuts the top border of the fieldset.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-field-group data-i18n-label="playground.demo.field-group.form.label">
+                      <k3-text-field
+                        variant="outlined"
+                        data-i18n-label="playground.demo.variant.outlined"
+                      ></k3-text-field>
+                      <k3-text-field
+                        variant="filled"
+                        data-i18n-label="playground.demo.variant.filled"
+                      ></k3-text-field>
+                      <k3-text-field
+                        variant="standard"
+                        data-i18n-label="playground.demo.variant.standard"
+                      ></k3-text-field>
+                    </k3-field-group>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
               </div>
-              <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.with-error">With error</h2></header>
-                <k3-field-group
-                  data-i18n-label="playground.demo.field-group.login.label"
-                  data-i18n-error="playground.demo.field-group.login.error"
-                >
-                  <k3-text-field
-                    variant="outlined"
-                    data-i18n-label="playground.demo.text-field.username.label"
-                    data-i18n-error="playground.demo.field-group.required.error"
-                  ></k3-text-field>
-                  <k3-text-field
-                    variant="outlined"
-                    data-i18n-label="playground.demo.text-field.password.label"
-                    type="password"
-                  ></k3-text-field>
-                </k3-field-group>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-field-group
+                      data-i18n-label="playground.demo.field-group.login.label"
+                      data-i18n-error="playground.demo.field-group.login.error"
+                    >
+                      <k3-text-field
+                        variant="outlined"
+                        data-i18n-label="playground.demo.text-field.username.label"
+                        data-i18n-error="playground.demo.field-group.required.error"
+                      ></k3-text-field>
+                      <k3-text-field
+                        variant="outlined"
+                        data-i18n-label="playground.demo.text-field.password.label"
+                        type="password"
+                      ></k3-text-field>
+                    </k3-field-group>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-field-group label="Disabled" disabled>
+                      <k3-text-field variant="outlined" label="Email" value="a@b.c"></k3-text-field>
+                      <k3-text-field variant="outlined" label="Name" value="Ada"></k3-text-field>
+                    </k3-field-group>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
               </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.field-group.state.error">error</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.field-group.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+              </ol>
             </div>
           </div>
         </article>
@@ -4111,7 +4150,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               PIN and OTP fields collect fixed-length codes one character at a time. Pick numeric, alpha, or alphanumeric charsets to match the source, enable masking for secrets, and group cells when codes are spoken in chunks. Autofocus the first empty cell and move focus forward as the user types.
             </p>
           </header>
-          <div class="surface surface-flush stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.pin-field.option.variant">variant</h3>
+              <p data-i18n="doc.pin-field.option.variant.desc">
+                Outlined · filled · standard cell chrome. Each column shows numeric, alpha, and alphanumeric charsets.
+              </p>
+            </header>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
@@ -4134,7 +4182,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </ol>
             <div class="grid-3">
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.outlined">Outlined</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.outlined">Outlined</h3></header>
                 <k3-pin-field
                   data-pin-code="4242"
                   data-i18n-supporting-text="playground.demo.pin.code.numeric"
@@ -4158,7 +4206,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 ></k3-pin-field>
               </div>
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.filled">Filled</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.filled">Filled</h3></header>
                 <k3-pin-field
                   data-pin-code="4242"
                   data-i18n-supporting-text="playground.demo.pin.code.numeric"
@@ -4182,7 +4230,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 ></k3-pin-field>
               </div>
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.standard">Standard</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.standard">Standard</h3></header>
                 <k3-pin-field
                   data-pin-code="4242"
                   data-i18n-supporting-text="playground.demo.pin.code.numeric"
@@ -4205,6 +4253,123 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                   variant="standard"
                 ></k3-pin-field>
               </div>
+            </div>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.pin-field.option.mask">mask</h3>
+              <p data-i18n="doc.pin-field.option.mask.desc">
+                Hide characters as bullets — use for secrets.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-pin-field
+                      label="PIN"
+                      value="4242"
+                      length="4"
+                      mask
+                      variant="outlined"
+                    ></k3-pin-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-pin-field
+                      label="OTP"
+                      value="123456"
+                      length="6"
+                      group-size="3"
+                      variant="outlined"
+                      supporting-text="Grouped 3+3"
+                    ></k3-pin-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.pin-field.option.mask">mask</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.pin-field.option.group-size"
+                    >group-size</span
+                  >
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-pin-field
+                      label="Disabled"
+                      value="12"
+                      length="4"
+                      disabled
+                      variant="outlined"
+                    ></k3-pin-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-pin-field
+                      label="Error"
+                      value="0000"
+                      length="4"
+                      error="Wrong code"
+                      variant="outlined"
+                    ></k3-pin-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-pin-field
+                      label="Success"
+                      value="4242"
+                      length="4"
+                      success-text="Correct"
+                      variant="outlined"
+                    ></k3-pin-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.pin-field.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.pin-field.state.error">error</span>
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.pin-field.state.success"
+                    >success</span
+                  >
+                </li>
+              </ol>
             </div>
           </div>
         </article>
