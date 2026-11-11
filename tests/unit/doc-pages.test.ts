@@ -17,6 +17,7 @@ const PAGE_TAGS: Record<string, string[]> = {
   buttons: ['k3-button'],
   'text-field': ['k3-text-field'],
   dialog: ['k3-dialog'],
+  textarea: ['k3-textarea'],
   /* extend as pages leave PENDING_PAGES */
 };
 
@@ -29,7 +30,11 @@ const CATALOG_IDS = DOC_COMPONENTS.filter(
  * Empty → étape D (clôture).
  */
 export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
-  (id) => id !== 'buttons' && id !== 'text-field' && id !== 'dialog',
+  (id) =>
+    id !== 'buttons' &&
+    id !== 'text-field' &&
+    id !== 'dialog' &&
+    id !== 'textarea',
 );
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');

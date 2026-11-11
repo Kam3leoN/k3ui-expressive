@@ -19,10 +19,11 @@
 | `buttons` | `docs(buttons): gabarit complet` | Examples (shape/variant/size) + States |
 | `text-field` | `docs(text-field): gabarit complet` | Examples (variant) + States |
 | `dialog` | `docs(dialog): gabarit complet` | Examples (variant) + Versions |
+| `textarea` | `docs(textarea): gabarit complet` | Examples (variant, rows) + States |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` (88 ids) — prochain lot Inputs : `textarea`, `field-group`, `pin-field`, …
+Voir `PENDING_PAGES` — prochain : `field-group`, `pin-field`, `select`, …
 
 ## Décisions humaines
 

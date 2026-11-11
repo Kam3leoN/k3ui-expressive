@@ -3855,7 +3855,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Text areas capture multiline content with the same chrome as text fields. Choose outlined, filled, or standard to match neighboring inputs, set a sensible rows default, and expose max-length when the backend enforces one. Keep supporting text for guidance, not for repeating the label.
             </p>
           </header>
-          <div class="surface surface-flush stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.textarea.option.variant">variant</h3>
+              <p data-i18n="doc.textarea.option.variant.desc">
+                Outlined · filled · standard — same API as text fields, multiline locked on.
+              </p>
+            </header>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
@@ -3878,7 +3887,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </ol>
             <div class="grid-3">
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.outlined">Outlined</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.outlined">Outlined</h3></header>
                 <k3-textarea
                   variant="outlined"
                   data-i18n-label="playground.demo.textarea.description.label"
@@ -3889,7 +3898,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 ></k3-textarea>
               </div>
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.filled">Filled</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.filled">Filled</h3></header>
                 <k3-textarea
                   variant="filled"
                   data-i18n-label="playground.demo.textarea.description.label"
@@ -3900,7 +3909,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 ></k3-textarea>
               </div>
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.standard">Standard</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.standard">Standard</h3></header>
                 <k3-textarea
                   variant="standard"
                   data-i18n-label="playground.demo.textarea.description.label"
@@ -3910,6 +3919,118 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                   rows="4"
                 ></k3-textarea>
               </div>
+            </div>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.textarea.option.rows">rows</h3>
+              <p data-i18n="doc.textarea.option.rows.desc">
+                Visible row count (default 4). Same chrome tokens as k3-text-field.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-textarea
+                      variant="outlined"
+                      label="Short"
+                      rows="2"
+                      value="Two rows"
+                    ></k3-textarea>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-textarea
+                      variant="outlined"
+                      label="Tall"
+                      rows="6"
+                      value="Six rows of space"
+                    ></k3-textarea>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label">rows="2"</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label">rows="6"</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-textarea
+                      variant="outlined"
+                      label="Disabled"
+                      value="Locked"
+                      rows="3"
+                      disabled
+                    ></k3-textarea>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-textarea
+                      variant="outlined"
+                      label="Readonly"
+                      value="Read only"
+                      rows="3"
+                      readonly
+                    ></k3-textarea>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-textarea
+                      variant="outlined"
+                      label="Notes"
+                      value="Too short"
+                      rows="3"
+                      error="Add more detail"
+                    ></k3-textarea>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.textarea.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.textarea.state.readonly"
+                    >readonly</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.textarea.state.error">error</span>
+                </li>
+              </ol>
             </div>
           </div>
         </article>
