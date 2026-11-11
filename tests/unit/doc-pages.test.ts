@@ -37,7 +37,8 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'text-field' &&
     id !== 'dialog' &&
     id !== 'textarea' &&
-    id !== 'field-group',
+    id !== 'field-group' &&
+    id !== 'pin-field',
 );
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');
