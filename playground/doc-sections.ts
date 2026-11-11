@@ -311,12 +311,21 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: 'doc.chip.versions.blurb',
   },
   'autocomplete': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['field chrome', 'text-field tokens', 'Same variants as k3-text-field'],
+      ['panel', 'menu surface', 'Listbox under field'],
+    ],
+    keyboard: [
+      ['ArrowDown / ArrowUp', 'Move active option'],
+      ['Enter', 'Commit highlighted option'],
+      ['Escape', 'Close panel'],
+    ],
+    focus: 'doc.autocomplete.focus',
+    motion: [
+      ['Open / close', 'Panel toggle', 'Respects reduced motion'],
+    ],
+    a11y: 'doc.autocomplete.a11y',
+    versions: { na: 'Single combobox layout' },
   },
   'counter': {
     theming: [

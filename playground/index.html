@@ -10673,34 +10673,95 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               variant and supporting text to neighboring fields, and commit selection with k3-change.
             </p>
           </header>
-          <div class="demo-block">
-            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 18rem">
-                  <k3-autocomplete
-                    label="Country"
-                    supporting-text="Type to filter"
-                    options='[{"value":"fr","label":"France"},{"value":"de","label":"Germany"},{"value":"es","label":"Spain"},{"value":"it","label":"Italy"}]'
-                  ></k3-autocomplete>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.autocomplete.option.variant">variant / filter</h3>
+              <p data-i18n="doc.autocomplete.option.variant.desc">
+                Field chrome plus contains or starts-with matching.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: 100%; max-width: 18rem">
+                    <k3-autocomplete
+                      label="Country"
+                      supporting-text="Type to filter"
+                      options='[{"value":"fr","label":"France"},{"value":"de","label":"Germany"},{"value":"es","label":"Spain"},{"value":"it","label":"Italy"}]'
+                    ></k3-autocomplete>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
                 </div>
-                <span class="demo-case-num" aria-hidden="true">1</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 18rem">
-                  <k3-autocomplete
-                    label="City"
-                    variant="filled"
-                    filter="starts-with"
-                    options='[{"value":"par","label":"Paris"},{"value":"ber","label":"Berlin"},{"value":"mad","label":"Madrid"}]'
-                  ></k3-autocomplete>
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: 100%; max-width: 18rem">
+                    <k3-autocomplete
+                      label="City"
+                      variant="filled"
+                      filter="starts-with"
+                      options='[{"value":"par","label":"Paris"},{"value":"ber","label":"Berlin"},{"value":"mad","label":"Madrid"}]'
+                    ></k3-autocomplete>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
                 </div>
-                <span class="demo-case-num" aria-hidden="true">2</span>
               </div>
+              <ol class="variant-guide">
+                <li><span class="pill-num">1</span><span class="variant-label">Outlined · contains</span></li>
+                <li><span class="pill-num">2</span><span class="variant-label">Filled · starts-with</span></li>
+              </ol>
             </div>
-            <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">Outlined · contains</span></li>
-              <li><span class="pill-num">2</span><span class="variant-label">Filled · starts-with</span></li>
-            </ol>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: 100%; max-width: 18rem">
+                    <k3-autocomplete
+                      label="Disabled"
+                      disabled
+                      options='[{"value":"a","label":"Alpha"}]'
+                    ></k3-autocomplete>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: 100%; max-width: 18rem">
+                    <k3-autocomplete
+                      label="Loading"
+                      loading
+                      options='[]'
+                    ></k3-autocomplete>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.autocomplete.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.autocomplete.state.loading"
+                    >loading</span
+                  >
+                </li>
+              </ol>
+            </div>
           </div>
         </article>
 
