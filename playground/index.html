@@ -828,49 +828,35 @@ import 'k3ux/holo-effects.css';
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.ripple.section.demo">Try it</h2>
-              <p data-i18n="doc.ripple.section.demo.blurb">
-                Press and hold — ink grows from the contact point (Material Web parity).
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.ripple.option.bounded">bounded</h3>
+              <p data-i18n="doc.ripple.option.bounded.desc">
+                Press and hold — ink grows from the contact point (Material Web parity). Buttons include ripple by default.
               </p>
             </header>
-            <div class="row wrap gap-md">
-              <button type="button" class="ripple-demo-surface" id="ripple-demo-bounded">
-                <k3-ripple></k3-ripple>
-                Bounded
-              </button>
-              <k3-icon-button label="Favorite" variant="outlined">
-                <span class="ms">favorite</span>
-              </k3-icon-button>
-              <k3-icon-button label="Favorite" variant="tonal">
-                <span class="ms">favorite</span>
-              </k3-icon-button>
+            <div class="demo-block">
+              <div class="row wrap gap-md">
+                <button type="button" class="ripple-demo-surface" id="ripple-demo-bounded">
+                  <k3-ripple></k3-ripple>
+                  Bounded
+                </button>
+                <k3-icon-button label="Favorite" variant="outlined">
+                  <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"></span>
+                </k3-icon-button>
+                <k3-icon-button label="Favorite" variant="tonal">
+                  <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"></span>
+                </k3-icon-button>
+              </div>
+              <div class="row wrap gap-md" style="margin-block-start: 1rem">
+                <k3-button variant="filled">Filled</k3-button>
+                <k3-button variant="tonal">Tonal</k3-button>
+                <k3-button variant="outlined">Outlined</k3-button>
+              </div>
             </div>
-            <div class="row wrap gap-md" style="margin-block-start: 1rem">
-              <k3-button variant="filled">Filled</k3-button>
-              <k3-button variant="tonal">Tonal</k3-button>
-              <k3-button variant="outlined">Outlined</k3-button>
-            </div>
-          </div>
-
-          <div class="surface stack gap-lg">
-            <header class="section-head sub">
-              <h2 data-i18n="doc.ripple.section.usage">Usage</h2>
-              <p data-i18n="doc.ripple.section.usage.blurb">
-                Place inside a position:relative surface. Buttons include it by default.
-              </p>
-            </header>
-            <k3-codeblock language="html" code="<button style=&quot;position:relative; overflow:hidden&quot;>
-  <k3-ripple></k3-ripple>
-  Label
-</button>
-
-<!-- Unbounded (icon) — 40dp circle -->
-<button class=&quot;icon&quot;>
-  <k3-ripple unbounded></k3-ripple>
-  …
-</button>" ></k3-codeblock>
           </div>
         </article>
 
@@ -891,14 +877,14 @@ import 'k3ux/holo-effects.css';
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.shape-chip.section.demo">Demo</h2>
-              <p data-i18n="doc.shape-chip.section.demo.blurb">
-                Informative only —
-                <code>--k3-shape-chip-color</code>, optional
-                <code>slot="icon"</code>,
-                <code>placement="leading|trailing"</code>.
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.shape-chip.option.placement">placement / icon</h3>
+              <p data-i18n="doc.shape-chip.option.placement.desc">
+                Informative only — --k3-shape-chip-color, optional slot=icon, placement=leading|trailing.
               </p>
             </header>
             <div class="demo-block">
@@ -956,26 +942,26 @@ import 'k3ux/holo-effects.css';
             <ol class="variant-guide">
               <li>
                   <span class="pill-num">1</span>
-                  <span class="variant-label">Normal</span>
+                  <span class="variant-label" data-i18n="doc.shape-chip.guide.plain">Plain</span>
               </li>
               <li>
                   <span class="pill-num">2</span>
-                  <span class="variant-label"
-                    >Avec icône (personnalisable) en leading à gauche</span
+                  <span class="variant-label" data-i18n="doc.shape-chip.guide.leading"
+                    >Icon · leading</span
                   >
               </li>
               <li>
                   <span class="pill-num">3</span>
-                  <span class="variant-label"
-                    >Avec icône (personnalisable) en trailing à droite</span
+                  <span class="variant-label" data-i18n="doc.shape-chip.guide.trailing"
+                    >Icon · trailing</span
                   >
               </li>
               </ol>
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.shape-chip.section.sizes">Sizes</h2>
-              <p data-i18n="doc.shape-chip.section.sizes.blurb">
+              <h3 data-i18n="doc.shape-chip.option.size">size</h3>
+              <p data-i18n="doc.shape-chip.option.size.desc">
                 XS · SM · MD · LG · XL — same height ladder as Buttons; shape
                 &amp; icon scale with the pill.
               </p>
@@ -1116,6 +1102,68 @@ import 'k3ux/holo-effects.css';
                   <span class="variant-label" data-i18n="playground.size.dp.xl"
                     >XL · 136</span
                   >
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="padding-inline-start: 1.25rem">
+                    <k3-shape-chip
+                      toggle
+                      shape="Cookie7Sided"
+                      style="--k3-shape-chip-color: #7c4dff"
+                      >Toggle</k3-shape-chip
+                    >
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="padding-inline-start: 1.25rem">
+                    <k3-shape-chip
+                      toggle
+                      selected
+                      shape="Cookie7Sided"
+                      style="--k3-shape-chip-color: #7c4dff"
+                      >Selected</k3-shape-chip
+                    >
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="padding-inline-start: 1.25rem">
+                    <k3-shape-chip
+                      toggle
+                      disabled
+                      shape="Cookie7Sided"
+                      style="--k3-shape-chip-color: #7c4dff"
+                      >Disabled</k3-shape-chip
+                    >
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.shape-chip.state.toggle">toggle</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.shape-chip.state.selected">selected</span>
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.shape-chip.state.disabled">disabled</span>
                 </li>
               </ol>
             </div>
@@ -1694,10 +1742,13 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               A floating action button highlights the single most important action on a screen. Use default, medium, or large icon-only sizes and keep the glyph unmistakable. Place it where the thumb can reach it, avoid stacking multiple FABs, and prefer an extended FAB when a short label removes ambiguity.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.fab.section.sizes">Sizes</h2>
-              <p data-i18n="doc.fab.section.sizes.blurb">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.fab.option.size">size</h3>
+              <p data-i18n="doc.fab.option.size.desc">
                 Default · Medium · Large — 56 · 80 · 96 dp (M3 Expressive; not the XS–XL button ladder).
               </p>
             </header>
@@ -1736,7 +1787,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.fab.section.variants">Variants</h2>
+              <h3 data-i18n="doc.fab.option.variant">variant</h3>
+              <p data-i18n="doc.fab.option.variant.desc">
+                primary · secondary · tertiary · surface — color role for the FAB chrome.
+              </p>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--cases items-end">
@@ -1773,6 +1827,45 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </ol>
             </div>
           </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-fab size="medium" variant="primary" aria-label="Enabled"
+                      ><span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="add" aria-hidden="true"></span
+                    ></k3-fab>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-fab size="medium" variant="primary" disabled aria-label="Disabled"
+                      ><span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="add" aria-hidden="true"></span
+                    ></k3-fab>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.fab.state.enabled">enabled</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.fab.state.disabled">disabled</span>
+                </li>
+              </ol>
+            </div>
+          </div>
         </article>
 
         <!-- EXTENDED FAB -->
@@ -1787,10 +1880,13 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Extended FABs pair an icon with a short label for actions that need a word, not only a glyph. Keep the label to one or two words, use them sparingly, and collapse back to an icon-only FAB when the layout becomes compact or the action is already well known.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.extended-fab.section.sizes">Sizes</h2>
-              <p data-i18n="doc.extended-fab.section.sizes.blurb">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.extended-fab.option.size">size</h3>
+              <p data-i18n="doc.extended-fab.option.size.desc">
                 Small · Medium · Large — 40 · 56 · 96 dp height (M3 Expressive FAB ladder).
               </p>
             </header>
@@ -1834,7 +1930,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.extended-fab.section.variants">Variants</h2>
+              <h3 data-i18n="doc.extended-fab.option.variant">variant</h3>
+              <p data-i18n="doc.extended-fab.option.variant.desc">
+                primary · secondary · tertiary · surface — color role for the extended FAB.
+              </p>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--cases">
@@ -1863,6 +1962,47 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </ol>
             </div>
           </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-extended-fab variant="primary" size="medium"
+                      ><span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span
+                      >Compose</k3-extended-fab
+                    >
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-extended-fab variant="primary" size="medium" disabled
+                      ><span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span
+                      >Compose</k3-extended-fab
+                    >
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.extended-fab.state.enabled">enabled</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.extended-fab.state.disabled">disabled</span>
+                </li>
+              </ol>
+            </div>
+          </div>
         </article>
 
         <!-- FAB MENU (M3 Expressive) -->
@@ -1877,12 +2017,21 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               The Material 3 Expressive FAB menu replaces speed dials with labeled pills that expand from the trailing edge. Offer a small set of related actions, keep one menu size, and use the Default close FAB so dismissal stays obvious. Prefer this pattern when several peer actions share equal weight.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.fab-menu.option.size">size / variant</h3>
+              <p data-i18n="doc.fab-menu.option.size.desc">
+                Closed trigger Default · Medium · Large (56 · 80 · 96). Close FAB stays Default 56. Pair with primary · secondary · tertiary.
+              </p>
+            </header>
             <div class="demo-block">
               <div class="row wrap gap-md fab-menu-cases">
                 <div class="demo-frame demo-frame--fab-menu fab-menu-case">
                   <k3-fab-menu size="default" variant="primary" placement="bottom-end">
-                    <span class="ms" slot="icon">edit</span>
+                    <span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span>
                     <k3-fab-menu-item icon="reply">Reply</k3-fab-menu-item>
                     <k3-fab-menu-item icon="reply_all">Reply all</k3-fab-menu-item>
                     <k3-fab-menu-item icon="forward">Forward</k3-fab-menu-item>
@@ -1890,7 +2039,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </div>
                 <div class="demo-frame demo-frame--fab-menu fab-menu-case">
                   <k3-fab-menu size="medium" variant="secondary" placement="bottom-end">
-                    <span class="ms" slot="icon">edit</span>
+                    <span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span>
                     <k3-fab-menu-item icon="reply">Reply</k3-fab-menu-item>
                     <k3-fab-menu-item icon="reply_all">Reply all</k3-fab-menu-item>
                     <k3-fab-menu-item icon="forward">Forward</k3-fab-menu-item>
@@ -1898,7 +2047,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </div>
                 <div class="demo-frame demo-frame--fab-menu fab-menu-case">
                   <k3-fab-menu size="large" variant="tertiary" placement="bottom-end">
-                    <span class="ms" slot="icon">edit</span>
+                    <span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span>
                     <k3-fab-menu-item icon="reply">Reply</k3-fab-menu-item>
                     <k3-fab-menu-item icon="reply_all">Reply all</k3-fab-menu-item>
                     <k3-fab-menu-item icon="forward">Forward</k3-fab-menu-item>
@@ -1934,8 +2083,8 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.fab-menu.section.below">Menu below</h2>
-              <p data-i18n="doc.fab-menu.hint.below">
+              <h3 data-i18n="doc.fab-menu.option.placement">placement</h3>
+              <p data-i18n="doc.fab-menu.option.placement.desc">
                 Same cases · FAB on top · menu below · start edge · inverted open · Default 56 · Medium 80 · Large 96.
               </p>
             </header>
@@ -1943,7 +2092,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <div class="row wrap gap-md fab-menu-cases">
                 <div class="demo-frame demo-frame--fab-menu fab-menu-case fab-menu-case--flip">
                   <k3-fab-menu size="default" variant="primary" placement="top-start">
-                    <span class="ms" slot="icon">edit</span>
+                    <span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span>
                     <k3-fab-menu-item icon="reply">Reply</k3-fab-menu-item>
                     <k3-fab-menu-item icon="reply_all">Reply all</k3-fab-menu-item>
                     <k3-fab-menu-item icon="forward">Forward</k3-fab-menu-item>
@@ -1951,7 +2100,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </div>
                 <div class="demo-frame demo-frame--fab-menu fab-menu-case fab-menu-case--flip">
                   <k3-fab-menu size="medium" variant="secondary" placement="top-start">
-                    <span class="ms" slot="icon">edit</span>
+                    <span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span>
                     <k3-fab-menu-item icon="reply">Reply</k3-fab-menu-item>
                     <k3-fab-menu-item icon="reply_all">Reply all</k3-fab-menu-item>
                     <k3-fab-menu-item icon="forward">Forward</k3-fab-menu-item>
@@ -1959,7 +2108,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </div>
                 <div class="demo-frame demo-frame--fab-menu fab-menu-case fab-menu-case--flip">
                   <k3-fab-menu size="large" variant="tertiary" placement="top-start">
-                    <span class="ms" slot="icon">edit</span>
+                    <span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span>
                     <k3-fab-menu-item icon="reply">Reply</k3-fab-menu-item>
                     <k3-fab-menu-item icon="reply_all">Reply all</k3-fab-menu-item>
                     <k3-fab-menu-item icon="forward">Forward</k3-fab-menu-item>
@@ -1994,6 +2143,47 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </ol>
             </div>
           </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-fab-menu size="default" variant="primary" placement="bottom-end">
+                      <span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span>
+                      <k3-fab-menu-item icon="reply">Reply</k3-fab-menu-item>
+                    </k3-fab-menu>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-fab-menu size="default" variant="primary" placement="bottom-end" disabled>
+                      <span class="ms notranslate" slot="icon" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"></span>
+                      <k3-fab-menu-item icon="reply">Reply</k3-fab-menu-item>
+                    </k3-fab-menu>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.fab-menu.state.enabled">enabled</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.fab-menu.state.disabled">disabled</span>
+                </li>
+              </ol>
+            </div>
+          </div>
         </article>
 
 
@@ -2011,7 +2201,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               dial. For a linear stack (including vertical), use FAB Rail.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.fab-dial.option.position">position</h3>
+              <p data-i18n="doc.fab-dial.option.position.desc">
+                Four corner docks · flower layout · up to four actions. Linear stacks → FAB Rail.
+              </p>
+            </header>
             <div class="demo-block">
               <!-- One stage · 4 corners · flower only (linear / vertical → FAB Rail) -->
               <div class="demo-frame demo-frame--fab-menu fab-corners">
@@ -2045,10 +2244,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </div>
               </div>
               <ol class="variant-guide">
-                <li><span class="pill-num">1</span><span class="variant-label">TL · flower</span></li>
-                <li><span class="pill-num">2</span><span class="variant-label">TR · flower</span></li>
-                <li><span class="pill-num">3</span><span class="variant-label">BL · flower</span></li>
-                <li><span class="pill-num">4</span><span class="variant-label">BR · flower</span></li>
+                <li><span class="pill-num">1</span><span class="variant-label" data-i18n="doc.fab-dial.guide.tl">TL · flower</span></li>
+                <li><span class="pill-num">2</span><span class="variant-label" data-i18n="doc.fab-dial.guide.tr">TR · flower</span></li>
+                <li><span class="pill-num">3</span><span class="variant-label" data-i18n="doc.fab-dial.guide.bl">BL · flower</span></li>
+                <li><span class="pill-num">4</span><span class="variant-label" data-i18n="doc.fab-dial.guide.br">BR · flower</span></li>
               </ol>
             </div>
           </div>
@@ -2069,7 +2268,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               order matters more than a radial fan.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.fab-rail.option.position">position / direction</h3>
+              <p data-i18n="doc.fab-rail.option.position.desc">
+                Four corners · linear axes (right · down · up · left). Auto-fit scales short viewports.
+              </p>
+            </header>
             <div class="demo-block">
               <!-- One stage · 4 corners · linear axes (← → · up/down via direction) -->
               <div class="demo-frame demo-frame--fab-menu fab-corners">
@@ -2103,10 +2311,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </div>
               </div>
               <ol class="variant-guide">
-                <li><span class="pill-num">1</span><span class="variant-label">TL · right</span></li>
-                <li><span class="pill-num">2</span><span class="variant-label">TR · down</span></li>
-                <li><span class="pill-num">3</span><span class="variant-label">BL · up</span></li>
-                <li><span class="pill-num">4</span><span class="variant-label">BR · left</span></li>
+                <li><span class="pill-num">1</span><span class="variant-label" data-i18n="doc.fab-rail.guide.tl">TL · right</span></li>
+                <li><span class="pill-num">2</span><span class="variant-label" data-i18n="doc.fab-rail.guide.tr">TR · down</span></li>
+                <li><span class="pill-num">3</span><span class="variant-label" data-i18n="doc.fab-rail.guide.bl">BL · up</span></li>
+                <li><span class="pill-num">4</span><span class="variant-label" data-i18n="doc.fab-rail.guide.br">BR · left</span></li>
               </ol>
             </div>
           </div>

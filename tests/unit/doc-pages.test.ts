@@ -40,6 +40,13 @@ const PAGE_TAGS: Record<string, string[]> = {
   'buttons-split': ['k3-split-button'],
   'buttons-segmented': ['k3-button-segmented'],
   /* buttons-smart: CEM lacks tagName — skip PAGE_TAGS */
+  fab: ['k3-fab'],
+  'fab-extended': ['k3-extended-fab'],
+  'fab-menu': ['k3-fab-menu'],
+  'fab-dial': ['k3-fab-dial'],
+  'fab-rail': ['k3-fab-rail'],
+  ripple: ['k3-ripple'],
+  'shape-chip': ['k3-shape-chip'],
   /* extend as pages leave PENDING_PAGES */
 };
 
@@ -78,7 +85,14 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'buttons-pill' &&
     id !== 'buttons-smart' &&
     id !== 'buttons-split' &&
-    id !== 'buttons-segmented',
+    id !== 'buttons-segmented' &&
+    id !== 'fab' &&
+    id !== 'fab-extended' &&
+    id !== 'fab-menu' &&
+    id !== 'fab-dial' &&
+    id !== 'fab-rail' &&
+    id !== 'ripple' &&
+    id !== 'shape-chip',
 );
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');

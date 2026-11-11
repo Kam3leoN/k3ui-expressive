@@ -136,6 +136,10 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['disabled', 'boolean', 'false', 'Disables press'],
       ['extended', 'boolean', 'false', 'Deprecated — use k3-extended-fab'],
     ],
+    methods: [
+      ['show', '() => Promise<boolean>', 'Animate in (scale + fade)'],
+      ['hide', '() => Promise<boolean>', 'Animate out then hidden'],
+    ],
     events: [['k3-click', '—', 'Activated']],
     slots: [
       ['icon', 'FAB icon'],
@@ -148,9 +152,44 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['variant', "'primary'|'surface'|'secondary'|'tertiary'", 'primary', 'Color role'],
       ['disabled', 'boolean', 'false', 'Disables press'],
     ],
+    methods: [
+      ['show', '() => Promise<boolean>', 'Animate in (scale + fade)'],
+      ['hide', '() => Promise<boolean>', 'Animate out then hidden'],
+      ['setRailCollapsed', '(collapsed, animate?) => void', 'Nav-rail pill ↔ square morph'],
+    ],
     events: [['k3-click', '—', 'Activated']],
     slots: [
       ['icon', 'Leading icon'],
+      ['(default)', 'Label'],
+    ],
+  },
+  ripple: {
+    properties: [
+      ['disabled', 'boolean', 'false', 'No ink / hover'],
+      ['unbounded', 'boolean', 'false', '40dp circle (icon buttons)'],
+      ['htmlFor', 'string | null', 'null', 'Attach to element id (attr for; else parent)'],
+    ],
+    methods: [
+      ['attach', '(control) => void', 'Imperative bind'],
+      ['detach', '() => void', 'Unbind control'],
+    ],
+    events: { na: 'No custom events — host control owns activation' },
+    slots: { na: 'No slots — paint-only overlay' },
+  },
+  'shape-chip': {
+    properties: [
+      ['shape', 'MaterialShapeName', 'Cookie7Sided', 'Material shape path'],
+      ['size', "'xs'|'sm'|'md'|'lg'|'xl'", 'sm', 'Pill height ladder'],
+      ['placement', "'leading'|'trailing'", 'leading', 'Shape on pill edge'],
+      ['selected', 'boolean', 'false', 'Selected chrome (with toggle)'],
+      ['toggle', 'boolean', 'false', 'Opt-in interactive selection'],
+      ['disabled', 'boolean', 'false', 'Non-interactive when toggle'],
+      ['value', 'string', "''", 'Payload for k3-change'],
+      ['has-icon', 'boolean', 'false', 'Reflects slotted icon'],
+    ],
+    events: [['k3-change', '{ selected, value }', 'When toggle flips']],
+    slots: [
+      ['icon', 'Optional glyph inside shape'],
       ['(default)', 'Label'],
     ],
   },

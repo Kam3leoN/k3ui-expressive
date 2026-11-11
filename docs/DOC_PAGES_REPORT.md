@@ -42,10 +42,17 @@
 | `buttons-smart` | `docs(buttons-smart): gabarit complet` | Examples + States · pas de PAGE_TAGS (CEM sans tagName) |
 | `buttons-split` | `docs(buttons-split): gabarit complet` | Examples + States |
 | `buttons-segmented` | `docs(buttons-segmented): gabarit complet` | Examples + Versions |
+| `fab` | `docs(fab): gabarit complet` | Examples (size/variant) + States |
+| `fab-extended` | `docs(fab-extended): gabarit complet` | Examples (size/variant) + States |
+| `fab-menu` | `docs(fab-menu): gabarit complet` | Examples (size/variant/placement) + States · icônes ms notranslate |
+| `fab-dial` | `docs(fab-dial): gabarit complet` | Examples (position) |
+| `fab-rail` | `docs(fab-rail): gabarit complet` | Examples (position/direction) |
+| `ripple` | `docs(ripple): gabarit complet` | Examples (bounded) · Usage h2 retiré |
+| `shape-chip` | `docs(shape-chip): gabarit complet` | Examples (placement/size) + States |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — lot Actions ensuite (`fab`, `fab-extended`, …).
+Voir `PENDING_PAGES` — lot Feedback ensuite.
 
 ## Décisions humaines
 
