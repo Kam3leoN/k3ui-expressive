@@ -1,0 +1,52 @@
+# Gabarit page composant (playground)
+
+Fait autorité pour toute page `article.comp-page` hors `Styles` / `Resources`.
+
+## Ordre fixe des h2
+
+Sous-ensemble **ordonné** de :
+
+1. `Exemples` — `doc.section.examples`
+2. `États` — `doc.section.states`
+3. `Versions` — `doc.section.versions`
+4. `Usage` — `doc.usage.title`
+5. `Theming` — `doc.section.theming`
+6. `Keyboard` — `doc.section.keyboard`
+7. `Focus` — `doc.section.focus`
+8. `Motion` — `doc.section.motion`
+9. `Accessibility` — `doc.section.a11y`
+10. Tables API (`Specs`, `Properties`, `Methods`, `Events`, `Slots`, `CSS parts`, `Options`, `Init`) via `doc-tables.ts`
+
+Omettre une section si absente ou `{ na }` — ne jamais réordonner.
+
+## En-tête
+
+- `h1` + blurb (`titleKey` / `blurbKey` catalogue)
+- Intro courte optionnelle (`.doc-intro`)
+
+## Exemples
+
+- Un **`h3` par option publique** documentée (attribut / variante significative)
+- Chaque exemple : description i18n + démo (`.demo-block` / `demo-cases-m3.mdc`) + `k3-codeblock` (via `createExample` quand possible)
+- Conserver les démos existantes ; les replacer sous le bon `h3`
+
+## États
+
+Documenter seulement ce qui existe dans le code : `disabled`, `error`, `readonly`, `loading`, `selected`, …
+
+## Versions
+
+Si le composant a plusieurs modes / layouts distincts (ex. dial vs input) — sinon `{ na }` ou section omise.
+
+## Données
+
+- `USAGE_BY_PAGE` — snippet Usage
+- `COMPONENT_API` — tables API (ou `{ na: '…' }` motivé)
+- `DOC_SECTIONS` — theming, keyboard, focus, motion, a11y, versions
+
+## Règles dures
+
+- Aucune API inventée — lire `src/components/`
+- Pas de `<pre class="code-block">` : uniquement `k3-codeblock` (les `<pre>` slotés **dans** un `k3-codeblock` sont OK)
+- i18n FR + EN pour tout texte utilisateur de la page
+- Ne pas casser `demo-cases-m3`, `edge-scrollbar`, `icon-notranslate`, grille layout
