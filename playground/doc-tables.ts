@@ -11,7 +11,13 @@ export type DocTableId =
   | 'slots'
   | 'css-parts'
   | 'options'
-  | 'init';
+  | 'init'
+  | 'theming'
+  | 'keyboard'
+  | 'motion';
+
+/** Motivated absence — table skipped, reason retained for audits. */
+export type DocTableNa = { na: string };
 
 export interface DocTableSection {
   id: DocTableId;
@@ -28,6 +34,13 @@ const EVENT_COLS = 'Name, Detail, Description';
 const SLOT_COLS = 'Name, Description';
 const PART_COLS = 'Name, Description';
 const OPTION_COLS = 'Name, Type, Default, Description';
+const THEMING_COLS = 'Token, Default, Description';
+const KEYBOARD_COLS = 'Key, Action';
+const MOTION_COLS = 'Interaction, Effect, Reduced motion';
+
+export function isDocTableNa(v: unknown): v is DocTableNa {
+  return !!v && typeof v === 'object' && 'na' in v && typeof (v as DocTableNa).na === 'string';
+}
 
 function specsToRows(rows: SpecRow[]): string[][] {
   return rows.map((r) => [r.token, r.value, r.note ?? '']);
@@ -44,10 +57,11 @@ function section(
 }
 
 /** Curated Properties / Methods / Events / Slots / CSS parts per page id. */
-const COMPONENT_API: Record<
-  string,
-  Partial<Record<Exclude<DocTableId, 'specs'>, string[][]>>
-> = {
+export type ComponentApiTables = Partial<
+  Record<Exclude<DocTableId, 'specs'>, string[][] | DocTableNa>
+>;
+
+export const COMPONENT_API: Record<string, ComponentApiTables> = {
   buttons: {
     properties: [
       ['variant', "'filled'|'tonal'|'elevated'|'outlined'|'text'", 'filled', 'Visual style'],
@@ -314,43 +328,6 @@ const COMPONENT_API: Record<
       ['(default)', 'Leading label only (not clickable; omit for icon-only)'],
       ['icon', 'Leading icon'],
       ['menu', 'k3-menu-item × ≥2 (first/last edges)'],
-    ],
-  },
-  'buttons-arrow': {
-    properties: [
-      ['direction', "'horizontal'|'vertical'", 'horizontal', 'Chevron axis'],
-      ['variant', "'filled'|'tonal'|'outlined'", 'filled', 'Surface style'],
-      ['list', 'string[] (CSV / JSON)', '[]', 'Cyclic values'],
-      ['index', 'number', '0', 'Current list index'],
-    ],
-    events: [['k3-change', '{ value, index }', 'After step / setIndex']],
-    methods: [
-      ['prev', '() => void', 'Previous (cycle)'],
-      ['next', '() => void', 'Next (cycle)'],
-      ['setIndex', '(index) => void', 'Clamp + emit'],
-      ['setList', '(list, reset?) => void', 'Replace values'],
-    ],
-  },
-  'buttons-card': {
-    properties: [
-      ['label', 'string', "''", 'Primary line (uppercase)'],
-      ['subtitle', 'string', "''", 'Secondary line (@handle)'],
-      ['icon', 'string', "''", 'Material ligature if no slot'],
-      ['href', 'string', "''", 'Anchor when set'],
-      ['external', 'boolean', 'false', 'target=_blank'],
-      ['stretch', 'boolean', 'false', 'Full width'],
-      ['disabled', 'boolean', 'false', 'Non-interactive'],
-      ['--k3-button-card-icon-bg', 'CSS var', 'primary-container', 'Icon well background'],
-      ['--k3-button-card-icon-fg', 'CSS var', 'on-primary-container', 'Icon / glyph color'],
-      ['--k3-button-card-brand', 'CSS var', 'primary', 'Hover fill (brand)'],
-    ],
-    slots: [['icon', 'SVG or .ms glyph']],
-    events: [['k3-activate', '{ label, subtitle, href }', 'Click / activate']],
-    'css-parts': [
-      ['card', 'Surface control'],
-      ['icon', 'Tonal icon well'],
-      ['label', 'Primary text'],
-      ['subtitle', 'Secondary text'],
     ],
   },
   'buttons-grid': {
@@ -654,6 +631,63 @@ const COMPONENT_API: Record<
       ['prev / next', '() => void', 'Step by one'],
       ['goTo', '(index) => void', 'Jump to item'],
     ],
+  },
+  coverflow: {
+    properties: [
+      ['label', 'string', "''", 'Region accessible name'],
+      ['index', 'number', '0', 'Centred cover (set to navigate)'],
+      ['mode', "'loop'|'bounded'", 'loop', 'Endless ring vs stop at the ends'],
+      ['orientation', "'horizontal'|'vertical'", 'horizontal', 'Vertical: stacked top to bottom, ↑ ↓, no reflection'],
+      ['effect', "'coverflow'|'slide'", 'coverflow', 'Slide: flat row, the centred cover grows'],
+      ['active-scale', 'number', '1.4', 'Slide: scale of the centred cover'],
+      ['angle', 'number', '60', 'Side rotation (deg)'],
+      ['gap', 'number', '0.72', 'Centre → first side cover (× width)'],
+      ['spacing', 'number', '0.24', 'Between side covers (× width)'],
+      ['depth', 'number', '0.62', 'Side covers depth (× width)'],
+      ['visible', 'number', '4', 'Side covers per side'],
+      ['no-reflection', 'boolean', 'false', 'Hide the mirror reflection'],
+      ['wheel', 'boolean', 'false', 'Vertical wheel also navigates'],
+      ['arrows', 'boolean', 'false', 'Previous / next buttons on the sides'],
+      ['bullets', 'boolean', 'false', 'Bullets — active one 3× wider, follows the motion'],
+      ['full-width', 'boolean', 'false', 'Side covers reach the container edges (top / bottom when vertical)'],
+      ['lightbox', 'boolean', 'false', 'Link covers open their image in a viewer'],
+    ],
+    events: [
+      ['k3-change', '{ index }', 'A new cover is centred'],
+      ['k3-open / k3-close', '{ index }', 'Lightbox opened / closed'],
+    ],
+    slots: [['(default)', 'k3-coverflow-item children']],
+    'css-parts': [
+      ['viewport', 'Clipping, perspective, gestures'],
+      ['stage', '3D stage'],
+      ['arrow · arrow-prev · arrow-next', 'Side buttons'],
+      ['bullets · bullet', 'Bullet row · each bullet'],
+      ['lightbox · lightbox-image · lightbox-button', 'Viewer layer, image, buttons'],
+    ],
+    methods: [
+      ['prev / next', '() => void', 'Step by one'],
+      ['goTo', '(index) => void', 'Centre a cover'],
+      ['open / close', '(index?) => void', 'Lightbox'],
+    ],
+  },
+  'coverflow-item': {
+    properties: [
+      ['href / target / rel', 'string', "''", 'Centred cover is a link'],
+      ['flip', 'boolean', 'false', 'Centred cover turns over'],
+      ['flipped', 'boolean', 'false', 'Back side showing'],
+      ['label', 'string', "''", 'Accessible name (else the img alt)'],
+    ],
+    events: [['k3-flip', '{ flipped }', 'Card turned (k3-change-start cancels)']],
+    slots: [
+      ['(default)', 'Front (img / video / any content)'],
+      ['back', 'Back side (flip)'],
+    ],
+    'css-parts': [
+      ['card', '3D card'],
+      ['front', 'Front face (the link with href)'],
+      ['back', 'Back face'],
+    ],
+    methods: [['toggle', '(force?) => void', 'Turn over (flip)']],
   },
   'iso-filter': {
     properties: [
@@ -1162,21 +1196,6 @@ const COMPONENT_API: Record<
       ['supporting', 'Helper / error'],
     ],
   },
-  'field-row': {
-    properties: [
-      ['label', 'string', "''", 'Side label (meta column)'],
-      ['supporting-text', 'string', "''", 'Helper under the side label'],
-      ['disabled', 'boolean', 'false', 'Disables row'],
-    ],
-    events: [],
-    slots: [['(default)', 'Control (text-field, select, …) — omit its label']],
-    'css-parts': [
-      ['meta', 'Label + supporting stack'],
-      ['label', 'Side label'],
-      ['supporting', 'Helper under label'],
-      ['control', 'Control wrapper'],
-    ],
-  },
   'pin-field': {
     properties: [
       ['label', 'string', "''", 'Static label above cells'],
@@ -1400,14 +1419,13 @@ const COMPONENT_API: Record<
   'date-picker': {
     properties: [
       ['value', 'string', "''", 'yyyy-MM-dd'],
-      ['for', 'string', "''", 'Single / short-range field (`yyyy-MM-dd – yyyy-MM-dd`)'],
-      ['for-start / for-end', 'string', "''", 'Long-range dual fields'],
-      ['variant', "'docked'|'modal'|'auto'", 'docked', 'Docked anchors to field'],
-      ['range', 'boolean', 'false', 'Select start–end range'],
+      ['for', 'string', "''", 'Single date, or one-field range (Du/Au)'],
+      ['for-start / for-end', 'string', "''", 'Two-field range (one ISO each)'],
+      ['variant', "'docked'|'modal'|'auto'", 'docked', 'Single date only — range always modal'],
+      ['range', 'boolean', 'false', 'Modal range · scroll months · OK needs both ends'],
       ['range-start / range-end', 'string', "''", 'Range bounds (yyyy-MM-dd)'],
-      ['layout', "'paged'|'scroll'|'auto'", 'auto', 'auto/paged = side-by-side · scroll opt-in'],
-      ['months', 'number', '1', '2 = short dual-pane · 1 = long single-pane'],
-      ['toggle edge', "'start'|'end'", "''", 'Dual-field: which end this icon edits'],
+      ['layout', "'paged'|'scroll'|'auto'", 'auto', 'auto → scroll when range (Noph)'],
+      ['months', 'number', '1', 'Paged panes / scroll viewport hint'],
       ['min-date / max-date', 'string', "''", 'Selectable bounds'],
       ['start-view', "'month'|'year'|'multi-year'", 'month', 'Initial calendar view'],
       ['start-at', 'string', "''", 'Initial visible month/year'],
@@ -1646,16 +1664,20 @@ const COMPONENT_API: Record<
       ['size', "'compact'|'large'", 'compact', 'Width'],
       ['expanded', 'boolean', 'false', 'Large layout (synced with size)'],
       ['collapsible', 'boolean', 'false', 'menu / menu_open toggle'],
-      ['appearance', "'standard'|'modal'", 'standard', 'Chrome'],
+      ['layout', "'modal'|'standard'", 'modal', 'Expanded chrome — modal (edge-docked, end radii, elev-1) · standard (flush, no sheet)'],
+      ['position', "'start'|'center'|'bottom'", 'start', 'Leading destinations group alignment'],
+      ['appearance', "'modal'|'standard'", 'modal', 'Deprecated alias of layout'],
     ],
     events: [
       ['k3-change', '{ index }', 'Selection'],
       ['k3-expand', '{ expanded }', 'Collapsed ↔ expanded'],
     ],
     slots: [
-      ['(default)', 'k3-nav-item children'],
-      ['fab', 'k3-fab + k3-extended-fab (header)'],
-      ['foot', 'Trailing actions'],
+      ['(default)', 'Leading k3-nav-item children'],
+      ['leading', 'Leading destinations (same as default)'],
+      ['trailing', 'Bottom destinations — horizontal divider'],
+      ['fab', 'k3-extended-fab (header morph · optional k3-fab twin hidden)'],
+      ['foot', 'Deprecated alias of trailing'],
     ],
   },
   'navigation-bar': {
@@ -1815,6 +1837,9 @@ const SECTION_META: { id: DocTableId; title: string; columns: string }[] = [
   { id: 'css-parts', title: 'CSS parts', columns: PART_COLS },
   { id: 'options', title: 'Options', columns: OPTION_COLS },
   { id: 'init', title: 'Init', columns: OPTION_COLS },
+  { id: 'theming', title: 'Theming', columns: THEMING_COLS },
+  { id: 'keyboard', title: 'Keyboard', columns: KEYBOARD_COLS },
+  { id: 'motion', title: 'Motion', columns: MOTION_COLS },
 ];
 
 /** Resolve all doc tables for a page id. */
@@ -1834,7 +1859,7 @@ export function docTablesForPage(pageId: string): DocTableSection[] {
     for (const meta of SECTION_META) {
       if (meta.id === 'specs') continue;
       const rows = api[meta.id as keyof typeof api];
-      if (!rows?.length) continue;
+      if (!rows || isDocTableNa(rows) || !rows.length) continue;
       const s = section(meta.id, meta.title, meta.columns, rows);
       if (s) out.push(s);
     }
