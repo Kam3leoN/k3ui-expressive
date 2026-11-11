@@ -9,10 +9,26 @@
 | B3 DOC_SECTIONS | OK | `playground/doc-sections.ts` (91 pages, `{ na }` initial) |
 | B4 tables | OK | theming / keyboard / motion ; `{ na }` ; `field-row` retiré |
 | B5 mountDocPage | OK | remplace `mountDocTables` + `mountUsageIfNeeded` |
-| B6 garde-fou | OK | `tests/unit/doc-pages.test.ts` + `PENDING_PAGES` = tout le catalogue |
+| B6 garde-fou | OK | `tests/unit/doc-pages.test.ts` + `PENDING_PAGES` (k3ux restant) |
 | B7 CEM | OK | `@custom-elements-manifest/analyzer` ; globs filtrés (évite crash circular JSON sur `**/*.ts`) ; `npm run manifest` dans `build` ; comparaison noms pour pages hors PENDING |
 
-## Pages traitées
+## Étape D (clôture k3ui)
+
+| Item | Statut | Notes |
+| --- | --- | --- |
+| Styles / Resources | OK | Pas de `<pre>` nu ; samples → `k3-codeblock` ; tables via `doc-tables.ts` / `mountTableIn` / `COMPONENT_API` |
+| `PENDING_PAGES` | **Conservé** | ~21 ids `product: k3ux` — **ne pas supprimer l’export** (pas vide) |
+| `COMPONENT_CHECKLIST.md` | OK | Pointeur vers `.cursor/rules/doc-page-template.mdc` |
+| check / build / build:playground | OK | Voir commits étape D |
+
+### Styles / Resources (catalogue)
+
+`color-roles`, `color-palettes`, `color-extras`, `elevation`, `grid`, `motion`, `shapes`, `spacing`, `typography` (Styles) · `material-symbols` (Resources).
+
+- Samples : `k3-codeblock` sur toutes les pages Styles/Resources (y compris `color-roles`, `color-palettes`, `motion`, `shapes`) — aucun `<pre>` nu.
+- Tables : Specs token via `fillStyleTokenDemos` + `mountTableIn` ; API Init/Methods/Properties via `COMPONENT_API` + `mountDocPage` ; filtre Specs dupliqués si `.token-scale` déjà rempli.
+
+## Pages traitées (gabarit composant k3ui)
 
 | Page | Commit message | Notes |
 | --- | --- | --- |
@@ -87,19 +103,39 @@
 | `dnd` | `docs(dnd): gabarit complet` | Examples + States · utility (no PAGE_TAGS) |
 | `scrollbar` | `docs(scrollbar): gabarit complet` | Examples + States · utility (no PAGE_TAGS) |
 
-## Pages en attente
+**Total gabarit composant k3ui : 70 pages.** Styles/Resources = lot token (étape D), hors `PENDING_PAGES` / hors filtre catalogue du garde-fou.
 
-Voir `PENDING_PAGES` — uniquement pages `product: k3ux` (composants retirés du tree / lot UX). Aucune page k3ui restante hors Styles/Resources.
+## Pages encore PENDING (garder l’export)
 
-## Bloqués / hors lot k3ui (rester PENDING)
+`PENDING_PAGES` dans `tests/unit/doc-pages.test.ts` **n’est pas vide** et **ne doit pas être retiré**. Raison unique : pages `product: k3ux` (lot UX) et/ou sources retirées du tree k3ui.
 
 | Page | Raison |
 | --- | --- |
 | `iso-filter`, `masonry` | `product: k3ux` + composants retirés de `src/components/containment/` |
-| `signature`, `rating`, `wheel-picker`, `countdown`, `marquee`, `sound-fx`, `confetti`, `text-bounce`, `text-scramble`, `heart-burst`, `halftone`, `card-holo`, `card-lenticular`, `card-scratch`, `audio-player`, `qr-code`, `charts-*` | `product: k3ux` (et/ou sources retirées du tree) — lot UX |
-| `keyboard-media` (démo) | Démo playground référence `k3-audio-player` retiré — page utilitaire k3ui migrée ; démo audio bloquée jusqu’au lot UX |
+| `signature`, `rating`, `wheel-picker` | `product: k3ux` (sources retirées / lot UX) |
+| `countdown`, `marquee`, `sound-fx`, `confetti`, `text-bounce`, `text-scramble`, `heart-burst`, `halftone` | `product: k3ux` (animation) |
+| `card-holo`, `card-lenticular`, `card-scratch` | `product: k3ux` (cartes effets) |
+| `audio-player`, `qr-code` | `product: k3ux` (médias / utilitaires UX) |
+| `charts-bar`, `charts-line`, `charts-other` | `product: k3ux` (charts) |
+
+Liste exacte (21) : `signature`, `rating`, `wheel-picker`, `countdown`, `marquee`, `sound-fx`, `confetti`, `text-bounce`, `text-scramble`, `heart-burst`, `halftone`, `card-holo`, `card-lenticular`, `card-scratch`, `audio-player`, `qr-code`, `charts-bar`, `charts-line`, `charts-other`, `iso-filter`, `masonry`.
+
+Note : `keyboard-media` est **migrée** (k3ui) ; la démo playground peut encore référencer `k3-audio-player` retiré — bloqué UX, pas PENDING gabarit.
+
+## Résumé sections `{ na }` (pages complétées, 70)
+
+| Section | Count `{ na }` | Lecture |
+| --- | --- | --- |
+| theming | 5 | Peu de pages sans tokens dédiés |
+| keyboard | 17 | Utilitaires / décoratifs sans host keys |
+| focus | 0 | Toujours prose ou table |
+| motion | 20 | Surfaces statiques / input-driven |
+| a11y | 0 | Toujours prose |
+| versions | 48 | Souvent mono-layout (`Single CE…`) |
 
 ## Décisions humaines
 
 - `custom-elements.json` est généré au build (gitignore) — ne pas le committer.
-- Pages `product: k3ux` restent dans PENDING jusqu’au lot UX.
+- Pages `product: k3ux` restent dans `PENDING_PAGES` jusqu’au lot UX — **étape D ne vide pas PENDING**.
+- Styles / Resources hors gabarit composant (pas d’Examples/States obligatoires) ; light touch `k3-codeblock` + tables token/API.
+- `PENDING_PAGES` export conservé pour le garde-fou vitest même si le lot k3ui est clos.

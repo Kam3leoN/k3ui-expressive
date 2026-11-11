@@ -14473,6 +14473,11 @@ static styles = [
               </div>
             </section>
             <div id="color-roles" class="color-roles" aria-label="Color roles"></div>
+            <k3-codeblock language="js" code="import { K3UI } from 'k3ui';
+
+await K3UI.init();
+K3UI.theme.apply({ seed: '#6750A4', mode: 'auto', variant: 'expressive' });
+/* Roles → --k3-sys-color-primary, --k3-sys-color-surface, … */"></k3-codeblock>
           </div>
         </article>
 
@@ -14566,6 +14571,8 @@ static styles = [
               </div>
             </section>
             <div id="color-palettes" class="color-palettes" aria-label="Tonal palettes"></div>
+            <k3-codeblock language="js" code="K3UI.theme.apply({ seed: '#6750A4', variant: 'vibrant' });
+/* Tonal ladders rebuild — primary/secondary/… 0–100 */"></k3-codeblock>
           </div>
         </article>
 
@@ -14708,6 +14715,11 @@ static styles = [
                 ><span class="variant-label" data-i18n="doc.elevation.level.5">Level 5</span>
               </li>
             </ol>
+            <k3-codeblock language="css" code="/* Token */
+.panel { box-shadow: var(--k3-sys-elevation-level2); }
+
+/* Utility */
+.panel.k3-elevation-2 { /* shipped in k3ui.css */ }" ></k3-codeblock>
           </div>
           <div class="surface surface-flush stack gap-lg">
             <div id="elevation-scale" class="token-scale" aria-label="Elevation levels"></div>
@@ -14963,6 +14975,10 @@ static styles = [
             </div>
           </div>
 
+          <k3-codeblock language="html" code="<div class=&quot;k3-layout-grid k3-demo-cols-2&quot;>
+  <section class=&quot;k3-col-span-6&quot;>…</section>
+  <aside class=&quot;k3-col-span-6&quot;>…</aside>
+</div>" ></k3-codeblock>
           <div class="surface surface-flush stack gap-lg">
             <div id="grid-scale" class="token-scale" aria-label="Grid tokens"></div>
           </div>
@@ -14980,6 +14996,13 @@ static styles = [
               K3ui uses Material Symbols ligatures via data-k3-icon (no ms-icon package). This browser loads the variable fonts (Material Symbols New) so you can tune FILL, wght, GRAD, and opsz live — click an icon to copy a Translate-safe snippet.
             </p>
           </header>
+          <k3-codeblock language="html" code="<span
+  class=&quot;ms notranslate&quot;
+  translate=&quot;no&quot;
+  lang=&quot;zxx&quot;
+  data-k3-icon=&quot;home&quot;
+  aria-hidden=&quot;true&quot;
+></span>" ></k3-codeblock>
           <div class="ms-browser surface surface-flush stack gap-lg">
             <k3-text-field
               id="ms-search"
@@ -15388,6 +15411,14 @@ static styles = [
           </div>
           <div class="surface surface-flush stack gap-lg">
             <div id="motion-scale" class="token-scale" aria-label="Motion tokens"></div>
+            <k3-codeblock language="css" code=".panel {
+  transition:
+    transform var(--k3-sys-motion-duration-spatial-default)
+      var(--k3-sys-motion-easing-spatial-default);
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel { transition: none; }
+}"></k3-codeblock>
           </div>
         </article>
 
@@ -15407,6 +15438,10 @@ static styles = [
             <div id="shape-corners" class="token-scale" aria-label="Corner scale"></div>
             <header class="section-head sub"><h2 data-i18n="playground.demo.section.shapes.count">35 shapes</h2></header>
             <div id="shape-grid" class="shape-grid" aria-label="Material shapes"></div>
+            <k3-codeblock language="css" code=".card {
+  border-radius: var(--k3-sys-shape-corner-large);
+}
+.fab { border-radius: var(--k3-sys-shape-corner-full); }"></k3-codeblock>
           </div>
         </article>
 
@@ -15424,6 +15459,12 @@ static styles = [
           </header>
           <div class="surface surface-flush stack gap-lg">
             <div id="spacing-scale" class="token-scale" aria-label="Spacing scale"></div>
+            <k3-codeblock language="css" code=".toolbar {
+  padding: var(--k3-sys-spacing-space200);
+  gap: var(--k3-sys-spacing-space100); /* 8dp */
+}
+/* helpers */
+.row.k3-flex.k3-gap-100.k3-p-200 { }" ></k3-codeblock>
             <div class="stack gap-md" aria-labelledby="spacing-helpers-title">
               <header class="section-head sub">
                 <h2 id="spacing-helpers-title" data-i18n="doc.spacing.helpers.title">Helpers</h2>
@@ -15484,6 +15525,9 @@ static styles = [
           </div>
           <div class="surface surface-flush stack gap-lg">
             <div id="type-scale" class="token-scale" aria-label="Type scale"></div>
+            <k3-codeblock language="html" code="<h1 class=&quot;k3-display-small&quot;>Headline</h1>
+<p class=&quot;k3-body-large&quot;>Supporting copy.</p>
+<span class=&quot;k3-label-medium-emphasized&quot;>Emphasized</span>" ></k3-codeblock>
           </div>
         </article>
 

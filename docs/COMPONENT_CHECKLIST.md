@@ -1,3 +1,5 @@
+> **Gabarit doc playground** — voir [`.cursor/rules/doc-page-template.mdc`](../.cursor/rules/doc-page-template.mdc) (ordre des h2, `k3-codeblock`, `doc-tables.ts`, `DOC_SECTIONS`).
+
 # Component checklist
 
 Before merging a component:
