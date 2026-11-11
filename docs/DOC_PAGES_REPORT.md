@@ -36,10 +36,16 @@
 | `buttons-icon` | `docs(buttons-icon): gabarit complet` | Examples + States |
 | `buttons-grid` | `docs(buttons-grid): gabarit complet` | Examples + Versions |
 | `buttons-group` | `docs(buttons-group): gabarit complet` | Examples + States + Versions |
+| `buttons-menu` | `docs(buttons-menu): gabarit complet` | Examples + States |
+| `buttons-pad` | `docs(buttons-pad): gabarit complet` | Examples + Versions |
+| `buttons-pill` | `docs(buttons-pill): gabarit complet` | Examples + States + Versions |
+| `buttons-smart` | `docs(buttons-smart): gabarit complet` | Examples + States · pas de PAGE_TAGS (CEM sans tagName) |
+| `buttons-split` | `docs(buttons-split): gabarit complet` | Examples + States |
+| `buttons-segmented` | `docs(buttons-segmented): gabarit complet` | Examples + Versions |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — lot Buttons : `buttons-menu`, `buttons-pad`, `buttons-pill`, …
+Voir `PENDING_PAGES` — lot Actions ensuite (`fab`, `fab-extended`, …).
 
 ## Décisions humaines
 

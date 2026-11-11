@@ -350,7 +350,7 @@ export const COMPONENT_SPECS: Record<string, SpecRow[]> = {
   'date-picker': [
     { token: 'variant', value: 'docked · modal · auto' },
     { token: 'layout', value: 'paged · scroll · auto (paged default)' },
-    { token: 'months', value: '2 short-range panes · 1 long-range pane' },
+    { token: 'months', value: 'paged panes · scroll hint when range' },
     { token: 'views', value: 'month · year · multi-year (18)' },
     { token: 'cell', value: '40 dp day · 72×36 month/year' },
     { token: 'range', value: 'short: 1 wide field · long: Start/End + edge toggles' },

@@ -3069,9 +3069,18 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               subtitles, and a two-column grid for denser control strips.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.button-smart.option.active">active</h3>
+              <p data-i18n="doc.button-smart.option.active.desc">
+                Off pill vs active squircle — toggle with a tap.
+              </p>
+            </header>
             <div class="demo-block">
-              <div class="demo-frame demo-frame--cases demo-frame--stack">
+              <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
                 <div class="demo-case">
                   <div class="demo-case-stage" style="width: min(100%, 22rem)">
                     <div class="btn-smart-grid">
@@ -3169,6 +3178,63 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </ol>
             </div>
           </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: min(100%, 12rem)">
+                    <k3-button-smart label="Wi‑Fi" active disabled>
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="wifi"
+                        aria-hidden="true"
+                      ></span>
+                    </k3-button-smart>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage" style="width: min(100%, 12rem)">
+                    <k3-button-smart label="Bluetooth" disabled>
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="bluetooth"
+                        aria-hidden="true"
+                      ></span>
+                    </k3-button-smart>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.button-smart.state.disabled"
+                    >disabled · active</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.button-smart.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+              </ol>
+            </div>
+          </div>
         </article>
 
         <article class="comp-page" data-page="buttons-split" id="page-buttons-split" hidden>
@@ -3182,65 +3248,196 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Split buttons combine a primary action with a trailing menu of related alternatives. Put the most common action on the leading segment and at least two menu items on the trailing side. Five Expressive sizes and filled, tonal, outlined, or elevated variants keep the control aligned with nearby buttons.
             </p>
           </header>
-          <div class="surface stack gap-lg">
-            <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">filled</span></li>
-              <li><span class="pill-num">2</span><span class="variant-label">tonal</span></li>
-              <li><span class="pill-num">3</span><span class="variant-label">outlined</span></li>
-              <li><span class="pill-num">4</span><span class="variant-label">elevated</span></li>
-            </ol>
-            <div class="row wrap gap-md items-center">
-              <k3-split-button size="sm" variant="filled">
-                <span slot="icon" class="ms">edit</span>
-                Label
-                <k3-menu-item slot="menu" value="a">Schedule</k3-menu-item>
-                <k3-menu-item slot="menu" value="b">Save draft</k3-menu-item>
-              </k3-split-button>
-              <k3-split-button size="sm" variant="tonal">
-                <span slot="icon" class="ms">add</span>
-                $ 7.49
-                <k3-menu-item slot="menu" value="a">Add tip</k3-menu-item>
-                <k3-menu-item slot="menu" value="b">Split bill</k3-menu-item>
-              </k3-split-button>
-              <k3-split-button size="sm" variant="outlined">
-                Send
-                <k3-menu-item slot="menu" value="a">Schedule send</k3-menu-item>
-                <k3-menu-item slot="menu" value="b">Save draft</k3-menu-item>
-              </k3-split-button>
-              <k3-split-button size="sm" variant="elevated">
-                <span slot="icon" class="ms">send</span>
-                Send
-                <k3-menu-item slot="menu" value="a">Schedule send</k3-menu-item>
-                <k3-menu-item slot="menu" value="b">Save draft</k3-menu-item>
-            </k3-split-button>
-            </div>
-            <p class="hint">Leading anatomy — label+icon · label · icon (trailing always has the menu chevron).</p>
-            <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">label + icon</span></li>
-              <li><span class="pill-num">2</span><span class="variant-label">label</span></li>
-              <li><span class="pill-num">3</span><span class="variant-label">icon</span></li>
-            </ol>
-            <div class="row wrap gap-md items-center">
-              <k3-split-button size="sm" variant="filled">
-                <span slot="icon" class="ms">edit</span>
-                Label
-                <k3-menu-item slot="menu">Schedule</k3-menu-item>
-                <k3-menu-item slot="menu">Save draft</k3-menu-item>
-              </k3-split-button>
-              <k3-split-button size="sm" variant="filled">
-                Label
-                <k3-menu-item slot="menu">Schedule</k3-menu-item>
-                <k3-menu-item slot="menu">Save draft</k3-menu-item>
-              </k3-split-button>
-              <k3-split-button size="sm" variant="filled" label="Edit">
-                <span slot="icon" class="ms">edit</span>
-                <k3-menu-item slot="menu">Schedule</k3-menu-item>
-                <k3-menu-item slot="menu">Save draft</k3-menu-item>
-              </k3-split-button>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.button-split.option.variant">variant</h3>
+              <p data-i18n="doc.button-split.option.variant.desc">
+                filled · tonal · outlined · elevated — primary + menu chevron.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-4"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-split-button size="sm" variant="filled">
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="edit"
+                        aria-hidden="true"
+                      ></span>
+                      Label
+                      <k3-menu-item slot="menu" value="a">Schedule</k3-menu-item>
+                      <k3-menu-item slot="menu" value="b">Save draft</k3-menu-item>
+                    </k3-split-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-split-button size="sm" variant="tonal">
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="add"
+                        aria-hidden="true"
+                      ></span>
+                      $ 7.49
+                      <k3-menu-item slot="menu" value="a">Add tip</k3-menu-item>
+                      <k3-menu-item slot="menu" value="b">Split bill</k3-menu-item>
+                    </k3-split-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-split-button size="sm" variant="outlined">
+                      Send
+                      <k3-menu-item slot="menu" value="a">Schedule send</k3-menu-item>
+                      <k3-menu-item slot="menu" value="b">Save draft</k3-menu-item>
+                    </k3-split-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-split-button size="sm" variant="elevated">
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="send"
+                        aria-hidden="true"
+                      ></span>
+                      Send
+                      <k3-menu-item slot="menu" value="a">Schedule send</k3-menu-item>
+                      <k3-menu-item slot="menu" value="b">Save draft</k3-menu-item>
+                    </k3-split-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">4</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="playground.demo.variant.filled"
+                    >filled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="playground.demo.variant.tonal"
+                    >tonal</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="playground.demo.variant.outlined"
+                    >outlined</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">4</span
+                  ><span class="variant-label" data-i18n="playground.demo.variant.elevated"
+                    >elevated</span
+                  >
+                </li>
+              </ol>
             </div>
             <header class="section-head sub">
-              <h2 data-i18n="playground.sizes.title">Expressive sizes</h2>
-              <p class="hint">M3E XS · SM · MD · LG · XL (32 → 136) · menu ≥ 2 items.</p>
+              <h3 data-i18n="doc.button-split.option.leading">leading</h3>
+              <p data-i18n="doc.button-split.option.leading.desc">
+                Leading anatomy — label+icon · label · icon (trailing always has the menu chevron).
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-split-button size="sm" variant="filled">
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="edit"
+                        aria-hidden="true"
+                      ></span>
+                      Label
+                      <k3-menu-item slot="menu">Schedule</k3-menu-item>
+                      <k3-menu-item slot="menu">Save draft</k3-menu-item>
+                    </k3-split-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-split-button size="sm" variant="filled">
+                      Label
+                      <k3-menu-item slot="menu">Schedule</k3-menu-item>
+                      <k3-menu-item slot="menu">Save draft</k3-menu-item>
+                    </k3-split-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-split-button size="sm" variant="filled" label="Edit">
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="edit"
+                        aria-hidden="true"
+                      ></span>
+                      <k3-menu-item slot="menu">Schedule</k3-menu-item>
+                      <k3-menu-item slot="menu">Save draft</k3-menu-item>
+                    </k3-split-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.button-split.variant.label-icon"
+                    >label + icon</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.button-split.variant.label"
+                    >label</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.button-split.variant.icon"
+                    >icon</span
+                  >
+                </li>
+              </ol>
+            </div>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.button-split.option.size">size</h3>
+              <p data-i18n="doc.button-split.option.size.desc">
+                M3E XS · SM · MD · LG · XL (32 → 136) · menu ≥ 2 items.
+              </p>
             </header>
             <!-- Balanced wrap: row1 xs+sm+md · row2 lg+xl — never overlap / clip menus -->
             <div class="demo-block">
@@ -3333,6 +3530,45 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </ol>
             </div>
           </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-split-button size="sm" variant="filled" disabled>
+                      <span
+                        slot="icon"
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="edit"
+                        aria-hidden="true"
+                      ></span>
+                      Label
+                      <k3-menu-item slot="menu">Schedule</k3-menu-item>
+                      <k3-menu-item slot="menu">Save draft</k3-menu-item>
+                    </k3-split-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.button-split.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+              </ol>
+            </div>
+          </div>
         </article>
 
         <!-- BUTTON MENU -->
@@ -3345,28 +3581,80 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               A button menu opens a list of actions from a single trigger. Use it when space is limited and the actions are secondary. Keep the menu short, order items by frequency, and mirror the trigger variant so the control feels native to the toolbar or card that hosts it.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.button-menu.option.variant">variant</h3>
+              <p data-i18n="doc.button-menu.option.variant.desc">
+                Trigger styles — tonal · outlined · filled.
+              </p>
+            </header>
             <ol class="variant-guide">
               <li><span class="pill-num">1</span><span class="variant-label">tonal</span></li>
               <li><span class="pill-num">2</span><span class="variant-label">outlined</span></li>
               <li><span class="pill-num">3</span><span class="variant-label">filled</span></li>
             </ol>
-            <div class="row wrap gap-md">
-              <k3-button-menu label="Options" variant="tonal" size="sm">
-                <k3-menu-item>Edit</k3-menu-item>
-                <k3-menu-item>Duplicate</k3-menu-item>
-                <k3-menu-item>Delete</k3-menu-item>
-              </k3-button-menu>
-              <k3-button-menu label="Export" variant="outlined" size="sm">
-                <span slot="icon" class="ms">download</span>
-                <k3-menu-item>PDF</k3-menu-item>
-                <k3-menu-item>CSV</k3-menu-item>
-                <k3-menu-item>JSON</k3-menu-item>
-              </k3-button-menu>
-              <k3-button-menu label="More" variant="filled" size="sm">
-                <k3-menu-item>Share</k3-menu-item>
-                <k3-menu-item>Archive</k3-menu-item>
-              </k3-button-menu>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3" data-demo-enhance="off">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button-menu label="Options" variant="tonal" size="sm">
+                      <k3-menu-item>Edit</k3-menu-item>
+                      <k3-menu-item>Duplicate</k3-menu-item>
+                      <k3-menu-item>Delete</k3-menu-item>
+                    </k3-button-menu>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button-menu label="Export" variant="outlined" size="sm">
+                      <span slot="icon" class="ms">download</span>
+                      <k3-menu-item>PDF</k3-menu-item>
+                      <k3-menu-item>CSV</k3-menu-item>
+                      <k3-menu-item>JSON</k3-menu-item>
+                    </k3-button-menu>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button-menu label="More" variant="filled" size="sm">
+                      <k3-menu-item>Share</k3-menu-item>
+                      <k3-menu-item>Archive</k3-menu-item>
+                    </k3-button-menu>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1" data-demo-enhance="off">
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-button-menu label="Disabled" variant="tonal" size="sm" disabled>
+                      <k3-menu-item>Edit</k3-menu-item>
+                    </k3-button-menu>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.button-menu.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+              </ol>
             </div>
           </div>
         </article>
@@ -3386,12 +3674,21 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               galleries, and spatial UIs — keep one pad per view.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.button-pad.option.mode">mode / variant</h3>
+              <p data-i18n="doc.button-pad.option.mode.desc">
+                Diagonal vs cardinal layout · filled · tonal · outlined cells.
+              </p>
+            </header>
             <p class="hint">
               Direction: <span id="pad-val" class="notranslate" translate="no">—</span>
             </p>
             <div class="demo-block">
-              <div class="demo-frame demo-frame--cases items-end">
+              <div class="demo-frame demo-frame--cases items-end" data-demo-enhance="off">
                 <div class="demo-case-row">
                   <div class="demo-case">
                     <div class="demo-case-stage">
@@ -3443,6 +3740,15 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </ol>
             </div>
           </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.button-pad.versions.blurb">
+              mode=diagonal (corners) or cardinal (rotated U/R/D/L).
+            </p>
+          </div>
         </article>
 
         <!-- BUTTON PILL -->
@@ -3461,9 +3767,12 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Not wired into nav yet — ready to drop in.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.button-pill.section.selected">Selected</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.button-pill.option.selected">selected</h3>
               <p data-i18n="doc.button-pill.section.selected.blurb">
                 Rest vs selected — secondary-container indicator + filled icon. Click to toggle.
               </p>
@@ -3533,7 +3842,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.button-pill.section.layouts">Layouts</h2>
+              <h3 data-i18n="doc.button-pill.option.layout">layout</h3>
               <p data-i18n="doc.button-pill.section.layouts.blurb">
                 Single-select like nav — click a destination. 1 vertical · 2 horizontal.
               </p>
@@ -3587,7 +3896,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.button-pill.section.stretch">Stretch</h2>
+              <h3 data-i18n="doc.button-pill.option.stretch">stretch</h3>
               <p data-i18n="doc.button-pill.section.stretch.blurb">
                 Horizontal + stretch — full-width row (rail expanded). Click to select.
               </p>
@@ -3653,6 +3962,59 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </li>
               </ol>
             </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button-pill icon="home" label="Home" disabled></k3-button-pill>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button-pill
+                      icon="home"
+                      label="Home"
+                      selected
+                      disabled
+                    ></k3-button-pill>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.button-pill.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.button-pill.state.selected-disabled"
+                    >selected · disabled</span
+                  >
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.button-pill.versions.blurb">
+              layout=vertical (icon above label) or horizontal (inline).
+            </p>
           </div>
         </article>
 
@@ -10857,33 +11219,66 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               active segment. Use rounded for pill chrome or square for denser toolbars.
             </p>
           </header>
-          <div class="demo-block">
-            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
-              <div class="demo-case">
-                <div class="demo-case-stage">
-                  <k3-button-segmented
-                    segments='[{"label":"Day"},{"label":"Week"},{"label":"Month"}]'
-                  ></k3-button-segmented>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.button-segmented.option.shape">shape / multi-select</h3>
+              <p data-i18n="doc.button-segmented.option.shape.desc">
+                rounded single-select vs square multi-select with optional check.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button-segmented
+                      segments='[{"label":"Day"},{"label":"Week"},{"label":"Month"}]'
+                    ></k3-button-segmented>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
                 </div>
-                <span class="demo-case-num" aria-hidden="true">1</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage">
-                  <k3-button-segmented
-                    shape="square"
-                    show-check
-                    multi-select
-                    segments='[{"label":"List","icon":"view_list"},{"label":"Grid","icon":"grid_on"}]'
-                    default-selected="[0,1]"
-                  ></k3-button-segmented>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button-segmented
+                      shape="square"
+                      show-check
+                      multi-select
+                      segments='[{"label":"List","icon":"view_list"},{"label":"Grid","icon":"grid_on"}]'
+                      default-selected="[0,1]"
+                    ></k3-button-segmented>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
                 </div>
-                <span class="demo-case-num" aria-hidden="true">2</span>
               </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.button-segmented.variant.single"
+                    >Single · rounded</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.button-segmented.variant.multi"
+                    >Multi · square · check</span
+                  >
+                </li>
+              </ol>
             </div>
-            <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">Single · rounded</span></li>
-              <li><span class="pill-num">2</span><span class="variant-label">Multi · square · check</span></li>
-            </ol>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.button-segmented.versions.blurb">
+              shape rounded|square · single or multi-select · optional check.
+            </p>
           </div>
         </article>
 

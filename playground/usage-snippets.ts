@@ -66,10 +66,27 @@ fav?.addEventListener("k3-change", (e) => {
 });`,
   },
   'buttons-group': {
-    components: ['k3-button-group', 'k3-button'],
+    components: ['k3-button-group', 'k3-button', 'k3-icon-button'],
     html: `<k3-button-group selection="single" size="sm" label="Time">
   <k3-button variant="tonal" value="am" selected>Morning</k3-button>
   <k3-button variant="tonal" value="pm">Evening</k3-button>
+</k3-button-group>
+
+<!-- Connected chevron pair (step a list in app code) -->
+<k3-button-group
+  variant="connected"
+  selection="none"
+  size="md"
+  sync
+  shape="round"
+  label="Step"
+>
+  <k3-icon-button variant="filled" width="narrow" label="Previous" data-arrow-step="-1">
+    ${MS('chevron_left')}
+  </k3-icon-button>
+  <k3-icon-button variant="filled" width="narrow" label="Next" data-arrow-step="1">
+    ${MS('chevron_right')}
+  </k3-icon-button>
 </k3-button-group>`,
   },
   'buttons-split': {
@@ -81,40 +98,6 @@ fav?.addEventListener("k3-change", (e) => {
   <k3-menu-item slot="menu">Save draft</k3-menu-item>
 </k3-split-button>`,
     css: defaultCss,
-  },
-  'buttons-card': {
-    components: ['k3-button-card'],
-    html: `<k3-button-card
-  label="Alpha"
-  subtitle="@handle"
-  icon="share"
-  href="#"
-></k3-button-card>`,
-    css: `${defaultCss}
-
-k3-button-card {
-  --k3-button-card-icon-bg: var(--k3-sys-color-primary-container);
-  --k3-button-card-icon-fg: var(--k3-sys-color-on-primary-container);
-  /* Hover fills the card with brand */
-  --k3-button-card-brand: var(--k3-sys-color-primary);
-}`,
-  },
-  'buttons-arrow': {
-    components: ['k3-button-arrow'],
-    html: `<k3-button-arrow
-  direction="horizontal"
-  variant="filled"
-  list="Alpha,Beta,Gamma"
-  index="0"
-></k3-button-arrow>
-<p>Value: <span id="arrow-val">Alpha</span></p>`,
-    css: defaultCss,
-    jsExtra: `
-const arrow = document.querySelector("k3-button-arrow");
-const label = document.getElementById("arrow-val");
-arrow?.addEventListener("k3-change", (e) => {
-  if (label) label.textContent = e.detail.value;
-});`,
   },
   'buttons-grid': {
     components: ['k3-button-grid'],
@@ -364,38 +347,61 @@ document.querySelector("k3-button-pad")?.addEventListener("k3-navigate", (e) => 
     css: defaultCss,
   },
   'date-picker': {
-    components: ['k3-date-picker', 'k3-date-picker-toggle', 'k3-text-field', 'k3-icon-button'],
-    html: `<k3-text-field id="date" variant="outlined" label="Date" clearable>
-  <k3-icon-button slot="trailing-icon" variant="tonal" width="default" label="Open date picker">
+    components: [
+      'k3-date-picker',
+      'k3-date-picker-toggle',
+      'k3-text-field',
+      'k3-icon-button',
+      'k3-button',
+    ],
+    html: `<!-- Docked -->
+<k3-text-field id="date" variant="outlined" label="Date" clearable>
+  <k3-icon-button slot="trailing-icon" variant="tonal" width="default" label="Open">
     ${MS('calendar_today')}
     <k3-date-picker-toggle for="dp"></k3-date-picker-toggle>
   </k3-icon-button>
 </k3-text-field>
 <k3-date-picker id="dp" for="date" variant="docked"></k3-date-picker>
 
-<!-- Short range — 2 months + multiline Du/Au field (both dates visible) -->
-<k3-text-field id="range" variant="outlined" label="Date range" multiline rows="2" clearable style="min-width:16rem">
+<!-- Modal -->
+<k3-button id="pick">Pick a date</k3-button>
+<k3-date-picker id="dpm" variant="modal" label="Select date"></k3-date-picker>
+
+<!-- Bounds + weekday blackout -->
+<k3-date-picker id="dpb" for="date" variant="docked" min-date="2026-01-01" max-date="2026-12-31"></k3-date-picker>
+
+<!-- Range — one compact field (always modal + scroll) -->
+<k3-text-field id="range" variant="outlined" label="Date range" supporting-text="yyyy-MM-dd - yyyy-MM-dd" clearable>
   <k3-icon-button slot="trailing-icon" variant="tonal" width="default" label="Open">
     ${MS('calendar_today')}
     <k3-date-picker-toggle for="dpr2"></k3-date-picker-toggle>
   </k3-icon-button>
 </k3-text-field>
-<k3-date-picker id="dpr2" range months="2" for="range" variant="modal"></k3-date-picker>
+<k3-date-picker id="dpr2" range for="range"></k3-date-picker>
 
-<!-- Long range — 1 month + dual fields, edge per icon -->
+<!-- Range — two fields, same shared modal -->
 <k3-text-field id="start" variant="outlined" label="Start date" clearable>
   <k3-icon-button slot="trailing-icon" variant="tonal" width="default" label="Start">
     ${MS('calendar_today')}
-    <k3-date-picker-toggle for="dprl" edge="start"></k3-date-picker-toggle>
+    <k3-date-picker-toggle for="dprl"></k3-date-picker-toggle>
   </k3-icon-button>
 </k3-text-field>
 <k3-text-field id="end" variant="outlined" label="End date" clearable>
   <k3-icon-button slot="trailing-icon" variant="tonal" width="default" label="End">
     ${MS('calendar_today')}
-    <k3-date-picker-toggle for="dprl" edge="end"></k3-date-picker-toggle>
+    <k3-date-picker-toggle for="dprl"></k3-date-picker-toggle>
   </k3-icon-button>
 </k3-text-field>
-<k3-date-picker id="dprl" range months="1" for-start="start" for-end="end" variant="modal"></k3-date-picker>`,
+<k3-date-picker id="dprl" range for-start="start" for-end="end"></k3-date-picker>`,
+    jsExtra: `const dpm = document.getElementById("dpm");
+document.getElementById("pick")?.addEventListener("k3-click", () => dpm?.show());
+const dpb = document.getElementById("dpb");
+if (dpb) {
+  dpb.blackoutDates = (d) => {
+    const wd = new Date(d.year, d.month - 1, d.day).getDay();
+    return wd === 0 || wd === 6; // weekends
+  };
+}`,
     css: defaultCss,
   },
   'mood-calendar': {
@@ -640,10 +646,15 @@ document.getElementById("dlg")?.show?.();`,
     css: defaultCss,
   },
   'navigation-rail': {
-    components: ['k3-nav-rail', 'k3-nav-item'],
-    html: `<k3-nav-rail>
+    components: ['k3-nav-rail', 'k3-nav-item', 'k3-extended-fab'],
+    html: `<k3-nav-rail layout="modal" position="start" collapsible>
+  <k3-extended-fab slot="fab" size="medium" variant="primary">
+    ${MS('timer')}
+    Add timer
+  </k3-extended-fab>
   <k3-nav-item selected label="Home">${MS('home')}</k3-nav-item>
-  <k3-nav-item label="Tune">${MS('tune')}</k3-nav-item>
+  <k3-nav-item label="Browse">${MS('search')}</k3-nav-item>
+  <k3-nav-item slot="trailing" label="Settings">${MS('settings')}</k3-nav-item>
 </k3-nav-rail>`,
     css: defaultCss,
   },
@@ -774,6 +785,50 @@ syntax.highlight('SELECT 1', 'mysql'); // escaped HTML with token spans`,
   </k3-carousel-item>
 </k3-carousel>`,
   },
+  coverflow: {
+    components: ['k3-coverflow', 'k3-coverflow-item'],
+    html: `<!-- Lightbox: the centred cover opens its href in a viewer (scrim, arrows, Esc) -->
+<k3-coverflow label="Gallery" lightbox arrows bullets>
+  <k3-coverflow-item href="big/dunes.webp"><img src="dunes.webp" alt="Desert dunes" /></k3-coverflow-item>
+  <k3-coverflow-item href="big/aurora.webp"><img src="aurora.webp" alt="Northern lights" /></k3-coverflow-item>
+  <k3-coverflow-item href="/albums/3"><img src="3.webp" alt="Album 3" /></k3-coverflow-item>
+</k3-coverflow>
+
+<!-- Plain links (no lightbox attribute) -->
+<k3-coverflow label="Albums">
+  <k3-coverflow-item href="/albums/1"><img src="1.webp" alt="Album 1" /></k3-coverflow-item>
+</k3-coverflow>
+
+<!-- Vertical: stacked top to bottom (↑ ↓, vertical drag and wheel) -->
+<k3-coverflow label="Vertical gallery" orientation="vertical" arrows bullets
+  style="--k3-coverflow-item-width: 18rem; --k3-coverflow-item-height: 11rem; --k3-coverflow-height: 32rem">
+  <k3-coverflow-item href="big/aurora.webp"><img src="aurora.webp" alt="Northern lights" /></k3-coverflow-item>
+  <k3-coverflow-item href="big/forest.webp"><img src="forest.webp" alt="Misty forest" /></k3-coverflow-item>
+</k3-coverflow>
+
+<!-- Slide: no 3D, a flat row where the centred cover grows (also orientation="vertical") -->
+<k3-coverflow label="Products" effect="slide" active-scale="1.4" arrows bullets>
+  <k3-coverflow-item href="/p/1"><img src="p1.webp" alt="Product 1" /></k3-coverflow-item>
+  <k3-coverflow-item href="/p/2"><img src="p2.webp" alt="Product 2" /></k3-coverflow-item>
+</k3-coverflow>
+
+<!-- Flip, edge to edge -->
+<k3-coverflow label="Cards" full-width bullets no-reflection>
+  <k3-coverflow-item flip>
+    <img src="front.webp" alt="Card" />
+    <img slot="back" src="back.webp" alt="" />
+  </k3-coverflow-item>
+</k3-coverflow>`,
+    css: `k3-coverflow {
+  --k3-coverflow-item-width: 12rem;
+  --k3-coverflow-item-height: 16rem; /* portrait covers */
+  --k3-coverflow-bullet-size: 6px;
+}`,
+    jsExtra: `const flow = document.querySelector('k3-coverflow');
+flow.addEventListener('k3-change', (e) => console.log('centred', e.detail.index));
+flow.goTo(3); // also: flow.next(), flow.prev(), flow.index = 3
+flow.open(); // lightbox on the centred cover — flow.close()`,
+  },
   'iso-filter': {
     components: ['k3-iso-filter', 'k3-chip-set', 'k3-chip'],
     html: `<k3-iso-filter layout="masonry" column-width="72" gap="8" filter="*">
@@ -872,7 +927,7 @@ marquee.addContent("<b>New</b> item", { html: true });
 <k3-button variant="tonal" onclick="document.getElementById('celebrate').rain()">
   Rain
 </k3-button>`,
-    jsExtra: `import { ConfettiPresets, rain } from 'k3ui';
+    jsExtra: `import { ConfettiPresets, rain } from 'k3ux';
 // Imperative (no element required):
 ConfettiPresets.fireBasic();
 ConfettiPresets.fireFireworks();
