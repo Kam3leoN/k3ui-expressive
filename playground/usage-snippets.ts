@@ -452,8 +452,9 @@ cal.addEventListener("k3-change", (e) => console.log(e.detail));`,
 <k3-progress indeterminate></k3-progress>`,
   },
   loading: {
-    components: ['k3-loading'],
-    html: `<k3-loading size="medium"></k3-loading>`,
+    components: ['k3-loading-indicator'],
+    html: `<k3-loading-indicator></k3-loading-indicator>
+<k3-loading-indicator contained></k3-loading-indicator>`,
   },
   lazy: {
     components: ['k3-lazy'],
@@ -479,8 +480,12 @@ await K3UI.registry.registerWhen(document.querySelector("#comments"), "visible")
   },
   skeleton: {
     components: ['k3-skeleton'],
-    html: `<k3-skeleton variant="text"></k3-skeleton>
-<k3-skeleton variant="circular"></k3-skeleton>`,
+    html: `<k3-skeleton animation="wave" style="width:12rem;height:1rem"></k3-skeleton>
+<k3-skeleton shape="circular" style="width:2.5rem;height:2.5rem"></k3-skeleton>
+<k3-skeleton animation="pulse">
+  <strong>Jane Doe</strong>
+</k3-skeleton>
+<!-- later: el.loaded = true → reveals content -->`,
   },
   snackbar: {
     components: ['k3-snackbar'],
@@ -525,9 +530,14 @@ await window.K3UI.snackbar.show({ message: "Saved", duration: 2000 });`,
 document.getElementById("dlg")?.show?.();`,
   },
   tooltip: {
-    components: ['k3-tooltip'],
-    html: `<k3-tooltip plain="Helpful tip">
-  <button type="button">Hover me</button>
+    components: ['k3-tooltip', 'k3-button'],
+    html: `<k3-tooltip variant="plain" position="top" content="Helpful tip">
+  <k3-button variant="tonal">Hover me</k3-button>
+</k3-tooltip>
+
+<k3-tooltip variant="rich" position="top" headline="Rich tip" content="Supporting text for denser help.">
+  <k3-button variant="outlined">Rich</k3-button>
+  <k3-button slot="actions" size="xs" variant="text">Learn more</k3-button>
 </k3-tooltip>`,
   },
   badge: {

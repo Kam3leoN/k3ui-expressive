@@ -806,7 +806,8 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['root-margin', 'string', '200px', 'Viewport margin for visible'],
       ['fallback', "'skeleton'|'indicator'|'none'", 'skeleton', 'Placeholder until ready'],
       ['animation', "'wave'|'pulse'|'none'", 'wave', 'Skeleton animation'],
-      ['delay · min-duration', 'number', '150 · 300', 'Indicator anti-flicker (ms)'],
+      ['delay', 'number', '150', 'Indicator anti-flicker delay (ms)'],
+      ['min-duration', 'number', '300', 'Min indicator display once shown (ms)'],
       ['state', "'idle'|'loading'|'ready'|'error'", 'idle', 'Reflected'],
       ['loader', '() => Promise', 'null', 'Async work after registration (JS)'],
     ],
@@ -1607,8 +1608,12 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
     properties: [
       ['variant', "'linear'|'circular'", 'linear', 'Bar or ring'],
       ['value', 'number', '0', '0–1 determinate'],
+      ['max', 'number', '1', 'Denominator for value'],
       ['indeterminate', 'boolean', 'false', 'Indeterminate'],
-      ['shape', "'flat'|'wavy'", 'flat', 'M3E wavy track'],
+      ['shape', "'flat'|'wavy'|'oscillation'", 'flat', 'Track paint (oscillation = PCM bars)'],
+      ['wavy', 'boolean', 'false', 'Alias — sets shape=wavy'],
+      ['src', 'string', "''", 'Audio URL for oscillation PCM peaks'],
+      ['interactive', 'boolean', 'false', 'Linear determinate seek'],
       ['layout', "'default'|'top'|'bottom'", 'default', 'Linear chrome (label/value vs bar)'],
       ['show-percent', 'boolean', 'false', 'Show trailing value %'],
       [
@@ -1623,6 +1628,10 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['thickness', 'number', '4', 'Stroke dp (track + active)'],
       ['size', 'number', '0', 'Circular diameter dp (0 = 40 / 48 wavy)'],
     ],
+    events: [
+      ['k3-input', '{ value }', 'While seeking (interactive)'],
+      ['k3-change', '{ value }', 'Seek commit (interactive)'],
+    ],
     slots: [
       ['leading', 'Label ± icon'],
       ['trailing', 'Value % (default from show-percent)'],
@@ -1630,7 +1639,20 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
     ],
   },
   loading: {
-    properties: [['indeterminate', 'boolean', 'true', 'Morph spinner']],
+    properties: [['contained', 'boolean', 'false', 'Primary-container disc + on-container fill']],
+  },
+  skeleton: {
+    properties: [
+      ['animation', "'wave'|'pulse'|'none'", 'wave', 'Bone shimmer'],
+      ['shape', "'auto'|'circular'|'rounded'|'square'", 'auto', 'Corner of bone'],
+      ['loaded', 'boolean', 'false', 'Reveal slotted content'],
+      ['block', 'boolean', 'false', 'Stretch to parent width'],
+    ],
+    slots: [['(default)', 'Content to mimic / reveal when loaded']],
+    'css-parts': [
+      ['bone', 'Placeholder surface'],
+      ['content', 'Slotted content wrapper'],
+    ],
   },
   snackbar: {
     properties: [
@@ -1683,6 +1705,29 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['dismiss', 'Close icon button'],
     ],
   },
+  alert: {
+    properties: [
+      [
+        'variant',
+        "'secondary'|'primary'|'tertiary'|'error'|'surface'|'success'|'warning'|'info'|'note'",
+        'secondary',
+        'Theme roles + semantic tones',
+      ],
+      ['shape', "'rounded'|'square'", 'rounded', 'Corner'],
+      ['label', 'string', "''", 'Heading when no label slot'],
+      ['icon', 'string', 'variant default', 'Material Symbol ligature (empty hides)'],
+      ['dismissible', 'boolean', 'false', 'Trailing close control'],
+      ['hide-icon', 'boolean', 'false', 'Hide leading icon entirely'],
+    ],
+    methods: [['dismiss', '() => void', 'Hide host + emit k3-dismiss']],
+    events: [['k3-dismiss', '—', 'Dismiss control activated']],
+    slots: [
+      ['(default)', 'Body content'],
+      ['icon', 'Leading icon override'],
+      ['label', 'Heading override'],
+      ['action', 'Trailing action (button, link, …)'],
+    ],
+  },
   tooltip: {
     properties: [
       ['variant', "'plain'|'rich'", 'plain', 'Plain inverse · rich surface + actions'],
@@ -1695,7 +1740,6 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
         'Side of the anchor (logical start/end + corners)',
       ],
     ],
-    events: [['k3-action', '{ source }', 'Action button clicked (rich)']],
     slots: [
       ['(default)', 'Anchor content'],
       ['headline', 'Rich title (optional)'],
@@ -1720,6 +1764,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['(default)', 'Anchor (icon / button)'],
       ['badge', 'Optional custom badge content'],
     ],
+    'css-parts': [['badge', 'Badge surface']],
   },
   avatar: {
     properties: [

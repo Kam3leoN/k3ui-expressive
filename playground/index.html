@@ -7207,189 +7207,223 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </header>
 
-          <header class="section-head sub">
-            <h2 data-i18n="doc.progress.section.shapes">Shapes</h2>
-            <p data-i18n="doc.progress.section.shapes.blurb">
-              Flat · wavy (M3 Expressive) · oscillation (real PCM via src).
-            </p>
-          </header>
-          <div class="demo-block" id="progress-shapes">
-            <div class="demo-frame demo-frame--cases grid-3">
-              <div class="demo-case">
-                <div class="demo-case-stage">
-                  <k3-progress
-                    class="progress-shape-demo"
-                    shape="flat"
-                    value="0.65"
-                    show-percent
-                    label="Flat"
-                  ></k3-progress>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.progress.option.shape">shape</h3>
+              <p data-i18n="doc.progress.option.shape.desc">
+                Flat · wavy (M3 Expressive) · oscillation (real PCM via src).
+              </p>
+            </header>
+            <div class="demo-block" id="progress-shapes">
+              <div class="demo-frame demo-frame--cases grid-3">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-progress
+                      class="progress-shape-demo"
+                      shape="flat"
+                      value="0.65"
+                      show-percent
+                      label="Flat"
+                    ></k3-progress>
+                  </div>
+                  <span class="demo-case-num">1</span>
                 </div>
-                <span class="demo-case-num">1</span>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-progress
+                      class="progress-shape-demo"
+                      shape="wavy"
+                      value="0.65"
+                      show-percent
+                      label="Wavy"
+                    ></k3-progress>
+                  </div>
+                  <span class="demo-case-num">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-progress
+                      class="progress-shape-demo"
+                      shape="oscillation"
+                      src="/sounds/hello.mp3"
+                      value="0.42"
+                      show-percent
+                      label="Oscillation"
+                    ></k3-progress>
+                  </div>
+                  <span class="demo-case-num">3</span>
+                </div>
               </div>
-              <div class="demo-case">
-                <div class="demo-case-stage">
-                  <k3-progress
-                    class="progress-shape-demo"
-                    shape="wavy"
-                    value="0.65"
-                    show-percent
-                    label="Wavy"
-                  ></k3-progress>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.progress.shape.flat">Flat</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label" data-i18n="doc.progress.shape.wavy">Wavy</span>
+                </li>
+                <li>
+                  <span class="pill-num">3</span>
+                  <span class="variant-label" data-i18n="doc.progress.shape.oscillation"
+                    >Oscillation</span
+                  >
+                </li>
+              </ol>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.progress.option.playground">variant / layout / size</h3>
+              <p data-i18n="doc.progress.option.playground.desc">
+                Tune variant, shape (incl. oscillation + PCM src), size, percent, label, and value live.
+              </p>
+            </header>
+            <div class="demo-block" id="progress-lab">
+              <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
+                <div class="demo-case">
+                  <div class="demo-case-stage progress-lab-stage">
+                    <k3-progress
+                      id="progress-lab-el"
+                      value="0.65"
+                      thickness="4"
+                      show-stop
+                      show-percent
+                      layout="default"
+                    ></k3-progress>
+                  </div>
                 </div>
-                <span class="demo-case-num">2</span>
               </div>
-              <div class="demo-case">
-                <div class="demo-case-stage">
-                  <k3-progress
-                    class="progress-shape-demo"
-                    shape="oscillation"
-                    src="/sounds/hello.mp3"
-                    value="0.42"
-                    show-percent
-                    label="Oscillation"
-                  ></k3-progress>
+              <div class="progress-lab-controls k3-layout-grid surface-flush">
+                <fieldset class="progress-lab-field">
+                  <legend data-i18n="doc.progress.control.variant">Variant</legend>
+                  <div class="progress-lab-radios">
+                    <k3-radio name="prog-variant" value="linear" checked>Linear</k3-radio>
+                    <k3-radio name="prog-variant" value="circular">Circular</k3-radio>
+                  </div>
+                </fieldset>
+                <fieldset class="progress-lab-field">
+                  <legend data-i18n="doc.progress.control.shape">Shape</legend>
+                  <div class="progress-lab-radios">
+                    <k3-radio name="prog-shape" value="flat" checked
+                      ><span data-i18n="doc.progress.shape.flat">Flat</span></k3-radio
+                    >
+                    <k3-radio name="prog-shape" value="wavy"
+                      ><span data-i18n="doc.progress.shape.wavy">Wavy</span></k3-radio
+                    >
+                    <k3-radio name="prog-shape" value="oscillation"
+                      ><span data-i18n="doc.progress.shape.oscillation">Oscillation</span></k3-radio
+                    >
+                  </div>
+                </fieldset>
+                <fieldset class="progress-lab-field" id="progress-lab-src-field" hidden>
+                  <legend data-i18n="doc.progress.control.src">Waveform src</legend>
+                  <k3-switch
+                    id="prog-sw-src"
+                    selected
+                    aria-label="Use demo audio for PCM"
+                  ></k3-switch>
+                  <p class="progress-lab-hint" data-i18n="doc.progress.control.src.hint">
+                    Decode /sounds/hello.mp3 peaks (same cache as audio seek).
+                  </p>
+                </fieldset>
+                <fieldset class="progress-lab-field">
+                  <legend data-i18n="doc.progress.control.behavior">Behavior</legend>
+                  <div class="progress-lab-radios">
+                    <k3-radio name="prog-behavior" value="determinate" checked>Determinate</k3-radio>
+                    <k3-radio name="prog-behavior" value="indeterminate">Indeterminate</k3-radio>
+                  </div>
+                </fieldset>
+                <fieldset class="progress-lab-field">
+                  <legend data-i18n="doc.progress.control.thickness">Thickness</legend>
+                  <div class="progress-lab-radios">
+                    <k3-radio name="prog-thickness" value="4" checked>4 dp</k3-radio>
+                    <k3-radio name="prog-thickness" value="8">8 dp</k3-radio>
+                  </div>
+                </fieldset>
+                <fieldset class="progress-lab-field" id="progress-lab-stop-field">
+                  <legend data-i18n="doc.progress.control.stop">Stop indicator</legend>
+                  <div class="progress-lab-radios">
+                    <k3-radio name="prog-stop" value="on" checked>On</k3-radio>
+                    <k3-radio name="prog-stop" value="off">Off</k3-radio>
+                  </div>
+                </fieldset>
+                <fieldset class="progress-lab-field" id="progress-lab-layout-field">
+                  <legend data-i18n="doc.progress.control.layout">Layout</legend>
+                  <div class="progress-lab-radios">
+                    <k3-radio name="prog-layout" value="default" checked>Default</k3-radio>
+                    <k3-radio name="prog-layout" value="top">Top</k3-radio>
+                    <k3-radio name="prog-layout" value="bottom">Bottom</k3-radio>
+                  </div>
+                </fieldset>
+                <fieldset class="progress-lab-field" id="progress-lab-pct-pos-field" hidden>
+                  <legend data-i18n="doc.progress.control.percentPos">Percent</legend>
+                  <div class="progress-lab-radios">
+                    <k3-radio name="prog-pct-pos" value="trailing" checked>Below</k3-radio>
+                    <k3-radio name="prog-pct-pos" value="inside">Inside</k3-radio>
+                  </div>
+                </fieldset>
+                <fieldset class="progress-lab-field" id="progress-lab-size-field" hidden>
+                  <legend data-i18n="doc.progress.control.size">Size</legend>
+                  <div class="progress-lab-radios">
+                    <k3-radio name="prog-size" value="0" checked>Auto</k3-radio>
+                    <k3-radio name="prog-size" value="48">48</k3-radio>
+                    <k3-radio name="prog-size" value="64">64</k3-radio>
+                    <k3-radio name="prog-size" value="96">96</k3-radio>
+                  </div>
+                </fieldset>
+                <fieldset class="progress-lab-field">
+                  <legend data-i18n="doc.progress.control.label">Label</legend>
+                  <k3-switch id="prog-sw-label" aria-label="Label"></k3-switch>
+                </fieldset>
+                <fieldset class="progress-lab-field">
+                  <legend data-i18n="doc.progress.control.percent">Value %</legend>
+                  <k3-switch id="prog-sw-percent" selected aria-label="Value %"></k3-switch>
+                </fieldset>
+                <fieldset class="progress-lab-field">
+                  <legend data-i18n="doc.progress.control.supporting">Supporting</legend>
+                  <k3-switch id="prog-sw-supporting" aria-label="Supporting"></k3-switch>
+                </fieldset>
+                <div class="progress-lab-value" id="progress-lab-value-wrap">
+                  <label class="progress-lab-value-label" for="progress-lab-slider"
+                    ><span data-i18n="doc.progress.control.value">Value</span>
+                    <span id="progress-lab-value-pct">65%</span></label
+                  >
+                  <k3-slider id="progress-lab-slider" value="65" min="0" max="100" aria-label="Progress"></k3-slider>
                 </div>
-                <span class="demo-case-num">3</span>
               </div>
             </div>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span>
-                <span class="variant-label" data-i18n="doc.progress.shape.flat">Flat</span>
+                <span class="variant-label" data-i18n="doc.progress.state.determinate">determinate</span>
               </li>
               <li>
                 <span class="pill-num">2</span>
-                <span class="variant-label" data-i18n="doc.progress.shape.wavy">Wavy</span>
+                <span class="variant-label" data-i18n="doc.progress.state.indeterminate">indeterminate</span>
               </li>
               <li>
                 <span class="pill-num">3</span>
-                <span class="variant-label" data-i18n="doc.progress.shape.oscillation"
-                  >Oscillation</span
-                >
+                <span class="variant-label" data-i18n="doc.progress.state.interactive">interactive</span>
               </li>
             </ol>
           </div>
 
-          <header class="section-head sub">
-            <h2 data-i18n="doc.progress.section.playground">Playground</h2>
-            <p data-i18n="doc.progress.section.playground.blurb">
-              Tune variant, shape (incl. oscillation + PCM src), size, percent, label, and value live.
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.progress.versions.blurb">
+              linear (default) vs circular. Linear layouts default · top · bottom. Oscillation is linear-only PCM bars.
             </p>
-          </header>
-          <div class="demo-block" id="progress-lab">
-            <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
-              <div class="demo-case">
-                <div class="demo-case-stage progress-lab-stage">
-                  <k3-progress
-                    id="progress-lab-el"
-                    value="0.65"
-                    thickness="4"
-                    show-stop
-                    show-percent
-                    layout="default"
-                  ></k3-progress>
-                </div>
-              </div>
-            </div>
-            <div class="progress-lab-controls k3-layout-grid surface-flush">
-              <fieldset class="progress-lab-field">
-                <legend data-i18n="doc.progress.control.variant">Variant</legend>
-                <div class="progress-lab-radios">
-                  <k3-radio name="prog-variant" value="linear" checked>Linear</k3-radio>
-                  <k3-radio name="prog-variant" value="circular">Circular</k3-radio>
-                </div>
-              </fieldset>
-              <fieldset class="progress-lab-field">
-                <legend data-i18n="doc.progress.control.shape">Shape</legend>
-                <div class="progress-lab-radios">
-                  <k3-radio name="prog-shape" value="flat" checked
-                    ><span data-i18n="doc.progress.shape.flat">Flat</span></k3-radio
-                  >
-                  <k3-radio name="prog-shape" value="wavy"
-                    ><span data-i18n="doc.progress.shape.wavy">Wavy</span></k3-radio
-                  >
-                  <k3-radio name="prog-shape" value="oscillation"
-                    ><span data-i18n="doc.progress.shape.oscillation">Oscillation</span></k3-radio
-                  >
-                </div>
-              </fieldset>
-              <fieldset class="progress-lab-field" id="progress-lab-src-field" hidden>
-                <legend data-i18n="doc.progress.control.src">Waveform src</legend>
-                <k3-switch
-                  id="prog-sw-src"
-                  selected
-                  aria-label="Use demo audio for PCM"
-                ></k3-switch>
-                <p class="progress-lab-hint" data-i18n="doc.progress.control.src.hint">
-                  Decode /sounds/hello.mp3 peaks (same cache as audio seek).
-                </p>
-              </fieldset>
-              <fieldset class="progress-lab-field">
-                <legend data-i18n="doc.progress.control.behavior">Behavior</legend>
-                <div class="progress-lab-radios">
-                  <k3-radio name="prog-behavior" value="determinate" checked>Determinate</k3-radio>
-                  <k3-radio name="prog-behavior" value="indeterminate">Indeterminate</k3-radio>
-                </div>
-              </fieldset>
-              <fieldset class="progress-lab-field">
-                <legend data-i18n="doc.progress.control.thickness">Thickness</legend>
-                <div class="progress-lab-radios">
-                  <k3-radio name="prog-thickness" value="4" checked>4 dp</k3-radio>
-                  <k3-radio name="prog-thickness" value="8">8 dp</k3-radio>
-                </div>
-              </fieldset>
-              <fieldset class="progress-lab-field" id="progress-lab-stop-field">
-                <legend data-i18n="doc.progress.control.stop">Stop indicator</legend>
-                <div class="progress-lab-radios">
-                  <k3-radio name="prog-stop" value="on" checked>On</k3-radio>
-                  <k3-radio name="prog-stop" value="off">Off</k3-radio>
-                </div>
-              </fieldset>
-              <fieldset class="progress-lab-field" id="progress-lab-layout-field">
-                <legend data-i18n="doc.progress.control.layout">Layout</legend>
-                <div class="progress-lab-radios">
-                  <k3-radio name="prog-layout" value="default" checked>Default</k3-radio>
-                  <k3-radio name="prog-layout" value="top">Top</k3-radio>
-                  <k3-radio name="prog-layout" value="bottom">Bottom</k3-radio>
-                </div>
-              </fieldset>
-              <fieldset class="progress-lab-field" id="progress-lab-pct-pos-field" hidden>
-                <legend data-i18n="doc.progress.control.percentPos">Percent</legend>
-                <div class="progress-lab-radios">
-                  <k3-radio name="prog-pct-pos" value="trailing" checked>Below</k3-radio>
-                  <k3-radio name="prog-pct-pos" value="inside">Inside</k3-radio>
-                </div>
-              </fieldset>
-              <fieldset class="progress-lab-field" id="progress-lab-size-field" hidden>
-                <legend data-i18n="doc.progress.control.size">Size</legend>
-                <div class="progress-lab-radios">
-                  <k3-radio name="prog-size" value="0" checked>Auto</k3-radio>
-                  <k3-radio name="prog-size" value="48">48</k3-radio>
-                  <k3-radio name="prog-size" value="64">64</k3-radio>
-                  <k3-radio name="prog-size" value="96">96</k3-radio>
-                </div>
-              </fieldset>
-              <fieldset class="progress-lab-field">
-                <legend data-i18n="doc.progress.control.label">Label</legend>
-                <k3-switch id="prog-sw-label" aria-label="Label"></k3-switch>
-              </fieldset>
-              <fieldset class="progress-lab-field">
-                <legend data-i18n="doc.progress.control.percent">Value %</legend>
-                <k3-switch id="prog-sw-percent" selected aria-label="Value %"></k3-switch>
-              </fieldset>
-              <fieldset class="progress-lab-field">
-                <legend data-i18n="doc.progress.control.supporting">Supporting</legend>
-                <k3-switch id="prog-sw-supporting" aria-label="Supporting"></k3-switch>
-              </fieldset>
-              <div class="progress-lab-value" id="progress-lab-value-wrap">
-                <label class="progress-lab-value-label" for="progress-lab-slider"
-                  ><span data-i18n="doc.progress.control.value">Value</span>
-                  <span id="progress-lab-value-pct">65%</span></label
-                >
-                <k3-slider id="progress-lab-slider" value="65" min="0" max="100" aria-label="Progress"></k3-slider>
-              </div>
-            </div>
           </div>
         </article>
 
@@ -7403,9 +7437,42 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Loading indicators show that the UI is busy without implying a known percentage. Use the morphing shape for brand moments and the contained variant inside buttons or tight slots. Prefer skeleton screens for longer waits where layout can be previewed.
             </p>
           </header>
-          <div class="surface row wrap gap-lg items-center">
-            <k3-loading-indicator></k3-loading-indicator>
-            <k3-loading-indicator contained></k3-loading-indicator>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.loading.option.contained">contained</h3>
+              <p data-i18n="doc.loading.option.contained.desc">
+                Default morph spinner, or contained on a primary-container disc for tight slots.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end k3-layout-grid k3-demo-cols-2">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-loading-indicator></k3-loading-indicator>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-loading-indicator contained></k3-loading-indicator>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.loading.legend.default">Default</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label" data-i18n="doc.loading.legend.contained">contained</span>
+                </li>
+              </ol>
+            </div>
           </div>
         </article>
 
@@ -7422,35 +7489,23 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </header>
 
-          <div class="surface stack gap-md">
-            <ol class="variant-guide">
-              <li>
-                <span class="pill-num">1</span>
-                <span class="variant-label">wave</span>
-              </li>
-              <li>
-                <span class="pill-num">2</span>
-                <span class="variant-label">pulse</span>
-              </li>
-              <li>
-                <span class="pill-num">3</span>
-                <span class="variant-label">circular · rounded · square</span>
-              </li>
-            </ol>
-            <div class="row wrap gap-sm">
-              <k3-button id="btn-skeleton-toggle" variant="tonal">
-                <span data-i18n="doc.skeleton.toggle">Toggle loaded</span>
-              </k3-button>
-            </div>
-          </div>
-
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.skeleton.section.reveal">Reveal content</h2>
-              <p data-i18n="doc.skeleton.section.reveal.blurb">
-                Wrap the real UI — bone covers it while loading, then <code>loaded</code> reveals it.
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.skeleton.option.animation">animation / loaded</h3>
+              <p data-i18n="doc.skeleton.option.animation.desc">
+                Wrap the real UI — bone covers it while loading, then loaded reveals it. Toggle to try.
               </p>
             </header>
+            <div class="surface stack gap-md">
+              <div class="row wrap gap-sm">
+                <k3-button id="btn-skeleton-toggle" variant="tonal">
+                  <span data-i18n="doc.skeleton.toggle">Toggle loaded</span>
+                </k3-button>
+              </div>
+            </div>
             <div class="skeleton-demo-row">
               <k3-skeleton
                 class="skel-reveal"
@@ -7484,13 +7539,11 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </p>
               </div>
             </k3-skeleton>
-          </div>
 
-          <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.skeleton.section.bones">Animation samples</h2>
-              <p data-i18n="doc.skeleton.section.bones.blurb">
-                Empty bones (no slot) — sizing only; they stay as placeholders (not toggled).
+              <h3 data-i18n="doc.skeleton.option.shape">shape</h3>
+              <p data-i18n="doc.skeleton.option.shape.desc">
+                Empty bones (no slot) — circular · rounded · square sizing only.
               </p>
             </header>
             <div class="row wrap gap-md items-end">
@@ -7512,13 +7565,21 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
           </div>
 
-          <k3-codeblock language="html" code="<k3-skeleton animation=&quot;wave&quot;>
-  <strong>Jane Doe</strong>
-</k3-skeleton>
-<!-- later: el.loaded = true  → reveals content -->
-
-<!-- Empty bone (placeholder only, no reveal) -->
-<k3-skeleton animation=&quot;wave&quot; style=&quot;width:8rem;height:5rem&quot;></k3-skeleton>" ></k3-codeblock>
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span>
+                <span class="variant-label" data-i18n="doc.skeleton.state.loading">loading</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span>
+                <span class="variant-label" data-i18n="doc.skeleton.state.loaded">loaded</span>
+              </li>
+            </ol>
+          </div>
         </article>
 
         <!-- FEEDBACK: LAZY LOADING -->
@@ -7530,7 +7591,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             <p class="doc-intro" data-i18n="doc.lazy.intro">k3-lazy waits for its trigger, registers the k3 components it contains, awaits an optional loader, then reveals the content.</p>
           </header>
 
-          <div class="surface stack gap-md">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.lazy.option.fallback">fallback / trigger</h3>
+              <p data-i18n="doc.lazy.option.fallback.desc">
+                Manual demos — skeleton (default), indicator, and error · retry. Replay resets the regions.
+              </p>
+            </header>
             <div class="lazy-demo-actions">
               <k3-button id="btn-lazy-replay" variant="tonal">
                 <span data-i18n="doc.lazy.replay">Replay</span>
@@ -7583,6 +7653,18 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <li><span class="pill-num">3</span><span class="variant-label">error · retry</span></li>
             </ol>
           </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <ol class="variant-guide">
+              <li><span class="pill-num">1</span><span class="variant-label" data-i18n="doc.lazy.state.idle">idle</span></li>
+              <li><span class="pill-num">2</span><span class="variant-label" data-i18n="doc.lazy.state.loading">loading</span></li>
+              <li><span class="pill-num">3</span><span class="variant-label" data-i18n="doc.lazy.state.ready">ready</span></li>
+              <li><span class="pill-num">4</span><span class="variant-label" data-i18n="doc.lazy.state.error">error</span></li>
+            </ol>
+          </div>
         </article>
 
         <!-- SNACKBAR -->
@@ -7597,7 +7679,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Snackbars confirm brief outcomes at the bottom of the screen. Keep copy to one or two lines, offer at most one action, and choose short, long, or indefinite duration with care. Use the inverse surface so the message stays readable over any page chrome.
             </p>
           </header>
-          <div class="surface stack gap-md">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.snackbar.option.duration">duration / action / dismissible</h3>
+              <p data-i18n="doc.snackbar.option.duration.desc">
+                short · long · indefinite — optional action, dismiss, two lines, or stacked long action.
+              </p>
+            </header>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span>
@@ -7642,6 +7733,9 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <k3-button id="btn-snack-stacked" variant="text">
                 <span data-i18n="doc.snackbar.open.stacked">Long action</span>
               </k3-button>
+              <k3-button id="btn-snack-api" variant="text">
+                <span data-i18n="doc.snackbar.open.api">showSnackbar()</span>
+              </k3-button>
             </div>
             <k3-snackbar id="snack" duration="short" queue-behavior="replace">
               <span data-i18n="doc.snackbar.demo.saved">Changes saved</span>
@@ -7685,11 +7779,6 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 >Photo already has the label “travel.”</span
               >
             </k3-snackbar>
-            <div class="row wrap gap-sm">
-              <k3-button id="btn-snack-api" variant="text">
-                <span data-i18n="doc.snackbar.open.api">showSnackbar()</span>
-              </k3-button>
-            </div>
           </div>
         </article>
 
@@ -7710,10 +7799,13 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.alert.section.variants">Variants</h2>
-              <p data-i18n="doc.alert.section.variants.blurb">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.alert.option.variant">variant</h3>
+              <p data-i18n="doc.alert.option.variant.desc">
                 Theme roles and semantic tones — container + accent bar.
               </p>
             </header>
@@ -7773,12 +7865,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 >
               </k3-alert>
             </div>
-          </div>
 
-          <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.alert.section.shapes">Shapes</h2>
-              <p data-i18n="doc.alert.section.shapes.blurb">Rounded (default) or square.</p>
+              <h3 data-i18n="doc.alert.option.shape">shape</h3>
+              <p data-i18n="doc.alert.option.shape.desc">Rounded (default) or square.</p>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--cases items-end">
@@ -7814,13 +7904,11 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </li>
               </ol>
             </div>
-          </div>
 
-          <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.alert.section.dismiss">Dismissible</h2>
-              <p data-i18n="doc.alert.section.dismiss.blurb">
-                Optional close control — emits k3-dismiss.
+              <h3 data-i18n="doc.alert.option.dismissible">dismissible / action</h3>
+              <p data-i18n="doc.alert.option.dismissible.desc">
+                Optional close control (k3-dismiss) and trailing action slot.
               </p>
             </header>
             <div class="stack gap-sm" style="max-width: 40rem">
@@ -7830,17 +7918,6 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                   stay in the body.</span
                 >
               </k3-alert>
-            </div>
-          </div>
-
-          <div class="surface stack gap-lg">
-            <header class="section-head sub">
-              <h2 data-i18n="doc.alert.section.actions">With action</h2>
-              <p data-i18n="doc.alert.section.actions.blurb">
-                Trailing action slot next to the body.
-              </p>
-            </header>
-            <div class="stack gap-sm" style="max-width: 40rem">
               <k3-alert variant="primary" dismissible label="Update available">
                 <span data-i18n="doc.alert.demo.body"
                   >Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span
@@ -7956,56 +8033,71 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Tooltips explain a control on hover or focus. Plain tips carry a short phrase; rich tips add a headline and optional actions for denser help. Anchor to eight sides plus logical start/end so RTL mirrors correctly, and never put essential information only in a tooltip.
             </p>
           </header>
-          <div class="surface surface-flush">
-            <h2 class="demo-subtitle" data-i18n="doc.tooltip.compass">Eight sides</h2>
-            <div class="tooltip-compass" aria-label="Tooltip placements">
-              <k3-tooltip class="tc tc-nw" position="top-start" content="top-start">
-                <k3-button size="xs" variant="tonal">NW</k3-button>
-              </k3-tooltip>
-              <k3-tooltip class="tc tc-n" position="top" content="top">
-                <k3-button size="xs" variant="tonal">N</k3-button>
-              </k3-tooltip>
-              <k3-tooltip class="tc tc-ne" position="top-end" content="top-end">
-                <k3-button size="xs" variant="tonal">NE</k3-button>
-              </k3-tooltip>
-              <k3-tooltip class="tc tc-w" position="start" content="start">
-                <k3-button size="xs" variant="tonal">W</k3-button>
-              </k3-tooltip>
-              <div class="tc tc-center" aria-hidden="true">
-                <span
-                  class="ms notranslate"
-                  translate="no"
-                  lang="zxx"
-                  data-k3-icon="anchor"
-                ></span>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.tooltip.option.position">position</h3>
+              <p data-i18n="doc.tooltip.option.position.desc">
+                Eight logical sides + corners; physical left / right stay fixed in RTL.
+              </p>
+            </header>
+            <div class="surface surface-flush">
+              <p class="hint" data-i18n="doc.tooltip.compass">Eight sides</p>
+              <div class="tooltip-compass" aria-label="Tooltip placements">
+                <k3-tooltip class="tc tc-nw" position="top-start" content="top-start">
+                  <k3-button size="xs" variant="tonal">NW</k3-button>
+                </k3-tooltip>
+                <k3-tooltip class="tc tc-n" position="top" content="top">
+                  <k3-button size="xs" variant="tonal">N</k3-button>
+                </k3-tooltip>
+                <k3-tooltip class="tc tc-ne" position="top-end" content="top-end">
+                  <k3-button size="xs" variant="tonal">NE</k3-button>
+                </k3-tooltip>
+                <k3-tooltip class="tc tc-w" position="start" content="start">
+                  <k3-button size="xs" variant="tonal">W</k3-button>
+                </k3-tooltip>
+                <div class="tc tc-center" aria-hidden="true">
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="anchor"
+                  ></span>
+                </div>
+                <k3-tooltip class="tc tc-e" position="end" content="end">
+                  <k3-button size="xs" variant="tonal">E</k3-button>
+                </k3-tooltip>
+                <k3-tooltip class="tc tc-sw" position="bottom-start" content="bottom-start">
+                  <k3-button size="xs" variant="tonal">SW</k3-button>
+                </k3-tooltip>
+                <k3-tooltip class="tc tc-s" position="bottom" content="bottom">
+                  <k3-button size="xs" variant="tonal">S</k3-button>
+                </k3-tooltip>
+                <k3-tooltip class="tc tc-se" position="bottom-end" content="bottom-end">
+                  <k3-button size="xs" variant="tonal">SE</k3-button>
+                </k3-tooltip>
               </div>
-              <k3-tooltip class="tc tc-e" position="end" content="end">
-                <k3-button size="xs" variant="tonal">E</k3-button>
-              </k3-tooltip>
-              <k3-tooltip class="tc tc-sw" position="bottom-start" content="bottom-start">
-                <k3-button size="xs" variant="tonal">SW</k3-button>
-              </k3-tooltip>
-              <k3-tooltip class="tc tc-s" position="bottom" content="bottom">
-                <k3-button size="xs" variant="tonal">S</k3-button>
-              </k3-tooltip>
-              <k3-tooltip class="tc tc-se" position="bottom-end" content="bottom-end">
-                <k3-button size="xs" variant="tonal">SE</k3-button>
-              </k3-tooltip>
             </div>
-          </div>
-          <div class="surface">
-            <h2 class="demo-subtitle" data-i18n="doc.tooltip.physical">Physical left / right</h2>
-            <div class="tooltip-physical">
-              <k3-tooltip position="left" content="left">
-                <k3-button size="sm" variant="outlined">left</k3-button>
-              </k3-tooltip>
-              <k3-tooltip position="right" content="right">
-                <k3-button size="sm" variant="outlined">right</k3-button>
-            </k3-tooltip>
+            <div class="surface surface-flush">
+              <p class="hint" data-i18n="doc.tooltip.physical">Physical left / right</p>
+              <div class="tooltip-physical">
+                <k3-tooltip position="left" content="left">
+                  <k3-button size="sm" variant="outlined">left</k3-button>
+                </k3-tooltip>
+                <k3-tooltip position="right" content="right">
+                  <k3-button size="sm" variant="outlined">right</k3-button>
+                </k3-tooltip>
+              </div>
             </div>
-          </div>
-          <div class="surface">
-            <h2 class="demo-subtitle" data-i18n="doc.tooltip.variants">Plain · rich</h2>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.tooltip.option.variant">variant</h3>
+              <p data-i18n="doc.tooltip.option.variant.desc">
+                Plain inverse one-liner, or rich surface with headline + actions.
+              </p>
+            </header>
             <div class="tooltip-variants">
               <div class="tooltip-variant-card">
                 <span class="tooltip-variant-num" aria-hidden="true">1</span>
@@ -8039,6 +8131,15 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </div>
             </div>
           </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.tooltip.versions.blurb">
+              plain = inverse single line. rich = surface + headline + optional actions. Tips escape overflow via popover / fixed.
+            </p>
+          </div>
         </article>
 
         <!-- BADGE -->
@@ -8054,10 +8155,13 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.badge.section.sizes">Sizes</h2>
-              <p data-i18n="doc.badge.section.sizes.blurb">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.badge.option.dot">dot / value / max</h3>
+              <p data-i18n="doc.badge.option.dot.desc">
                 Small dot, large digit, and max characters (999+).
               </p>
             </header>
@@ -8084,38 +8188,27 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             <div class="badge-demo-row">
               <figure class="badge-demo-item">
                 <k3-badge dot>
-                  <span class="badge-demo-icon ms" aria-hidden="true">change_history</span>
+                  <span class="badge-demo-icon ms notranslate" translate="no" lang="zxx" data-k3-icon="change_history" aria-hidden="true"></span>
                 </k3-badge>
                 <figcaption>Label</figcaption>
               </figure>
               <figure class="badge-demo-item">
                 <k3-badge value="1">
-                  <span class="badge-demo-icon ms" aria-hidden="true">change_history</span>
+                  <span class="badge-demo-icon ms notranslate" translate="no" lang="zxx" data-k3-icon="change_history" aria-hidden="true"></span>
                 </k3-badge>
                 <figcaption>Label</figcaption>
               </figure>
               <figure class="badge-demo-item">
                 <k3-badge value="1200">
-                  <span class="badge-demo-icon ms" aria-hidden="true">change_history</span>
+                  <span class="badge-demo-icon ms notranslate" translate="no" lang="zxx" data-k3-icon="change_history" aria-hidden="true"></span>
                 </k3-badge>
                 <figcaption>Label</figcaption>
               </figure>
             </div>
-          </div>
 
-          <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.badge.section.note">Not a status pill</h2>
-              <p data-i18n="doc.badge.section.note.blurb">
-                Colored Available / Unavailable labels are chips — see Chips → Status.
-              </p>
-            </header>
-          </div>
-
-          <div class="surface stack gap-lg">
-            <header class="section-head sub">
-              <h2 data-i18n="doc.badge.section.corners">Corners</h2>
-              <p data-i18n="doc.badge.section.corners.blurb">
+              <h3 data-i18n="doc.badge.option.position">position</h3>
+              <p data-i18n="doc.badge.option.position.desc">
                 Logical top/bottom × start/end (RTL mirrors). Physical left/right stay fixed.
               </p>
             </header>
@@ -8126,15 +8219,15 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <figure class="badge-demo-item">
                 <k3-badge value="3" position="top-end">
                   <k3-icon-button label="top-end" variant="standard">
-                <span class="ms">notifications</span>
-              </k3-icon-button>
-            </k3-badge>
+                    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="notifications" aria-hidden="true"></span>
+                  </k3-icon-button>
+                </k3-badge>
                 <figcaption>top-end</figcaption>
               </figure>
               <figure class="badge-demo-item">
                 <k3-badge value="3" position="top-start">
                   <k3-icon-button label="top-start" variant="standard">
-                    <span class="ms">notifications</span>
+                    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="notifications" aria-hidden="true"></span>
                   </k3-icon-button>
                 </k3-badge>
                 <figcaption>top-start</figcaption>
@@ -8142,7 +8235,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <figure class="badge-demo-item">
                 <k3-badge value="3" position="bottom-end">
                   <k3-icon-button label="bottom-end" variant="standard">
-                    <span class="ms">notifications</span>
+                    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="notifications" aria-hidden="true"></span>
                   </k3-icon-button>
                 </k3-badge>
                 <figcaption>bottom-end</figcaption>
@@ -8150,7 +8243,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <figure class="badge-demo-item">
                 <k3-badge value="3" position="bottom-start">
                   <k3-icon-button label="bottom-start" variant="standard">
-                    <span class="ms">notifications</span>
+                    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="notifications" aria-hidden="true"></span>
                   </k3-icon-button>
                 </k3-badge>
                 <figcaption>bottom-start</figcaption>
@@ -8163,7 +8256,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <figure class="badge-demo-item">
                 <k3-badge dot position="top-right">
                   <k3-icon-button label="top-right" variant="standard">
-                    <span class="ms">mail</span>
+                    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="mail" aria-hidden="true"></span>
                   </k3-icon-button>
                 </k3-badge>
                 <figcaption>top-right · dot</figcaption>
@@ -8171,7 +8264,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <figure class="badge-demo-item">
                 <k3-badge value="9" position="top-left">
                   <k3-icon-button label="top-left" variant="standard">
-                    <span class="ms">mail</span>
+                    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="mail" aria-hidden="true"></span>
                   </k3-icon-button>
                 </k3-badge>
                 <figcaption>top-left · 9</figcaption>
@@ -8179,7 +8272,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <figure class="badge-demo-item">
                 <k3-badge value="99" position="bottom-right">
                   <k3-icon-button label="bottom-right" variant="standard">
-                    <span class="ms">mail</span>
+                    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="mail" aria-hidden="true"></span>
                   </k3-icon-button>
                 </k3-badge>
                 <figcaption>bottom-right · 99</figcaption>
@@ -8187,12 +8280,21 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <figure class="badge-demo-item">
                 <k3-badge value="1500" position="bottom-left">
                   <k3-icon-button label="bottom-left" variant="standard">
-                    <span class="ms">mail</span>
+                    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="mail" aria-hidden="true"></span>
                   </k3-icon-button>
                 </k3-badge>
                 <figcaption>bottom-left · 999+</figcaption>
               </figure>
             </div>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.badge.section.note.blurb">
+              Colored Available / Unavailable labels are chips — see Chips → Status. Zero is hidden unless show-zero.
+            </p>
           </div>
         </article>
 

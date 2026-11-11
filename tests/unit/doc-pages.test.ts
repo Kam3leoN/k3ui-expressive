@@ -47,6 +47,14 @@ const PAGE_TAGS: Record<string, string[]> = {
   'fab-rail': ['k3-fab-rail'],
   ripple: ['k3-ripple'],
   'shape-chip': ['k3-shape-chip'],
+  progress: ['k3-progress'],
+  loading: ['k3-loading-indicator'],
+  skeleton: ['k3-skeleton'],
+  lazy: ['k3-lazy'],
+  snackbar: ['k3-snackbar'],
+  alert: ['k3-alert'],
+  tooltip: ['k3-tooltip'],
+  badge: ['k3-badge'],
   /* extend as pages leave PENDING_PAGES */
 };
 
@@ -92,7 +100,15 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'fab-dial' &&
     id !== 'fab-rail' &&
     id !== 'ripple' &&
-    id !== 'shape-chip',
+    id !== 'shape-chip' &&
+    id !== 'progress' &&
+    id !== 'loading' &&
+    id !== 'skeleton' &&
+    id !== 'lazy' &&
+    id !== 'snackbar' &&
+    id !== 'alert' &&
+    id !== 'tooltip' &&
+    id !== 'badge',
 );
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');

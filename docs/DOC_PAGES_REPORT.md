@@ -49,10 +49,18 @@
 | `fab-rail` | `docs(fab-rail): gabarit complet` | Examples (position/direction) |
 | `ripple` | `docs(ripple): gabarit complet` | Examples (bounded) · Usage h2 retiré |
 | `shape-chip` | `docs(shape-chip): gabarit complet` | Examples (placement/size) + States |
+| `progress` | `docs(progress): gabarit complet` | Examples (shape + lab) + States + Versions |
+| `loading` | `docs(loading): gabarit complet` | Examples (contained) · tag `k3-loading-indicator` |
+| `skeleton` | `docs(skeleton): gabarit complet` | Examples (animation/shape) + States |
+| `lazy` | `docs(lazy): gabarit complet` | Examples (fallback) + States |
+| `snackbar` | `docs(snackbar): gabarit complet` | Examples (duration/action/dismiss) |
+| `alert` | `docs(alert): gabarit complet` | Examples (variant/shape/dismissible) |
+| `tooltip` | `docs(tooltip): gabarit complet` | Examples (position/variant) + Versions |
+| `badge` | `docs(badge): gabarit complet` | Examples (dot/value/position) + States |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — lot Feedback ensuite.
+Voir `PENDING_PAGES` — lot Containment ensuite. `marquee` / `countdown` / `sound-fx` restent k3ux (hors lot Feedback k3ui).
 
 ## Décisions humaines
 
