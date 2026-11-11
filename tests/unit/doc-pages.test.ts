@@ -27,7 +27,7 @@ const CATALOG_IDS = DOC_COMPONENTS.filter(
  * Pages not yet migrated to the full gabarit. Remove an id when its page ships.
  * Empty → étape D (clôture).
  */
-export const PENDING_PAGES: string[] = [...CATALOG_IDS];
+export const PENDING_PAGES: string[] = CATALOG_IDS.filter((id) => id !== 'buttons');
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');
 
@@ -39,8 +39,11 @@ function sectionFilled(v: unknown): boolean {
 }
 
 describe('doc pages gabarit', () => {
-  it('PENDING_PAGES covers every catalog component page initially', () => {
-    expect(new Set(PENDING_PAGES)).toEqual(new Set(CATALOG_IDS));
+  it('PENDING_PAGES is a subset of catalog component pages', () => {
+    const catalog = new Set(CATALOG_IDS);
+    for (const id of PENDING_PAGES) {
+      expect(catalog.has(id), `unknown pending id ${id}`).toBe(true);
+    }
   });
 
   it('DOC_SECTIONS has an entry for every catalog component page', () => {

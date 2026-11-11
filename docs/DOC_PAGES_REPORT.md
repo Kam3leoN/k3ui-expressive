@@ -14,11 +14,13 @@
 
 ## Pages traitées
 
-_(aucune — phase C à suivre : `buttons`, `text-field`, `dialog`)_
+| Page | Commit message | Notes |
+| --- | --- | --- |
+| `buttons` | `docs(buttons): gabarit complet` | Examples (shape/variant/size) + States ; DOC_SECTIONS remplies |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` dans `tests/unit/doc-pages.test.ts` (91 ids).
+Voir `PENDING_PAGES` dans `tests/unit/doc-pages.test.ts` (90 ids restants — prochaines : `text-field`, `dialog`).
 
 ## Décisions humaines
 

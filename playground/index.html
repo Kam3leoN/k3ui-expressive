@@ -573,12 +573,22 @@ import 'k3ux/holo-effects.css';
               Buttons communicate actions a user can take. Prefer filled for the primary action on a screen, tonal for secondary emphasis, elevated when the button sits on a busy surface, outlined for quiet alternatives, and text for the lowest emphasis. Material 3 Expressive morphs corner radius on press without changing the layout size — keep labels short, pair with a clear icon when helpful, and reserve one filled button per view.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+
             <!--
               Cols 1–2 (top) = Normal | Toggle
               Rows A–B (side) = Round | Square
-              A1 Normal round · B1 Normal square · A2 Toggle round · B2 Toggle square
             -->
+            <header class="section-head sub">
+              <h3 data-i18n="doc.button.option.shape">shape</h3>
+              <p data-i18n="doc.button.option.shape.desc">
+                Round (pill) by default; square uses soft corners. Selected morphs the resting
+                family without changing layout size.
+              </p>
+            </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--width-matrix">
                 <div class="width-matrix width-matrix--2">
@@ -637,7 +647,10 @@ import 'k3ux/holo-effects.css';
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.button.section.variants">Variants</h2>
+              <h3 data-i18n="doc.button.option.variant">variant</h3>
+              <p data-i18n="doc.button.option.variant.desc">
+                Filled · tonal · elevated · outlined · text — pick emphasis, not decoration.
+              </p>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--cases">
@@ -686,7 +699,10 @@ import 'k3ux/holo-effects.css';
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="playground.sizes.title">Expressive sizes</h2>
+              <h3 data-i18n="doc.button.option.size">size</h3>
+              <p data-i18n="doc.button.option.size.desc">
+                XS 32 · SM 40 · MD 56 · LG 96 · XL 136 — M3 Expressive ladder (default SM).
+              </p>
             </header>
             <!-- Cols 1–5 sizes · Rows A round / B square -->
             <div class="demo-block">
@@ -760,6 +776,41 @@ import 'k3ux/holo-effects.css';
                   </li>
                 </ol>
               </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button variant="filled" disabled>Disabled</k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button variant="tonal" selected>Selected</k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.button.state.disabled">disabled</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.button.state.selected">selected</span>
+                </li>
+              </ol>
             </div>
           </div>
         </article>

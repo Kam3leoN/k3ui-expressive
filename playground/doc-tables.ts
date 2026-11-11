@@ -65,18 +65,25 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
   buttons: {
     properties: [
       ['variant', "'filled'|'tonal'|'elevated'|'outlined'|'text'", 'filled', 'Visual style'],
-      ['size', "'xs'|'sm'|'md'|'lg'|'xl'", 'sm', 'Height scale'],
+      ['size', "'xs'|'sm'|'md'|'lg'|'xl'", 'sm', 'Height scale (default sm=40)'],
       ['shape', "'round'|'square'", 'round', 'Corner family'],
       ['disabled', 'boolean', 'false', 'Disables press'],
-      ['selected', 'boolean', 'false', 'Selected / toggle look'],
+      ['selected', 'boolean', 'false', 'Selected / toggle look (aria-pressed)'],
+      ['radio', 'boolean', 'false', 'Attr data-radio — group single-select → role=radio'],
       ['type', "'button'|'submit'|'reset'", 'button', 'Native button type'],
     ],
-    events: [['k3-click', '—', 'Activated (click / keyboard)']],
+    events: [['k3-click', '{ source: "user" }', 'Activated (click / keyboard)']],
     slots: [
       ['(default)', 'Label text'],
       ['icon', 'Leading icon'],
+      ['trailing-icon', 'Trailing icon'],
     ],
-    'css-parts': [['container', 'Inner button surface']],
+    'css-parts': [
+      ['container', 'Inner button surface'],
+      ['icon', 'Leading icon wrapper'],
+      ['label', 'Label wrapper'],
+      ['trailing-icon', 'Trailing icon wrapper'],
+    ],
   },
   'buttons-icon': {
     properties: [

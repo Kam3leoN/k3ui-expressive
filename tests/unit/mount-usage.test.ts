@@ -8,7 +8,11 @@ describe('mount-usage', () => {
     const el = createUsageSection(snip);
     expect(el.classList.contains('doc-usage')).toBe(true);
     expect(el.querySelectorAll('[data-code-panel]')).toHaveLength(3);
-    expect(el.querySelector('[data-code-panel="html"]')?.textContent).toContain('k3-button');
+    const htmlPanel = el.querySelector('[data-code-panel="html"]') as HTMLElement & {
+      code?: string;
+    };
+    const code = htmlPanel?.getAttribute('code') || htmlPanel?.code || '';
+    expect(code).toContain('k3-button');
   });
 
   it('mountUsageIfNeeded skips when .doc-usage already present', () => {

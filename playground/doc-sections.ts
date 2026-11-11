@@ -19,12 +19,22 @@ export function isDocNa(v: unknown): v is DocNa {
 
 export const DOC_SECTIONS: Record<string, DocSections> = {
   'buttons': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['--k3-btn-height', '2.5rem (sm)', 'Control height'],
+      ['--k3-btn-radius', 'height/2', 'Resting corner (round)'],
+      ['--k3-btn-pad-inline', '1rem (sm)', 'Horizontal padding'],
+    ],
+    keyboard: [
+      ['Enter / Space', 'Activate (native button)'],
+      ['Tab', 'Move focus'],
+    ],
+    focus: 'doc.button.focus',
+    motion: [
+      ['Press', 'Corner radius morphs to pressed token', 'Instant / no spring'],
+      ['Select', 'Round ↔ square soft morph', 'Reduced motion skips'],
+    ],
+    a11y: 'doc.button.a11y',
+    versions: { na: 'Single CE — no alternate layouts' },
   },
   'buttons-grid': {
     theming: { na: "Pending gabarit migration" },
