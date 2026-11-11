@@ -6297,10 +6297,24 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               cover the current year and the previous year; pass your own entries from the app.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.mood-calendar.option.demo">demo</h3>
+              <p data-i18n="doc.mood-calendar.option.demo.desc">
+                Generates a fake year when entries are empty — turn off for real data.
+              </p>
+            </header>
             <div class="demo-block">
-              <div class="demo-frame demo-frame--stack">
-                <k3-mood-calendar demo></k3-mood-calendar>
+              <div class="demo-frame demo-frame--stack" data-demo-enhance="off">
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-mood-calendar demo></k3-mood-calendar>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
               </div>
             </div>
           </div>
@@ -6322,9 +6336,13 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </header>
 
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.time-picker.section.basic">Basic</h2>
+              <h3 data-i18n="doc.time-picker.option.basic">variant / mode</h3>
             </header>
             <p class="hint" data-i18n="doc.time-picker.hint.orient">
               Docked anchors to the field · modal centers with scrim. Dial or keyboard input —
@@ -6465,6 +6483,34 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               mode="input"
               format="12"
             ></k3-time-picker>
+          </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-time-picker variant="modal" mode="dial" disabled></k3-time-picker>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.time-picker.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+              </ol>
+            </div>
           </div>
         </article>
 

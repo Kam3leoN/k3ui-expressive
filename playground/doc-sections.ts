@@ -396,20 +396,36 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: 'doc.date-picker.versions.blurb',
   },
   'mood-calendar': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['legend colors', 'MoodMeta[]', 'Per-mood swatches'],
+      ['day cells', 'grid', 'Year heatmap'],
+    ],
+    keyboard: [
+      ['Tab', 'Move between year tabs / legend / days'],
+      ['Enter / Space', 'Open journal dialog for focused day'],
+    ],
+    focus: 'doc.mood-calendar.focus',
+    motion: { na: 'No host spring — dialog uses standard overlay motion' },
+    a11y: 'doc.mood-calendar.a11y',
+    versions: { na: 'Single year-grid layout with year tabs' },
   },
   'time-picker': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['dial', 'clock face', 'Hour / minute rings'],
+      ['surface', 'docked / modal', 'Overlay chrome'],
+    ],
+    keyboard: [
+      ['Arrow keys (input mode)', 'Adjust focused segment'],
+      ['Tab', 'Hour → minute → second'],
+      ['Escape', 'Dismiss'],
+    ],
+    focus: 'doc.time-picker.focus',
+    motion: [
+      ['Open / close', 'Overlay enter/exit', 'Instant when reduced'],
+      ['Dial hand', 'Spatial motion to value', 'Respects reduced motion'],
+    ],
+    a11y: 'doc.time-picker.a11y',
+    versions: 'doc.time-picker.versions.blurb',
   },
   'wheel-picker': {
     theming: { na: "Pending gabarit migration" },

@@ -31,10 +31,12 @@
 | `autocomplete` | `docs(autocomplete): gabarit complet` | Examples + States |
 | `slider` | `docs(slider): gabarit complet` | Examples (playground) + States + Versions |
 | `date-picker` | `docs(date-picker): gabarit complet` | Examples + States + Versions |
+| `mood-calendar` | `docs(mood-calendar): gabarit complet` | Examples (demo) |
+| `time-picker` | `docs(time-picker): gabarit complet` | Examples + States + Versions |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — prochain : `mood-calendar`, `time-picker` (fin Inputs), …
+Voir `PENDING_PAGES` — lot Inputs terminé. Prochain : Buttons (`buttons-icon`, …), puis Actions…
 
 ## Décisions humaines
 

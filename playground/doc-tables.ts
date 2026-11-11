@@ -1480,9 +1480,9 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
   'mood-calendar': {
     properties: [
       ['year', 'number', 'current', 'Active year tab'],
-      ['years', 'number[]', 'n−1 · current', 'Year tabs (property; defaultMoodYears())'],
+      ['years', 'number[]', 'n−1 · current', 'Year tabs (property)'],
       ['entries', 'MoodEntry[]', 'null', 'App data; null + demo → generated'],
-      ['legend', 'MoodMeta[]', '8 moods', 'Colors + labels (property)'],
+      ['legend', 'MoodMeta[]', 'DEFAULT_MOOD_LEGEND', 'Colors + labels (property)'],
       ['demo', 'boolean', 'true', 'Generate fake year when entries empty'],
     ],
     events: [
@@ -1536,7 +1536,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['variant', "'docked'|'modal'|'auto'", 'docked', 'Docked anchors to `for` field'],
       ['mode', "'dial'|'input'|'auto'", 'dial', 'Default selection mode'],
       ['format', "'12'|'24'|'auto'", '12', 'Hour cycle'],
-      ['orientation', "'vertical'|'horizontal'|'auto'", 'vertical', 'Dial layout only · keyboard always vertical'],
+      ['orientation', "'vertical'|'horizontal'|'auto'", 'vertical', 'Dial layout only'],
       ['min-time', 'string', "''", 'Earliest selectable time'],
       ['max-time', 'string', "''", 'Latest selectable time'],
       ['show-seconds', 'boolean', 'false', 'Show seconds segment'],
@@ -1545,6 +1545,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['disabled', 'boolean', 'false', 'Blocks open and interaction'],
       ['hide-mode-toggle', 'boolean', 'false', 'Hide dial/keyboard toggle'],
       ['hide-format-toggle', 'boolean', 'false', 'Hide 12h/24h icon toggle'],
+      ['open', 'boolean', 'false', 'Open state (reflect)'],
       ['blackoutTimes', '(t) => boolean', '—', 'JS predicate — blocked times'],
     ],
     events: [
