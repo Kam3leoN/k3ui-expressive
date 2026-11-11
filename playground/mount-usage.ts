@@ -13,16 +13,28 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;');
 }
 
-function panel(id: 'html' | 'css' | 'js', code: string, hidden: boolean): HTMLPreElement {
-  const pre = document.createElement('pre');
-  pre.className = 'code-block';
-  pre.dataset.codePanel = id;
-  pre.tabIndex = 0;
-  if (hidden) pre.hidden = true;
-  const codeEl = document.createElement('code');
-  codeEl.textContent = code;
-  pre.append(codeEl);
-  return pre;
+function panel(
+  id: 'html' | 'css' | 'js',
+  code: string,
+  language: string,
+  hidden: boolean,
+): HTMLElement {
+  const block = document.createElement('k3-codeblock') as HTMLElement & {
+    code: string;
+    language: string;
+    showToolbar: boolean;
+    showCopy: boolean;
+    showDownload: boolean;
+  };
+  block.dataset.codePanel = id;
+  block.language = language;
+  block.code = code;
+  /* Outer Usage toolbar already has Copy — hide inner chrome */
+  block.showToolbar = false;
+  block.showCopy = false;
+  block.showDownload = false;
+  if (hidden) block.hidden = true;
+  return block;
 }
 
 /** Build a Usage section (tabs HTML / CSS / JS + copy). */
@@ -72,9 +84,9 @@ export function createUsageSection(snip: UsageSnippet): HTMLElement {
 
   sample.append(
     toolbar,
-    panel('html', snip.html.trim(), false),
-    panel('css', buildUsageCss(snip), true),
-    panel('js', buildUsageJs(snip), true),
+    panel('html', snip.html.trim(), 'html', false),
+    panel('css', buildUsageCss(snip), 'css', true),
+    panel('js', buildUsageJs(snip), 'js', true),
   );
   section.append(header, sample);
   ariaTabs(section);

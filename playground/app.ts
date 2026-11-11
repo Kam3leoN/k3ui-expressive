@@ -41,13 +41,19 @@ import {
   orderedComponents,
   neighborComponents,
   findComponent,
+  findComponentAnyProduct,
   resolvePageId,
+  getDocProduct,
+  setDocProduct,
+  type DocProduct,
 } from './catalog.js';
 import {
   NAV_DESTINATIONS,
+  navDestinationsForProduct,
   COMPONENT_MENU_GROUPS,
   RESOURCE_PAGES,
   destinationForPage,
+  iconForComponent,
 } from './nav-destinations.js';
 import { mountMaterialSymbols } from './material-symbols.js';
 import { docStore, DocKeys } from './doc-store.js';
@@ -61,19 +67,39 @@ import {
 } from './theme-defaults.js';
 import { mountSponsors } from './sponsors.js';
 import { enhanceAllDemos } from './demo-enhance.js';
-/* API tables + Usage snippets only matter on component / style pages → own chunks */
+import { wireNavRailLab } from './nav-rail-lab.js';
+/* API tables + Usage / doc sections — component / style pages → own chunks */
 const loadDocTables = () => import('./doc-tables.js');
-const loadUsage = () => import('./mount-usage.js');
+
+/** Home: Lighthouse gauges — module loaded when the section nears the viewport. */
+function watchLighthouse(): void {
+  const root = document.getElementById('lighthouse-root');
+  if (!root) return;
+  const load = () => void import('./lighthouse.js').then((m) => m.mountLighthouse(root));
+  if (typeof IntersectionObserver !== 'function') return load();
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      load();
+    },
+    { rootMargin: '600px 0px' },
+  );
+  io.observe(root);
+}
 import {
   isPlaygroundLocale,
+  localeMenuEntry,
   mountLocaleFlags,
+  playgroundToI18n,
   syncLocaleLeadingFlag,
   type PlaygroundLocale,
 } from './locale-flags.js';
 import { armNavActive, navItemFromEvent } from '../src/components/navigation/nav-selection.js';
 import type { K3NavItem } from '../src/components/navigation/nav-item.js';
 import type { DocComponent } from './catalog.js';
-import { getSoundFx } from '../src/core/sound-fx.js';
+/* Engine only — avoid pulling the full k3ux catalog on first paint. */
+import { getSoundFx } from '../../k3ux/src/core/sound-fx.js';
 import { canHoverOpen } from '../src/components/containment/menu.types.js';
 
 /**
@@ -283,15 +309,10 @@ const KEYBOARD_SUBPAGES = [
 const KEYBOARD_CHILD_IDS = new Set<string>(KEYBOARD_SUBPAGES.map(([id]) => id));
 
 /**
- * Cards family — Components → Containment → Cards → (3rd-level flyout)
- * Standard (#/card) + holographic / lenticular / scratch demos.
+ * Cards family — Components → Containment → Cards.
+ * Decorative holo / lenticular / scratch demos live in the companion package `k3ux`.
  */
-const CARD_SUBPAGES = [
-  ['card', 'doc.cards.nav.overview'],
-  ['card-holo', 'doc.cards.nav.holo'],
-  ['card-lenticular', 'doc.cards.nav.lenticular'],
-  ['card-scratch', 'doc.cards.nav.scratch'],
-] as const;
+const CARD_SUBPAGES = [['card', 'doc.cards.nav.overview']] as const;
 
 const CARD_CHILD_IDS = new Set<string>(CARD_SUBPAGES.map(([id]) => id));
 
@@ -305,7 +326,7 @@ function makeCardsFamilyMenuItem(
   cardsParent.setAttribute('value', 'card');
   cardsParent.setAttribute('has-submenu', '');
   cardsParent.slot = 'submenu';
-  cardsParent.append(t('doc.cards.title'));
+  cardsParent.append(menuItemIcon('dashboard'), t('doc.cards.title'));
   appendEnSupporting(cardsParent, 'doc.cards.title');
   if (selectCurrent && isCardFamilyPage(pageId)) {
     cardsParent.setAttribute('selected', '');
@@ -314,7 +335,10 @@ function makeCardsFamilyMenuItem(
     const child = document.createElement('k3-menu-item');
     child.setAttribute('value', value);
     child.slot = 'submenu';
-    child.append(t(labelKey));
+    child.append(
+      menuItemIcon(iconForComponent(value, 'Containment')),
+      t(labelKey),
+    );
     appendEnSupporting(child, labelKey);
     if (selectCurrent && resolved === value) child.setAttribute('selected', '');
     cardsParent.appendChild(child);
@@ -369,6 +393,7 @@ function wirePinSuccessDemo(): void {
 function applyPlaygroundI18n(): void {
   /* Ensure sponsors DOM exists before translating data-i18n nodes */
   mountSponsors();
+  watchLighthouse();
   document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
     const key = el.getAttribute('data-i18n');
     if (!key || el.children.length > 0) return;
@@ -454,8 +479,11 @@ function fillScrollbarDemo(): void {
 }
 
 function currentLocale(): PlaygroundLocale {
-  const raw = (window.K3UI?.i18n.locale ?? docStore.get(DocKeys.uiLocale, 'fr')) as string;
-  return isPlaygroundLocale(raw) ? raw : 'fr';
+  /* Prefer stored menu selection (region tags like nl-BE) over i18n language. */
+  const stored = docStore.get(DocKeys.uiLocale, 'fr') as string;
+  if (isPlaygroundLocale(stored)) return stored;
+  const fromI18n = window.K3UI?.i18n.locale as string | undefined;
+  return isPlaygroundLocale(fromI18n ?? '') ? (fromI18n as PlaygroundLocale) : 'fr';
 }
 
 /** Locale rows live in the split trail menu (shadow-adopted). */
@@ -556,7 +584,7 @@ function syncSettingsSheet(): void {
     syncSettingsToggle(el, el.getAttribute('data-settings-motion') === motionScheme);
   });
 
-  const dir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
+    const dir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
   document.querySelectorAll<HTMLElement>('[data-settings-dir]').forEach((el) => {
     syncSettingsToggle(el, el.getAttribute('data-settings-dir') === dir);
   });
@@ -679,8 +707,10 @@ function setThemeMode(mode: ColorMode): void {
 }
 
 function setLocale(locale: PlaygroundLocale): void {
-  window.K3UI?.i18n.setLocale(locale);
+  const meta = localeMenuEntry(locale);
+  window.K3UI?.i18n.setLocale(meta.i18n);
   docStore.set(DocKeys.uiLocale, locale);
+  document.documentElement.lang = meta.htmlLang;
   syncLocaleMenu();
 }
 
@@ -814,8 +844,10 @@ function syncPrimaryItems(host: HTMLElement): ShellNavItem[] {
     items.push(el);
   }
 
+  const visible = new Set(navDestinationsForProduct(getDocProduct()).map((d) => d.id));
   NAV_DESTINATIONS.forEach((dest, i) => {
     const el = items[i]!;
+    el.hidden = !visible.has(dest.id);
     el.icon = dest.icon;
     el.label = t(dest.labelKey);
     /* Direct pages keep href; menu destinations stay empty (open secondary menu) */
@@ -873,6 +905,7 @@ type ShellNavMenu = HTMLElement & {
   armDismissGuard?: (ms?: number) => void;
   positioningAnchor?: HTMLElement | null;
   positioningEdge?: HTMLElement | null;
+  refit?: () => void;
 };
 
 /** Serialize rail menu open/toggle so overlapping clicks cannot fight. */
@@ -882,8 +915,8 @@ type ShellMenuItem = HTMLElement & {
   openSubmenu: (opts?: { focusFirst?: boolean }) => void;
 };
 
-/** Anchor rect for positioning the secondary menu (from the clicked nav-item). */
-let pendingMenuAnchor: DOMRect | null = null;
+/** Live nav-item for positioning the secondary menu (from the clicked / hovered item). */
+let pendingMenuAnchor: HTMLElement | null = null;
 /** Dest id currently shown in the compact bottom sheet (toggle-to-close). */
 let openSheetDestId: string | null = null;
 /** Dest id currently shown in the rail secondary menu (toggle-to-close). */
@@ -966,35 +999,23 @@ function syncShellSecondarySurface(mode: 'bar' | 'rail' = navMode()): void {
   if (cleared) syncNavMenuOpenHighlight();
 }
 
-/** Position the M3E menu next to the rail item (tablet / desktop only). */
-function positionShellNavMenu(anchor: DOMRect | null): void {
+/**
+ * Bind the shell secondary menu to a rail item + rail edge, then refit.
+ * Prefer live `positioningAnchor` / `positioningEdge` over host top/left —
+ * `hide()` clears those fields, so callers must re-bind after every show.
+ */
+function bindShellNavMenuAnchor(item: HTMLElement | null): void {
   const menu = shellNavMenu();
   if (!menu) return;
-  const rtl = document.documentElement.getAttribute('dir') === 'rtl';
-
-  if (!anchor) {
-    menu.style.top = '';
-    menu.style.left = '';
-    menu.style.right = '';
-    return;
-  }
-
-  /*
-   * Rail: open toward content with end-start (LTR → right · RTL → left).
-   * Horizontal anchor = rail’s content-facing edge — NOT the nav-item.
-   * Expanded pills are narrower than the rail and start-aligned, so using
-   * item.left in RTL left a visible gap between menu and rail.
-   */
   menu.position = 'end-start';
-  menu.style.top = `${anchor.top}px`;
-  menu.style.right = '';
   const rail = document.getElementById('nav-rail');
-  const railRect = rail?.getBoundingClientRect();
-  if (railRect && railRect.width > 0) {
-    menu.style.left = `${rtl ? railRect.left : railRect.right}px`;
-  } else {
-    menu.style.left = `${rtl ? anchor.left : anchor.right}px`;
-  }
+  menu.positioningAnchor = item;
+  menu.positioningEdge = rail;
+  /* Clear legacy host offsets — panel fit owns placement */
+  menu.style.top = '';
+  menu.style.left = '';
+  menu.style.right = '';
+  if (menu.open) menu.refit?.();
 }
 
 function sheetNavLink(comp: DocComponent, pageId: string): HTMLElement {
@@ -1006,7 +1027,10 @@ function sheetNavLink(comp: DocComponent, pageId: string): HTMLElement {
     a.classList.add('is-active');
     a.setAttribute('aria-current', 'page');
   }
-  a.append(sheetLabel(comp.titleKey));
+  const icon = document.createElement('span');
+  icon.className = 'ms';
+  setMsIcon(icon, iconForComponent(comp.id, comp.category));
+  a.append(icon, sheetLabel(comp.titleKey));
   return a;
 }
 
@@ -1021,11 +1045,15 @@ function menuItemIcon(name: string): HTMLElement {
 function leafMenuItem(
   comp: DocComponent,
   pageId: string,
-  opts?: { slot?: string; selectCurrent?: boolean },
+  opts?: { slot?: string; selectCurrent?: boolean; icon?: boolean },
 ): HTMLElement {
   const item = document.createElement('k3-menu-item');
   item.setAttribute('value', comp.id);
   if (opts?.slot) item.slot = opts.slot;
+  const withIcon = opts?.icon !== false;
+  if (withIcon) {
+    item.append(menuItemIcon(iconForComponent(comp.id, comp.category)));
+  }
   item.append(t(comp.titleKey));
   appendEnSupporting(item, comp.titleKey);
   if (opts?.selectCurrent && comp.id === pageId) item.setAttribute('selected', '');
@@ -1094,7 +1122,9 @@ function buildNavSheet(destId: string): void {
   nav.setAttribute('aria-label', label);
 
   if (openDest.id === 'components') {
-    for (const group of COMPONENT_MENU_GROUPS) {
+    for (const group of COMPONENT_MENU_GROUPS.filter(
+      (g) => componentsInCategory(g.category).length > 0,
+    )) {
       const groupEl = document.createElement('div');
       groupEl.className = 'shell-sheet-group';
       groupEl.dataset.category = group.category;
@@ -1121,7 +1151,7 @@ function buildNavSheet(destId: string): void {
       ul.id = panelId;
       ul.hidden = pageCat !== group.category;
 
-      if (group.category === 'Containment') {
+      if (group.category === 'Containment' && getDocProduct() === 'k3ui') {
         const peers = componentsInCategory('Containment').filter(
           (c) => !CARD_CHILD_IDS.has(c.id),
         );
@@ -1142,7 +1172,10 @@ function buildNavSheet(destId: string): void {
           const a = document.createElement('a');
           a.className = 'shell-sheet-link';
           a.href = `#/${hash}`;
-          a.append(sheetLabel(labelKey));
+          const cardLeafIcon = document.createElement('span');
+          cardLeafIcon.className = 'ms';
+          setMsIcon(cardLeafIcon, iconForComponent(hash, 'Containment'));
+          a.append(cardLeafIcon, sheetLabel(labelKey));
           if (selectCurrent && resolved === hash) {
             a.classList.add('is-active');
             a.setAttribute('aria-current', 'page');
@@ -1158,7 +1191,10 @@ function buildNavSheet(destId: string): void {
           selectCurrent && isCardFamilyPage(pageId) ? 'true' : 'false',
         );
         cardsBtn.setAttribute('aria-controls', cardsPanelId);
-        cardsBtn.append(sheetLabel('doc.cards.title'));
+        const cardsIcon = document.createElement('span');
+        cardsIcon.className = 'ms';
+        setMsIcon(cardsIcon, 'dashboard');
+        cardsBtn.append(cardsIcon, sheetLabel('doc.cards.title'));
         const cardsChevron = document.createElement('span');
         cardsChevron.className = 'ms chevron';
         setMsIcon(cardsChevron, 'expand_more');
@@ -1187,22 +1223,16 @@ function buildNavSheet(destId: string): void {
         }
         if (!cardsInserted) ul.append(wrap);
       } else {
-        for (const c of componentsInCategory(group.category)) {
-          const li = document.createElement('li');
-          li.append(sheetNavLink(c, selectCurrent ? pageId : ''));
-          ul.append(li);
+      for (const c of componentsInCategory(group.category)) {
+        const li = document.createElement('li');
+        li.append(sheetNavLink(c, selectCurrent ? pageId : ''));
+        ul.append(li);
         }
       }
       groupEl.append(btn, ul);
       nav.append(groupEl);
     }
   } else if (openDest.id === 'utilities') {
-    const flatIcons: Record<string, string> = {
-      gestures: 'gesture',
-      mouse: 'mouse',
-      dnd: 'drag_indicator',
-      scrollbar: 'swap_vert',
-    };
     const ul = document.createElement('ul');
     ul.className = 'shell-sheet-nav';
     let keyboardGroupDone = false;
@@ -1226,7 +1256,10 @@ function buildNavSheet(destId: string): void {
           const a = document.createElement('a');
           a.className = 'shell-sheet-link';
           a.href = `#/${hash}`;
-          a.append(sheetLabel(labelKey));
+          const kIcon = document.createElement('span');
+          kIcon.className = 'ms';
+          setMsIcon(kIcon, iconForComponent(hash, 'Utilities'));
+          a.append(kIcon, sheetLabel(labelKey));
           if (selectCurrent && resolved === hash) {
             a.classList.add('is-active');
             a.setAttribute('aria-current', 'page');
@@ -1263,32 +1296,16 @@ function buildNavSheet(destId: string): void {
         continue;
       }
       const li = document.createElement('li');
-      const link = sheetNavLink(c, selectCurrent ? pageId : '');
-      const icon = document.createElement('span');
-      icon.className = 'ms';
-      setMsIcon(icon, flatIcons[c.id] ?? 'tune');
-      link.prepend(icon);
-      li.append(link);
+      li.append(sheetNavLink(c, selectCurrent ? pageId : ''));
       ul.append(li);
     }
     if (ul.childElementCount) nav.append(ul);
   } else if (openDest.id === 'animations') {
-    const animIcons: Record<string, string> = {
-      'text-bounce': 'title',
-      'text-scramble': 'shuffle',
-      'heart-burst': 'favorite',
-      halftone: 'grid_on',
-    };
     const ul = document.createElement('ul');
     ul.className = 'shell-sheet-nav';
     for (const c of componentsInCategory('Animation')) {
       const li = document.createElement('li');
-      const link = sheetNavLink(c, selectCurrent ? pageId : '');
-      const icon = document.createElement('span');
-      icon.className = 'ms';
-      setMsIcon(icon, animIcons[c.id] ?? 'animation');
-      link.prepend(icon);
-      li.append(link);
+      li.append(sheetNavLink(c, selectCurrent ? pageId : ''));
       ul.append(li);
     }
     if (ul.childElementCount) nav.append(ul);
@@ -1315,13 +1332,6 @@ function buildNavSheet(destId: string): void {
     if (ul.childElementCount) nav.append(ul);
   } else {
     /* Styles — Color expands to Roles / Palettes / Additional */
-    const flatIcons: Record<string, string> = {
-      elevation: 'layers',
-      motion: 'animation',
-      shapes: 'shapes',
-      spacing: 'space_bar',
-      typography: 'match_case',
-    };
     const ul = document.createElement('ul');
     ul.className = 'shell-sheet-nav';
     let colorGroupDone = false;
@@ -1343,7 +1353,10 @@ function buildNavSheet(destId: string): void {
           const a = document.createElement('a');
           a.className = 'shell-sheet-link';
           a.href = `#/${hash}`;
-          a.append(sheetLabel(labelKey));
+          const cIcon = document.createElement('span');
+          cIcon.className = 'ms';
+          setMsIcon(cIcon, iconForComponent(hash, 'Styles'));
+          a.append(cIcon, sheetLabel(labelKey));
           if (selectCurrent && resolved === hash) {
             a.classList.add('is-active');
             a.setAttribute('aria-current', 'page');
@@ -1380,12 +1393,7 @@ function buildNavSheet(destId: string): void {
         continue;
       }
       const li = document.createElement('li');
-      const link = sheetNavLink(c, selectCurrent ? pageId : '');
-      const icon = document.createElement('span');
-      icon.className = 'ms';
-      setMsIcon(icon, flatIcons[c.id] ?? 'palette');
-      link.prepend(icon);
-      li.append(link);
+      li.append(sheetNavLink(c, selectCurrent ? pageId : ''));
       ul.append(li);
     }
     if (ul.childElementCount) nav.append(ul);
@@ -1416,14 +1424,16 @@ function fillNavMenu(destId?: string | null): {
 
   if (openDest.id === 'components') {
     menu.replaceChildren(
-      ...COMPONENT_MENU_GROUPS.map((group) => {
+      ...COMPONENT_MENU_GROUPS.filter(
+        (group) => componentsInCategory(group.category).length > 0,
+      ).map((group) => {
         const parent = document.createElement('k3-menu-item');
         parent.setAttribute('value', `cat-${group.category}`);
         parent.setAttribute('has-submenu', '');
         parent.append(menuItemIcon(group.icon), t(group.labelKey));
         appendEnSupporting(parent, group.labelKey);
 
-        if (group.category === 'Containment') {
+        if (group.category === 'Containment' && getDocProduct() === 'k3ui') {
           /* Flat peers except Cards family → one nested flyout under Cartes */
           const peers = componentsInCategory('Containment').filter(
             (c) => !CARD_CHILD_IDS.has(c.id),
@@ -1452,12 +1462,6 @@ function fillNavMenu(destId?: string | null): {
       }),
     );
   } else if (openDest.id === 'utilities') {
-    const utilIcons: Record<string, string> = {
-      gestures: 'gesture',
-      mouse: 'mouse',
-      dnd: 'drag_indicator',
-      scrollbar: 'swap_vert',
-    };
     const links = componentsInCategory('Utilities');
     const resolved = articlePageId(pageId);
     const nodes: HTMLElement[] = [];
@@ -1475,7 +1479,10 @@ function fillNavMenu(destId?: string | null): {
           const child = document.createElement('k3-menu-item');
           child.setAttribute('value', value);
           child.slot = 'submenu';
-          child.append(t(labelKey));
+          child.append(
+            menuItemIcon(iconForComponent(value, 'Utilities')),
+            t(labelKey),
+          );
           appendEnSupporting(child, labelKey);
           if (selectCurrent && resolved === value) child.setAttribute('selected', '');
           parent.appendChild(child);
@@ -1483,24 +1490,14 @@ function fillNavMenu(destId?: string | null): {
         nodes.push(parent);
         continue;
       }
-      const item = leafMenuItem(c, pageId, { selectCurrent });
-      item.prepend(menuItemIcon(utilIcons[c.id] ?? 'tune'));
-      nodes.push(item);
+      nodes.push(leafMenuItem(c, pageId, { selectCurrent }));
     }
     menu.replaceChildren(...nodes);
   } else if (openDest.id === 'animations') {
-    const animIcons: Record<string, string> = {
-      'text-bounce': 'title',
-      'text-scramble': 'shuffle',
-      'heart-burst': 'favorite',
-      halftone: 'grid_on',
-    };
     menu.replaceChildren(
-      ...componentsInCategory('Animation').map((c) => {
-        const item = leafMenuItem(c, pageId, { selectCurrent });
-        item.prepend(menuItemIcon(animIcons[c.id] ?? 'animation'));
-        return item;
-      }),
+      ...componentsInCategory('Animation').map((c) =>
+        leafMenuItem(c, pageId, { selectCurrent }),
+      ),
     );
   } else if (openDest.id === 'resources') {
     menu.replaceChildren(
@@ -1526,13 +1523,16 @@ function fillNavMenu(destId?: string | null): {
         const parent = document.createElement('k3-menu-item');
         parent.setAttribute('value', 'color-roles');
         parent.setAttribute('has-submenu', '');
-        parent.append(t('doc.colors.title'));
+        parent.append(menuItemIcon('palette'), t('doc.colors.title'));
         appendEnSupporting(parent, 'doc.colors.title');
         for (const [value, labelKey] of COLOR_SUBPAGES) {
           const child = document.createElement('k3-menu-item');
           child.setAttribute('value', value);
           child.slot = 'submenu';
-          child.append(t(labelKey));
+          child.append(
+            menuItemIcon(iconForComponent(value, 'Styles')),
+            t(labelKey),
+          );
           appendEnSupporting(child, labelKey);
           if (selectCurrent && resolved === value) child.setAttribute('selected', '');
           parent.appendChild(child);
@@ -1557,7 +1557,7 @@ function fillNavMenu(destId?: string | null): {
  * - Components → Containment → Cards expands to Standard / Holo / Lenticular / Scratch
  */
 function buildNavMenu(
-  opts: { open?: boolean; anchor?: DOMRect | null; destId?: string | null } = {},
+  opts: { open?: boolean; anchor?: HTMLElement | null; destId?: string | null } = {},
 ): void {
   if (opts.open) {
     void openShellNavMenu(opts.destId, opts.anchor ?? pendingMenuAnchor);
@@ -1591,7 +1591,7 @@ function navMenuKey(destId?: string | null): string {
  */
 async function openShellNavMenu(
   destId?: string | null,
-  anchor: DOMRect | null = null,
+  anchorEl: HTMLElement | null = null,
   opts: { toggle?: boolean } = {},
 ): Promise<void> {
   const toggle = opts.toggle !== false;
@@ -1609,10 +1609,12 @@ async function openShellNavMenu(
     /* Same dest already shown → close on click toggle; keep on hover */
     if (openMenuDestId === id) {
       if (!toggle) {
-        positionShellNavMenu(anchor);
+        bindShellNavMenuAnchor(anchorEl);
         syncNavMenuOpenHighlight();
         if (!menu.open) {
           menu.hidden = false;
+          /* hide() clears anchors — re-bind immediately before show */
+          bindShellNavMenuAnchor(anchorEl);
           await menu.show('menu', { fast: true });
         }
         return;
@@ -1633,10 +1635,11 @@ async function openShellNavMenu(
     openMenuDestId = id;
     syncNavMenuOpenHighlight();
     menu.hidden = false;
-    positionShellNavMenu(anchor);
-
-    const rail = document.getElementById('nav-rail');
-    if (rail) menu.positioningEdge = rail;
+    /*
+     * hide() nulls positioningAnchor/Edge — bind AFTER hide, BEFORE show,
+     * so fit uses the live item band × rail edge (not a stale host offset).
+     */
+    bindShellNavMenuAnchor(anchorEl);
 
     /* Show immediately — items upgrade while the panel is visible */
     menu.armDismissGuard?.(320);
@@ -1646,6 +1649,8 @@ async function openShellNavMenu(
       syncNavMenuOpenHighlight();
       return;
     }
+    /* show() path may clear/rebind fit listeners — ensure anchor sticks */
+    bindShellNavMenuAnchor(anchorEl);
     if (!pageCat) return;
     const parent = menu.querySelector<ShellMenuItem>(
       `k3-menu-item[value="cat-${pageCat}"]`,
@@ -1659,6 +1664,140 @@ async function openShellNavMenu(
 
 /** Markup currently in #catalog-grid (skips identical rebuilds — locale sync runs it often). */
 let catalogHtml: string | null = null;
+
+/** Doc pages whose CEs live in companion package `k3ux`. */
+const K3UX_PAGES = new Set([
+  'confetti',
+  'text-bounce',
+  'text-scramble',
+  'heart-burst',
+  'halftone',
+  'card-holo',
+  'card-lenticular',
+  'card-scratch',
+  'countdown',
+  'marquee',
+  'sound-fx',
+  'audio-player',
+  'qr-code',
+  'charts-bar',
+  'charts-line',
+  'charts-other',
+  'rating',
+  'signature',
+  'wheel-picker',
+  'masonry',
+  'iso-filter',
+]);
+
+let k3uxReady: Promise<void> | null = null;
+
+type K3uxRegistry = {
+  isKnown: (tag: string) => boolean;
+  registerAll: (tags: 'all' | string[]) => Promise<void>;
+};
+
+/** Load companion UX package once — MANUAL so we register page tags on demand. */
+function ensureK3ux(): Promise<void> {
+  k3uxReady ??= (async () => {
+    (window as Window & { K3UX_MANUAL?: boolean }).K3UX_MANUAL = true;
+    await import('k3ux');
+  })();
+  return k3uxReady;
+}
+
+function k3uxRegistry(): K3uxRegistry | null {
+  const api = (window as Window & { K3UX?: { registry?: K3uxRegistry } }).K3UX;
+  return api?.registry ?? null;
+}
+
+/** Collect `k3-*` tags under a page root (light DOM demos). */
+function collectPageK3Tags(root: ParentNode | null | undefined): string[] {
+  if (!root) return [];
+  return [
+    ...new Set(
+      [...root.querySelectorAll('*')]
+        .map((el) => el.tagName.toLowerCase())
+        .filter((t) => t.startsWith('k3-')),
+    ),
+  ];
+}
+
+/**
+ * Register every `k3-*` on the page that belongs to k3ui and/or k3ux.
+ * Present tags are upgraded before interactions — no full-catalog boot.
+ */
+async function registerPresentK3Tags(tags: string[]): Promise<void> {
+  if (!tags.length) return;
+  /* Companion tags are unknown to the k3ui catalog until k3ux is loaded. */
+  if (tags.some((t) => !registry.isKnown(t))) await ensureK3ux();
+  const ux = k3uxRegistry();
+  const uiTags = tags.filter((t) => registry.isKnown(t));
+  const uxTags = ux ? tags.filter((t) => ux.isKnown(t)) : [];
+  if (uiTags.length) await registry.registerAll(uiTags);
+  if (uxTags.length) await ux!.registerAll(uxTags);
+}
+
+function syncProductSwitchButtons(product: DocProduct): void {
+  document.querySelectorAll<HTMLElement>('[data-product-switch]').forEach((btn) => {
+    const on = btn.dataset.productSwitch === product;
+    if (on) btn.setAttribute('selected', '');
+    else btn.removeAttribute('selected');
+  });
+}
+
+function applyDocProduct(product: DocProduct, opts?: { navigateHome?: boolean }): void {
+  const prev = getDocProduct();
+  const changed = prev !== product;
+  setDocProduct(product);
+  docStore.set(DocKeys.docProduct, product);
+  document.documentElement.dataset.k3DocProduct = product;
+  document.querySelectorAll<HTMLElement>('[data-doc-product]').forEach((el) => {
+    el.hidden = el.dataset.docProduct !== product;
+  });
+  syncProductSwitchButtons(product);
+  const title = document.querySelector('.home-hero .hero-title');
+  if (title) title.textContent = product === 'k3ux' ? 'K3ux' : 'K3ui';
+  if (changed) {
+    catalogHtml = null;
+    const grid = document.getElementById('catalog-grid');
+    if (grid) delete grid.dataset.prerendered;
+    buildCatalogGrid();
+    buildPrimaryNav();
+    buildNavMenu();
+  } else {
+    /* First paint / same pack — still sync switch chrome. */
+    buildPrimaryNav();
+  }
+  if (opts?.navigateHome && changed && currentPageId() !== 'home') {
+    location.hash = '#/';
+  }
+}
+
+function syncProductForPage(pageId: string): void {
+  const articleId = articlePageId(pageId);
+  const comp = findComponentAnyProduct(articleId);
+  if (!comp) return;
+  const pack = comp.product ?? 'k3ui';
+  if (pack !== getDocProduct()) applyDocProduct(pack);
+}
+
+function wireProductSwitch(): void {
+  const group = document.getElementById('product-switch');
+  const apply = (next: DocProduct | undefined): void => {
+    if (!next || (next !== 'k3ui' && next !== 'k3ux') || next === getDocProduct()) return;
+    applyDocProduct(next, { navigateHome: true });
+    if (next === 'k3ux') void ensureK3ux();
+  };
+  group?.addEventListener('k3-change', ((e: CustomEvent<{ values?: string[] }>) => {
+    apply(e.detail?.values?.[0] as DocProduct | undefined);
+  }) as EventListener);
+  group?.querySelectorAll<HTMLElement>('[data-product-switch]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      apply(btn.dataset.productSwitch as DocProduct | undefined);
+    });
+  });
+}
 
 function buildCatalogGrid(filter = ''): void {
   const grid = document.getElementById('catalog-grid');
@@ -1737,6 +1876,7 @@ function waitNextPaint(): Promise<void> {
 
 function showPage(id: string): void {
   const articleId = articlePageId(id);
+  syncProductForPage(articleId);
   /* Canonicalize URL when alias / legacy hash was used */
   if (articleId !== id) {
     const next = `#/${articleId}`;
@@ -1759,6 +1899,8 @@ function showPage(id: string): void {
     }
   }
   const resolvedId = articleId === 'home' || !found ? 'home' : articleId;
+  const ambient = document.getElementById('home-ambient');
+  if (ambient) ambient.hidden = resolvedId !== 'home';
   buildPrimaryNav();
   /* Rebuild menu contents (closed) — rail click opens via buildNavMenu({ open: true }) */
   buildNavMenu();
@@ -1840,6 +1982,31 @@ async function fillShapes(): Promise<void> {
       <span>${name}</span>
     </div>`,
   ).join('');
+}
+
+/** Pale Material expressive shapes behind the home hero (m3.material.io vibe). */
+async function mountHomeAmbient(): Promise<void> {
+  const host = document.getElementById('home-ambient');
+  if (!host || host.childElementCount) return;
+  const { MATERIAL_SHAPE_SVG } = await import('../src/shapes/index.js');
+  const slots = [
+    { name: 'SoftBurst', slot: 'a' },
+    { name: 'Cookie9Sided', slot: 'b' },
+    { name: 'Pill', slot: 'c' },
+    { name: 'Puffy', slot: 'd' },
+  ] as const;
+  host.replaceChildren(
+    ...slots.map(({ name, slot }) => {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('class', `home-ambient__shape home-ambient__shape--${slot}`);
+      svg.setAttribute('viewBox', '0 0 1 1');
+      svg.setAttribute('aria-hidden', 'true');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', MATERIAL_SHAPE_SVG[name]);
+      svg.append(path);
+      return svg;
+    }),
+  );
 }
 
 /** Schedule work after first paint (idle when available). */
@@ -2718,9 +2885,9 @@ function updateColorHct(seed: string): void {
 
 /** Specs / Properties / Methods / … — always `<k3-table>` (current page only). */
 async function ensureDocTables(pageId?: string): Promise<void> {
-  const [{ createDocTable, INIT_SECTION, mountDocTables }, { mountUsageIfNeeded }] = await Promise.all([
+  const [{ createDocTable, INIT_SECTION }, { mountDocPage }] = await Promise.all([
     loadDocTables(),
-    loadUsage(),
+    import('./mount-doc-page.js'),
   ]);
   const id = pageId ?? currentPageId();
   if (id === 'home') {
@@ -2737,9 +2904,8 @@ async function ensureDocTables(pageId?: string): Promise<void> {
   if (id === 'quick-start') return;
   const page = document.querySelector<HTMLElement>(`.comp-page[data-page="${id}"]`);
   if (!page) return;
-  await registry.register('k3-table');
-  mountDocTables(page, id);
-  mountUsageIfNeeded(page, id);
+  await Promise.all([registry.register('k3-table'), registry.register('k3-codeblock')]);
+  mountDocPage(page, id);
   applyPlaygroundI18n();
 }
 
@@ -2964,10 +3130,13 @@ async function boot(): Promise<void> {
   try {
     window.K3UI_MANUAL = true;
     const savedSeed = seeds[seedIdx] ?? seeds[0]!;
-    const savedLocale = docStore.get(DocKeys.uiLocale, 'fr');
+    const savedLocaleRaw = docStore.get(DocKeys.uiLocale, 'fr') as string;
+    const savedLocale: PlaygroundLocale = isPlaygroundLocale(savedLocaleRaw)
+      ? savedLocaleRaw
+      : 'fr';
     syncThemeElement(savedSeed);
     const api = await init({
-      locale: savedLocale,
+      locale: playgroundToI18n(savedLocale),
       theme: {
         seed: savedSeed,
         mode: themeMode,
@@ -2989,17 +3158,24 @@ async function boot(): Promise<void> {
     applyAdaptiveShell();
     containerOn = docStore.get(DocKeys.uiContainer, true);
     applyContainerLayout();
+    const savedProduct = docStore.get<DocProduct>(DocKeys.docProduct, 'k3ui');
+    applyDocProduct(savedProduct === 'k3ux' ? 'k3ux' : 'k3ui');
+    if (getDocProduct() === 'k3ux') void ensureK3ux();
+    wireProductSwitch();
     buildPrimaryNav();
     await yieldToMain();
     buildNavMenu();
     await yieldToMain();
     buildCatalogGrid();
+    void mountHomeAmbient();
     rebuildGridOverlay();
     setDocumentDir(docStore.get(DocKeys.uiDir, 'ltr'));
     applyAnimationsPreference();
     /* Re-apply persisted theme (seed already restored into seeds[seedIdx]) */
     applyThemePersist();
     await yieldToMain();
+    /* Restore region tag (nl-BE / de-AT…) + html lang after init’s language code */
+    document.documentElement.lang = localeMenuEntry(savedLocale).htmlLang;
     /* After CE upgrade + adoptMenuItems (flags live in split shadow menu) */
     const paintLocaleFlags = (): void => mountLocaleFlags(currentLocale());
     paintLocaleFlags();
@@ -3035,14 +3211,13 @@ async function boot(): Promise<void> {
         document.querySelector<HTMLElement>(`.comp-page[data-page="${articleId}"]`) ??
         (articleId === 'home' ? document.getElementById('page-home') : null);
       if (!page) return;
-      const tags = [
-        ...new Set(
-          [...page.querySelectorAll('*')]
-            .map((el) => el.tagName.toLowerCase())
-            .filter((t) => t.startsWith('k3-')),
-        ),
-      ];
-      if (tags.length) await registry.registerAll(tags);
+      /* Load k3ux module when visiting a UX page (even before scanning tags). */
+      if (K3UX_PAGES.has(articleId) || getDocProduct() === 'k3ux') {
+        await ensureK3ux();
+      }
+      const tags = collectPageK3Tags(page);
+      /* k3ui + k3ux: only tags present on this page, so demos work without refresh. */
+      await registerPresentK3Tags(tags);
       /* JetBrains Mono — needed for k3-codeblock + any light-DOM pre/code */
       if (
         articleId === 'codeblock' ||
@@ -3056,6 +3231,7 @@ async function boot(): Promise<void> {
       if (articleId === 'lazy') wireLazyDemos();
       if (articleId === 'material-symbols') await mountMaterialSymbols();
       if (articleId === 'codeblock') void wireCodeblockGallery();
+      if (articleId === 'navigation-rail') wireNavRailLab();
       if (articleId === 'marquee') wireMarqueeDemos();
       if (
         articleId === 'spacing' ||
@@ -3091,10 +3267,14 @@ async function boot(): Promise<void> {
       /* Labs that need upgraded CEs — wire after registerAll for this page. */
       if (articleId === 'countdown') wireCountdownLab();
       if (articleId === 'carousel') wireCarouselLab();
+      if (articleId === 'coverflow') wireCoverflowDemo();
       if (articleId === 'halftone') wireHalftoneLab();
+      if (articleId === 'text-bounce') wireTextBounceDemo();
+      if (articleId === 'text-scramble') wireTextScrambleDemo();
+      if (articleId === 'confetti') wireConfettiDemo();
       if (articleId === 'card-holo') {
-        /* Optional holo foils for k3-holo-card (GPL-3.0 add-on, outside k3ui.js) */
-        await import('../addons/holo-effects/holo-effects.scss');
+        /* Sibling package source (playground alias also maps k3ux/holo-effects.css). */
+        await import('../../k3ux/addons/holo-effects/holo-effects.scss');
         wireHoloCardDemo();
       }
       if (articleId === 'card-scratch') wireScratchCardDemo();
@@ -3114,11 +3294,9 @@ async function boot(): Promise<void> {
        otherwise they resize in view (CLS). Page wiring still runs once visible. */
     const initialArticle = articlePageId(initialPage);
     if (initialArticle !== 'home') {
+      if (K3UX_PAGES.has(initialArticle)) await ensureK3ux();
       const page = document.querySelector(`.comp-page[data-page="${CSS.escape(initialArticle)}"]`);
-      const tags = new Set(
-        [...(page?.querySelectorAll('*') ?? [])].map((el) => el.localName).filter((t) => t.startsWith('k3-')),
-      );
-      if (tags.size) await registry.registerAll([...tags]);
+      await registerPresentK3Tags(collectPageK3Tags(page));
     }
     /* Veil for real CE registration — home is near-instant; deep links show the loader */
     await navigateDocPage(initialPage, ensurePageComponents);
@@ -3186,12 +3364,10 @@ async function boot(): Promise<void> {
       /* Hover mode: click opens without toggle-close (leave dismisses) */
       const hover = canHoverOpen();
       shellNavMenu()?.armDismissGuard?.(320);
-      const menu = shellNavMenu();
-      if (menu) menu.positioningAnchor = item as HTMLElement;
-      void openShellNavMenu(dest.id, item.getBoundingClientRect(), { toggle: !hover });
+      void openShellNavMenu(dest.id, item as HTMLElement, { toggle: !hover });
     };
 
-    /** Grace before closing when the pointer leaves rail ↔ menu. */
+    /** Grace before closing when the pointer leaves rail item ↔ menu. */
     const RAIL_HOVER_CLOSE_MS = 160;
     let railHoverCloseTimer = 0;
     const clearRailHoverClose = (): void => {
@@ -3205,8 +3381,12 @@ async function boot(): Promise<void> {
         railHoverCloseTimer = 0;
         if (!canHoverOpen() || shellNavMode() !== 'rail') return;
         const menu = shellNavMenu();
-        const rail = document.getElementById('nav-rail');
-        if (menu?.matches(':hover') || rail?.matches(':hover')) return;
+        /*
+         * Keep open only while the pointer is on the menu.
+         * Staying on rail chrome (padding / divider / empty) must dismiss —
+         * do NOT gate on rail:hover (that left flyouts stuck until content).
+         */
+        if (menu?.matches(':hover')) return;
         closeShellNavMenu();
       }, RAIL_HOVER_CLOSE_MS);
     };
@@ -3216,7 +3396,11 @@ async function boot(): Promise<void> {
       if (e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
       const rail = e.currentTarget as HTMLElement;
       const hit = resolvePrimaryDest(rail, e);
-      if (!hit) return;
+      if (!hit) {
+        /* Rail surface without a dest item — dismiss secondary */
+        if (openMenuDestId) scheduleRailHoverClose();
+        return;
+      }
       clearRailHoverClose();
       const { item, dest } = hit;
       if (dest.href) {
@@ -3226,8 +3410,7 @@ async function boot(): Promise<void> {
       }
       const menu = shellNavMenu();
       menu?.armDismissGuard?.(320);
-      if (menu) menu.positioningAnchor = item as HTMLElement;
-      void openShellNavMenu(dest.id, item.getBoundingClientRect(), { toggle: false });
+      void openShellNavMenu(dest.id, item as HTMLElement, { toggle: false });
     };
 
     const onRailPointerLeave = (e: PointerEvent): void => {
@@ -3258,14 +3441,22 @@ async function boot(): Promise<void> {
       scheduleRailHoverClose();
     });
 
-    /* Keep sticky audio dock inset in sync with rail compact ↔ expanded. */
+    /* Keep sticky audio dock + modal app-bar bleed in sync with rail width. */
     const shellRail = document.getElementById('nav-rail');
-    shellRail?.addEventListener('k3-expand', () => {
+    const syncRailSizeSoon = (): void => {
+      syncShellRailInlineSize();
       requestAnimationFrame(() => syncShellRailInlineSize());
-    });
+    };
+    shellRail?.addEventListener('k3-expand', syncRailSizeSoon);
     if (shellRail && typeof ResizeObserver === 'function') {
       const railRo = new ResizeObserver(() => syncShellRailInlineSize());
       railRo.observe(shellRail);
+    }
+    if (shellRail && typeof MutationObserver === 'function') {
+      new MutationObserver(syncRailSizeSoon).observe(shellRail, {
+        attributes: true,
+        attributeFilter: ['size', 'expanded', 'layout', 'mode'],
+      });
     }
 
     /* Outside dismiss / Escape — keep toggle state in sync */
@@ -3327,7 +3518,6 @@ async function boot(): Promise<void> {
       }
     };
     document.getElementById('rail-fab')?.addEventListener('k3-click', goHome);
-    document.getElementById('rail-efab')?.addEventListener('k3-click', goHome);
 
     /* Secondary menu leaf items → navigate then close (ignore category parents) */
     document.getElementById('shell-nav-menu')?.addEventListener('k3-select', (e) => {
@@ -3452,7 +3642,7 @@ async function boot(): Promise<void> {
 function wireShellChrome(): void {
   document.getElementById('locale-menu')?.addEventListener('k3-select', (e) => {
     const v = (e as CustomEvent<{ value?: string }>).detail?.value;
-    if (v === 'fr' || v === 'en') setLocale(v);
+    if (typeof v === 'string' && isPlaygroundLocale(v)) setLocale(v);
   });
 
   /* Chip version badge — never toggle selected */
@@ -3691,7 +3881,15 @@ function wireCodeSamples(): void {
     if (!root) return;
     void (async () => {
       const panel = root.querySelector<HTMLElement>('[data-code-panel]:not([hidden])');
-      const text = panel?.querySelector('code')?.textContent ?? panel?.textContent ?? '';
+      const fromCodeblock =
+        panel?.getAttribute('code') ||
+        (panel as HTMLElement & { code?: string } | null)?.code ||
+        '';
+      const text =
+        fromCodeblock ||
+        panel?.querySelector('code')?.textContent ||
+        panel?.textContent ||
+        '';
       if (!text.trim()) return;
       try {
         await navigator.clipboard.writeText(text);
@@ -3875,6 +4073,7 @@ function wireDemoPages(): void {
   wireButtonPillDemos();
   wireMeetToolbarDemo();
   wireArrowPadGridDemos();
+  wireDatePickerDemo();
 
   const wireToggle = (id: string): void => {
     const el = document.getElementById(id) as (HTMLElement & { selected: boolean }) | null;
@@ -3893,6 +4092,167 @@ function wireDemoPages(): void {
   wireTextScrambleDemo();
   wireChartDemos();
   wireAudioPlayerDemoRights();
+}
+
+/** Date picker demos — modal open, year bounds, weekday blackout (Noph coverage). */
+function wireDatePickerDemo(): void {
+  const page = document.getElementById('page-date-picker');
+  if (!page || page.dataset.dpWired) return;
+  page.dataset.dpWired = '1';
+
+  type DpEl = HTMLElement & {
+    show: (anchor?: HTMLElement | null) => Promise<boolean>;
+    value: string;
+    minDate: string;
+    maxDate: string;
+    blackoutDates: ((d: { year: number; month: number; day: number }) => boolean) | null;
+  };
+
+  const y = new Date().getFullYear();
+  const bound = document.getElementById('dp-bound') as DpEl | null;
+  if (bound) {
+    bound.minDate = `${y}-01-01`;
+    bound.maxDate = `${y}-12-31`;
+  }
+
+  const blackout = document.getElementById('dp-blackout') as DpEl | null;
+  if (blackout) {
+    const today = new Date();
+    const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    blackout.minDate = iso;
+    blackout.blackoutDates = (d) => {
+      const wd = new Date(d.year, d.month - 1, d.day).getDay();
+      return wd === 0 || wd === 6;
+    };
+  }
+
+  const modal = document.getElementById('dp-modal') as DpEl | null;
+  const openBtn = document.getElementById('dp-modal-open');
+  const valueEl = document.getElementById('dp-modal-value');
+  openBtn?.addEventListener('k3-click', () => void modal?.show(openBtn));
+  openBtn?.addEventListener('click', () => void modal?.show(openBtn));
+  modal?.addEventListener('k3-change', ((e: CustomEvent<{ value?: string }>) => {
+    if (valueEl) valueEl.textContent = e.detail?.value || '—';
+  }) as EventListener);
+}
+
+/** Coverflow playground — one stage; connected opts + lightbox/flip mode. */
+function wireCoverflowDemo(): void {
+  const page = document.getElementById('page-coverflow');
+  if (!page || page.dataset.coverflowWired) return;
+
+  type FlowEl = HTMLElement & {
+    arrows: boolean;
+    bullets: boolean;
+    noReflection: boolean;
+    mode: 'loop' | 'bounded';
+    lightbox: boolean;
+    fullWidth: boolean;
+    effect: 'coverflow' | 'slide';
+    orientation: 'horizontal' | 'vertical';
+    index: number;
+  };
+  type GroupEl = HTMLElement & { selectedValues: () => string[] };
+
+  const flow = document.getElementById('coverflow-demo') as FlowEl | null;
+  const opts = document.getElementById('cf-opts') as GroupEl | null;
+  const mode = document.getElementById('cf-mode') as GroupEl | null;
+  const width = document.getElementById('cf-width') as GroupEl | null;
+  const effect = document.getElementById('cf-effect') as GroupEl | null;
+  const orient = document.getElementById('cf-orient') as GroupEl | null;
+  if (!flow || !opts || !mode || !width || !effect || !orient) return;
+  page.dataset.coverflowWired = '1';
+
+  const scenes = [
+    { id: 'alpine-dawn', alt: 'Alpine dawn' },
+    { id: 'coffee', alt: 'Espresso cup' },
+    { id: 'night-aurora', alt: 'Northern lights' },
+    { id: 'desert-dunes', alt: 'Desert dunes' },
+    { id: 'cat', alt: 'Tabby cat' },
+    { id: 'ocean-dusk', alt: 'Sunset over the ocean' },
+    { id: 'misty-forest', alt: 'Misty pine forest' },
+    { id: 'rocket', alt: 'Rocket on the launch pad' },
+    { id: 'lake-reflection', alt: 'Mountain lake' },
+    { id: 'deep-field', alt: 'Hubble deep field' },
+  ] as const;
+
+  const thumb = (id: string) => `/coverflow/${id}.webp`;
+  const full = (id: string) => `/coverflow/full/${id}.webp`;
+
+  const fill = (kind: 'lightbox' | 'flip'): void => {
+    const keep = flow.index;
+    const nodes = scenes.map((scene, i) => {
+      const item = document.createElement('k3-coverflow-item');
+      const front = document.createElement('img');
+      front.decoding = 'async';
+      front.width = 448;
+      front.height = 448;
+      front.alt = scene.alt;
+      front.src = thumb(scene.id);
+      if (i === 0) front.fetchPriority = 'high';
+      else front.loading = 'lazy';
+      item.append(front);
+      if (kind === 'lightbox') {
+        item.setAttribute('href', full(scene.id));
+      } else {
+        item.setAttribute('flip', '');
+        const back = document.createElement('img');
+        back.slot = 'back';
+        back.loading = 'lazy';
+        back.decoding = 'async';
+        back.width = 448;
+        back.height = 448;
+        back.alt = '';
+        const next = scenes[(i + 1) % scenes.length]!;
+        back.src = thumb(next.id);
+        item.append(back);
+      }
+      return item;
+    });
+    flow.replaceChildren(...nodes);
+    flow.lightbox = kind === 'lightbox';
+    flow.index = Math.min(keep, scenes.length - 1);
+  };
+
+  const applyOpts = (): void => {
+    const values = new Set(opts.selectedValues());
+    flow.arrows = values.has('arrows');
+    flow.bullets = values.has('bullets');
+    flow.noReflection = !values.has('shadow');
+    flow.mode = values.has('loop') ? 'loop' : 'bounded';
+  };
+
+  const applyWidth = (): void => {
+    flow.fullWidth = width.selectedValues().includes('full');
+  };
+
+  const applyEffect = (): void => {
+    const slide = effect.selectedValues().includes('slide');
+    flow.classList.toggle('coverflow-slide-demo', slide);
+    flow.effect = slide ? 'slide' : 'coverflow';
+  };
+
+  const applyOrient = (): void => {
+    const vertical = orient.selectedValues().includes('vertical');
+    flow.classList.toggle('coverflow-vertical-demo', vertical);
+    flow.orientation = vertical ? 'vertical' : 'horizontal';
+  };
+
+  const applyMode = (): void => {
+    const values = mode.selectedValues();
+    fill(values.includes('flip') ? 'flip' : 'lightbox');
+    applyOpts();
+    applyWidth();
+    applyEffect();
+    applyOrient();
+  };
+
+  opts.addEventListener('k3-change', applyOpts);
+  mode.addEventListener('k3-change', applyMode);
+  width.addEventListener('k3-change', applyWidth);
+  effect.addEventListener('k3-change', applyEffect);
+  orient.addEventListener('k3-change', applyOrient);
+  applyMode();
 }
 
 /**
@@ -4377,13 +4737,49 @@ function wireConfettiDemo(): void {
   }) as EventListener);
 }
 
-/** Buttons Arrow / Pad / Grid — live value labels on demo pages. */
+/** Buttons Group arrows / Pad / Grid — live value labels on demo pages. */
 function wireArrowPadGridDemos(): void {
+  /* Connected chevron pairs — full NATO / US military phonetic alphabet */
   const arrowVal = document.getElementById('arrow-val');
-  document.querySelectorAll('k3-button-arrow').forEach((el) => {
-    el.addEventListener('k3-change', ((e: CustomEvent<{ value?: string }>) => {
-      if (arrowVal && e.detail?.value != null) arrowVal.textContent = e.detail.value;
-    }) as EventListener);
+  const arrowList = [
+    'Alpha',
+    'Bravo',
+    'Charlie',
+    'Delta',
+    'Echo',
+    'Foxtrot',
+    'Golf',
+    'Hotel',
+    'India',
+    'Juliet',
+    'Kilo',
+    'Lima',
+    'Mike',
+    'November',
+    'Oscar',
+    'Papa',
+    'Quebec',
+    'Romeo',
+    'Sierra',
+    'Tango',
+    'Uniform',
+    'Victor',
+    'Whiskey',
+    'X-ray',
+    'Yankee',
+    'Zulu',
+  ];
+  let arrowIndex = 0;
+  const syncArrowVal = (): void => {
+    if (arrowVal) arrowVal.textContent = arrowList[arrowIndex] ?? '';
+  };
+  document.querySelectorAll<HTMLElement>('[data-arrow-step]').forEach((btn) => {
+    btn.addEventListener('k3-click', () => {
+      const step = Number(btn.getAttribute('data-arrow-step') || '0');
+      if (!step || !arrowList.length) return;
+      arrowIndex = ((arrowIndex + step) % arrowList.length + arrowList.length) % arrowList.length;
+      syncArrowVal();
+    });
   });
 
   const padVal = document.getElementById('pad-val');

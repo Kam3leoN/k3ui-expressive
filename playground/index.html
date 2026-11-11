@@ -83,29 +83,21 @@
         id="nav-rail"
         class="shell-rail"
         size="compact"
-        appearance="standard"
+        layout="modal"
         collapsible
         aria-label="Primary"
       >
-        <k3-fab
-          slot="fab"
-          id="rail-fab"
-          class="rail-fab-compact"
-          size="default"
-          aria-label="Home"
-        >
-          <span class="ms" slot="icon">home</span>
-        </k3-fab>
         <k3-extended-fab
           slot="fab"
-          id="rail-efab"
+          id="rail-fab"
           class="rail-fab-extended"
           size="medium"
+          aria-label="Home"
         >
           <span class="ms" slot="icon">home</span>
           <span data-i18n="playground.rail.home">Accueil</span>
         </k3-extended-fab>
-        <div slot="foot" class="rail-foot">
+        <div slot="trailing" class="rail-foot">
           <k3-chip id="ver" class="rail-ver-chip" aria-label="Version">v0.0.1</k3-chip>
         </div>
       </k3-nav-rail>
@@ -146,10 +138,163 @@
                 <span
                   class="flag-icon flag-icon--1x1"
                   slot="icon"
-                  data-locale-flag="en"
+                  data-locale-flag="gb"
                   aria-hidden="true"
                 ></span>
                 English
+              </k3-menu-item>
+              <k3-menu-item id="btn-nl" slot="menu" data-locale="nl" value="nl">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="nl"
+                  aria-hidden="true"
+                ></span>
+                Nederlands
+              </k3-menu-item>
+              <k3-menu-item id="btn-be" slot="menu" data-locale="nl-BE" value="nl-BE">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="be"
+                  aria-hidden="true"
+                ></span>
+                België
+              </k3-menu-item>
+              <k3-menu-item id="btn-at" slot="menu" data-locale="de-AT" value="de-AT">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="at"
+                  aria-hidden="true"
+                ></span>
+                Deutsch
+              </k3-menu-item>
+              <k3-menu-item id="btn-se" slot="menu" data-locale="sv" value="sv">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="se"
+                  aria-hidden="true"
+                ></span>
+                Svenska
+              </k3-menu-item>
+              <k3-menu-item id="btn-it" slot="menu" data-locale="it" value="it">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="it"
+                  aria-hidden="true"
+                ></span>
+                Italiano
+              </k3-menu-item>
+              <k3-menu-item id="btn-ch" slot="menu" data-locale="de-CH" value="de-CH">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="ch"
+                  aria-hidden="true"
+                ></span>
+                Deutsch (CH)
+              </k3-menu-item>
+              <k3-menu-item id="btn-fi" slot="menu" data-locale="fi" value="fi">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="fi"
+                  aria-hidden="true"
+                ></span>
+                Suomi
+              </k3-menu-item>
+              <k3-menu-item id="btn-pl" slot="menu" data-locale="pl" value="pl">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="pl"
+                  aria-hidden="true"
+                ></span>
+                Polski
+              </k3-menu-item>
+              <k3-menu-item id="btn-cs" slot="menu" data-locale="cs" value="cs">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="cz"
+                  aria-hidden="true"
+                ></span>
+                Čeština
+              </k3-menu-item>
+              <k3-menu-item id="btn-ro" slot="menu" data-locale="ro" value="ro">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="ro"
+                  aria-hidden="true"
+                ></span>
+                Română
+              </k3-menu-item>
+              <k3-menu-item id="btn-hu" slot="menu" data-locale="hu" value="hu">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="hu"
+                  aria-hidden="true"
+                ></span>
+                Magyar
+              </k3-menu-item>
+              <k3-menu-item id="btn-el" slot="menu" data-locale="el" value="el">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="gr"
+                  aria-hidden="true"
+                ></span>
+                Ελληνικά
+              </k3-menu-item>
+              <k3-menu-item id="btn-uk" slot="menu" data-locale="uk" value="uk">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="ua"
+                  aria-hidden="true"
+                ></span>
+                Українська
+              </k3-menu-item>
+              <k3-menu-item id="btn-tr" slot="menu" data-locale="tr" value="tr">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="tr"
+                  aria-hidden="true"
+                ></span>
+                Türkçe
+              </k3-menu-item>
+              <k3-menu-item id="btn-he" slot="menu" data-locale="he" value="he">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="il"
+                  aria-hidden="true"
+                ></span>
+                עברית
+              </k3-menu-item>
+              <k3-menu-item id="btn-zh" slot="menu" data-locale="zh" value="zh">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="cn"
+                  aria-hidden="true"
+                ></span>
+                中文
+              </k3-menu-item>
+              <k3-menu-item id="btn-ja" slot="menu" data-locale="ja" value="ja">
+                <span
+                  class="flag-icon flag-icon--1x1"
+                  slot="icon"
+                  data-locale-flag="jp"
+                  aria-hidden="true"
+                ></span>
+                日本語
               </k3-menu-item>
             </k3-split-button>
             <k3-tooltip id="tip-settings" position="bottom" content="Settings">
@@ -187,163 +332,57 @@
           <k3-loading-indicator contained></k3-loading-indicator>
           <span class="doc-page-loading-label" data-i18n="playground.page.loading">Loading…</span>
         </div>
+        <!-- Full-surface Material ambient (shell, not .k3-container) — toggled in showPage -->
+        <div id="home-ambient" class="home-ambient" aria-hidden="true"></div>
         <main class="main k3-container" id="doc-main">
         <div id="grid-overlay" class="k3-layout-grid-overlay" hidden aria-hidden="true"></div>
 
         <!-- HOME — component index -->
-        <article class="comp-page is-active" data-page="home" id="page-home">
-          <header class="section-head">
+        <article class="comp-page home-page is-active" data-page="home" id="page-home">
+          <header class="section-head home-hero">
             <p class="eyebrow" data-i18n="playground.eyebrow">Material 3 Expressive · Web</p>
             <h1 class="k3-display-large hero-title">K3ui</h1>
-            <p class="hero-lead" data-i18n="playground.lead">
+            <div class="product-switch">
+              <k3-button-group
+                id="product-switch"
+                variant="connected"
+                shape="round"
+                selection="single"
+                size="xl"
+                sync
+                required
+                label="K3ui / K3ux"
+              >
+                <k3-button variant="tonal" value="k3ui" data-product-switch="k3ui" selected
+                  >K3ui</k3-button
+                >
+                <k3-button variant="tonal" value="k3ux" data-product-switch="k3ux"
+                  >K3ux</k3-button
+                >
+              </k3-button-group>
+            </div>
+            <p class="hero-lead" data-doc-product="k3ui" data-i18n="playground.lead">
               Shape morph, five sizes, expressive motion — custom elements drop-in (k3ui.js +
               k3ui.css).
             </p>
+            <p class="hero-lead" data-doc-product="k3ux" hidden data-i18n="playground.lead.k3ux">
+              Decorative UX animations companion — confetti, text effects, holographic cards
+              (k3ux.js on top of k3ui).
+            </p>
           </header>
-          <p class="catalog-intro" data-i18n="doc.catalog.intro">
+          <p class="catalog-intro" data-doc-product="k3ui" data-i18n="doc.catalog.intro">
             Browse components — one page per component, like m3.material.io.
+          </p>
+          <p class="catalog-intro" data-doc-product="k3ux" hidden data-i18n="doc.catalog.intro.k3ux">
+            Browse UX animations — optional package so k3ui stays UI-only.
           </p>
           <div id="catalog-grid" class="catalog-grid"></div>
 
+          <!-- Lighthouse scores of this page — playground/lighthouse.ts (loaded on approach) -->
+          <div id="lighthouse-root" class="home-lighthouse-root"></div>
+
           <!-- Sponsors — Chakra-style tiers (prices ÷2) + logo walls + Don min 5€ -->
           <div id="sponsors-root" class="sponsors-root"></div>
-
-          <section class="home-social" aria-labelledby="home-social-title">
-            <header class="section-head sub">
-              <h2 id="home-social-title" data-i18n="playground.social.title">Find K3ui</h2>
-              <p data-i18n="playground.social.blurb">Follow along on your favorite platforms.</p>
-            </header>
-            <div class="home-social-grid k3-layout-grid">
-              <k3-button-card
-                stretch
-                class="home-social-card"
-                label="Instagram"
-                subtitle="@K3ui"
-                href="https://www.instagram.com/"
-                external
-                style="--k3-button-card-brand: #e1306c; --k3-button-card-icon-bg: color-mix(in srgb, #e1306c 16%, transparent); --k3-button-card-icon-fg: #e1306c"
-              >
-                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2zM12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"
-                  />
-                </svg>
-              </k3-button-card>
-              <k3-button-card
-                stretch
-                class="home-social-card"
-                label="TikTok"
-                subtitle="@K3ui"
-                href="https://www.tiktok.com/"
-                external
-                style="--k3-button-card-brand: #111111; --k3-button-card-icon-bg: color-mix(in srgb, #111111 12%, transparent); --k3-button-card-icon-fg: #111111"
-              >
-                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M19.6 7.1a5.7 5.7 0 0 1-3.4-1.1v7.7a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.8a2.9 2.9 0 1 0 2 2.7V2h2.8c.2 1.6 1.3 3 2.8 3.7.7.3 1.4.5 2.1.5v2.9c-.5 0-1-.1-1.5-.2z"
-                  />
-                </svg>
-              </k3-button-card>
-              <k3-button-card
-                stretch
-                class="home-social-card"
-                label="YouTube"
-                subtitle="@K3ui"
-                href="https://www.youtube.com/"
-                external
-                style="--k3-button-card-brand: #ff0000; --k3-button-card-icon-bg: color-mix(in srgb, #ff0000 14%, transparent); --k3-button-card-icon-fg: #ff0000"
-              >
-                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.8 15.5v-7l6.3 3.5-6.3 3.5z"
-                  />
-                </svg>
-              </k3-button-card>
-              <k3-button-card
-                stretch
-                class="home-social-card"
-                label="Facebook"
-                subtitle="@K3ui"
-                href="https://www.facebook.com/"
-                external
-                style="--k3-button-card-brand: #1877f2; --k3-button-card-icon-bg: color-mix(in srgb, #1877f2 16%, transparent); --k3-button-card-icon-fg: #1877f2"
-              >
-                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M14 8.2h2.7V5H14c-2.5 0-4.2 1.7-4.2 4.3V12H7.2v3.2h2.6V22h3.3v-6.8h2.6l.5-3.2h-3.1V9.5c0-.8.4-1.3 1.3-1.3z"
-                  />
-                </svg>
-              </k3-button-card>
-              <k3-button-card
-                stretch
-                class="home-social-card"
-                label="Twitch"
-                subtitle="@K3ui"
-                href="https://www.twitch.tv/"
-                external
-                style="--k3-button-card-brand: #9146ff; --k3-button-card-icon-bg: color-mix(in srgb, #9146ff 16%, transparent); --k3-button-card-icon-fg: #9146ff"
-              >
-                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M4.3 2 2 4.3v15.4h5.1V22l2.3-2.3h3.7L20.6 12V2H4.3zm14.3 9.1-2.9 2.9h-2.9l-2.5 2.5v-2.5H7.4V4.3h11.2v6.8zM14.3 6.6h1.7v5.1h-1.7V6.6zm-4.6 0H11v5.1H9.7V6.6z"
-                  />
-                </svg>
-              </k3-button-card>
-              <k3-button-card
-                stretch
-                class="home-social-card"
-                label="DeviantArt"
-                subtitle="@K3ui"
-                href="https://www.deviantart.com/"
-                external
-                style="--k3-button-card-brand: #05cc47; --k3-button-card-icon-bg: color-mix(in srgb, #05cc47 16%, transparent); --k3-button-card-icon-fg: #05cc47"
-              >
-                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M17.6 2H13l-.9 1.7-1.1 2.1H6.3v4.3h3.1L8 13.1v4.6h4.6l.9-1.7 1.1-2.1h4.7V9.6h-3.1L17.6 6.6V2z"
-                  />
-                </svg>
-              </k3-button-card>
-              <k3-button-card
-                stretch
-                class="home-social-card"
-                label="LinkedIn"
-                subtitle="@K3ui"
-                href="https://www.linkedin.com/"
-                external
-                style="--k3-button-card-brand: #0a66c2; --k3-button-card-icon-bg: color-mix(in srgb, #0a66c2 16%, transparent); --k3-button-card-icon-fg: #0a66c2"
-              >
-                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5zM3.5 9.5h3V20.5h-3V9.5zM9.5 9.5h2.9v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V20.5h-3v-4.9c0-1.17-.02-2.67-1.63-2.67-1.63 0-1.88 1.27-1.88 2.58V20.5h-3V9.5z"
-                  />
-                </svg>
-              </k3-button-card>
-              <k3-button-card
-                stretch
-                class="home-social-card"
-                label="X"
-                subtitle="@K3ui"
-                href="https://x.com/"
-                external
-                style="--k3-button-card-brand: #111111; --k3-button-card-icon-bg: color-mix(in srgb, #111111 12%, transparent); --k3-button-card-icon-fg: #111111"
-              >
-                <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M18.9 2H22l-6.8 7.8L23 22h-6.5l-5.1-6.6L5.6 22H2.5l7.3-8.3L1 2h6.7l4.6 6.1L18.9 2zm-1.1 18h1.8L6.3 3.9H4.4L17.8 20z"
-                  />
-                </svg>
-              </k3-button-card>
-            </div>
-          </section>
         </article>
 
         <!-- QUICK START -->
@@ -351,11 +390,17 @@
           <header class="section-head">
             <p class="comp-category" data-i18n="doc.nav.quick-start">Quick Start</p>
             <h1 data-i18n="doc.quick-start.title">Quick Start</h1>
-            <p data-i18n="doc.quick-start.blurb">
+            <p data-doc-product="k3ui" data-i18n="doc.quick-start.blurb">
               Install and use K3ui web components in Angular, React, Vue, or plain HTML.
             </p>
-            <p class="doc-intro" data-i18n="doc.quick-start.intro">
+            <p data-doc-product="k3ux" hidden data-i18n="doc.quick-start.blurb.k3ux">
+              Add the optional K3ux companion for decorative animations on top of K3ui.
+            </p>
+            <p class="doc-intro" data-doc-product="k3ui" data-i18n="doc.quick-start.intro">
               Pick a path that matches your stack. CDN for a quick try in plain HTML, npm when you already have a bundler, or the framework notes for Angular, React, and Vue. After install, call K3UI.init once, import k3ui.css, and register only the components you use so first paint stays light.
+            </p>
+            <p class="doc-intro" data-doc-product="k3ux" hidden data-i18n="doc.quick-start.intro.k3ux">
+              Install k3ui first (UI + tokens), then add k3ux for animation custom elements. Same tags (`k3-text-bounce`, `k3-holo-card`…) — they simply live in the companion package.
             </p>
             <div class="qs-chips" aria-label="Tags">
               <k3-chip data-i18n="doc.quick-start.chip.m3">Material 3</k3-chip>
@@ -364,7 +409,7 @@
             </div>
           </header>
 
-          <div class="qs-grid k3-layout-grid">
+          <div class="qs-grid k3-layout-grid" data-doc-product="k3ui">
             <section class="qs-card" style="grid-column: span 12">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon" data-k3-icon="cloud_download" aria-hidden="true"></span>
@@ -375,10 +420,10 @@
                   </p>
                 </div>
               </header>
-              <pre class="qs-code" tabindex="0"><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/k3ui/k3ui.css" /&gt;
-&lt;script type="module" src="https://cdn.jsdelivr.net/npm/k3ui/+esm"&gt;&lt;/script&gt;
+              <k3-codeblock language="html" code="<link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/k3ui/k3ui.css&quot; />
+<script type=&quot;module&quot; src=&quot;https://cdn.jsdelivr.net/npm/k3ui/+esm&quot;></script>
 
-&lt;k3-button variant="filled"&gt;Click me&lt;/k3-button&gt;</code></pre>
+<k3-button variant=&quot;filled&quot;>Click me</k3-button>" class="qs-code" ></k3-codeblock>
             </section>
 
             <section class="qs-card" style="grid-column: span 12">
@@ -395,15 +440,15 @@
                 <button type="button" class="qs-tab is-active" data-qs-tab="npm">npm</button>
                 <button type="button" class="qs-tab" data-qs-tab="pnpm">pnpm</button>
               </div>
-              <pre class="qs-code" data-qs-panel="npm" tabindex="0"><code>npm install k3ui</code></pre>
-              <pre class="qs-code" data-qs-panel="pnpm" hidden tabindex="0"><code>pnpm add k3ui</code></pre>
-              <pre class="qs-code" tabindex="0"><code>import { K3UI } from 'k3ui';
+              <k3-codeblock language="js" code="npm install k3ui" data-qs-panel="npm" class="qs-code" ></k3-codeblock>
+              <k3-codeblock language="js" code="pnpm add k3ui" data-qs-panel="pnpm" hidden class="qs-code" ></k3-codeblock>
+              <k3-codeblock language="js" code="import { K3UI } from 'k3ui';
 import 'k3ui/k3ui.css';
 
 await K3UI.init({
   locale: 'en',
   theme: { seed: '#6750A4', mode: 'auto', motion: 'expressive' },
-});</code></pre>
+});" class="qs-code" ></k3-codeblock>
             </section>
 
             <section class="qs-card" style="grid-column: span 4">
@@ -416,16 +461,16 @@ await K3UI.init({
                   </p>
                 </div>
               </header>
-              <pre class="qs-code" tabindex="0"><code>import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+              <k3-codeblock language="js" code="import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import 'k3ui';
 import 'k3ui/k3ui.css';
 
 @Component({
   selector: 'app-root',
-  template: `&lt;k3-button variant="filled"&gt;Angular&lt;/k3-button&gt;`,
+  template: `<k3-button variant=&quot;filled&quot;>Angular</k3-button>`,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class AppComponent {}</code></pre>
+export class AppComponent {}" class="qs-code" ></k3-codeblock>
             </section>
 
             <section class="qs-card" style="grid-column: span 4">
@@ -438,17 +483,17 @@ export class AppComponent {}</code></pre>
                   </p>
                 </div>
               </header>
-              <pre class="qs-code" tabindex="0"><code>import React from 'react';
+              <k3-codeblock language="js" code="import React from 'react';
 import 'k3ui';
 import 'k3ui/k3ui.css';
 
 export default function App() {
   return (
-    &lt;k3-button variant="filled" onClick={() =&gt; console.log('ok')}&gt;
+    <k3-button variant=&quot;filled&quot; onClick={() => console.log('ok')}>
       React
-    &lt;/k3-button&gt;
+    </k3-button>
   );
-}</code></pre>
+}" class="qs-code" ></k3-codeblock>
             </section>
 
             <section class="qs-card" style="grid-column: span 4">
@@ -461,16 +506,56 @@ export default function App() {
                   </p>
                 </div>
               </header>
-              <pre class="qs-code" tabindex="0"><code>&lt;script setup&gt;
+              <k3-codeblock language="html" code="<script setup>
 import 'k3ui';
 import 'k3ui/k3ui.css';
-&lt;/script&gt;
+</script>
 
-&lt;template&gt;
-  &lt;k3-button variant="filled" @click="() =&gt; {}"&gt;
+<template>
+  <k3-button variant=&quot;filled&quot; @click=&quot;() => {}&quot;>
     Vue
-  &lt;/k3-button&gt;
-&lt;/template&gt;</code></pre>
+  </k3-button>
+</template>" class="qs-code" ></k3-codeblock>
+            </section>
+          </div>
+
+          <div class="qs-grid k3-layout-grid" data-doc-product="k3ux" hidden>
+            <section class="qs-card" style="grid-column: span 12">
+              <header class="qs-card-head">
+                <span class="ms qs-card-icon" data-k3-icon="inventory_2" aria-hidden="true"></span>
+                <div>
+                  <h2 data-i18n="doc.quick-start.k3ux.npm.title">Install k3ui + k3ux</h2>
+                  <p data-i18n="doc.quick-start.k3ux.npm.blurb">
+                    Peer: k3ui provides tokens and K3Element. k3ux registers the animation tags.
+                  </p>
+                </div>
+              </header>
+              <div class="qs-tabs" role="tablist" aria-label="Package manager">
+                <button type="button" class="qs-tab is-active" data-qs-tab="npm-ux">npm</button>
+                <button type="button" class="qs-tab" data-qs-tab="pnpm-ux">pnpm</button>
+              </div>
+              <k3-codeblock language="js" code="npm install k3ui k3ux" data-qs-panel="npm-ux" class="qs-code" ></k3-codeblock>
+              <k3-codeblock language="js" code="pnpm add k3ui k3ux" data-qs-panel="pnpm-ux" hidden class="qs-code" ></k3-codeblock>
+              <k3-codeblock language="js" code="import 'k3ui';
+import 'k3ui/k3ui.css';
+import 'k3ux';
+/* optional GPL foils for k3-holo-card */
+import 'k3ux/holo-effects.css';
+
+<k3-text-bounce text=&quot;HELLO&quot; loop></k3-text-bounce>
+<k3-confetti id=&quot;celebrate&quot;></k3-confetti>" class="qs-code" ></k3-codeblock>
+            </section>
+            <section class="qs-card" style="grid-column: span 12">
+              <header class="qs-card-head">
+                <span class="ms qs-card-icon" data-k3-icon="animation" aria-hidden="true"></span>
+                <div>
+                  <h2 data-i18n="doc.quick-start.k3ux.scope.title">What ships in k3ux</h2>
+                  <p data-i18n="doc.quick-start.k3ux.scope.blurb">
+                    Confetti, text bounce / scramble, heart burst, halftone, holographic /
+                    lenticular / scratch cards — decorative only. UI controls stay in k3ui.
+                  </p>
+                </div>
+              </header>
             </section>
           </div>
         </article>
@@ -725,16 +810,16 @@ import 'k3ui/k3ui.css';
                 Place inside a position:relative surface. Buttons include it by default.
               </p>
             </header>
-            <pre class="code-block"><code>&lt;button style="position:relative; overflow:hidden"&gt;
-  &lt;k3-ripple&gt;&lt;/k3-ripple&gt;
+            <k3-codeblock language="html" code="<button style=&quot;position:relative; overflow:hidden&quot;>
+  <k3-ripple></k3-ripple>
   Label
-&lt;/button&gt;
+</button>
 
-&lt;!-- Unbounded (icon) — 40dp circle --&gt;
-&lt;button class="icon"&gt;
-  &lt;k3-ripple unbounded&gt;&lt;/k3-ripple&gt;
+<!-- Unbounded (icon) — 40dp circle -->
+<button class=&quot;icon&quot;>
+  <k3-ripple unbounded></k3-ripple>
   …
-&lt;/button&gt;</code></pre>
+</button>" ></k3-codeblock>
           </div>
         </article>
 
@@ -1435,32 +1520,32 @@ import 'k3ui/k3ui.css';
                   Copy
                 </button>
               </div>
-              <pre class="code-block" data-code-panel="html" tabindex="0"><code>&lt;!-- Default action — label is the accessible name --&gt;
-&lt;k3-icon-button label="Favorite" variant="filled"&gt;
-  &lt;span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"&gt;&lt;/span&gt;
-&lt;/k3-icon-button&gt;
+              <k3-codeblock language="html" code="<!-- Default action — label is the accessible name -->
+<k3-icon-button label=&quot;Favorite&quot; variant=&quot;filled&quot;>
+  <span class=&quot;ms notranslate&quot; translate=&quot;no&quot; lang=&quot;zxx&quot; data-k3-icon=&quot;favorite&quot; aria-hidden=&quot;true&quot;></span>
+</k3-icon-button>
 
-&lt;!-- Sizes · shapes · widths --&gt;
-&lt;k3-icon-button label="Edit" size="md" shape="square" width="wide" variant="tonal"&gt;
-  &lt;span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="edit" aria-hidden="true"&gt;&lt;/span&gt;
-&lt;/k3-icon-button&gt;
+<!-- Sizes · shapes · widths -->
+<k3-icon-button label=&quot;Edit&quot; size=&quot;md&quot; shape=&quot;square&quot; width=&quot;wide&quot; variant=&quot;tonal&quot;>
+  <span class=&quot;ms notranslate&quot; translate=&quot;no&quot; lang=&quot;zxx&quot; data-k3-icon=&quot;edit&quot; aria-hidden=&quot;true&quot;></span>
+</k3-icon-button>
 
-&lt;!-- Toggle — optional selected-icon when on --&gt;
-&lt;k3-icon-button toggle label="Add to favorites" variant="standard"&gt;
-  &lt;span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"&gt;&lt;/span&gt;
-  &lt;span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" slot="selected-icon" aria-hidden="true"&gt;&lt;/span&gt;
-&lt;/k3-icon-button&gt;</code></pre>
-              <pre class="code-block" data-code-panel="css" hidden tabindex="0"><code>/* Optional — k3ui.css already ships .ms + [data-k3-icon]::before */
+<!-- Toggle — optional selected-icon when on -->
+<k3-icon-button toggle label=&quot;Add to favorites&quot; variant=&quot;standard&quot;>
+  <span class=&quot;ms notranslate&quot; translate=&quot;no&quot; lang=&quot;zxx&quot; data-k3-icon=&quot;favorite&quot; aria-hidden=&quot;true&quot;></span>
+  <span class=&quot;ms notranslate&quot; translate=&quot;no&quot; lang=&quot;zxx&quot; data-k3-icon=&quot;favorite&quot; slot=&quot;selected-icon&quot; aria-hidden=&quot;true&quot;></span>
+</k3-icon-button>" data-code-panel="html" ></k3-codeblock>
+              <k3-codeblock language="css" code="/* Optional — k3ui.css already ships .ms + [data-k3-icon]::before */
 .ms {
-  font-family: "Material Symbols Rounded", "Material Symbols Outlined", sans-serif;
-  font-feature-settings: "liga";
-  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-family: &quot;Material Symbols Rounded&quot;, &quot;Material Symbols Outlined&quot;, sans-serif;
+  font-feature-settings: &quot;liga&quot;;
+  font-variation-settings: &quot;FILL&quot; 0, &quot;wght&quot; 400, &quot;GRAD&quot; 0, &quot;opsz&quot; 24;
   line-height: 1;
   speak: never;
 }
 .ms[data-k3-icon]::before {
   content: attr(data-k3-icon);
-  font-feature-settings: "liga";
+  font-feature-settings: &quot;liga&quot;;
 }
 
 /* Fine-tune via host attrs (size / shape / width / variant).
@@ -1468,20 +1553,20 @@ import 'k3ui/k3ui.css';
 k3-icon-button {
   /* --k3-ib-h: 2.5rem; */
   /* --k3-ib-icon: 1.5rem; */
-}</code></pre>
-              <pre class="code-block" data-code-panel="js" hidden tabindex="0"><code>import { K3UI } from "k3ui";
-import "k3ui/k3ui.css";
+}" data-code-panel="css" hidden ></k3-codeblock>
+              <k3-codeblock language="js" code="import { K3UI } from &quot;k3ui&quot;;
+import &quot;k3ui/k3ui.css&quot;;
 
 await K3UI.init({
-  locale: "en",
-  theme: { seed: "#6750A4", mode: "auto", motion: "expressive" },
-  components: ["k3-icon-button"],
+  locale: &quot;en&quot;,
+  theme: { seed: &quot;#6750A4&quot;, mode: &quot;auto&quot;, motion: &quot;expressive&quot; },
+  components: [&quot;k3-icon-button&quot;],
 });
 
-const fav = document.querySelector("k3-icon-button[toggle]");
-fav?.addEventListener("k3-change", (e) => {
-  console.log("selected", e.detail.selected);
-});</code></pre>
+const fav = document.querySelector(&quot;k3-icon-button[toggle]&quot;);
+fav?.addEventListener(&quot;k3-change&quot;, (e) => {
+  console.log(&quot;selected&quot;, e.detail.selected);
+});" data-code-panel="js" hidden ></k3-codeblock>
             </div>
           </section>
         </article>
@@ -1914,198 +1999,6 @@ fav?.addEventListener("k3-change", (e) => {
           </div>
         </article>
 
-
-        <!-- BUTTONS ARROW -->
-        <article class="comp-page" data-page="buttons-arrow" id="page-buttons-arrow" hidden>
-          <header class="section-head">
-            <p class="comp-category" data-i18n="doc.nav.buttons">Buttons</p>
-            <h1 data-i18n="doc.button-arrow.title">Buttons Arrow</h1>
-            <p data-i18n="doc.button-arrow.blurb">
-              Split chevrons — horizontal or vertical · filled · tonal · outlined · cyclic list.
-            </p>
-            <p class="doc-intro" data-i18n="doc.button-arrow.intro">
-              Arrow buttons step through a cyclic list with paired chevrons. Use horizontal for
-              carousels and vertical for stacked pages. Keep the list short, surface the current
-              value nearby, and match filled, tonal, or outlined to nearby controls.
-            </p>
-          </header>
-          <div class="surface stack gap-lg">
-            <p class="hint">
-              Value: <span id="arrow-val" class="notranslate" translate="no">Alpha</span>
-            </p>
-            <div class="demo-block">
-              <div class="demo-frame demo-frame--cases items-end">
-                <div class="demo-case-row">
-                  <div class="demo-case">
-                    <div class="demo-case-stage">
-                      <k3-button-arrow
-                        direction="horizontal"
-                        variant="filled"
-                        list="Alpha,Beta,Gamma,Delta"
-                        index="0"
-                      ></k3-button-arrow>
-                    </div>
-                    <span class="demo-case-num" aria-hidden="true">1</span>
-                  </div>
-                  <div class="demo-case">
-                    <div class="demo-case-stage">
-                      <k3-button-arrow
-                        direction="horizontal"
-                        variant="tonal"
-                        list="Alpha,Beta,Gamma,Delta"
-                        index="0"
-                      ></k3-button-arrow>
-                    </div>
-                    <span class="demo-case-num" aria-hidden="true">2</span>
-                  </div>
-                  <div class="demo-case">
-                    <div class="demo-case-stage">
-                      <k3-button-arrow
-                        direction="horizontal"
-                        variant="outlined"
-                        list="Alpha,Beta,Gamma,Delta"
-                        index="0"
-                      ></k3-button-arrow>
-                    </div>
-                    <span class="demo-case-num" aria-hidden="true">3</span>
-                  </div>
-                </div>
-                <div class="demo-case-row">
-                  <div class="demo-case">
-                    <div class="demo-case-stage">
-                      <k3-button-arrow
-                        direction="vertical"
-                        variant="filled"
-                        list="Alpha,Beta,Gamma,Delta"
-                        index="0"
-                      ></k3-button-arrow>
-                    </div>
-                    <span class="demo-case-num" aria-hidden="true">4</span>
-                  </div>
-                  <div class="demo-case">
-                    <div class="demo-case-stage">
-                      <k3-button-arrow
-                        direction="vertical"
-                        variant="tonal"
-                        list="Alpha,Beta,Gamma,Delta"
-                        index="0"
-                      ></k3-button-arrow>
-                    </div>
-                    <span class="demo-case-num" aria-hidden="true">5</span>
-                  </div>
-                  <div class="demo-case">
-                    <div class="demo-case-stage">
-                      <k3-button-arrow
-                        direction="vertical"
-                        variant="outlined"
-                        list="Alpha,Beta,Gamma,Delta"
-                        index="0"
-                      ></k3-button-arrow>
-                    </div>
-                    <span class="demo-case-num" aria-hidden="true">6</span>
-                  </div>
-                </div>
-              </div>
-              <ol class="variant-guide">
-                <li><span class="pill-num">1</span><span class="variant-label">H · filled</span></li>
-                <li><span class="pill-num">2</span><span class="variant-label">H · tonal</span></li>
-                <li><span class="pill-num">3</span><span class="variant-label">H · outlined</span></li>
-                <li><span class="pill-num">4</span><span class="variant-label">V · filled</span></li>
-                <li><span class="pill-num">5</span><span class="variant-label">V · tonal</span></li>
-                <li><span class="pill-num">6</span><span class="variant-label">V · outlined</span></li>
-              </ol>
-            </div>
-          </div>
-        </article>
-
-        <!-- BUTTONS CARD -->
-        <article class="comp-page" data-page="buttons-card" id="page-buttons-card" hidden>
-          <header class="section-head">
-            <p class="comp-category" data-i18n="doc.nav.buttons">Buttons</p>
-            <h1 data-i18n="doc.button-card.title">Buttons Card</h1>
-            <p data-i18n="doc.button-card.blurb">
-              Compact link row — tonal icon well · label · subtitle · optional href.
-            </p>
-            <p class="doc-intro" data-i18n="doc.button-card.intro">
-              Button cards present a short destination with an icon, a primary label, and an
-              optional subtitle. Use them in grids for peer links. Tint the icon well with
-              --k3-button-card-icon-bg and --k3-button-card-icon-fg; pass href for navigation.
-            </p>
-          </header>
-          <div class="demo-block">
-            <div class="demo-frame demo-frame--cases grid-2" data-demo-enhance="off">
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%">
-                  <k3-button-card
-                    stretch
-                    label="Alpha"
-                    subtitle="@handle"
-                    icon="share"
-                  ></k3-button-card>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">1</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%">
-                  <k3-button-card
-                    stretch
-                    label="Beta"
-                    subtitle="@demo"
-                    icon="link"
-                    style="--k3-button-card-icon-bg: var(--k3-sys-color-secondary-container); --k3-button-card-icon-fg: var(--k3-sys-color-on-secondary-container)"
-                  ></k3-button-card>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">2</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%">
-                  <k3-button-card
-                    stretch
-                    label="Gamma"
-                    subtitle="@sample"
-                    icon="language"
-                    href="#"
-                    style="--k3-button-card-icon-bg: var(--k3-sys-color-tertiary-container); --k3-button-card-icon-fg: var(--k3-sys-color-on-tertiary-container)"
-                  ></k3-button-card>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">3</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%">
-                  <k3-button-card stretch label="Delta" subtitle="@user" disabled icon="share"></k3-button-card>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">4</span>
-              </div>
-            </div>
-            <ol class="variant-guide">
-              <li>
-                <span class="pill-num">1</span
-                ><span class="variant-label" data-i18n="doc.button-card.guide.default"
-                  >Default · primary</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">2</span
-                ><span class="variant-label" data-i18n="doc.button-card.guide.secondary"
-                  >Secondary tint</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">3</span
-                ><span class="variant-label" data-i18n="doc.button-card.guide.link"
-                  >With href</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">4</span
-                ><span class="variant-label" data-i18n="doc.button-card.guide.disabled"
-                  >Disabled</span
-                >
-              </li>
-            </ol>
-          </div>
-        </article>
-
         <!-- BUTTONS GRID -->
         <article class="comp-page" data-page="buttons-grid" id="page-buttons-grid" hidden>
           <header class="section-head">
@@ -2360,6 +2253,269 @@ fav?.addEventListener("k3-change", (e) => {
                   <span class="pill-num">3</span
                   ><span class="variant-label" data-i18n="doc.button-group.variant.connected-labels"
                     >Connected · labels=selected</span
+                  >
+                </li>
+              </ol>
+            </div>
+
+            <!-- ── Arrows (connected chevron pair) ── -->
+            <header class="section-head sub">
+              <h2 data-i18n="doc.button-group.section.arrows">Arrows</h2>
+            </header>
+            <p class="hint" data-i18n="doc.button-group.hint.arrows">
+              Connected pair of chevrons — horizontal or vertical · filled · tonal · outlined.
+              Step a short cyclic list in app code (value shown below).
+            </p>
+            <p class="arrow-val-line" aria-live="polite">
+              <span class="arrow-val-label">Value</span>
+              <span id="arrow-val" class="arrow-val notranslate" translate="no">Alpha</span>
+            </p>
+            <div class="demo-block" data-demo-enhance="off">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-group
+                        class="arrow-demo"
+                        variant="connected"
+                        selection="none"
+                        orientation="horizontal"
+                        size="md"
+                        sync
+                        shape="round"
+                        label="Step horizontal filled"
+                      >
+                        <k3-icon-button variant="filled" width="narrow" label="Previous" data-arrow-step="-1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="chevron_left"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                        <k3-icon-button variant="filled" width="narrow" label="Next" data-arrow-step="1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="chevron_right"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                      </k3-button-group>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">1</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-group
+                        class="arrow-demo"
+                        variant="connected"
+                        selection="none"
+                        orientation="horizontal"
+                        size="md"
+                        sync
+                        shape="round"
+                        label="Step horizontal tonal"
+                      >
+                        <k3-icon-button variant="tonal" width="narrow" label="Previous" data-arrow-step="-1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="chevron_left"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                        <k3-icon-button variant="tonal" width="narrow" label="Next" data-arrow-step="1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="chevron_right"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                      </k3-button-group>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">2</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-group
+                        class="arrow-demo"
+                        variant="connected"
+                        selection="none"
+                        orientation="horizontal"
+                        size="md"
+                        sync
+                        shape="round"
+                        label="Step horizontal outlined"
+                      >
+                        <k3-icon-button variant="outlined" width="narrow" label="Previous" data-arrow-step="-1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="chevron_left"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                        <k3-icon-button variant="outlined" width="narrow" label="Next" data-arrow-step="1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="chevron_right"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                      </k3-button-group>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">3</span>
+                  </div>
+                </div>
+                <div class="demo-case-row">
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-group
+                        class="arrow-demo"
+                        variant="connected"
+                        selection="none"
+                        orientation="vertical"
+                        size="md"
+                        sync
+                        shape="round"
+                        label="Step vertical filled"
+                      >
+                        <k3-icon-button variant="filled" width="narrow" label="Up" data-arrow-step="-1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="expand_less"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                        <k3-icon-button variant="filled" width="narrow" label="Down" data-arrow-step="1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="expand_more"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                      </k3-button-group>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">4</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-group
+                        class="arrow-demo"
+                        variant="connected"
+                        selection="none"
+                        orientation="vertical"
+                        size="md"
+                        sync
+                        shape="round"
+                        label="Step vertical tonal"
+                      >
+                        <k3-icon-button variant="tonal" width="narrow" label="Up" data-arrow-step="-1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="expand_less"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                        <k3-icon-button variant="tonal" width="narrow" label="Down" data-arrow-step="1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="expand_more"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                      </k3-button-group>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">5</span>
+                  </div>
+                  <div class="demo-case">
+                    <div class="demo-case-stage">
+                      <k3-button-group
+                        class="arrow-demo"
+                        variant="connected"
+                        selection="none"
+                        orientation="vertical"
+                        size="md"
+                        sync
+                        shape="round"
+                        label="Step vertical outlined"
+                      >
+                        <k3-icon-button variant="outlined" width="narrow" label="Up" data-arrow-step="-1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="expand_less"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                        <k3-icon-button variant="outlined" width="narrow" label="Down" data-arrow-step="1">
+                          <span
+                            class="ms notranslate"
+                            translate="no"
+                            lang="zxx"
+                            data-k3-icon="expand_more"
+                            aria-hidden="true"
+                          ></span>
+                        </k3-icon-button>
+                      </k3-button-group>
+                    </div>
+                    <span class="demo-case-num" aria-hidden="true">6</span>
+                  </div>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.button-group.variant.arrow-h-filled"
+                    >H · filled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.button-group.variant.arrow-h-tonal"
+                    >H · tonal</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.button-group.variant.arrow-h-outlined"
+                    >H · outlined</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">4</span
+                  ><span class="variant-label" data-i18n="doc.button-group.variant.arrow-v-filled"
+                    >V · filled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">5</span
+                  ><span class="variant-label" data-i18n="doc.button-group.variant.arrow-v-tonal"
+                    >V · tonal</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">6</span
+                  ><span class="variant-label" data-i18n="doc.button-group.variant.arrow-v-outlined"
+                    >V · outlined</span
                   >
                 </li>
               </ol>
@@ -4976,15 +5132,19 @@ fav?.addEventListener("k3-change", (e) => {
           </header>
 
           <div class="surface stack gap-lg">
+            <!-- Basic: docked / filled / modal -->
             <header class="section-head sub">
               <h2 data-i18n="doc.date-picker.section.basic">Basic</h2>
             </header>
-            <p class="hint" data-i18n="doc.date-picker.hint">
-              Short range: 2 months + one wide field. Long range: 1 month + Start/End fields, each
-              with its own calendar icon.
+            <p class="hint" data-i18n="doc.date-picker.hint.basic">
+              Docked anchors under the field. Modal is better on small screens or when the date is
+              the main task.
             </p>
             <div class="demo-block">
-              <div class="demo-frame demo-frame--cases items-end">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3 items-end"
+                data-demo-enhance="off"
+              >
                 <div class="demo-case">
                   <div class="demo-case-stage">
                     <k3-text-field
@@ -4992,8 +5152,9 @@ fav?.addEventListener("k3-change", (e) => {
                       variant="outlined"
                       label="Date"
                       supporting-text="yyyy-MM-dd"
+                      value="2026-08-17"
                       clearable
-                      style="max-width: 16rem"
+                      style="width: 100%; max-width: 16rem"
                     >
                       <k3-icon-button
                         slot="trailing-icon"
@@ -5017,14 +5178,176 @@ fav?.addEventListener("k3-change", (e) => {
                 <div class="demo-case">
                   <div class="demo-case-stage">
                     <k3-text-field
+                      id="dp-field-filled"
+                      variant="filled"
+                      label="Filled"
+                      supporting-text="yyyy-MM-dd"
+                      clearable
+                      style="width: 100%; max-width: 16rem"
+                    >
+                      <k3-icon-button
+                        slot="trailing-icon"
+                        variant="standard"
+                        width="default"
+                        label="Open filled date"
+                      >
+                        <span
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="calendar_today"
+                          aria-hidden="true"
+                        ></span>
+                        <k3-date-picker-toggle for="dp-filled"></k3-date-picker-toggle>
+                      </k3-icon-button>
+                    </k3-text-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <div class="row wrap" style="gap: var(--k3-layout-gutter); align-items: center">
+                      <k3-button id="dp-modal-open" variant="filled"
+                        ><span data-i18n="doc.date-picker.action.pick">Pick a date</span></k3-button
+                      >
+                      <code id="dp-modal-value" class="mono">—</code>
+                    </div>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.date-picker.variant.docked"
+                    >Docked · outlined</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.date-picker.variant.filled"
+                    >Docked · filled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.date-picker.variant.modal"
+                    >Modal dialog</span
+                  >
+                </li>
+              </ol>
+            </div>
+
+            <!-- Bounds + blackout -->
+            <header class="section-head sub">
+              <h2 data-i18n="doc.date-picker.section.bounds">Bounds &amp; blackouts</h2>
+            </header>
+            <p class="hint" data-i18n="doc.date-picker.hint.bounds">
+              <code>min-date</code> / <code>max-date</code> grey out days outside the window.
+              <code>blackoutDates</code> disables rules a range cannot express (weekends, holidays).
+            </p>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2 items-end"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-text-field
+                      id="dp-field-bound"
+                      variant="outlined"
+                      label="Within this year"
+                      supporting-text="yyyy-MM-dd"
+                      clearable
+                      style="width: 100%; max-width: 16rem"
+                    >
+                      <k3-icon-button
+                        slot="trailing-icon"
+                        variant="tonal"
+                        width="default"
+                        label="Open bounded picker"
+                      >
+                        <span
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="calendar_today"
+                          aria-hidden="true"
+                        ></span>
+                        <k3-date-picker-toggle for="dp-bound"></k3-date-picker-toggle>
+                      </k3-icon-button>
+                    </k3-text-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-text-field
+                      id="dp-field-blackout"
+                      variant="outlined"
+                      label="Appointment"
+                      supporting-text="Weekdays only"
+                      clearable
+                      style="width: 100%; max-width: 16rem"
+                    >
+                      <k3-icon-button
+                        slot="trailing-icon"
+                        variant="tonal"
+                        width="default"
+                        label="Open appointment picker"
+                      >
+                        <span
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="calendar_today"
+                          aria-hidden="true"
+                        ></span>
+                        <k3-date-picker-toggle for="dp-blackout"></k3-date-picker-toggle>
+                      </k3-icon-button>
+                    </k3-text-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.date-picker.variant.bounds"
+                    >min / max this year</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.date-picker.variant.blackout"
+                    >Weekdays only (blackout)</span
+                  >
+                </li>
+              </ol>
+            </div>
+
+            <!-- Range -->
+            <header class="section-head sub">
+              <h2 data-i18n="doc.date-picker.section.range">Range</h2>
+            </header>
+            <p class="hint" data-i18n="doc.date-picker.hint">
+              Range is always modal (scroll months). Use one Du/Au field or two Start/End fields —
+              both open the same picker.
+            </p>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases demo-frame--stack"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-text-field
                       id="dp-field-r2"
                       variant="outlined"
                       label="Date range"
-                      supporting-text="Du / Au · yyyy-MM-dd"
-                      multiline
-                      rows="2"
+                      supporting-text="yyyy-MM-dd - yyyy-MM-dd"
                       clearable
-                      style="width: 22rem; min-width: 22rem"
+                      style="width: 100%; max-width: 28rem; --k3-text-field-max-width: 28rem"
                     >
                       <k3-icon-button
                         slot="trailing-icon"
@@ -5043,13 +5366,13 @@ fav?.addEventListener("k3-change", (e) => {
                       </k3-icon-button>
                     </k3-text-field>
                   </div>
-                  <span class="demo-case-num" aria-hidden="true">2</span>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
                 </div>
                 <div class="demo-case">
                   <div class="demo-case-stage">
                     <div
                       class="row wrap"
-                      style="gap: var(--k3-layout-gutter, 0.5rem); align-items: flex-end; max-width: 28rem"
+                      style="gap: var(--k3-layout-gutter); align-items: flex-end; width: 100%; max-width: 28rem"
                     >
                       <k3-text-field
                         id="dp-field-rl-start"
@@ -5072,10 +5395,7 @@ fav?.addEventListener("k3-change", (e) => {
                             data-k3-icon="calendar_today"
                             aria-hidden="true"
                           ></span>
-                          <k3-date-picker-toggle
-                            for="dp-rl"
-                            edge="start"
-                          ></k3-date-picker-toggle>
+                          <k3-date-picker-toggle for="dp-rl"></k3-date-picker-toggle>
                         </k3-icon-button>
                       </k3-text-field>
                       <k3-text-field
@@ -5099,45 +5419,47 @@ fav?.addEventListener("k3-change", (e) => {
                             data-k3-icon="calendar_today"
                             aria-hidden="true"
                           ></span>
-                          <k3-date-picker-toggle
-                            for="dp-rl"
-                            edge="end"
-                          ></k3-date-picker-toggle>
+                          <k3-date-picker-toggle for="dp-rl"></k3-date-picker-toggle>
                         </k3-icon-button>
                       </k3-text-field>
                     </div>
                   </div>
-                  <span class="demo-case-num" aria-hidden="true">3</span>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
                 </div>
               </div>
               <ol class="variant-guide">
                 <li>
                   <span class="pill-num">1</span
-                  ><span class="variant-label" data-i18n="doc.date-picker.variant.single"
-                    >Single date (docked)</span
+                  ><span class="variant-label" data-i18n="doc.date-picker.variant.range-short"
+                    >Range — one field (Du / Au)</span
                   >
                 </li>
                 <li>
                   <span class="pill-num">2</span
-                  ><span class="variant-label" data-i18n="doc.date-picker.variant.range-short"
-                    >Short range — 2 months · one field</span
-                  >
-                </li>
-                <li>
-                  <span class="pill-num">3</span
                   ><span class="variant-label" data-i18n="doc.date-picker.variant.range-long"
-                    >Long range — 1 month · Start / End</span
+                    >Range — two fields (Start / End)</span
                   >
                 </li>
               </ol>
             </div>
-            <k3-date-picker id="dp-s" for="dp-field-s" variant="docked"></k3-date-picker>
+
+            <k3-date-picker id="dp-s" for="dp-field-s" variant="docked" value="2026-08-17"></k3-date-picker>
+            <k3-date-picker id="dp-filled" for="dp-field-filled" variant="docked"></k3-date-picker>
+            <k3-date-picker id="dp-modal" variant="modal" label="Select date" clearable></k3-date-picker>
+            <k3-date-picker
+              id="dp-bound"
+              for="dp-field-bound"
+              variant="docked"
+            ></k3-date-picker>
+            <k3-date-picker
+              id="dp-blackout"
+              for="dp-field-blackout"
+              variant="docked"
+            ></k3-date-picker>
             <k3-date-picker
               id="dp-r2"
               for="dp-field-r2"
-              variant="modal"
               range
-              months="2"
               clearable
               label="Select dates"
             ></k3-date-picker>
@@ -5145,9 +5467,7 @@ fav?.addEventListener("k3-change", (e) => {
               id="dp-rl"
               for-start="dp-field-rl-start"
               for-end="dp-field-rl-end"
-              variant="modal"
               range
-              months="1"
               clearable
               label="Select dates"
             ></k3-date-picker>
@@ -5661,13 +5981,13 @@ fav?.addEventListener("k3-change", (e) => {
             </div>
           </div>
 
-          <pre class="code-block"><code>&lt;k3-skeleton animation="wave"&gt;
-  &lt;strong&gt;Jane Doe&lt;/strong&gt;
-&lt;/k3-skeleton&gt;
-&lt;!-- later: el.loaded = true  → reveals content --&gt;
+          <k3-codeblock language="html" code="<k3-skeleton animation=&quot;wave&quot;>
+  <strong>Jane Doe</strong>
+</k3-skeleton>
+<!-- later: el.loaded = true  → reveals content -->
 
-&lt;!-- Empty bone (placeholder only, no reveal) --&gt;
-&lt;k3-skeleton animation="wave" style="width:8rem;height:5rem"&gt;&lt;/k3-skeleton&gt;</code></pre>
+<!-- Empty bone (placeholder only, no reveal) -->
+<k3-skeleton animation=&quot;wave&quot; style=&quot;width:8rem;height:5rem&quot;></k3-skeleton>" ></k3-codeblock>
         </article>
 
         <!-- FEEDBACK: LAZY LOADING -->
@@ -6569,6 +6889,146 @@ fav?.addEventListener("k3-change", (e) => {
         </article>
 
         <!-- CARD -->
+        <article class="comp-page" data-page="coverflow" id="page-coverflow" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.coverflow.title">Cover flow</h1>
+            <p data-i18n="doc.coverflow.blurb">
+              3D covers turning towards the centre — endless loop, reflection, lightbox, link or flip.
+            </p>
+            <p class="doc-intro" data-i18n="doc.coverflow.intro">
+              Cover flow shows a row of covers in 3D.
+            </p>
+          </header>
+
+          <div class="demo-block">
+            <div class="coverflow-toolbar">
+              <k3-button-group
+                id="cf-opts"
+                variant="connected"
+                shape="round"
+                selection="multi"
+                size="sm"
+                sync
+                label="Options"
+                data-i18n-label="doc.coverflow.opt.label"
+              >
+                <k3-button variant="outlined" value="arrows" selected>
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="swap_horiz" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.opt.arrows">Arrow</span>
+                </k3-button>
+                <k3-button variant="outlined" value="bullets" selected>
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="more_horiz" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.opt.bullets">Bullet</span>
+                </k3-button>
+                <k3-button variant="outlined" value="shadow" selected>
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="layers" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.opt.shadow">Shadow</span>
+                </k3-button>
+                <k3-button variant="outlined" value="loop" selected>
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="repeat" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.opt.loop">Continu</span>
+                </k3-button>
+              </k3-button-group>
+              <k3-button-group
+                id="cf-mode"
+                variant="connected"
+                shape="round"
+                selection="single"
+                required
+                size="sm"
+                sync
+                label="Mode"
+                data-i18n-label="doc.coverflow.mode.label"
+              >
+                <k3-button variant="outlined" value="lightbox" selected>
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="image" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.mode.lightbox">Lightbox</span>
+                </k3-button>
+                <k3-button variant="outlined" value="flip">
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="restart_alt" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.mode.flip">Flip</span>
+                </k3-button>
+              </k3-button-group>
+              <k3-button-group
+                id="cf-width"
+                variant="connected"
+                shape="round"
+                selection="single"
+                required
+                size="sm"
+                sync
+                label="Width"
+                data-i18n-label="doc.coverflow.width.label"
+              >
+                <k3-button variant="outlined" value="container">
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="view_column" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.width.container">Container</span>
+                </k3-button>
+                <k3-button variant="outlined" value="full" selected>
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="open_in_full" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.width.full">Full</span>
+                </k3-button>
+              </k3-button-group>
+              <k3-button-group
+                id="cf-effect"
+                variant="connected"
+                shape="round"
+                selection="single"
+                required
+                size="sm"
+                sync
+                label="Effect"
+                data-i18n-label="doc.coverflow.effect.label"
+              >
+                <k3-button variant="outlined" value="coverflow" selected>
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="animation" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.effect.coverflow">Coverflow</span>
+                </k3-button>
+                <k3-button variant="outlined" value="slide">
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="view_list" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.effect.slide">Slide</span>
+                </k3-button>
+              </k3-button-group>
+              <k3-button-group
+                id="cf-orient"
+                variant="connected"
+                shape="round"
+                selection="single"
+                required
+                size="sm"
+                sync
+                label="Orientation"
+                data-i18n-label="doc.coverflow.orient.label"
+              >
+                <k3-button variant="outlined" value="horizontal" selected>
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="swap_horiz" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.orient.horizontal">Horizontal</span>
+                </k3-button>
+                <k3-button variant="outlined" value="vertical">
+                  <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="swap_vert" aria-hidden="true"></span>
+                  <span data-i18n="doc.coverflow.orient.vertical">Vertical</span>
+                </k3-button>
+              </k3-button-group>
+            </div>
+            <div class="demo-frame demo-frame--stack" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage coverflow-stage">
+                  <k3-coverflow
+                    id="coverflow-demo"
+                    label="Gallery"
+                    data-i18n-label="doc.coverflow.demo.label"
+                    full-width
+                    lightbox
+                    arrows
+                    bullets
+                  ></k3-coverflow>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
         <article class="comp-page" data-page="card" id="page-card" hidden>
           <header class="section-head">
             <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
@@ -7641,77 +8101,110 @@ fav?.addEventListener("k3-change", (e) => {
             <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
             <h1 data-i18n="doc.nav-rail.title">Navigation Rail</h1>
             <p data-i18n="doc.nav-rail.blurb">
-              Mid / expanded (≥600dp). Collapsed/Expanded · FAB header · menu / menu_open.
+              Mid / expanded (≥600dp). Modal/standard · leading/trailing · position start/center/bottom.
             </p>
             <p class="doc-intro" data-i18n="doc.nav-rail.intro">
-              Navigation rails suit mid-width and expanded layouts (≥600 dp). Collapse or expand destinations, optionally lead with a FAB, and use menu / menu_open affordances when the rail can hide. Keep destination labels short and the active item obvious with FILL icons when selected.
+              Navigation rails suit mid-width and expanded layouts (≥600 dp). Collapse or expand destinations, optionally lead with a FAB, and use menu / menu_open when the rail can hide. Expanded layout defaults to modal (edge-docked, end-side radii, elevation-1); use layout="standard" for a flush rail with no inset sheet. Put secondary actions in slot="trailing" (divider). Align the leading group with position="start|center|bottom".
             </p>
           </header>
-          <div class="surface stack gap-lg">
-            <ol class="variant-guide">
-              <li>
-                <span class="pill-num">1</span
-                ><span class="variant-label">collapsed · FAB</span>
-              </li>
-              <li>
-                <span class="pill-num">2</span
-                ><span class="variant-label">expanded · extended FAB</span>
-              </li>
-              <li>
-                <span class="pill-num">3</span
-                ><span class="variant-label">compact · modal</span>
-              </li>
-              <li>
-                <span class="pill-num">4</span
-                ><span class="variant-label">large · modal</span>
-              </li>
-            </ol>
-            <div class="row wrap gap-lg items-start">
-              <div class="surface-rail">
-                <k3-nav-rail size="compact" appearance="standard" collapsible active="3">
-                  <k3-fab slot="fab" size="default" variant="primary" aria-label="Timer">
-                    <span class="ms" slot="icon">timer</span>
-                  </k3-fab>
-                  <k3-extended-fab slot="fab" size="medium" variant="primary">
-                    <span class="ms" slot="icon">timer</span>
-                    Add timer
-                  </k3-extended-fab>
-                  <k3-nav-item icon="home" label="Home"></k3-nav-item>
-                  <k3-nav-item icon="search" label="Browse"></k3-nav-item>
-                  <k3-nav-item icon="radio" label="Radio"></k3-nav-item>
-                  <k3-nav-item icon="library_music" label="Library"></k3-nav-item>
-                </k3-nav-rail>
+          <div class="demo-block" data-demo-enhance="off">
+            <h2 data-i18n="doc.nav-rail.section.lab">Playground</h2>
+            <p data-i18n="doc.nav-rail.section.lab.blurb">
+              One rail — tune layout, size, FAB and trailing live (same morph as the shell).
+            </p>
+            <div class="nav-rail-lab">
+              <div class="nav-rail-lab-preview">
+                <div
+                  class="surface-rail"
+                  id="nr-stage"
+                  data-layout="modal"
+                  data-size="compact"
+                >
+                  <k3-nav-rail
+                    id="nr-lab"
+                    size="compact"
+                    layout="modal"
+                    position="start"
+                    collapsible
+                    active="0"
+                  >
+                    <k3-extended-fab
+                      id="nr-lab-fab"
+                      slot="fab"
+                      class="rail-fab-extended"
+                      size="medium"
+                      variant="primary"
+                    >
+                      <span
+                        class="ms notranslate"
+                        slot="icon"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="timer"
+                        aria-hidden="true"
+                      ></span>
+                      <span data-i18n="doc.nav-rail.lab.fabLabel">Add timer</span>
+                    </k3-extended-fab>
+                    <k3-nav-item icon="home" label="Home" data-i18n-label="doc.nav-rail.lab.home"></k3-nav-item>
+                    <k3-nav-item icon="library_music" label="Library" data-i18n-label="doc.nav-rail.lab.library"></k3-nav-item>
+                    <k3-nav-item
+                      id="nr-lab-trail-settings"
+                      slot="trailing"
+                      icon="settings"
+                      label="Settings"
+                      data-i18n-label="doc.nav-rail.lab.settings"
+                    ></k3-nav-item>
+                    <k3-nav-item
+                      id="nr-lab-trail-profile"
+                      slot="trailing"
+                      icon="person"
+                      label="Profile"
+                      data-i18n-label="doc.nav-rail.lab.profile"
+                    ></k3-nav-item>
+                  </k3-nav-rail>
+                </div>
               </div>
-              <div class="surface-rail surface-rail-large">
-                <k3-nav-rail size="large" appearance="standard" collapsible expanded active="2">
-                  <k3-fab slot="fab" size="default" variant="primary" aria-label="Timer">
-                    <span class="ms" slot="icon">timer</span>
-                  </k3-fab>
-                  <k3-extended-fab slot="fab" size="medium" variant="primary">
-                    <span class="ms" slot="icon">timer</span>
-                    Add timer
-                  </k3-extended-fab>
-                  <k3-nav-item icon="home" label="Home"></k3-nav-item>
-                  <k3-nav-item icon="search" label="Browse"></k3-nav-item>
-                  <k3-nav-item icon="radio" label="Radio"></k3-nav-item>
-                  <k3-nav-item icon="library_music" label="Library"></k3-nav-item>
-                </k3-nav-rail>
-              </div>
-              <div class="surface-rail surface-rail-modal">
-                <k3-nav-rail size="compact" appearance="modal" active="3">
-                  <k3-nav-item icon="home" label="Home"></k3-nav-item>
-                  <k3-nav-item icon="search" label="Browse"></k3-nav-item>
-                  <k3-nav-item icon="radio" label="Radio"></k3-nav-item>
-                  <k3-nav-item icon="library_music" label="Library"></k3-nav-item>
-                </k3-nav-rail>
-              </div>
-              <div class="surface-rail surface-rail-modal surface-rail-large">
-                <k3-nav-rail size="large" appearance="modal" active="2">
-                  <k3-nav-item icon="home" label="Home"></k3-nav-item>
-                  <k3-nav-item icon="search" label="Browse"></k3-nav-item>
-                  <k3-nav-item icon="radio" label="Radio"></k3-nav-item>
-                  <k3-nav-item icon="library_music" label="Library"></k3-nav-item>
-                </k3-nav-rail>
+              <div class="nav-rail-lab-controls">
+                <k3-select
+                  id="nr-layout"
+                  variant="outlined"
+                  value="modal"
+                  label="Layout"
+                  data-i18n-label="doc.nav-rail.lab.layout"
+                >
+                  <k3-menu-item value="modal" data-i18n="doc.nav-rail.lab.layout.modal">Modal</k3-menu-item>
+                  <k3-menu-item value="standard" data-i18n="doc.nav-rail.lab.layout.standard">Standard</k3-menu-item>
+                </k3-select>
+                <k3-select
+                  id="nr-position"
+                  variant="outlined"
+                  value="start"
+                  label="Position"
+                  data-i18n-label="doc.nav-rail.lab.position"
+                >
+                  <k3-menu-item value="start" data-i18n="doc.nav-rail.lab.position.start">Start</k3-menu-item>
+                  <k3-menu-item value="center" data-i18n="doc.nav-rail.lab.position.center">Center</k3-menu-item>
+                  <k3-menu-item value="bottom" data-i18n="doc.nav-rail.lab.position.bottom">Bottom</k3-menu-item>
+                </k3-select>
+                <k3-select
+                  id="nr-size"
+                  variant="outlined"
+                  value="compact"
+                  label="Size"
+                  data-i18n-label="doc.nav-rail.lab.size"
+                >
+                  <k3-menu-item value="compact" data-i18n="doc.nav-rail.lab.size.compact">Compact</k3-menu-item>
+                  <k3-menu-item value="large" data-i18n="doc.nav-rail.lab.size.large">Large</k3-menu-item>
+                </k3-select>
+                <k3-switch id="nr-collapsible" selected>
+                  <span data-i18n="doc.nav-rail.lab.collapsible">Collapsible</span>
+                </k3-switch>
+                <k3-switch id="nr-fab" selected>
+                  <span data-i18n="doc.nav-rail.lab.fab">FAB</span>
+                </k3-switch>
+                <k3-switch id="nr-trailing" selected>
+                  <span data-i18n="doc.nav-rail.lab.trailing">Trailing</span>
+                </k3-switch>
               </div>
             </div>
           </div>
@@ -11060,7 +11553,7 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
                 One-shot helpers for shortcut maps — ignoreFields skips inputs.
               </p>
             </header>
-            <pre class="code-block"><code>import { bindChords, attachKeyboard } from 'k3ui';
+            <k3-codeblock language="js" code="import { bindChords, attachKeyboard } from 'k3ui';
 
 const off = bindChords(document, {
   'control+k': () => console.log('chord'),
@@ -11069,7 +11562,7 @@ const off = bindChords(document, {
 
 const kb = attachKeyboard(document);
 kb.on('down', (d) => console.log('down', d.key, [...d.pressed]));
-kb.on('up', (d) => console.log('up', d.key));</code></pre>
+kb.on('up', (d) => console.log('up', d.key));" ></k3-codeblock>
           </div>
         </article>
 
@@ -11096,7 +11589,7 @@ kb.on('up', (d) => console.log('up', d.key));</code></pre>
                 Default seek step ±5 s — override with seekStepSec.
               </p>
             </header>
-            <pre class="code-block"><code>import { bindMediaHotkeys } from 'k3ui';
+            <k3-codeblock language="js" code="import { bindMediaHotkeys } from 'k3ui';
 
 bindMediaHotkeys({
   toggle: () => player.toggle(),
@@ -11104,7 +11597,7 @@ bindMediaHotkeys({
   next: () => player.next(),
   prev: () => player.prev(),
   mute: () => player.setMusicMuted(!player.muted),
-}, { seekStepSec: 5, enabled: () => player.hotkeys });</code></pre>
+}, { seekStepSec: 5, enabled: () => player.hotkeys });" ></k3-codeblock>
           </div>
 
           <div class="surface stack gap-lg">
@@ -11173,12 +11666,12 @@ bindMediaHotkeys({
                 left · middle · right · back · forward — buttons bitfield helpers included.
               </p>
             </header>
-            <pre class="code-block"><code>import { attachMouse } from 'k3ui';
+            <k3-codeblock language="js" code="import { attachMouse } from 'k3ui';
 
 const m = attachMouse(el, { dragThreshold: 4, preventContextMenu: true });
 m.on('down', (d) => console.log(d.button, [...d.buttons]));
 m.on('drag', (d) => console.log(d.totalX, d.totalY));
-m.on('wheel', (d) => console.log(d.deltaY));</code></pre>
+m.on('wheel', (d) => console.log(d.deltaY));" ></k3-codeblock>
           </div>
         </article>
 
@@ -11205,11 +11698,11 @@ m.on('wheel', (d) => console.log(d.deltaY));</code></pre>
                 <code>k3-gesture</code>.
               </p>
             </header>
-            <pre class="code-block"><code>import { detectGesture, phase, tap } from 'k3ui';
+            <k3-codeblock language="js" code="import { detectGesture, phase, tap } from 'k3ui';
 
 detectGesture(el, tap(phase({
   onEnd: (d) => console.log('tap', d),
-})));</code></pre>
+})));" ></k3-codeblock>
           </div>
 
           <div class="surface stack gap-lg">
@@ -11399,7 +11892,7 @@ detectGesture(el, tap(phase({
             <p class="hint" id="dnd-chips-log">—</p>
           </div>
 
-          <pre class="code-block"><code>import { attachSortable, attachDraggable, attachDroppable } from 'k3ui';
+          <k3-codeblock language="js" code="import { attachSortable, attachDraggable, attachDroppable } from 'k3ui';
 
 attachSortable(list, {
   itemSelector: ':scope > .dnd-item',
@@ -11407,14 +11900,14 @@ attachSortable(list, {
   onReorder: ({ from, to }) => { /* persist order */ },
 });
 
-/* Affordance: .k3-drag-handle + data-k3-icon="drag_indicator"
-   Chips: auto via &lt;k3-chip-set sortable&gt; → drag-handle + drop slot */
+/* Affordance: .k3-drag-handle + data-k3-icon=&quot;drag_indicator&quot;
+   Chips: auto via <k3-chip-set sortable> → drag-handle + drop slot */
 
 attachDraggable(src, { type: 'k3/demo', data: { id: 1 } });
 attachDroppable(zone, {
   accept: ['k3/demo'],
   onDrop: ({ payload }) => console.log(payload.data),
-});</code></pre>
+});" ></k3-codeblock>
         </article>
 
         <!-- SCROLLBAR (utilities) -->
@@ -11452,7 +11945,7 @@ attachDroppable(zone, {
                 k3ui.css.
               </p>
             </header>
-            <pre class="code-block"><code>/* Shadow custom element */
+            <k3-codeblock language="js" code="/* Shadow custom element */
 import { css } from 'lit';
 import { edgeScrollbarStyles } from 'k3ui'; // or '../../core/index.js'
 
@@ -11467,18 +11960,18 @@ static styles = [
 ];
 
 // render:
-// &lt;div class="body k3-scroll"&gt;
-//   &lt;div class="body-inner"&gt;…content…&lt;/div&gt;
-// &lt;/div&gt;
+// <div class=&quot;body k3-scroll&quot;>
+//   <div class=&quot;body-inner&quot;>…content…</div>
+// </div>
 
 /* Light DOM / playground */
-&lt;div class="k3-scroll" style="max-height: 12rem"&gt;…&lt;/div&gt;
+<div class=&quot;k3-scroll&quot; style=&quot;max-height: 12rem&quot;>…</div>
 
 /* Optional tokens on the scrollport */
 .k3-scroll {
   --k3-scroll-size: 0.5rem;          /* thicker (side sheet) */
   --k3-scroll-track-inset: 0.5rem;   /* clear rounded corners */
-}</code></pre>
+}" ></k3-codeblock>
           </div>
 
           <div class="surface stack gap-md">
@@ -11709,10 +12202,10 @@ static styles = [
             </p>
           </header>
           <div class="surface stack gap-lg">
-            <pre class="code-block"><code>.badge-hot {
+            <k3-codeblock language="css" code=".badge-hot {
   background: var(--k3-ref-palette-deep-orange-500);
   color: #fff;
-}</code></pre>
+}" ></k3-codeblock>
             <p class="hint" data-i18n="doc.color-lab.copy-hint">
               Click a swatch to copy HEX · Alt+click to copy the CSS variable.
             </p>

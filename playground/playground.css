@@ -388,7 +388,12 @@ html:has(.app[data-nav='rail']) {
   min-width: 0;
   min-height: 0;
   height: 100vh;
-  overflow: hidden;
+  /*
+   * Visible — modal expanded rail has end-side radii; the app bar surface
+   * bleeds under that curve (see .shell-appbar below). Scroll stays on
+   * .shell-scroll (min-height: 0 + overflow).
+   */
+  overflow: visible;
   display: flex;
   flex-direction: column;
 }
@@ -787,6 +792,26 @@ k3-top-app-bar.shell-appbar {
 .shell-appbar::part(container) {
   overflow: visible;
 }
+
+/*
+ * Modal rail — bleed the app-bar surface under the live rail width so the
+ * end-side radius never reveals a hard bar edge (compact ↔ expanded spring).
+ * --k3-shell-rail-inline-size tracks getBoundingClientRect via ResizeObserver.
+ */
+.app[data-nav='rail']:has(#nav-rail[layout='modal']) .shell-appbar::part(container) {
+  --k3-shell-appbar-modal-bleed: var(--k3-shell-rail-inline-size, 6.5rem);
+  margin-inline-start: calc(-1 * var(--k3-shell-appbar-modal-bleed));
+  width: calc(100% + var(--k3-shell-appbar-modal-bleed));
+  box-sizing: border-box;
+  padding-inline-start: calc(0.25rem + var(--k3-shell-appbar-modal-bleed));
+  transition:
+    margin-inline-start var(--k3-sys-motion-duration-spatial-default, 500ms)
+      var(--k3-sys-motion-easing-spatial, var(--k3-sys-motion-easing-expressive-spatial)),
+    padding-inline-start var(--k3-sys-motion-duration-spatial-default, 500ms)
+      var(--k3-sys-motion-easing-spatial, var(--k3-sys-motion-easing-expressive-spatial)),
+    width var(--k3-sys-motion-duration-spatial-default, 500ms)
+      var(--k3-sys-motion-easing-spatial, var(--k3-sys-motion-easing-expressive-spatial));
+}
 .shell-appbar::part(titles) {
   min-width: 0;
   width: 100%;
@@ -811,6 +836,10 @@ k3-top-app-bar.shell-appbar {
 /* App bar — locale split + settings */
 .shell-split {
   flex-shrink: 0;
+}
+/* Long locale list — keep menu within the viewport (k3-menu list already scrolls) */
+#locale-menu::part(menu) {
+  --k3-menu-max-w: 14rem;
 }
 .shell-appbar-actions {
   display: inline-flex;
@@ -1458,6 +1487,137 @@ k3-avatar [slot='badge'].ms {
   color: var(--k3-sys-color-on-surface-variant);
   font-size: var(--k3-sys-typescale-body-large-size);
   line-height: 1.5;
+}
+
+/* —— Home · Material.io-style ambient shapes (full shell surface, not container) —— */
+.home-hero {
+  margin-bottom: 2rem;
+  padding-block: clamp(1.5rem, 4vw, 3rem) 1.25rem;
+}
+.home-hero .hero-title {
+  font-size: clamp(2.75rem, 6vw, 4.25rem);
+  letter-spacing: -0.02em;
+}
+
+.product-switch {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: var(--k3-sys-spacing-space400, 1.5rem);
+}
+.product-switch k3-button-group {
+  display: block;
+  width: min(100%, 28rem);
+}
+.product-switch k3-button-group::part(container) {
+  width: 100%;
+}
+.product-switch k3-button {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  justify-content: center;
+}
+.home-ambient {
+  /* Fixed full-viewport surface (not .k3-container, does not scroll) */
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      80% 55% at 85% -10%,
+      color-mix(in srgb, var(--k3-sys-color-primary-container) 48%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      70% 50% at -5% 28%,
+      color-mix(in srgb, var(--k3-sys-color-tertiary-container) 40%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      60% 45% at 55% 105%,
+      color-mix(in srgb, var(--k3-sys-color-secondary-container) 36%, transparent),
+      transparent 70%
+    );
+}
+/* Keep clear of the sticky rail; bar mode uses full width */
+html:has(.app[data-nav='rail']) .home-ambient {
+  left: var(--doc-rail);
+}
+.home-ambient[hidden] {
+  display: none !important;
+}
+.shell-scroll > .main {
+  z-index: 1;
+}
+.home-ambient__shape {
+  position: absolute;
+  display: block;
+  width: min(78vmin, 36rem);
+  height: min(78vmin, 36rem);
+  opacity: 0.62;
+  will-change: transform;
+  transform-origin: 50% 50%;
+  animation: home-ambient-spin var(--home-spin-dur, 72s) linear infinite;
+  animation-direction: var(--home-spin-dir, normal);
+}
+.home-ambient__shape path {
+  fill: currentColor;
+}
+/* 4 pale tonals — SoftBurst · Cookie · Pillule · Puffy */
+.home-ambient__shape--a {
+  top: -18%;
+  right: -12%;
+  width: min(90vmin, 42rem);
+  height: min(90vmin, 42rem);
+  color: color-mix(in srgb, var(--k3-sys-color-primary) 28%, var(--k3-sys-color-primary-container));
+  --home-spin-dur: 96s;
+  opacity: 0.68;
+}
+.home-ambient__shape--b {
+  top: 8%;
+  left: -22%;
+  width: min(74vmin, 34rem);
+  height: min(74vmin, 34rem);
+  color: color-mix(in srgb, var(--k3-sys-color-tertiary) 26%, var(--k3-sys-color-tertiary-container));
+  --home-spin-dur: 78s;
+  --home-spin-dir: reverse;
+  opacity: 0.56;
+}
+.home-ambient__shape--c {
+  /* Pillule — elongated Material Pill */
+  top: 52%;
+  right: -6%;
+  width: min(78vmin, 40rem);
+  height: min(30vmin, 15rem);
+  color: color-mix(in srgb, var(--k3-sys-color-secondary) 24%, var(--k3-sys-color-secondary-container));
+  --home-spin-dur: 110s;
+  opacity: 0.5;
+}
+.home-ambient__shape--d {
+  bottom: -16%;
+  left: 18%;
+  width: min(72vmin, 34rem);
+  height: min(72vmin, 34rem);
+  color: color-mix(in srgb, var(--k3-sys-color-primary) 22%, var(--k3-sys-color-primary-fixed, var(--k3-sys-color-primary-container)));
+  --home-spin-dur: 88s;
+  --home-spin-dir: reverse;
+  opacity: 0.52;
+}
+@keyframes home-ambient-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-ambient__shape {
+    animation: none;
+  }
+}
+html[data-k3-reduce-motion] .home-ambient__shape {
+  animation: none;
 }
 
 .hero-controls {
@@ -2154,33 +2314,49 @@ k3-avatar [slot='badge'].ms {
   align-items: flex-start;
   justify-content: start; /* logical: start = left LTR, right RTL */
 }
-/* Nav-rail demos — single frame, no double border/padding fight */
+/* Nav-rail lab — stage chrome follows layout/size (same morph as shell) */
+.nav-rail-lab {
+  display: grid;
+  gap: var(--k3-sys-spacing-space300);
+  align-items: start;
+}
+@media (min-width: 840px) {
+  .nav-rail-lab {
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 18rem);
+  }
+}
+.nav-rail-lab-preview {
+  display: grid;
+  align-content: start;
+  min-inline-size: 0;
+}
+.nav-rail-lab-controls {
+  display: grid;
+  gap: var(--k3-sys-spacing-space200);
+}
+.nav-rail-lab-controls k3-select {
+  inline-size: 100%;
+}
+/*
+ * Same stage frame for compact + expanded — no padding jump.
+ * Do NOT set --k3-nav-rail-bg / --k3-nav-rail-radius here: they would override
+ * modal (surface-container + end radii) and make it look like standard.
+ */
 .surface-rail {
-  --k3-nav-rail-bg: transparent;
-  --k3-nav-rail-divider: none;
-  --k3-nav-rail-radius: 0;
   box-sizing: border-box;
   width: fit-content;
-  min-height: 20rem;
-  padding: 0;
-  overflow: hidden;
+  max-width: 100%;
+  min-height: 32rem; /* ~+1 compact destination vs 28rem */
+  padding: 0.75rem;
+  overflow: visible;
   border-radius: var(--k3-sys-shape-corner-extra-large);
-  background: var(--k3-sys-color-surface);
-  box-shadow: inset 0 0 0 1px var(--k3-sys-color-outline-variant);
+  background: var(--k3-sys-color-surface-container-low);
+  box-shadow: none;
 }
 .surface-rail k3-nav-rail {
   height: 100%;
-  min-height: 20rem;
+  min-height: 32rem;
   display: block;
-}
-.surface-rail-modal {
-  --k3-nav-rail-bg: var(--k3-sys-color-surface-container);
-  background: var(--k3-sys-color-surface-container-low);
-  padding: 0.75rem;
-  box-shadow: none;
-}
-.surface-rail-large {
-  min-width: 16rem;
 }
 
 /* Doc API tables — Specs / Properties / Methods / … via <k3-table> */
@@ -2725,6 +2901,28 @@ html[data-k3-color-mode='dark'] .demo-frame {
   font-size: var(--k3-sys-typescale-body-small-size);
 }
 
+/* Buttons Group · Arrows — live NATO phonetic value */
+.arrow-val-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--k3-sys-spacing-space200, 0.5rem);
+  margin: 0.75rem 0 0;
+}
+.arrow-val-label {
+  color: var(--k3-sys-color-on-surface-variant);
+  font-size: var(--k3-sys-typescale-title-medium-size, 1rem);
+  font-weight: var(--k3-sys-typescale-title-medium-weight, 500);
+}
+.arrow-val {
+  color: var(--k3-sys-color-on-surface);
+  font-size: var(--k3-sys-typescale-headline-small-size, 1.5rem);
+  font-weight: var(--k3-sys-typescale-headline-small-weight, 400);
+  letter-spacing: var(--k3-sys-typescale-headline-small-tracking, 0);
+  line-height: var(--k3-sys-typescale-headline-small-line-height, 2rem);
+  font-variant-numeric: tabular-nums;
+  min-inline-size: 8ch;
+}
+
 /* Meet-style hang-up FAB — error role (call end) */
 .toolbar-demo-hangup {
   --k3-fab-bg: var(--k3-sys-color-error);
@@ -3144,22 +3342,6 @@ k3-avatar [slot='badge'].ms {
   background: var(--k3-sys-color-primary-container);
   color: var(--k3-sys-color-on-primary-container);
 }
-.code-block {
-  margin: 0;
-  padding: var(--k3-sys-spacing-space200, 1rem);
-  border-radius: var(--k3-sys-shape-corner-medium, 0.75rem);
-  background: var(--k3-sys-color-surface-container-lowest);
-  overflow: auto;
-  font-size: 0.8125rem;
-  line-height: 1.45;
-}
-.code-block code {
-  padding: 0;
-  background: transparent;
-  font-size: inherit;
-  white-space: pre;
-}
-
 /* Usage — HTML / CSS / JS tabs + copy (before Specs) */
 .doc-usage {
   margin-block-start: 1.5rem;
@@ -3193,8 +3375,9 @@ k3-avatar [slot='badge'].ms {
   outline: 2px solid var(--k3-sys-color-secondary);
   outline-offset: 2px;
 }
-.code-sample .code-block {
-  background: var(--k3-sys-color-surface-container-highest);
+.code-sample k3-codeblock {
+  display: block;
+  width: 100%;
 }
 
 /* Slider playground — H | V frames + controls */
@@ -3445,45 +3628,6 @@ k3-avatar [slot='badge'].ms {
   width: 100%;
   min-height: 28rem;
   box-sizing: border-box;
-}
-
-/* ─── Home social (k3-button-card grid) ─── */
-.home-social {
-  margin-top: var(--k3-sys-spacing-space800, 4rem);
-  padding-top: var(--k3-sys-spacing-space600, 3rem);
-  border-top: 1px solid var(--k3-sys-color-outline-variant);
-  width: 100%;
-}
-
-.home-social .section-head.sub {
-  margin-bottom: var(--k3-sys-spacing-space300, 1.5rem);
-}
-
-.home-social-grid {
-  align-items: stretch;
-  overflow: visible;
-}
-
-.home-social-card {
-  grid-column: span 6;
-}
-
-@media (min-width: 600px) {
-  .home-social-card {
-    grid-column: span 4;
-  }
-}
-
-@media (min-width: 905px) {
-  .home-social-card {
-    grid-column: span 3;
-  }
-}
-
-.home-social-card svg[slot='icon'] {
-  display: block;
-  width: 1.375rem;
-  height: 1.375rem;
 }
 
 /* ─── Sponsors (Chakra / Open Collective–style) ─── */
@@ -4787,4 +4931,259 @@ k3-fab .ms-fill-icon {
   color: var(--k3-sys-color-on-surface-variant);
   font-size: var(--k3-sys-typescale-body-small-size, 0.75rem);
   line-height: var(--k3-sys-typescale-body-small-line-height, 1rem);
+}
+
+/* Cover flow demos: toolbar + full-width stage */
+.coverflow-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space200, 1rem);
+  margin-block-end: var(--k3-sys-spacing-space300, 1.5rem);
+}
+.coverflow-stage {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+.coverflow-stage > k3-coverflow {
+  inline-size: 100%;
+}
+
+/* ── Home: Lighthouse gauges (playground/lighthouse.ts) ─────────────── */
+.home-lighthouse-root {
+  /* Space kept before the module renders (no shift below) */
+  min-block-size: 36rem;
+  margin-block: 3rem 1rem;
+}
+.home-lighthouse {
+  --lh-poor: #f33d3d;
+  --lh-average: #ffa400;
+  --lh-good: #0cce6b;
+  display: grid;
+  justify-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+.home-lighthouse .section-head {
+  max-inline-size: 60rem;
+}
+.home-lighthouse .lh-date {
+  margin-block-start: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--k3-sys-color-on-surface-variant);
+}
+.home-lighthouse .lh-tabs {
+  inline-size: min(100%, 18rem);
+}
+.lh-gauges {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1rem, 4vw, 4rem);
+  inline-size: 100%;
+  max-inline-size: 72rem;
+}
+@media (max-width: 720px) {
+  .lh-gauges {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.lh-gauge {
+  justify-self: center;
+  inline-size: min(100%, 14rem);
+  aspect-ratio: 1;
+}
+.lh-gauge svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+.lh-frame {
+  fill: var(--k3-sys-color-surface-container, #f3edf7);
+}
+.lh-track,
+.lh-progress {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+.lh-track {
+  stroke: color-mix(in srgb, var(--k3-sys-color-on-surface, #1d1b20) 9%, transparent);
+}
+.lh-progress {
+  stroke: var(--k3-sys-color-outline, #79747e);
+  transition: stroke 300ms linear;
+}
+.lh-gauge[data-band='poor'] .lh-progress {
+  stroke: var(--lh-poor);
+}
+.lh-gauge[data-band='average'] .lh-progress {
+  stroke: var(--lh-average);
+}
+.lh-gauge[data-band='good'] .lh-progress {
+  stroke: var(--lh-good);
+}
+.lh-gauge.is-loading .lh-progress {
+  stroke: var(--k3-sys-color-primary, #6750a4);
+  stroke-dasharray: 18 200;
+  animation: lh-scan 1.4s linear infinite;
+}
+@keyframes lh-scan {
+  from {
+    stroke-dashoffset: 18;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+.lh-label {
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  fill: var(--k3-sys-color-on-surface, #1d1b20);
+}
+.lh-icon {
+  fill: var(--k3-sys-color-on-surface-variant, #49454f);
+}
+.lh-value {
+  fill: var(--k3-sys-color-on-surface, #1d1b20);
+}
+.lh-num {
+  font-size: 21px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.lh-pct {
+  font-size: 7px;
+  fill: var(--k3-sys-color-on-surface-variant, #49454f);
+}
+.lh-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lh-legend li {
+  min-inline-size: 5.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--k3-sys-shape-corner-small, 8px);
+  font-weight: 500;
+  color: #000;
+}
+.lh-legend [data-band='poor'] {
+  background: var(--lh-poor);
+}
+.lh-legend [data-band='average'] {
+  background: var(--lh-average);
+}
+.lh-legend [data-band='good'] {
+  background: var(--lh-good);
+}
+.lh-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.5rem 1.5rem;
+  inline-size: 100%;
+  max-inline-size: 64rem;
+  text-align: start;
+}
+.lh-metric {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.5rem;
+  align-items: center;
+  padding-block: 0.5rem;
+  border-block-end: 1px solid var(--k3-sys-color-outline-variant, #cac4d0);
+}
+.lh-metric-dot {
+  grid-row: span 2;
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+  border-radius: 50%;
+  background: var(--k3-sys-color-outline, #79747e);
+}
+.lh-metric[data-band='poor'] .lh-metric-dot {
+  background: var(--lh-poor);
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.lh-metric[data-band='average'] .lh-metric-dot {
+  background: var(--lh-average);
+  border-radius: 2px;
+}
+.lh-metric[data-band='good'] .lh-metric-dot {
+  background: var(--lh-good);
+}
+.lh-metric-name {
+  font-size: 0.8125rem;
+  color: var(--k3-sys-color-on-surface-variant);
+}
+.lh-metric-value {
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+.lh-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+.lh-report {
+  color: var(--k3-sys-color-primary);
+  font-weight: 500;
+}
+.lh-status {
+  min-block-size: 1.5em;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--k3-sys-color-on-surface-variant);
+}
+.lh-status.is-error {
+  color: var(--k3-sys-color-error);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lh-gauge.is-loading .lh-progress {
+    animation-duration: 4s;
+  }
+}
+
+/* Cover flow — vertical demo: landscape covers */
+.coverflow-vertical-demo {
+  --k3-coverflow-item-width: 18rem;
+  --k3-coverflow-item-height: 11rem;
+  --k3-coverflow-height: 32rem;
+}
+@media (max-width: 600px) {
+  .coverflow-vertical-demo {
+    --k3-coverflow-item-width: 12.5rem;
+    --k3-coverflow-item-height: 8rem;
+    --k3-coverflow-height: 26rem;
+  }
+}
+
+/* Cover flow — slide size when the toolbar effect is Slide */
+.coverflow-slide-demo {
+  --k3-coverflow-item-width: 10rem;
+  --k3-coverflow-item-height: 10rem;
+}
+.coverflow-slide-demo.coverflow-vertical-demo {
+  --k3-coverflow-item-width: 14rem;
+  --k3-coverflow-item-height: 8rem;
+  --k3-coverflow-height: 36rem;
+}
+@media (max-width: 600px) {
+  .coverflow-slide-demo {
+    --k3-coverflow-item-width: 7.5rem;
+    --k3-coverflow-item-height: 7.5rem;
+  }
+  .coverflow-slide-demo.coverflow-vertical-demo {
+    --k3-coverflow-item-width: 11rem;
+    --k3-coverflow-item-height: 6.5rem;
+    --k3-coverflow-height: 28rem;
+  }
 }
