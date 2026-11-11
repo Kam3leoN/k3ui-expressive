@@ -31,6 +31,7 @@ const PAGE_TAGS: Record<string, string[]> = {
   'date-picker': ['k3-date-picker'],
   'mood-calendar': ['k3-mood-calendar'],
   'time-picker': ['k3-time-picker'],
+  'buttons-icon': ['k3-icon-button'],
   /* extend as pages leave PENDING_PAGES */
 };
 
@@ -60,7 +61,8 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'slider' &&
     id !== 'date-picker' &&
     id !== 'mood-calendar' &&
-    id !== 'time-picker',
+    id !== 'time-picker' &&
+    id !== 'buttons-icon',
 );
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');

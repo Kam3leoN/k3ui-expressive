@@ -111,10 +111,12 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['disabled', 'boolean', 'false', 'Disables press'],
       ['label', 'string', "''", 'Accessible name (required — action, not glyph)'],
       ['value', 'string', "''", 'Value for groups / forms'],
+      ['type', "'button'|'submit'|'reset'", 'button', 'Native button type'],
+      ['radio', 'boolean', 'false', 'data-radio — exclusive in groups'],
     ],
     events: [
-      ['k3-click', 'selected', 'Activated'],
-      ['k3-change', 'selected · value', 'Toggle selection changed'],
+      ['k3-click', '{ selected }', 'Activated'],
+      ['k3-change', '{ selected, value }', 'Toggle selection changed'],
     ],
     methods: [
       ['select', '() => void', 'Select without k3-change'],

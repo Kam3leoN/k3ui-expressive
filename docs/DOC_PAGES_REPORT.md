@@ -33,10 +33,11 @@
 | `date-picker` | `docs(date-picker): gabarit complet` | Examples + States + Versions |
 | `mood-calendar` | `docs(mood-calendar): gabarit complet` | Examples (demo) |
 | `time-picker` | `docs(time-picker): gabarit complet` | Examples + States + Versions |
+| `buttons-icon` | `docs(buttons-icon): gabarit complet` | Examples + States |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — lot Inputs terminé. Prochain : Buttons (`buttons-icon`, …), puis Actions…
+Voir `PENDING_PAGES` — lot Buttons en cours (`buttons-grid`, …).
 
 ## Décisions humaines
 

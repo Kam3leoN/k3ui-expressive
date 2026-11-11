@@ -53,12 +53,21 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: "Pending gabarit migration" },
   },
   'buttons-icon': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['--k3-icon-btn-size', 'size ladder', 'Host height / painted width'],
+      ['variant colors', 'sys roles', 'filled · tonal · outlined · standard'],
+    ],
+    keyboard: [
+      ['Enter / Space', 'Activate / toggle'],
+      ['Tab', 'Move focus'],
+    ],
+    focus: 'doc.icon-button.focus',
+    motion: [
+      ['Press', 'Corner morph + state layer', 'Instant when reduced'],
+      ['Select', 'Shape morph round ↔ square', 'Respects reduced motion'],
+    ],
+    a11y: 'doc.icon-button.a11y',
+    versions: { na: 'Single CE — sizes/shapes/widths are scale options' },
   },
   'buttons-menu': {
     theming: { na: "Pending gabarit migration" },

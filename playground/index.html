@@ -1141,9 +1141,13 @@ import 'k3ux/holo-effects.css';
               glyph, and keep a ≥48dp touch target on extra-small and small sizes.
             </p>
           </header>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.icon-button.section.variants">Variants</h2>
+              <h3 data-i18n="doc.icon-button.option.variant">variant</h3>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--icon-button">
@@ -1209,7 +1213,7 @@ import 'k3ux/holo-effects.css';
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.icon-button.section.sizes">Sizes</h2>
+              <h3 data-i18n="doc.icon-button.option.size">size</h3>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--icon-button items-end">
@@ -1283,7 +1287,7 @@ import 'k3ux/holo-effects.css';
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.icon-button.section.shapes">Shapes</h2>
+              <h3 data-i18n="doc.icon-button.option.shape">shape</h3>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--icon-button">
@@ -1311,7 +1315,7 @@ import 'k3ux/holo-effects.css';
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.icon-button.section.widths">Widths</h2>
+              <h3 data-i18n="doc.icon-button.option.width">width</h3>
             </header>
             <div class="demo-block">
               <!-- Rows A–E (sizes) × cols 1–3 (default / narrow / wide) — m3.material.io -->
@@ -1437,7 +1441,7 @@ import 'k3ux/holo-effects.css';
             </div>
 
             <header class="section-head sub">
-              <h2 data-i18n="doc.icon-button.section.toggle">Toggle</h2>
+              <h3 data-i18n="doc.icon-button.option.toggle">toggle</h3>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--icon-button">
@@ -1541,6 +1545,64 @@ import 'k3ux/holo-effects.css';
                 <li>
                   <span class="pill-num">4</span
                   ><span class="variant-label">outlined · wide</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-icon-button label="Disabled" variant="filled" disabled
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"></span
+                    ></k3-icon-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-icon-button label="Selected" variant="tonal" toggle selected
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"></span
+                    ></k3-icon-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-icon-button label="Toggle off" variant="outlined" toggle
+                      ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"></span
+                    ></k3-icon-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.icon-button.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.icon-button.state.selected"
+                    >selected</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="doc.icon-button.state.toggle"
+                    >toggle</span
+                  >
                 </li>
               </ol>
             </div>
