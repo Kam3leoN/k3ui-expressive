@@ -676,4 +676,14 @@ export const COMPONENT_SPECS: Record<string, SpecRow[]> = {
     { token: 'attrs', value: 'size · line-height · weight · tracking' },
     { token: 'emphasized', value: 'Expressive weight steps' },
   ],
+  grid: [
+    { token: 'columns', value: '4 · 8 · 12 by breakpoint' },
+    { token: 'gutter', value: 'space100 · 8 dp' },
+    { token: 'helpers', value: '.k3-layout-grid · .k3-col-span-* · .k3-demo-cols-*' },
+  ],
+  'material-symbols': [
+    { token: 'markup', value: 'data-k3-icon + notranslate / translate="no"' },
+    { token: 'fonts', value: 'Material Symbols New (variable)' },
+    { token: 'axes', value: 'FILL · wght · GRAD · opsz' },
+  ],
 };

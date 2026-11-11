@@ -135,7 +135,13 @@ export function mountDocPage(page: HTMLElement, pageId: string): void {
     }
   }
 
+  /* Styles token pages already render Specs inside `.token-scale` */
+  const skipSpecs = !!page.querySelector(
+    '.token-scale k3-table, .token-scale .doc-table-title',
+  );
+
   for (const s of docTablesForPage(pageId)) {
+    if (s.id === 'specs' && skipSpecs) continue;
     if (s.id === 'theming' || s.id === 'keyboard' || s.id === 'motion') {
       if (host.querySelector(`[data-doc-table="${s.id}"]`)) continue;
     }

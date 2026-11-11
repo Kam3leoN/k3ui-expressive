@@ -86,8 +86,9 @@ const CATALOG_IDS = DOC_COMPONENTS.filter(
 ).map((c) => c.id);
 
 /**
- * Pages not yet migrated to the full gabarit. Remove an id when its page ships.
- * Empty → étape D (clôture).
+ * Pages not yet migrated to the full gabarit.
+ * Intentionally **not** emptied at étape D: remaining ids are `product: k3ux`
+ * (sources removed from the k3ui tree / UX lot). Keep this export for the garde-fou.
  */
 export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
   (id) =>

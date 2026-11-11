@@ -2036,6 +2036,55 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['m2PaletteHex(name, tone)', 'string|undefined', 'Raw hex swatch'],
     ],
   },
+  elevation: {
+    properties: [
+      ['.k3-elevation-0…5', 'CSS class', '—', 'Shadow stack + surface tint'],
+      ['--k3-sys-elevation-level0…5', 'CSS custom property', '—', 'box-shadow token'],
+    ],
+  },
+  grid: {
+    properties: [
+      ['.k3-layout-grid', 'CSS class', '—', 'Column tracks + gutter'],
+      ['.k3-container / .k3-container-none', 'CSS class', '—', 'Body max vs full-bleed (≥905)'],
+      ['.k3-col-span-* / .k3-col-full', 'CSS class', '—', 'Column spans'],
+      ['.k3-demo-cols-2|3|4', 'CSS class', '—', 'Equal share of columns'],
+    ],
+  },
+  motion: {
+    properties: [
+      ['--k3-sys-motion-duration-*', 'CSS custom property', '—', 'Spatial / effects durations'],
+      ['--k3-sys-motion-easing-*', 'CSS custom property', '—', 'Cubic-bezier / spring easings'],
+      ['data-k3-reduce-motion', 'HTML attribute', '—', 'Force reduced motion on host'],
+    ],
+  },
+  shapes: {
+    properties: [
+      ['--k3-sys-shape-corner-*', 'CSS custom property', '—', 'none → full corner roles'],
+      ['.k3-shape-*', 'CSS class', '—', 'Unit SVG shape helpers'],
+    ],
+  },
+  spacing: {
+    properties: [
+      ['--k3-sys-spacing-space*', 'CSS custom property', '—', 'space0…900 (space100 = 8dp)'],
+      ['.k3-p-* / .k3-m-* / .k3-gap-*', 'CSS class', '—', 'Padding / margin / gap helpers'],
+      ['--k3-layout-gutter', 'CSS custom property', 'space100', 'Inter-column gap'],
+    ],
+  },
+  typography: {
+    properties: [
+      ['.k3-{role}', 'CSS class', '—', 'Type scale role (display→label)'],
+      ['.k3-{role}-emphasized', 'CSS class', '—', 'Emphasized weight step'],
+      ['--k3-sys-typescale-*', 'CSS custom property', '—', 'size · line-height · weight · tracking'],
+    ],
+  },
+  'material-symbols': {
+    properties: [
+      ['data-k3-icon', 'string', '—', 'Ligature name (Material Symbols snake_case)'],
+      ['FILL / wght / GRAD / opsz', 'font axes', '0 / 400 / 0 / 48', 'Variable font axes'],
+    ],
+    slots: { na: 'Ligature markup — no custom element slots' },
+    events: { na: 'Browser page — click copies markup; no CE events' },
+  },
 };
 
 /** Global Init table (also shown on home). */

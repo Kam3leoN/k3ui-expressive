@@ -63,4 +63,5 @@ type DocSections = {
 
 ## Reprise
 
-`PENDING_PAGES` dans `tests/unit/doc-pages.test.ts` = pages pas encore migrées. Vide → étape D.
+`PENDING_PAGES` dans `tests/unit/doc-pages.test.ts` = pages pas encore migrées.
+Étape D (clôture k3ui) : Styles/Resources + rapport — **PENDING reste non vide** pour les pages `product: k3ux` (ne pas supprimer l’export).
