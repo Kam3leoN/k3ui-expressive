@@ -229,12 +229,21 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: 'Single layout — cells in a row' },
   },
   'select': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['max-width', '22rem', 'Host max width'],
+      ['chevron', 'on-surface-variant', 'Trailing icon color'],
+      ['panel z-index', '50', 'Dropdown stacking'],
+    ],
+    keyboard: [
+      ['ArrowDown / Enter / Space', 'Open menu'],
+      ['Escape', 'Close when open'],
+    ],
+    focus: 'doc.select.focus',
+    motion: [
+      ['Open / close', 'runOpenClose + chevron rotate', 'Respects reduced motion'],
+    ],
+    a11y: 'doc.select.a11y',
+    versions: { na: 'Single exposed-dropdown layout' },
   },
   'checkbox': {
     theming: { na: "Pending gabarit migration" },

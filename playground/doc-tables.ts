@@ -1288,6 +1288,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
   select: {
     properties: [
       ['label', 'string', "''", 'Passed to k3-text-field trigger'],
+      ['name', 'string', "''", 'Form name'],
       ['value', 'string', "''", 'Selected option value'],
       ['variant', "'outlined'|'filled'|'standard'", 'outlined', 'Trigger = text-field chrome'],
       ['placeholder', 'string', "''", 'Empty-state text'],
@@ -1297,8 +1298,12 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['error', 'string', "''", 'Supporting error text'],
       ['open', 'boolean', 'false', 'Menu open (reflect)'],
     ],
-    methods: [['syncSelection', '() => void', 'Re-sync checks from value']],
-    events: [['k3-change', 'value', 'Selection changed']],
+    methods: [
+      ['syncSelection', '() => void', 'Re-sync checks from value'],
+      ['show', '() => Promise<boolean>', 'Open menu'],
+      ['hide', '(source?) => Promise<boolean>', 'Close menu'],
+    ],
+    events: [['k3-change', '{ value }', 'Selection changed']],
     slots: [['(default)', 'k3-menu-item options']],
     'css-parts': [
       ['container', 'k3-text-field trigger'],

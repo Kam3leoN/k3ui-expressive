@@ -22,10 +22,11 @@
 | `textarea` | `docs(textarea): gabarit complet` | Examples (variant, rows) + States |
 | `field-group` | `docs(field-group): gabarit complet` | Examples (label) + States |
 | `pin-field` | `docs(pin-field): gabarit complet` | Examples (variant, mask) + States |
+| `select` | `docs(select): gabarit complet` | Examples (variant) + States |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — prochain : `select`, `checkbox`, `radio`, …
+Voir `PENDING_PAGES` — prochain : `checkbox`, `radio`, `switch`, …
 
 ## Décisions humaines
 

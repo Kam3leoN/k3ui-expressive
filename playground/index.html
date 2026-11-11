@@ -4386,7 +4386,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Select exposes a dropdown of predefined options behind a text-field-style trigger. Prefer it over free text when the value set is closed. Keep option labels scannable, support keyboard open/close, and match outlined, filled, or standard to the rest of the form.
             </p>
           </header>
-          <div class="surface surface-flush stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.select.option.variant">variant</h3>
+              <p data-i18n="doc.select.option.variant.desc">
+                Trigger chrome matches k3-text-field — outlined · filled · standard.
+              </p>
+            </header>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
@@ -4409,7 +4418,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </ol>
             <div class="grid-3">
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.outlined">Outlined</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.outlined">Outlined</h3></header>
                 <k3-select data-i18n-label="playground.demo.select.label" value="2" variant="outlined">
                   <k3-menu-item value="1" data-i18n="playground.demo.select.item.1">Item 1</k3-menu-item>
                   <k3-menu-item value="2" data-i18n="playground.demo.select.item.2">Item 2</k3-menu-item>
@@ -4421,7 +4430,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </k3-select>
               </div>
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.filled">Filled</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.filled">Filled</h3></header>
                 <k3-select data-i18n-label="playground.demo.select.fruit.label" value="fruit" variant="filled">
                   <k3-menu-item value="fruit" data-i18n="playground.demo.select.fruit">Fruit</k3-menu-item>
                   <k3-menu-item value="veg" data-i18n="playground.demo.select.veg">Vegetables</k3-menu-item>
@@ -4429,13 +4438,56 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </k3-select>
               </div>
               <div class="stack gap-md">
-                <header class="section-head sub"><h2 data-i18n="playground.demo.variant.standard">Standard</h2></header>
+                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.standard">Standard</h3></header>
                 <k3-select data-i18n-label="playground.demo.select.region.label" value="eu" variant="standard">
                   <k3-menu-item value="eu" data-i18n="playground.demo.select.region.eu">Europe</k3-menu-item>
                   <k3-menu-item value="us" data-i18n="playground.demo.select.region.us">Americas</k3-menu-item>
                   <k3-menu-item value="apac" data-i18n="playground.demo.select.region.apac">Asia-Pacific</k3-menu-item>
                 </k3-select>
               </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-select label="Disabled" value="1" variant="outlined" disabled>
+                      <k3-menu-item value="1">One</k3-menu-item>
+                      <k3-menu-item value="2">Two</k3-menu-item>
+                    </k3-select>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-select label="City" variant="outlined" error="Required">
+                      <k3-menu-item value="a">Paris</k3-menu-item>
+                      <k3-menu-item value="b">Lyon</k3-menu-item>
+                    </k3-select>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.select.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.select.state.error">error</span>
+                </li>
+              </ol>
             </div>
           </div>
         </article>
