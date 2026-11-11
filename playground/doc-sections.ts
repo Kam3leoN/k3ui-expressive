@@ -37,12 +37,21 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: 'Single CE — no alternate layouts' },
   },
   'buttons-grid': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['--k3-btn-grid-gap', '2dp snapped', 'Cell gap (device-pixel snap)'],
+      ['--k3-btn-grid-size', '3×48 + gaps', 'Host / grid box'],
+    ],
+    keyboard: [
+      ['Arrow keys', 'Move between cells'],
+      ['Enter / Space', 'Select cell'],
+      ['Escape', 'Collapse FAB mode'],
+    ],
+    focus: 'doc.button-grid.focus',
+    motion: [
+      ['FAB expand', 'Grid reveal from centre', 'Forced pad when reduced motion'],
+    ],
+    a11y: 'doc.button-grid.a11y',
+    versions: 'doc.button-grid.versions.blurb',
   },
   'buttons-group': {
     theming: { na: "Pending gabarit migration" },

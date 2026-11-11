@@ -34,10 +34,11 @@
 | `mood-calendar` | `docs(mood-calendar): gabarit complet` | Examples (demo) |
 | `time-picker` | `docs(time-picker): gabarit complet` | Examples + States + Versions |
 | `buttons-icon` | `docs(buttons-icon): gabarit complet` | Examples + States |
+| `buttons-grid` | `docs(buttons-grid): gabarit complet` | Examples + Versions |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — lot Buttons en cours (`buttons-grid`, …).
+Voir `PENDING_PAGES` — lot Buttons : `buttons-group`, `buttons-menu`, `buttons-pad`, …
 
 ## Décisions humaines
 
