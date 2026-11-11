@@ -6459,7 +6459,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Dialogs focus attention on a decision or short task. Use basic centered dialogs for confirms; fullscreen only on compact widths under 600 dp, adapting back to basic on larger breakpoints. Keep titles short, actions clear, and elevate above navigation so the rail never covers the sheet.
             </p>
           </header>
-          <div class="surface stack gap-md">
+          <div class="surface stack gap-md" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.dialog.option.variant">variant</h3>
+              <p data-i18n="doc.dialog.option.variant.desc">
+                basic (centered) or fullscreen (compact &lt;600 dp, adaptive).
+              </p>
+            </header>
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span>
@@ -6514,6 +6523,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 </p>
               </div>
             </k3-dialog>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.dialog.versions.blurb">
+              basic = centered modal. fullscreen = edge-to-edge under 600 dp; with adaptive
+              (default) it becomes basic on larger screens. Set adaptive=&quot;false&quot; to keep
+              fullscreen at all breakpoints.
+            </p>
           </div>
         </article>
 

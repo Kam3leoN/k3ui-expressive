@@ -16,11 +16,13 @@
 
 | Page | Commit message | Notes |
 | --- | --- | --- |
-| `buttons` | `docs(buttons): gabarit complet` | Examples (shape/variant/size) + States ; DOC_SECTIONS remplies |
+| `buttons` | `docs(buttons): gabarit complet` | Examples (shape/variant/size) + States |
+| `text-field` | `docs(text-field): gabarit complet` | Examples (variant) + States |
+| `dialog` | `docs(dialog): gabarit complet` | Examples (variant) + Versions |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` dans `tests/unit/doc-pages.test.ts` (90 ids restants — prochaines : `text-field`, `dialog`).
+Voir `PENDING_PAGES` (88 ids) — prochain lot Inputs : `textarea`, `field-group`, `pin-field`, …
 
 ## Décisions humaines
 

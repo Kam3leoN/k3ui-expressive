@@ -367,12 +367,21 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: "Pending gabarit migration" },
   },
   'dialog': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['--k3-sys-shape-corner-extra-large', '28dp', 'Basic panel radius'],
+      ['--k3-sys-elevation-level3', 'level3', 'Panel shadow'],
+    ],
+    keyboard: [
+      ['Escape', 'Dismiss (close-start cancelable)'],
+      ['Tab', 'Focus trap inside panel'],
+    ],
+    focus: 'doc.dialog.focus',
+    motion: [
+      ['Open', 'enterScaleY / dialog spring', 'Instant when reduced'],
+      ['Close', 'Reverse enter + scrim fade', 'Instant when reduced'],
+    ],
+    a11y: 'doc.dialog.a11y',
+    versions: 'doc.dialog.versions.blurb',
   },
   'tooltip': {
     theming: { na: "Pending gabarit migration" },
