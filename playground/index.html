@@ -4574,9 +4574,15 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               to nudge the value.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="playground.sizes.title">Expressive sizes</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.counter.option.size">size</h3>
+              <p data-i18n="doc.counter.option.size.desc">
+                Expressive ladder XS–XL — circle diameter matches nearby controls.
+              </p>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--cases items-end" data-demo-enhance="off">
@@ -4639,7 +4645,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </ol>
             </div>
             <header class="section-head sub">
-              <h2>Basic</h2>
+              <h3 data-i18n="doc.counter.option.step">step / bounds</h3>
+              <p data-i18n="doc.counter.option.step.desc">
+                Step, decimals, min/max, and allow-negative.
+              </p>
             </header>
             <div class="demo-block">
               <div class="demo-frame demo-frame--cases items-end" data-demo-enhance="off">
@@ -4676,12 +4685,6 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                     </div>
                     <span class="demo-case-num" aria-hidden="true">4</span>
                   </div>
-                  <div class="demo-case">
-                    <div class="demo-case-stage">
-                      <k3-counter value="3" min="0" max="9" disabled></k3-counter>
-                    </div>
-                    <span class="demo-case-num" aria-hidden="true">5</span>
-                  </div>
                 </div>
               </div>
               <ol class="variant-guide">
@@ -4689,7 +4692,45 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 <li><span class="pill-num">2</span><span class="variant-label">Decimals · step 0.5</span></li>
                 <li><span class="pill-num">3</span><span class="variant-label">Step · 10</span></li>
                 <li><span class="pill-num">4</span><span class="variant-label">Negatives · −20…20</span></li>
-                <li><span class="pill-num">5</span><span class="variant-label">Disabled</span></li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-counter value="3" min="0" max="9" disabled></k3-counter>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-counter value="5" min="0" max="9" readonly></k3-counter>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.counter.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="doc.counter.state.readonly"
+                    >readonly</span
+                  >
+                </li>
               </ol>
             </div>
           </div>

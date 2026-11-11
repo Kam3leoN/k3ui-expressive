@@ -319,12 +319,21 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: "Pending gabarit migration" },
   },
   'counter': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['size ladder', 'xs–xl', 'Circle diameter from CounterSpecs'],
+      ['primary / tonal', 'sys colors', '± pills vs value surface'],
+    ],
+    keyboard: [
+      ['ArrowUp / ArrowRight', 'Increment'],
+      ['ArrowDown / ArrowLeft', 'Decrement'],
+      ['Home / End', 'Min / max when set'],
+    ],
+    focus: 'doc.counter.focus',
+    motion: [
+      ['± press', 'State layer on circles', 'Instant when reduced'],
+    ],
+    a11y: 'doc.counter.a11y',
+    versions: { na: 'Single pill layout — sizes are scale only' },
   },
   'signature': {
     theming: { na: "Pending gabarit migration" },

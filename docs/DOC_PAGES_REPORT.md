@@ -27,10 +27,11 @@
 | `radio` | `docs(radio): gabarit complet` | Examples (name) + States |
 | `switch` | `docs(switch): gabarit complet` | Examples (selected) + States |
 | `chip` | `docs(chip): gabarit complet` | Examples (variant…) + States + Versions |
+| `counter` | `docs(counter): gabarit complet` | Examples (size, step) + States |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — prochain : `autocomplete`, `counter`, `slider`, …
+Voir `PENDING_PAGES` — prochain : `autocomplete`, `slider`, `date-picker`, …
 
 ## Décisions humaines
 

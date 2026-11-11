@@ -425,7 +425,8 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['value', 'number', '0', 'Current value'],
       ['size', "'xs'|'sm'|'md'|'lg'|'xl'", 'md', 'Circle diameter ladder'],
       ['step', 'number', '1', 'Increment amount (e.g. 10)'],
-      ['min / max', 'number', '—', 'Optional bounds'],
+      ['min', 'number', 'undefined', 'Optional lower bound'],
+      ['max', 'number', 'undefined', 'Optional upper bound'],
       ['decimals', 'number', '0', 'Display precision'],
       ['allow-negative', 'boolean', 'false', 'Values < 0 (also if min < 0)'],
       ['disabled', 'boolean', 'false', 'Non-interactive · faded'],
@@ -433,7 +434,8 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
     ],
     events: [
       ['k3-change', '{ value }', 'Value changed'],
-      ['k3-increment / k3-decrement', '{ value }', 'After ±'],
+      ['k3-increment', '{ value }', 'After increment'],
+      ['k3-decrement', '{ value }', 'After decrement'],
     ],
     methods: [
       ['getValue', '() => number', 'Current value'],
