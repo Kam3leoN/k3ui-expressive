@@ -326,8 +326,9 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['label', 'string', "''", 'Accessible name (aria-label)'],
     ],
     events: [
-      ['k3-change', 'selected, values', 'Selection changed'],
-      ['k3-select-start / k3-select-end', '—', 'Lifecycle around toggle'],
+      ['k3-change', '{ selected, values }', 'Selection changed'],
+      ['k3-select-start', '—', 'Lifecycle before toggle'],
+      ['k3-select-end', '—', 'Lifecycle after toggle'],
     ],
     methods: [['selectedValues', '() => string[]', 'Selected values in order']],
     slots: [['(default)', 'k3-button · k3-icon-button (styles preserved)']],

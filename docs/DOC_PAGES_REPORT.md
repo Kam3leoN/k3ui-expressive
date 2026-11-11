@@ -35,10 +35,11 @@
 | `time-picker` | `docs(time-picker): gabarit complet` | Examples + States + Versions |
 | `buttons-icon` | `docs(buttons-icon): gabarit complet` | Examples + States |
 | `buttons-grid` | `docs(buttons-grid): gabarit complet` | Examples + Versions |
+| `buttons-group` | `docs(buttons-group): gabarit complet` | Examples + States + Versions |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — lot Buttons : `buttons-group`, `buttons-menu`, `buttons-pad`, …
+Voir `PENDING_PAGES` — lot Buttons : `buttons-menu`, `buttons-pad`, `buttons-pill`, …
 
 ## Décisions humaines
 

@@ -2214,10 +2214,14 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               >
             </p>
           </header>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
           <div class="surface stack gap-lg">
             <!-- ── Standard ── -->
             <header class="section-head sub">
-              <h2 data-i18n="doc.button-group.section.standard">Standard</h2>
+              <h3 data-i18n="doc.button-group.option.standard">variant=standard</h3>
             </header>
             <p class="hint" data-i18n="doc.button-group.hint.standard">
               Gap XS 18 · SM 12 · MD/LG/XL 8 · press +15% (neighbors) · round↔square on select.
@@ -2282,7 +2286,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
             <!-- ── Connected ── -->
             <header class="section-head sub">
-              <h2 data-i18n="doc.button-group.section.connected">Connected</h2>
+              <h3 data-i18n="doc.button-group.option.connected">variant=connected</h3>
             </header>
             <p class="hint" data-i18n="doc.button-group.hint.connected-round">
               Gap 2dp · outer CornerFull · inner 4/8/8/16/20 · selected stadium · no width morph.
@@ -2382,7 +2386,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
             <!-- ── Arrows (connected chevron pair) ── -->
             <header class="section-head sub">
-              <h2 data-i18n="doc.button-group.section.arrows">Arrows</h2>
+              <h3 data-i18n="doc.button-group.option.arrows">Arrows</h3>
             </header>
             <p class="hint" data-i18n="doc.button-group.hint.arrows">
               Connected pair of chevrons — horizontal or vertical · filled · tonal · outlined.
@@ -2645,7 +2649,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
 
             <!-- ── Sizes ── -->
             <header class="section-head sub">
-              <h2 data-i18n="doc.button-group.section.sizes">Sizes</h2>
+              <h3 data-i18n="doc.button-group.option.size">size</h3>
             </header>
             <p class="hint" data-i18n="doc.button-group.hint.sizes-standard">
               Larger gap on XS/SM (18 / 12 dp) on purpose — keeps ≥48 dp touch targets.
@@ -3014,6 +3018,37 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                   </li>
                 </ol>
               </div>
+            </div>
+          </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-button-group selection="single" size="sm" label="Disabled" disabled>
+                      <k3-button variant="tonal" value="a" selected>A</k3-button>
+                      <k3-button variant="tonal" value="b">B</k3-button>
+                    </k3-button-group>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.button-group.state.disabled"
+                    >disabled</span
+                  >
+                </li>
+              </ol>
             </div>
           </div>
         </article>

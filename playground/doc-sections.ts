@@ -54,12 +54,20 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: 'doc.button-grid.versions.blurb',
   },
   'buttons-group': {
-    theming: { na: "Pending gabarit migration" },
-    keyboard: { na: "Pending gabarit migration" },
-    focus: { na: "Pending gabarit migration" },
-    motion: { na: "Pending gabarit migration" },
-    a11y: { na: "Pending gabarit migration" },
-    versions: { na: "Pending gabarit migration" },
+    theming: [
+      ['variant', 'standard|connected', 'Gap vs 2dp seams'],
+      ['size / shape', 'xs–xl · round|square', 'Propagated with sync'],
+    ],
+    keyboard: [
+      ['Arrow keys', 'Move between children'],
+      ['Enter / Space', 'Toggle selection on focused child'],
+    ],
+    focus: 'doc.button-group.focus',
+    motion: [
+      ['Select (standard)', 'Round ↔ square morph', 'Respects reduced motion'],
+    ],
+    a11y: 'doc.button-group.a11y',
+    versions: 'doc.button-group.versions.blurb',
   },
   'buttons-icon': {
     theming: [
