@@ -9657,64 +9657,73 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Top app bars frame a screen with navigation and actions. Small bars stay compact; medium and large flexible bars grow with title and subtitle. Optional sticky keeps the bar pinned while content scrolls. Place leading navigation, a concise headline, and trailing icon actions that stay within the touch target.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.app-bar.option.size">size / align / sticky</h3>
+              <p data-i18n="doc.app-bar.option.size.desc">small · medium · large flexible; align on small; sticky pin.</p>
+            </header>
+<div class="surface stack gap-lg">
             <ol class="variant-guide">
               <li><span class="pill-num">1</span><span class="variant-label">small</span></li>
               <li><span class="pill-num">2</span><span class="variant-label">medium</span></li>
               <li><span class="pill-num">3</span><span class="variant-label">large</span></li>
             </ol>
-            <header class="section-head sub"><h2 data-i18n="playground.demo.section.app-bar.small">Small</h2></header>
+            <header class="section-head sub"><h3 data-i18n="playground.demo.section.app-bar.small">Small</h3></header>
             <k3-top-app-bar size="small" elevated>
               <k3-icon-button slot="leading" label="Menu"
-                ><span class="ms">menu</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="menu" aria-hidden="true"></span></k3-icon-button
               >
               <span slot="headline">Inbox</span>
               <k3-icon-button slot="trailing" label="Search"
-                ><span class="ms">search</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="search" aria-hidden="true"></span></k3-icon-button
               >
               <k3-icon-button slot="trailing" label="More"
-                ><span class="ms">more_vert</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="more_vert" aria-hidden="true"></span></k3-icon-button
               >
             </k3-top-app-bar>
             <k3-top-app-bar size="small" align="center" elevated>
               <k3-icon-button slot="leading" label="Back"
-                ><span class="ms">arrow_back</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="arrow_back" aria-hidden="true"></span></k3-icon-button
               >
               <span slot="headline">Center aligned</span>
               <k3-icon-button slot="trailing" label="More"
-                ><span class="ms">more_vert</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="more_vert" aria-hidden="true"></span></k3-icon-button
               >
             </k3-top-app-bar>
-            <header class="section-head sub"><h2 data-i18n="playground.demo.section.app-bar.medium">Medium flexible</h2></header>
+            <header class="section-head sub"><h3 data-i18n="playground.demo.section.app-bar.medium">Medium flexible</h3></header>
             <k3-top-app-bar size="medium" elevated subtitle="Supporting line">
               <k3-icon-button slot="leading" label="Menu"
-                ><span class="ms">menu</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="menu" aria-hidden="true"></span></k3-icon-button
               >
               <span slot="headline">Medium flexible</span>
               <k3-icon-button slot="trailing" label="Search"
-                ><span class="ms">search</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="search" aria-hidden="true"></span></k3-icon-button
               >
             </k3-top-app-bar>
-            <header class="section-head sub"><h2 data-i18n="playground.demo.section.app-bar.large">Large flexible</h2></header>
+            <header class="section-head sub"><h3 data-i18n="playground.demo.section.app-bar.large">Large flexible</h3></header>
             <k3-top-app-bar size="large" elevated subtitle="With subtitle">
               <k3-icon-button slot="leading" label="Menu"
-                ><span class="ms">menu</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="menu" aria-hidden="true"></span></k3-icon-button
               >
               <span slot="headline">Large flexible title</span>
               <k3-icon-button slot="trailing" label="Share"
-                ><span class="ms">share</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="share" aria-hidden="true"></span></k3-icon-button
               >
             </k3-top-app-bar>
-            <header class="section-head sub"><h2 data-i18n="playground.demo.section.app-bar.sticky-top">Sticky top</h2></header>
+            <header class="section-head sub"><h3 data-i18n="playground.demo.section.app-bar.sticky-top">Sticky top</h3></header>
             <p class="hint">Scroll the pane — the bar stays pinned to the top.</p>
             <div class="sticky-demo">
               <k3-top-app-bar size="small" sticky elevated>
                 <k3-icon-button slot="leading" label="Back"
-                  ><span class="ms">arrow_back</span></k3-icon-button
+                  ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="arrow_back" aria-hidden="true"></span></k3-icon-button
                 >
                 <span slot="headline">Sticky app bar</span>
                 <k3-icon-button slot="trailing" label="Account"
-                  ><span class="ms">account_circle</span></k3-icon-button
+                  ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="account_circle" aria-hidden="true"></span></k3-icon-button
                 >
               </k3-top-app-bar>
               <div class="sticky-demo-body">
@@ -9733,7 +9742,23 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </div>
             </div>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.app-bar.states.blurb">elevated / scrolled fill the bar; sticky pins to the scrollport top.</p>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.app-bar.versions.blurb">Small compact vs medium/large flexible layouts.</p>
+          </div>
+
+</article>
 
         <!-- FOOTER BAR -->
         <article class="comp-page" data-page="footer-bar" id="page-footer-bar" hidden>
@@ -9747,7 +9772,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Footer bars host persistent bottom actions and an optional FAB. Use them for primary next steps on long forms or media screens. Sticky footers stay pinned while the pane scrolls; keep actions few and clearly labeled.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.footer-bar.option.sticky">elevated / sticky / fab</h3>
+              <p data-i18n="doc.footer-bar.option.sticky.desc">Lift, pin to bottom, optional FAB slot.</p>
+            </header>
+<div class="surface stack gap-lg">
             <ol class="variant-guide">
               <li><span class="pill-num">1</span><span class="variant-label">actions</span></li>
               <li><span class="pill-num">2</span><span class="variant-label">+ FAB</span></li>
@@ -9755,19 +9789,19 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </ol>
             <k3-footer-bar elevated>
               <k3-icon-button slot="actions" label="Home"
-                ><span class="ms">home</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="home" aria-hidden="true"></span></k3-icon-button
               >
               <k3-icon-button slot="actions" label="Search"
-                ><span class="ms">search</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="search" aria-hidden="true"></span></k3-icon-button
               >
               <k3-icon-button slot="actions" label="Archive"
-                ><span class="ms">archive</span></k3-icon-button
+                ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="archive" aria-hidden="true"></span></k3-icon-button
               >
               <k3-fab slot="fab" size="default" variant="primary"
                 ><span class="ms" slot="icon">add</span></k3-fab
               >
             </k3-footer-bar>
-            <header class="section-head sub"><h2 data-i18n="playground.demo.section.app-bar.sticky-bottom">Sticky bottom</h2></header>
+            <header class="section-head sub"><h3 data-i18n="playground.demo.section.app-bar.sticky-bottom">Sticky bottom</h3></header>
             <p class="hint">Scroll the pane — the footer stays pinned to the bottom.</p>
             <div class="sticky-demo sticky-demo--footer">
               <div class="sticky-demo-body">
@@ -9786,10 +9820,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </div>
               <k3-footer-bar sticky elevated>
                 <k3-icon-button slot="actions" label="Favorite"
-                  ><span class="ms">favorite</span></k3-icon-button
+                  ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"></span></k3-icon-button
                 >
                 <k3-icon-button slot="actions" label="Share"
-                  ><span class="ms">share</span></k3-icon-button
+                  ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="share" aria-hidden="true"></span></k3-icon-button
                 >
                 <k3-extended-fab slot="fab" size="medium" variant="primary"
                   ><span class="ms" slot="icon">edit</span>Compose</k3-extended-fab
@@ -9797,7 +9831,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </k3-footer-bar>
             </div>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.footer-bar.states.blurb">sticky pins to the scrollport bottom; elevated adds lift.</p>
+          </div>
+
+</article>
 
         <!-- TABS -->
         <article class="comp-page" data-page="tabs" id="page-tabs" hidden>
@@ -9811,7 +9854,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Tabs organize peer views at the same hierarchy. Primary tabs pair icons with a short indicator; secondary tabs underline the full cell for text-only sets. Keep tab counts manageable, preserve selection when content swaps, and avoid nesting tabs inside tabs.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.tabs.option.variant">variant</h3>
+              <p data-i18n="doc.tabs.option.variant.desc">primary (icon + short pill) · secondary (full-cell underline).</p>
+            </header>
+<div class="surface stack gap-lg">
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
@@ -9851,7 +9903,23 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <k3-tabs variant="secondary" labels="Overview,Specifications,Tokens"></k3-tabs>
             </div>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.tabs.states.blurb">index selects the active tab; labels/icons drive the tablist.</p>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.tabs.versions.blurb">Primary vs secondary indicator layouts.</p>
+          </div>
+
+</article>
 
         <!-- NAV RAIL -->
         <article class="comp-page" data-page="navigation-rail" id="page-navigation-rail" hidden>
@@ -9865,8 +9933,17 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Navigation rails suit mid-width and expanded layouts (≥600 dp). Collapse or expand destinations, optionally lead with a FAB, and use menu / menu_open when the rail can hide. Expanded layout defaults to modal (edge-docked, end-side radii, elevation-1); use layout="standard" for a flush rail with no inset sheet. Put secondary actions in slot="trailing" (divider). Align the leading group with position="start|center|bottom".
             </p>
           </header>
-          <div class="demo-block" data-demo-enhance="off">
-            <h2 data-i18n="doc.nav-rail.section.lab">Playground</h2>
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.nav-rail.option.lab">size / layout / position</h3>
+              <p data-i18n="doc.nav-rail.option.lab.desc">compact|large · modal|standard · start|center|bottom · collapsible · FAB · trailing.</p>
+            </header>
+<div class="demo-block" data-demo-enhance="off">
+            <h3 data-i18n="doc.nav-rail.section.lab">Playground</h3>
             <p data-i18n="doc.nav-rail.section.lab.blurb">
               One rail — tune layout, size, FAB and trailing live (same morph as the shell).
             </p>
@@ -9966,7 +10043,23 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </div>
             </div>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.nav-rail.states.blurb">active selects a destination; expanded/collapsible toggles large layout.</p>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.nav-rail.versions.blurb">Compact vs large; modal vs standard expanded chrome.</p>
+          </div>
+
+</article>
 
         <!-- NAV BAR -->
         <article class="comp-page" data-page="navigation-bar" id="page-navigation-bar" hidden>
@@ -9980,7 +10073,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Navigation bars serve compact layouts under 600 dp. Destinations use an expanding icon pill — vertical or horizontal — so the active item stays readable. Limit to a handful of top-level destinations and keep labels visible whenever space allows.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.nav-bar.option.layout">layout</h3>
+              <p data-i18n="doc.nav-bar.option.layout.desc">vertical (icon above label) · horizontal (pill).</p>
+            </header>
+<div class="surface stack gap-lg">
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span><span class="variant-label">vertical</span>
@@ -10004,7 +10106,23 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <k3-nav-item icon="library_music" label="Library"></k3-nav-item>
             </k3-nav-bar>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.nav-bar.states.blurb">active indexes the selected k3-nav-item.</p>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.nav-bar.versions.blurb">Vertical vs horizontal destination layouts.</p>
+          </div>
+
+</article>
 
         <!-- TOOLBAR — M3E docked / floating -->
         <article class="comp-page" data-page="toolbar" id="page-toolbar" hidden>
@@ -10022,7 +10140,15 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </header>
 
-          <div class="demo-block">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.toolbar.option.variant">variant / color / orientation</h3>
+              <p data-i18n="doc.toolbar.option.variant.desc">docked|floating · standard|vibrant · horizontal|vertical.</p>
+            </header>
+<div class="demo-block">
             <div class="demo-frame demo-frame--cases grid-2" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage">
@@ -10306,7 +10432,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
           </div>
 
           <header class="section-head sub">
-            <h2 data-i18n="doc.toolbar.demo.meet.title">Google Meet–style call bar</h2>
+            <h3 data-i18n="doc.toolbar.demo.meet.title">Google Meet–style call bar</h3>
             <p data-i18n="doc.toolbar.demo.meet.blurb">
               Floating · rounded · reactions toggle (scaleY up) · FAB 56.
             </p>
@@ -10509,7 +10635,23 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               </li>
             </ol>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.toolbar.states.blurb">expanded reveals slot=expand; sticky/elevated apply to docked.</p>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.toolbar.versions.blurb">Docked strip vs floating pill (and vertical floating).</p>
+          </div>
+
+</article>
 
         <!-- DOC NAV -->
         <article class="comp-page" data-page="prev-next" id="page-prev-next" hidden>
@@ -10523,7 +10665,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               Prev / next cards page documentation along the layout grid. Use clear titles for the adjacent topics so readers can jump without returning to the nav rail. Keep the control full-width in the doc container and consistent across component pages.
             </p>
           </header>
-          <div class="surface stack gap-lg">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.doc-nav.option.hrefs">previous / next</h3>
+              <p data-i18n="doc.doc-nav.option.hrefs.desc">Href + title pairs; optional eyebrow label overrides.</p>
+            </header>
+<div class="surface stack gap-lg">
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
@@ -10537,7 +10688,16 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               next-title="Tabs"
             ></k3-doc-nav>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.doc-nav.states.blurb">Cards render only when href and title are both set.</p>
+          </div>
+
+</article>
 
         <!-- TABLE -->
         <article class="comp-page" data-page="table" id="page-table" hidden>
@@ -13366,7 +13526,16 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               after N visible crumbs. Non-current items emit k3-select for SPA routing.
             </p>
           </header>
-          <div class="demo-block">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.breadcrumb.option.variant">variant / separator / size</h3>
+              <p data-i18n="doc.breadcrumb.option.variant.desc">plain · tonal · filled · chevron/slash/dot · sm|md|lg.</p>
+            </header>
+<div class="demo-block">
             <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage">
@@ -13393,7 +13562,16 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               <li><span class="pill-num">2</span><span class="variant-label">Filled · slash · lg</span></li>
             </ol>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.breadcrumb.states.blurb">Current crumb is non-interactive. Others emit k3-select.</p>
+          </div>
+
+</article>
 
         <!-- NAVIGATION: PAGINATION -->
         <article class="comp-page" data-page="pagination" id="page-pagination" hidden>
@@ -13409,7 +13587,16 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               ranges. Each change emits k3-change with the new 1-based page.
             </p>
           </header>
-          <div class="demo-block">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.pagination.option.page">page / count / siblings</h3>
+              <p data-i18n="doc.pagination.option.page.desc">Current page, total count, sibling window, first/prev/next/last.</p>
+            </header>
+<div class="demo-block">
             <div class="demo-frame demo-frame--cases demo-frame--stack" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage">
@@ -13429,7 +13616,16 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               <li><span class="pill-num">2</span><span class="variant-label">Ellipsis · 20 pages</span></li>
             </ol>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.pagination.states.blurb">disabled blocks interaction; page is 1-based.</p>
+          </div>
+
+</article>
 
         <!-- NAVIGATION: PAGINATION ALPHA -->
         <article class="comp-page" data-page="pagination-alpha" id="page-pagination-alpha" hidden>
@@ -13445,7 +13641,16 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               emits k3-select with the chosen letter.
             </p>
           </header>
-          <div class="demo-block">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.pagination-alpha.option.orientation">orientation / size</h3>
+              <p data-i18n="doc.pagination-alpha.option.orientation.desc">horizontal · vertical; sm|md|lg hit targets.</p>
+            </header>
+<div class="demo-block">
             <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage">
@@ -13473,7 +13678,23 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               <li><span class="pill-num">2</span><span class="variant-label">Vertical · sm</span></li>
             </ol>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.pagination-alpha.states.blurb">active-letter highlights; empty letters can hide or disable.</p>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.versions">Versions</h2>
+            </header>
+            <p data-i18n="doc.pagination-alpha.versions.blurb">Horizontal vs vertical index strips.</p>
+          </div>
+
+</article>
 
         <!-- NAVIGATION: INDEX LIST -->
         <article class="comp-page" data-page="index-list" id="page-index-list" hidden>
@@ -13489,7 +13710,16 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               k3-section-change tracks the visible group.
             </p>
           </header>
-          <div class="demo-block">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.index-list.option.rail">show-rail / sticky-headers</h3>
+              <p data-i18n="doc.index-list.option.rail.desc">A–Z scrub rail and sticky section titles.</p>
+            </header>
+<div class="demo-block">
             <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage" style="width: 100%; max-width: 22rem">
@@ -13505,7 +13735,16 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               <li><span class="pill-num">1</span><span class="variant-label">Rail · sticky headers</span></li>
             </ol>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.index-list.states.blurb">Active section tracks scroll; rail scrub jumps via scrollToKey.</p>
+          </div>
+
+</article>
 
         <!-- NAVIGATION: SCROLL TO TOP -->
         <article class="comp-page" data-page="scroll-to-top" id="page-scroll-to-top" hidden>
@@ -13521,13 +13760,31 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               and animation duration to match your FAB stack.
             </p>
           </header>
-          <div class="surface stack gap-md">
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.scroll-to-top.option.threshold">threshold / progress</h3>
+              <p data-i18n="doc.scroll-to-top.option.threshold.desc">Show after scrollY; optional progress ring.</p>
+            </header>
+<div class="surface stack gap-md">
             <p class="hint" data-i18n="doc.scroll-to-top.hint.shell">
               Live control is docked bottom-end (left of the GitHub FAB) — scroll this pane to
               reveal the circular progress ring.
             </p>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.scroll-to-top.states.blurb">Hidden below threshold; visible with optional ring above it.</p>
+          </div>
+
+</article>
         <!-- UTILITIES: KEYBOARD -->
         <article class="comp-page" data-page="keyboard" id="page-keyboard" hidden>
           <header class="section-head">
@@ -13544,9 +13801,17 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.keyboard.section.downup">Press &amp; release</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.keyboard.option.attach">attachKeyboard / chords</h3>
+              <p data-i18n="doc.keyboard.option.attach.desc">down/up tracking and bindChord(s) shortcut maps.</p>
+            </header>
+<div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h3 data-i18n="doc.keyboard.section.downup">Press &amp; release</h3>
               <p data-i18n="doc.keyboard.section.downup.blurb">
                 Focus the pad · hold keys — log shows down / up and the pressed set.
               </p>
@@ -13557,7 +13822,7 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.keyboard.section.chords">Chords</h2>
+              <h3 data-i18n="doc.keyboard.section.chords">Chords</h3>
               <p data-i18n="doc.keyboard.section.chords.blurb">
                 Try Control+K or Control+Shift+K — fires once when the last key completes the chord.
               </p>
@@ -13570,7 +13835,7 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.keyboard.section.bind">bindChord / bindChords</h2>
+              <h3 data-i18n="doc.keyboard.section.bind">bindChord / bindChords</h3>
               <p data-i18n="doc.keyboard.section.bind.blurb">
                 One-shot helpers for shortcut maps — ignoreFields skips inputs.
               </p>
@@ -13586,7 +13851,16 @@ const kb = attachKeyboard(document);
 kb.on('down', (d) => console.log('down', d.key, [...d.pressed]));
 kb.on('up', (d) => console.log('up', d.key));" ></k3-codeblock>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.keyboard.states.blurb">No host UI state — listeners only.</p>
+          </div>
+
+</article>
 
         <!-- UTILITIES: KEYBOARD → MEDIA -->
         <article class="comp-page" data-page="keyboard-media" id="page-keyboard-media" hidden>
@@ -13604,9 +13878,17 @@ kb.on('up', (d) => console.log('up', d.key));" ></k3-codeblock>
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.keyboard-media.section.map">Shortcut map</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.keyboard-media.option.map">bindMediaHotkeys</h3>
+              <p data-i18n="doc.keyboard-media.option.map.desc">Space/K · arrows · N/P · M with optional seekStepSec.</p>
+            </header>
+<div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h3 data-i18n="doc.keyboard-media.section.map">Shortcut map</h3>
               <p data-i18n="doc.keyboard-media.section.map.blurb">
                 Default seek step ±5 s — override with seekStepSec.
               </p>
@@ -13624,7 +13906,7 @@ bindMediaHotkeys({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.keyboard-media.section.player">With audio player</h2>
+              <h3 data-i18n="doc.keyboard-media.section.player">With audio player</h3>
               <p data-i18n="doc.keyboard-media.section.player.blurb">
                 Focus the page (not a field) · Space pauses · arrows seek · M mutes.
               </p>
@@ -13649,7 +13931,16 @@ bindMediaHotkeys({
             </div>
             <p class="hint" id="kb-media-log">Space · ← → · N P · M</p>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.keyboard-media.states.blurb">enabled callback can gate hotkeys (e.g. player.hotkeys).</p>
+          </div>
+
+</article>
 
         <!-- UTILITIES: MOUSE -->
         <article class="comp-page" data-page="mouse" id="page-mouse" hidden>
@@ -13667,9 +13958,17 @@ bindMediaHotkeys({
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.mouse.section.pad">Live pad</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.mouse.option.attach">attachMouse</h3>
+              <p data-i18n="doc.mouse.option.attach.desc">buttons · move · drag · wheel · click phases.</p>
+            </header>
+<div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h3 data-i18n="doc.mouse.section.pad">Live pad</h3>
               <p data-i18n="doc.mouse.section.pad.blurb">
                 Move, click, drag, and scroll over the pad — phases stream below.
               </p>
@@ -13683,7 +13982,7 @@ bindMediaHotkeys({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.mouse.section.buttons">Buttons</h2>
+              <h3 data-i18n="doc.mouse.section.buttons">Buttons</h3>
               <p data-i18n="doc.mouse.section.buttons.blurb">
                 left · middle · right · back · forward — buttons bitfield helpers included.
               </p>
@@ -13695,7 +13994,16 @@ m.on('down', (d) => console.log(d.button, [...d.buttons]));
 m.on('drag', (d) => console.log(d.totalX, d.totalY));
 m.on('wheel', (d) => console.log(d.deltaY));" ></k3-codeblock>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.mouse.states.blurb">No host UI state — listeners only.</p>
+          </div>
+
+</article>
 
         <!-- UTILITIES: GESTURES -->
         <article class="comp-page" data-page="gestures" id="page-gestures" hidden>
@@ -13711,9 +14019,17 @@ m.on('wheel', (d) => console.log(d.deltaY));" ></k3-codeblock>
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.gestures.section.basic">Basic usage</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.gestures.option.detect">detectGesture / phases</h3>
+              <p data-i18n="doc.gestures.option.detect.desc">tap · long-press · swipe · pan · rotate · scale · repeat · sequence.</p>
+            </header>
+<div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h3 data-i18n="doc.gestures.section.basic">Basic usage</h3>
               <p data-i18n="doc.gestures.section.basic.blurb">
                 Phases <code>start</code> · <code>update</code> · <code>end</code> ·
                 <code>cancel</code>. Use <code>phase()</code> handlers or listen to
@@ -13729,7 +14045,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2>Tap</h2>
+              <h3>Tap</h3>
               <p data-i18n="doc.gestures.section.tap.blurb">Short press · max 180 ms · 12 px.</p>
             </header>
             <div id="g-tap" class="gesture-pad" tabindex="0">Tap me</div>
@@ -13738,7 +14054,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2>Long press</h2>
+              <h3>Long press</h3>
               <p data-i18n="doc.gestures.section.longpress.blurb">Hold ≥ 500 ms with little movement.</p>
             </header>
             <div id="g-long" class="gesture-pad" tabindex="0">Press &amp; hold</div>
@@ -13747,7 +14063,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2>Swipe</h2>
+              <h3>Swipe</h3>
               <p data-i18n="doc.gestures.section.swipe.blurb">Fast directional flick on release.</p>
             </header>
             <div id="g-swipe" class="gesture-pad" tabindex="0">Swipe ← → ↑ ↓</div>
@@ -13756,7 +14072,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2>Pan</h2>
+              <h3>Pan</h3>
               <p data-i18n="doc.gestures.section.pan.blurb">Continuous move · delta + total.</p>
             </header>
             <div id="g-pan" class="gesture-pad gesture-pad--pan" tabindex="0">
@@ -13768,7 +14084,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2>Rotate</h2>
+              <h3>Rotate</h3>
               <p data-i18n="doc.gestures.section.rotate.blurb">Two pointers around centroid.</p>
             </header>
             <div id="g-rotate" class="gesture-pad gesture-pad--transform" tabindex="0">
@@ -13779,7 +14095,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2>Scale</h2>
+              <h3>Scale</h3>
               <p data-i18n="doc.gestures.section.scale.blurb">Pinch zoom · scale factor.</p>
             </header>
             <div id="g-scale" class="gesture-pad gesture-pad--transform" tabindex="0">
@@ -13790,7 +14106,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2>Repeat</h2>
+              <h3>Repeat</h3>
               <p data-i18n="doc.gestures.section.repeat.blurb">Triple-tap within 350 ms.</p>
             </header>
             <div id="g-repeat" class="gesture-pad" tabindex="0">Triple tap</div>
@@ -13799,7 +14115,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2>Sequence</h2>
+              <h3>Sequence</h3>
               <p data-i18n="doc.gestures.section.sequence.blurb">
                 Ordered chain — tap, then swipe within 800 ms.
               </p>
@@ -13807,7 +14123,16 @@ detectGesture(el, tap(phase({
             <div id="g-seq" class="gesture-pad" tabindex="0">Tap, then swipe</div>
             <p class="hint" id="g-seq-log">—</p>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.gestures.states.blurb">Phases start · update · end · cancel — no disabled host state.</p>
+          </div>
+
+</article>
 
         <!-- UTILITIES: DRAG AND DROP -->
         <article class="comp-page" data-page="dnd" id="page-dnd" hidden>
@@ -13823,9 +14148,17 @@ detectGesture(el, tap(phase({
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.dnd.section.sortable">Sortable list</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.dnd.option.sortable">sortable / droppable</h3>
+              <p data-i18n="doc.dnd.option.sortable.desc">attachSortable · attachDraggable · attachDroppable · chip-set sortable.</p>
+            </header>
+<div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h3 data-i18n="doc.dnd.section.sortable">Sortable list</h3>
               <p data-i18n="doc.dnd.section.sortable.blurb">
                 Reorder siblings — same engine as <code>k3-chip-set sortable</code>.
               </p>
@@ -13877,7 +14210,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.dnd.section.drop">Draggable → drop zone</h2>
+              <h3 data-i18n="doc.dnd.section.drop">Draggable → drop zone</h3>
               <p data-i18n="doc.dnd.section.drop.blurb">
                 Typed payload <code>k3/demo</code> — hover highlights the zone.
               </p>
@@ -13900,7 +14233,7 @@ detectGesture(el, tap(phase({
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.dnd.section.chips">Chip set</h2>
+              <h3 data-i18n="doc.dnd.section.chips">Chip set</h3>
               <p data-i18n="doc.dnd.section.chips.blurb">
                 Declarative — <code>&lt;k3-chip-set sortable&gt;</code>.
               </p>
@@ -13930,7 +14263,16 @@ attachDroppable(zone, {
   accept: ['k3/demo'],
   onDrop: ({ payload }) => console.log(payload.data),
 });" ></k3-codeblock>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.dnd.states.blurb">Drag affordances use .k3-drag-handle; drop zones highlight on accept.</p>
+          </div>
+
+</article>
 
         <!-- SCROLLBAR (utilities) -->
         <article class="comp-page" data-page="scrollbar" id="page-scrollbar" hidden>
@@ -13945,9 +14287,17 @@ attachDroppable(zone, {
             </p>
           </header>
 
-          <div class="surface stack gap-lg">
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
-              <h2 data-i18n="doc.scrollbar.section.demo">Live demo</h2>
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.scrollbar.option.class">.k3-scroll / edgeScrollbarStyles</h3>
+              <p data-i18n="doc.scrollbar.option.class.desc">Light DOM class or shadow styles import; pad an inner child.</p>
+            </header>
+<div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h3 data-i18n="doc.scrollbar.section.demo">Live demo</h3>
               <p data-i18n="doc.scrollbar.section.demo.blurb">
                 Thumb flush to the right edge · 6dp · transparent track.
               </p>
@@ -13961,7 +14311,7 @@ attachDroppable(zone, {
 
           <div class="surface stack gap-lg">
             <header class="section-head sub">
-              <h2 data-i18n="doc.scrollbar.section.usage">Usage in components</h2>
+              <h3 data-i18n="doc.scrollbar.section.usage">Usage in components</h3>
               <p data-i18n="doc.scrollbar.section.usage.blurb">
                 Shadow CE → edgeScrollbarStyles + class k3-scroll. Light DOM → global .k3-scroll from
                 k3ui.css.
@@ -13998,7 +14348,7 @@ static styles = [
 
           <div class="surface stack gap-md">
             <header class="section-head sub">
-              <h2 data-i18n="doc.scrollbar.section.rules">Hard rules</h2>
+              <h3 data-i18n="doc.scrollbar.section.rules">Hard rules</h3>
               <p data-i18n="doc.scrollbar.section.rules.blurb">
                 Pad an inner child · never set scrollbar-width on WebKit with ::-webkit-scrollbar.
               </p>
@@ -14022,7 +14372,16 @@ static styles = [
               </li>
             </ul>
           </div>
-        </article>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.scrollbar.states.blurb">No component states — CSS chrome only.</p>
+          </div>
+
+</article>
 
         <!-- STYLES: COLOR — ROLES -->
         <article class="comp-page" data-page="color-roles" id="page-color-roles" hidden>

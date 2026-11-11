@@ -1139,7 +1139,10 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['page', 'number', '1', 'Current page (1-based)'],
       ['count', 'number', '10', 'Total pages'],
       ['sibling-count', 'number', '1', 'Neighbors around current'],
-      ['show-first / show-last / show-prev / show-next', 'boolean', 'true', 'Nav buttons'],
+      ['show-first', 'boolean', 'true', 'First button'],
+      ['show-last', 'boolean', 'true', 'Last button'],
+      ['show-prev', 'boolean', 'true', 'Previous button'],
+      ['show-next', 'boolean', 'true', 'Next button'],
       ['disabled', 'boolean', 'false', 'Non-interactive'],
     ],
     events: [['k3-change', '{ page }', 'Page changed']],
@@ -1850,6 +1853,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['align', "'start'|'center'", 'start', 'Title align (small)'],
       ['sticky', 'boolean', 'false', 'position sticky'],
       ['elevated', 'boolean', 'false', 'Scroll fill'],
+      ['subtitle', 'string', "''", 'Medium/large subtitle'],
     ],
     slots: [
       ['leading', 'Leading actions'],
@@ -1922,6 +1926,25 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['trailing', 'Docked spread — end group'],
       ['fab', 'Paired FAB (8dp gap)'],
     ],
+  },
+
+  gestures: {
+    options: { na: 'Programmatic detectGesture / k3-*-gesture — see Usage & Examples' },
+  },
+  keyboard: {
+    options: { na: 'attachKeyboard · bindChord(s) — see Usage & Examples' },
+  },
+  'keyboard-media': {
+    options: { na: 'bindMediaHotkeys — see Usage & Examples (demo may reference k3-audio-player)' },
+  },
+  mouse: {
+    options: { na: 'attachMouse · K3UI.mouse — see Usage & Examples' },
+  },
+  dnd: {
+    options: { na: 'attachSortable · attachDraggable · attachDroppable — see Usage & Examples' },
+  },
+  scrollbar: {
+    options: { na: '.k3-scroll class · edgeScrollbarStyles — see Usage & Examples' },
   },
   sheet: {
     properties: [

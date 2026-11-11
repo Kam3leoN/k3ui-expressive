@@ -66,6 +66,18 @@ const PAGE_TAGS: Record<string, string[]> = {
   list: ['k3-list', 'k3-list-item'],
   table: ['k3-table'],
   sheet: ['k3-sheet'],
+  breadcrumb: ['k3-breadcrumb'],
+  'app-bar': ['k3-top-app-bar'],
+  'footer-bar': ['k3-footer-bar'],
+  tabs: ['k3-tabs'],
+  'navigation-bar': ['k3-nav-bar', 'k3-nav-item'],
+  'navigation-rail': ['k3-nav-rail', 'k3-nav-item'],
+  'index-list': ['k3-index-list'],
+  'prev-next': ['k3-doc-nav'],
+  pagination: ['k3-pagination'],
+  'pagination-alpha': ['k3-pagination-alpha'],
+  'scroll-to-top': ['k3-scroll-to-top'],
+  toolbar: ['k3-toolbar'],
   /* extend as pages leave PENDING_PAGES */
 };
 
@@ -130,7 +142,25 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'menu' &&
     id !== 'list' &&
     id !== 'table' &&
-    id !== 'sheet',
+    id !== 'sheet' &&
+    id !== 'breadcrumb' &&
+    id !== 'app-bar' &&
+    id !== 'footer-bar' &&
+    id !== 'tabs' &&
+    id !== 'navigation-bar' &&
+    id !== 'navigation-rail' &&
+    id !== 'index-list' &&
+    id !== 'prev-next' &&
+    id !== 'pagination' &&
+    id !== 'pagination-alpha' &&
+    id !== 'scroll-to-top' &&
+    id !== 'toolbar' &&
+    id !== 'gestures' &&
+    id !== 'keyboard' &&
+    id !== 'keyboard-media' &&
+    id !== 'mouse' &&
+    id !== 'dnd' &&
+    id !== 'scrollbar',
 );
 
 const INDEX_HTML = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');

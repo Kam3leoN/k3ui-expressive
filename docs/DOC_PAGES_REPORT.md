@@ -68,10 +68,28 @@
 | `list` | `docs(list): gabarit complet` | Examples (variant/selection/expand/…) + States |
 | `table` | `docs(table): gabarit complet` | Examples (variant/columns) + States |
 | `sheet` | `docs(sheet): gabarit complet` | Examples (placement/width/side) + States + Versions |
+| `breadcrumb` | `docs(breadcrumb): gabarit complet` | Examples + States |
+| `app-bar` | `docs(app-bar): gabarit complet` | Examples (size/align/sticky) + States + Versions |
+| `footer-bar` | `docs(footer-bar): gabarit complet` | Examples + States |
+| `tabs` | `docs(tabs): gabarit complet` | Examples (variant) + States + Versions |
+| `navigation-bar` | `docs(navigation-bar): gabarit complet` | Examples (layout) + States + Versions |
+| `navigation-rail` | `docs(navigation-rail): gabarit complet` | Examples (lab) + States + Versions |
+| `index-list` | `docs(index-list): gabarit complet` | Examples + States |
+| `prev-next` | `docs(prev-next): gabarit complet` | Examples + States |
+| `pagination` | `docs(pagination): gabarit complet` | Examples + States |
+| `pagination-alpha` | `docs(pagination-alpha): gabarit complet` | Examples + States + Versions |
+| `scroll-to-top` | `docs(scroll-to-top): gabarit complet` | Examples + States |
+| `toolbar` | `docs(toolbar): gabarit complet` | Examples + States + Versions |
+| `gestures` | `docs(gestures): gabarit complet` | Examples + States · utility (no PAGE_TAGS) |
+| `keyboard` | `docs(keyboard): gabarit complet` | Examples + States · utility (no PAGE_TAGS) |
+| `keyboard-media` | `docs(keyboard-media): gabarit complet` | Examples + States · demo may reference deleted `k3-audio-player` |
+| `mouse` | `docs(mouse): gabarit complet` | Examples + States · utility (no PAGE_TAGS) |
+| `dnd` | `docs(dnd): gabarit complet` | Examples + States · utility (no PAGE_TAGS) |
+| `scrollbar` | `docs(scrollbar): gabarit complet` | Examples + States · utility (no PAGE_TAGS) |
 
 ## Pages en attente
 
-Voir `PENDING_PAGES` — lot Navigation ensuite. Pages `product: k3ux` (dont `iso-filter`, `masonry`, composants feedback/anim/charts retirés du tree) restent PENDING jusqu’au lot UX ; noter composants absents de `src/components` comme bloqués pour gabarit k3ui.
+Voir `PENDING_PAGES` — uniquement pages `product: k3ux` (composants retirés du tree / lot UX). Aucune page k3ui restante hors Styles/Resources.
 
 ## Bloqués / hors lot k3ui (rester PENDING)
 
@@ -79,6 +97,7 @@ Voir `PENDING_PAGES` — lot Navigation ensuite. Pages `product: k3ux` (dont `is
 | --- | --- |
 | `iso-filter`, `masonry` | `product: k3ux` + composants retirés de `src/components/containment/` |
 | `signature`, `rating`, `wheel-picker`, `countdown`, `marquee`, `sound-fx`, `confetti`, `text-bounce`, `text-scramble`, `heart-burst`, `halftone`, `card-holo`, `card-lenticular`, `card-scratch`, `audio-player`, `qr-code`, `charts-*` | `product: k3ux` (et/ou sources retirées du tree) — lot UX |
+| `keyboard-media` (démo) | Démo playground référence `k3-audio-player` retiré — page utilitaire k3ui migrée ; démo audio bloquée jusqu’au lot UX |
 
 ## Décisions humaines
 
