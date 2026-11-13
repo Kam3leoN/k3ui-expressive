@@ -191,6 +191,28 @@ export class K3Menu extends K3Element {
     return (this.shadowRoot?.querySelector('.panel') as HTMLElement | null) ?? null;
   }
 
+  /**
+   * Select menus use the Popover API (Noph) so the panel always paints in the
+   * top layer — never under the next field in a stacked form.
+   */
+  private syncMatchWidthPopover(open: boolean): void {
+    if (!this.matchWidth) return;
+    const panel = this.panelEl();
+    if (!panel || typeof panel.showPopover !== 'function') return;
+    if (panel.getAttribute('popover') !== 'manual') {
+      panel.setAttribute('popover', 'manual');
+    }
+    try {
+      if (open) {
+        if (!panel.matches(':popover-open')) panel.showPopover();
+      } else if (panel.matches(':popover-open')) {
+        panel.hidePopover();
+      }
+    } catch {
+      /* already open/closed */
+    }
+  }
+
   private isRtl(): boolean {
     return (
       getComputedStyle(this).direction === 'rtl' ||
@@ -301,6 +323,8 @@ export class K3Menu extends K3Element {
             await this.updateComplete;
             this._pointerIgnoreUntil = performance.now() + POINTER_IGNORE_MS;
             await this.scheduleFit(1);
+            this.syncMatchWidthPopover(true);
+            this.fitPanel();
           } else {
             /*
              * Fit while closed → open → sync-refit before enter motion paints.
@@ -313,6 +337,7 @@ export class K3Menu extends K3Element {
             await this.scheduleFit(FIT_PASSES);
             this.open = true;
             await this.updateComplete;
+            this.syncMatchWidthPopover(true);
             this.fitPanel();
             this._enterLock = true;
             try {
@@ -347,6 +372,7 @@ export class K3Menu extends K3Element {
           await this.updateComplete;
           const panel = this.panelEl();
           if (panel && !fast) await waitForMotion(panel);
+          this.syncMatchWidthPopover(false);
           this.clearFit();
           this.positioningAnchor = null;
           this.positioningEdge = null;

@@ -42,6 +42,10 @@ export const menuStyles: CSSResultGroup = [
       0 2px 6px 2px rgb(0 0 0 / 0.15)
     );
   }
+  /* Open host above sibling fields (stacked selects) while panel is absolute */
+  :host([open]) {
+    z-index: 1000;
+  }
 
   /* Baseline — capture 7 · no gap · divider = 1px only (no band pad) */
   :host([variant='baseline']) {
@@ -143,6 +147,23 @@ export const menuStyles: CSSResultGroup = [
     box-shadow: var(--k3-menu-elev);
     pointer-events: none;
   }
+  /*
+   * Select / exposed dropdown — flush with the field even before JS fit
+   * (avoids a 7rem-wide absolute flash that paints under the next field).
+   */
+  :host([match-width]) .panel {
+    width: 100%;
+    min-width: 100%;
+    max-width: none;
+    inset-inline: 0;
+  }
+  /* UA popover defaults (margin/inset) would fight menu-fit top/left */
+  .panel[popover] {
+    margin: 0;
+    border: none;
+    inset: unset;
+    overflow: visible;
+  }
   .panel.bottom-start,
   .panel.bottom,
   .panel.bottom-end {
@@ -178,6 +199,7 @@ export const menuStyles: CSSResultGroup = [
   .panel[data-fitted] {
     /* Placement comes only from inline top/left/right set by menu-fit.ts */
     position: fixed;
+    z-index: 1200;
   }
   .panel.bottom-start,
   .panel.bottom {

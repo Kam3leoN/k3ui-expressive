@@ -48,6 +48,10 @@ export class K3Select extends K3Element {
         max-width: 22rem;
         overflow: visible;
       }
+      /* Stacked fields: open select (and its absolute fallback panel) on top */
+      :host([open]) {
+        z-index: 1000;
+      }
       :host([disabled]) {
         pointer-events: none;
       }
@@ -157,7 +161,8 @@ export class K3Select extends K3Element {
     this._mirroringOpen = true;
     if (this.open !== next) this.open = next;
     this.toggleAttribute('open', next);
-    queueMicrotask(() => {
+    /* Hold through Lit update so updated() does not echo show()/hide(). */
+    void this.updateComplete.then(() => {
       this._mirroringOpen = false;
     });
   }

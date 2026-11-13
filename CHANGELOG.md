@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.2] — 2026-11-13
+
+### Fixed — Select menu stacking / width consistency
+
+- Open `k3-select` / `k3-menu` raise `z-index` so the panel never paints under the next field
+- `match-width` panels use Popover top-layer + 100% field width CSS fallback before JS fit
+- Fitted panel `z-index: 1200`
+
 All notable changes to this project will be documented in this file.
 
 ## [1.2.1] — 2026-11-13

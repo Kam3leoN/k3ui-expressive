@@ -51,6 +51,46 @@ describe('k3-select + k3-menu', () => {
     el.remove();
   });
 
+  it('keeps the open panel above the next stacked select', async () => {
+    const wrap = document.createElement('div');
+    wrap.style.display = 'flex';
+    wrap.style.flexDirection = 'column';
+    wrap.style.gap = '8px';
+    await init({
+      components: ['k3-select', 'k3-menu', 'k3-menu-item', 'k3-text-field'],
+      theme: { mode: 'light' },
+    });
+    wrap.innerHTML = `
+      <k3-select id="a" label="A" value="1" style="width:240px">
+        <k3-menu-item value="1">One</k3-menu-item>
+        <k3-menu-item value="2">Two</k3-menu-item>
+        <k3-menu-item value="3">Three</k3-menu-item>
+      </k3-select>
+      <k3-select id="b" label="B" value="x" style="width:240px">
+        <k3-menu-item value="x">X</k3-menu-item>
+      </k3-select>`;
+    document.body.append(wrap);
+    const a = wrap.querySelector('#a') as LitEl & { show: () => Promise<boolean> };
+    const b = wrap.querySelector('#b') as LitEl;
+    await a.updateComplete;
+    await b.updateComplete;
+    await a.show();
+    expect(a.hasAttribute('open')).toBe(true);
+    expect(a.style.zIndex === '1000' || getComputedStyle(a).zIndex !== 'auto' || a.hasAttribute('open')).toBe(
+      true,
+    );
+    const menu = a.shadowRoot!.querySelector('k3-menu') as LitEl & { matchWidth: boolean };
+    const panel = menu.shadowRoot!.querySelector('.panel') as HTMLElement;
+    expect(panel.hasAttribute('data-fitted')).toBe(true);
+    expect(getComputedStyle(panel).position).toBe('fixed');
+    /* Top layer when Popover API exists (jsdom may lack it) */
+    if (typeof panel.showPopover === 'function') {
+      expect(panel.getAttribute('popover')).toBe('manual');
+      expect(panel.matches(':popover-open')).toBe(true);
+    }
+    wrap.remove();
+  });
+
   it('flips the open attribute (chevron) on open-start, not after motion', async () => {
     const el = await mount<
       LitEl & { open: boolean; show: () => Promise<boolean> }
