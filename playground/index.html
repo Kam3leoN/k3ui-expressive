@@ -5158,55 +5158,95 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 Trigger chrome matches k3-text-field — outlined · filled · standard.
               </p>
             </header>
-            <ol class="variant-guide">
-              <li>
-                <span class="pill-num">1</span
-                ><span class="variant-label" data-i18n="playground.demo.variant.outlined"
-                  >Outlined</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">2</span
-                ><span class="variant-label" data-i18n="playground.demo.variant.filled"
-                  >Filled</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">3</span
-                ><span class="variant-label" data-i18n="playground.demo.variant.standard"
-                  >Standard</span
-                >
-              </li>
-            </ol>
-            <div class="grid-3">
-              <div class="stack gap-md">
-                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.outlined">Outlined</h3></header>
-                <k3-select data-i18n-label="playground.demo.select.label" value="2" variant="outlined">
-                  <k3-menu-item value="1" data-i18n="playground.demo.select.item.1">Item 1</k3-menu-item>
-                  <k3-menu-item value="2" data-i18n="playground.demo.select.item.2">Item 2</k3-menu-item>
-                  <k3-menu-item value="3" data-i18n="playground.demo.select.item.3">Item 3</k3-menu-item>
-                </k3-select>
-                <k3-select data-i18n-label="playground.demo.select.empty.label" variant="outlined">
-                  <k3-menu-item value="a" data-i18n="playground.demo.select.option.a">Option A</k3-menu-item>
-                  <k3-menu-item value="b" data-i18n="playground.demo.select.option.b">Option B</k3-menu-item>
-                </k3-select>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3 items-end"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-select
+                      data-i18n-label="playground.demo.select.label"
+                      value="2"
+                      variant="outlined"
+                      style="max-width: none; width: 100%"
+                    >
+                      <k3-menu-item value="1" data-i18n="playground.demo.select.item.1"
+                        >Item 1</k3-menu-item
+                      >
+                      <k3-menu-item value="2" data-i18n="playground.demo.select.item.2"
+                        >Item 2</k3-menu-item
+                      >
+                      <k3-menu-item value="3" data-i18n="playground.demo.select.item.3"
+                        >Item 3</k3-menu-item
+                      >
+                    </k3-select>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-select
+                      data-i18n-label="playground.demo.select.fruit.label"
+                      value="apple"
+                      variant="filled"
+                      style="max-width: none; width: 100%"
+                    >
+                      <k3-menu-item value="apple" data-i18n="playground.demo.select.fruit.apple"
+                        >Apple</k3-menu-item
+                      >
+                      <k3-menu-item value="veg" data-i18n="playground.demo.select.veg"
+                        >Vegetables</k3-menu-item
+                      >
+                      <k3-menu-item value="grain" data-i18n="playground.demo.select.grain"
+                        >Grains</k3-menu-item
+                      >
+                    </k3-select>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-select
+                      data-i18n-label="playground.demo.select.region.label"
+                      value="eu"
+                      variant="standard"
+                      style="max-width: none; width: 100%"
+                    >
+                      <k3-menu-item value="eu" data-i18n="playground.demo.select.region.eu"
+                        >Europe</k3-menu-item
+                      >
+                      <k3-menu-item value="us" data-i18n="playground.demo.select.region.us"
+                        >Americas</k3-menu-item
+                      >
+                      <k3-menu-item value="apac" data-i18n="playground.demo.select.region.apac"
+                        >Asia-Pacific</k3-menu-item
+                      >
+                    </k3-select>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
               </div>
-              <div class="stack gap-md">
-                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.filled">Filled</h3></header>
-                <k3-select data-i18n-label="playground.demo.select.fruit.label" value="fruit" variant="filled">
-                  <k3-menu-item value="fruit" data-i18n="playground.demo.select.fruit">Fruit</k3-menu-item>
-                  <k3-menu-item value="veg" data-i18n="playground.demo.select.veg">Vegetables</k3-menu-item>
-                  <k3-menu-item value="grain" data-i18n="playground.demo.select.grain">Grains</k3-menu-item>
-                </k3-select>
-              </div>
-              <div class="stack gap-md">
-                <header class="section-head sub"><h3 data-i18n="playground.demo.variant.standard">Standard</h3></header>
-                <k3-select data-i18n-label="playground.demo.select.region.label" value="eu" variant="standard">
-                  <k3-menu-item value="eu" data-i18n="playground.demo.select.region.eu">Europe</k3-menu-item>
-                  <k3-menu-item value="us" data-i18n="playground.demo.select.region.us">Americas</k3-menu-item>
-                  <k3-menu-item value="apac" data-i18n="playground.demo.select.region.apac">Asia-Pacific</k3-menu-item>
-                </k3-select>
-              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="playground.demo.variant.outlined"
+                    >Outlined</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span
+                  ><span class="variant-label" data-i18n="playground.demo.variant.filled"
+                    >Filled</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span
+                  ><span class="variant-label" data-i18n="playground.demo.variant.standard"
+                    >Standard</span
+                  >
+                </li>
+              </ol>
             </div>
           </div>
 

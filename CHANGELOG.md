@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3] — 2026-11-13
+
+### Fixed — Select variant demo alignment
+
+- Playground `items-end` stages use flex column + `justify-content: flex-end` so outlined / filled / standard field chromes share one horizontal baseline
+- Select variants demo rewritten as `k3-demo-cols-3` cases (no orphan headers / uneven stacks)
+
 ## [1.2.2] — 2026-11-13
 
 ### Fixed — Select menu stacking / width consistency

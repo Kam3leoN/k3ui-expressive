@@ -1650,6 +1650,7 @@
   "playground.demo.select.option.b": "Option B",
   "playground.demo.select.fruit.label": "Fruit",
   "playground.demo.select.fruit": "Fruit",
+  "playground.demo.select.fruit.apple": "Apple",
   "playground.demo.select.veg": "Vegetables",
   "playground.demo.select.grain": "Grains",
   "playground.demo.select.region.label": "Region",

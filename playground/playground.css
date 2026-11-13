@@ -2046,13 +2046,24 @@ html[data-k3-reduce-motion] .home-ambient__shape {
 .demo-frame--demo.items-end > .demo-case,
 .demo-frame--fab.items-end > .demo-case {
   align-self: stretch;
+  height: 100%;
 }
+/*
+ * Bottom-align field chromes (outlined / filled / standard).
+ * k3-layout-grid stages default to display:block — restore flex so
+ * justify-content:flex-end can share one baseline across variants.
+ */
 .demo-frame--cases.items-end .demo-case-stage,
 .demo-frame--icon-button.items-end .demo-case-stage,
 .demo-frame--demo.items-end .demo-case-stage,
 .demo-frame--fab.items-end .demo-case-stage {
+  display: flex;
   flex: 1 1 auto;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
 }
 
 /* Stacked cases (lists, app bars, button-groups, …):
