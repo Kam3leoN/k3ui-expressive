@@ -28,7 +28,7 @@ body:has(.app[data-nav='bar']) {
 
 html {
   color-scheme: light dark;
-  background: var(--k3-sys-color-background, #fef7ff);
+  background: var(--k3-sys-color-background, #fff7ff);
   /* Shell owns scroll — never show the document’s native Windows scrollbar */
   height: 100%;
   overflow: hidden;
@@ -40,8 +40,8 @@ body {
   min-height: 100%;
   overflow: hidden;
   font-family: var(--k3-ref-typeface-plain, 'Google Sans', system-ui, sans-serif);
-  background: var(--k3-sys-color-background, #fef7ff);
-  color: var(--k3-sys-color-on-surface, #1d1b20);
+  background: var(--k3-sys-color-background, #fff7ff);
+  color: var(--k3-sys-color-on-surface, #3d2a51);
   transition:
     background-color var(--k3-sys-motion-duration-short4, 200ms) ease,
     color var(--k3-sys-motion-duration-short4, 200ms) ease;
@@ -237,17 +237,18 @@ k3-doc-nav:not(:defined) {
 }
 
 /*
- * Deep link (#/dialog…) on first load: show the page-loading veil instead of
- * flashing the home page until the app opens the requested page (CLS / LCP).
- * The inline script in index.html sets the flag; app.ts clears it.
+ * Boot / deep link: first paint is the loading veil (html[data-k3-booting]).
+ * Content mounts underneath; app.ts clears the flag when ready.
  */
 html[data-k3-deeplink] #page-home,
-html[data-k3-deeplink] #doc-nav {
+html[data-k3-deeplink] #doc-nav,
+html[data-k3-booting] #page-home,
+html[data-k3-booting] #doc-nav {
   display: none;
 }
-/* Same cascade layer as Tailwind's `[hidden] { display: none !important }` (base),
-   where the more specific selector wins. */
+/* Same cascade layer as Tailwind's `[hidden] { display: none !important }` (base). */
 @layer base {
+  html[data-k3-booting] .doc-page-loading[hidden],
   html[data-k3-deeplink] .doc-page-loading[hidden] {
     display: flex !important;
   }
@@ -417,12 +418,12 @@ html:has(.app[data-nav='rail']) {
   --k3-scroll-track-inset: 0;
 }
 
-/* Doc page load — absolute veil over the scrollport (F5 + SPA nav) */
+/* Doc page load — fixed veil (boot + SPA). First paint = this layer. */
 .doc-page-loading {
   display: none;
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 10000;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -430,14 +431,13 @@ html:has(.app[data-nav='rail']) {
   box-sizing: border-box;
   margin: 0;
   padding: var(--k3-sys-spacing-space400, 2rem);
-  background: color-mix(in srgb, var(--k3-sys-color-surface, #fef7ff) 86%, transparent);
-  color: var(--k3-sys-color-on-surface, #1d1b20);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: var(--k3-sys-color-surface, #fff7ff);
+  color: var(--k3-sys-color-on-surface, #3d2a51);
   pointer-events: all;
 }
 .doc-page-loading.is-on,
-.doc-page-loading:not([hidden]) {
+.doc-page-loading:not([hidden]),
+html[data-k3-booting] .doc-page-loading {
   display: flex;
 }
 .doc-page-loading[hidden]:not(.is-on) {
@@ -445,6 +445,31 @@ html:has(.app[data-nav='rail']) {
 }
 .doc-page-loading k3-loading-indicator {
   --k3-loading-size: 3.5rem;
+}
+/* Pre-CE SoftBurst stand-in (same as critical CSS in index.html) */
+.doc-page-loading k3-loading-indicator:not(:defined) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--k3-loading-size, 3.5rem);
+  height: var(--k3-loading-size, 3.5rem);
+  border-radius: 50%;
+  background: var(--k3-sys-color-primary-container, #e8def8);
+  color: var(--k3-sys-color-on-primary-container, #4a4458);
+}
+.doc-page-loading k3-loading-indicator:not(:defined) svg {
+  width: 79.166%;
+  height: 79.166%;
+  display: block;
+  animation: k3-loading-spin 4666ms linear infinite;
+}
+.doc-page-loading k3-loading-indicator:not(:defined) path {
+  fill: currentColor;
+}
+@keyframes k3-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .doc-page-loading-label {
   font-size: var(--k3-sys-typescale-label-large-size, 0.875rem);
@@ -1489,10 +1514,164 @@ k3-avatar [slot='badge'].ms {
   line-height: 1.5;
 }
 
+/* —— Home · hero banner (noph-style morph frame) —— */
+.home-hero-banner {
+  isolation: isolate;
+  box-sizing: border-box;
+  position: relative;
+  overflow: clip;
+  display: grid;
+  gap: 2rem;
+  margin: 1rem 0 1.5rem;
+  padding: 3rem 1.5rem;
+  border-radius: var(--k3-sys-shape-corner-extra-large, 1.75rem);
+  color: var(--k3-sys-color-on-primary-container);
+  background: linear-gradient(
+    140deg,
+    var(--k3-sys-color-primary-container),
+    var(--k3-sys-color-tertiary-container)
+  );
+}
+.home-hero-banner__glow {
+  position: absolute;
+  inset: -25%;
+  z-index: -1;
+  opacity: 0.5;
+  filter: blur(60px);
+  pointer-events: none;
+  background:
+    radial-gradient(
+      35% 35% at 20% 30%,
+      var(--k3-sys-color-primary-fixed, var(--k3-sys-color-primary-container)) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      40% 40% at 80% 70%,
+      var(--k3-sys-color-tertiary-fixed, var(--k3-sys-color-tertiary-container)) 0%,
+      transparent 100%
+    );
+}
+.home-hero-banner__copy {
+  max-width: 32rem;
+  position: relative;
+  z-index: 1;
+}
+.home-hero-banner .hero-title {
+  margin: 0.5rem 0 0;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-size: clamp(2.75rem, 8vw, 4.5rem);
+  color: inherit;
+}
+.home-hero-banner .hero-lead {
+  max-width: none;
+  margin: 1rem 0 0;
+  color: color-mix(in srgb, var(--k3-sys-color-on-primary-container) 88%, transparent);
+}
+.home-hero-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.home-hero-morph {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: min(20rem, 70vw);
+  justify-self: center;
+  z-index: 1;
+}
+/* Spin on a DIV wrapper — CSS transform on the SVG freezes SMIL `d` morph paint. */
+.home-hero-morph__shape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  transform-origin: 50% 50%;
+  animation: home-hero-morph-turn var(--home-hero-morph-turn, 120s) linear infinite;
+  will-change: transform;
+}
+.home-hero-morph__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  /* No CSS transform here — SMIL owns path morph. */
+}
+.home-hero-morph__shape--back {
+  color: var(--k3-sys-color-tertiary-fixed-dim, var(--k3-sys-color-tertiary-fixed, var(--k3-sys-color-tertiary)));
+  opacity: 0.75;
+  --home-hero-morph-turn: 150s;
+}
+.home-hero-morph__shape--mid {
+  color: var(--k3-sys-color-primary-fixed, var(--k3-sys-color-primary));
+  --home-hero-morph-turn: 110s;
+}
+.home-hero-morph__shape--front {
+  color: var(--k3-sys-color-secondary-fixed, var(--k3-sys-color-secondary-container));
+  --home-hero-morph-turn: 90s;
+}
+.home-hero-morph__still {
+  display: none;
+}
+.home-hero-morph__mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--k3-sys-color-on-primary-fixed, var(--k3-sys-color-on-primary));
+  pointer-events: none;
+}
+.home-hero-morph__k {
+  font-family: var(--k3-sys-typescale-display-large-font, inherit);
+  font-size: clamp(3.5rem, 12vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  user-select: none;
+}
+@keyframes home-hero-morph-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (width >= 768px) {
+  .home-hero-banner {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 4rem 3rem;
+  }
+  .home-hero-banner .hero-title {
+    font-size: clamp(3.5rem, 6vw, 6rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-morph__shape {
+    animation: none;
+  }
+  .home-hero-morph__animated {
+    display: none;
+  }
+  .home-hero-morph__still {
+    display: block;
+  }
+}
+html[data-k3-reduce-motion] .home-hero-morph__shape {
+  animation: none;
+}
+html[data-k3-reduce-motion] .home-hero-morph__animated {
+  display: none;
+}
+html[data-k3-reduce-motion] .home-hero-morph__still {
+  display: block;
+}
+
 /* —— Home · Material.io-style ambient shapes (full shell surface, not container) —— */
 .home-hero {
   margin-bottom: 2rem;
-  padding-block: clamp(1.5rem, 4vw, 3rem) 1.25rem;
+  padding-block: 0.5rem 1.25rem;
 }
 .home-hero .hero-title {
   font-size: clamp(2.75rem, 6vw, 4.25rem);
@@ -1933,15 +2112,15 @@ html[data-k3-reduce-motion] .home-ambient__shape {
   min-width: max-content;
 }
 /*
- * Heart-burst demos — particles rise above the control; never clip the rain
+ * icons-burst demos — particles rise above the control; never clip the rain
  * at the stage / frame edge. Content + pouces centered in each column.
  */
-.demo-frame--heart-burst {
+.demo-frame--icons-burst {
   overflow: visible;
   overflow-x: visible;
   overflow-y: visible;
 }
-.demo-frame--cases.grid-3.demo-frame--heart-burst > .demo-case {
+.demo-frame--cases.grid-3.demo-frame--icons-burst > .demo-case {
   align-items: center !important;
   overflow: visible;
   z-index: 2;
@@ -1961,17 +2140,17 @@ html[data-k3-reduce-motion] .home-ambient__shape {
   /* Room above for rising stars — card fills column width */
   padding: 2.75rem 0.5rem 1.25rem;
 }
-.demo-frame--cases.grid-3 .demo-case-stage--burst > k3-heart-burst:not([block]) {
+.demo-frame--cases.grid-3 .demo-case-stage--burst > k3-icons-burst:not([block]) {
   width: fit-content !important;
   max-width: 100%;
   margin-inline: auto;
 }
-.demo-frame--cases.grid-3 .demo-case-stage--burst-card > k3-heart-burst[block] {
+.demo-frame--cases.grid-3 .demo-case-stage--burst-card > k3-icons-burst[block] {
   width: 100% !important;
   max-width: 100%;
   margin-inline: auto;
 }
-.demo-frame--heart-burst > .demo-case > .demo-case-num {
+.demo-frame--icons-burst > .demo-case > .demo-case-num {
   align-self: center;
   margin-inline: auto;
 }

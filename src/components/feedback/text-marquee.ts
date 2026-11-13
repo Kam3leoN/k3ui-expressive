@@ -1,13 +1,14 @@
 /**
- * AOSP-style single-line text marquee (same behavior as `k3-button-smart`).
+ * AOSP-style single-line text marquee (button-smart · audio-player · …).
  * Track = [label][gap][ghost]; Web Animations API translate; reduced-motion → static.
  */
 import { prefersReducedMotion } from '../../core/index.js';
 import {
-  ButtonSmartMarqueeDelayMs,
-  ButtonSmartMarqueeDpPerSecond,
-  ButtonSmartMarqueeRestartDelayMs,
-} from '../actions/button-smart.specs.js';
+  TextMarqueeDelayMs,
+  TextMarqueeDpPerSecond,
+  TextMarqueeMinGapPx,
+  TextMarqueeRestartDelayMs,
+} from './text-marquee.specs.js';
 
 export type TextMarqueeOptions = {
   delayMs?: number;
@@ -33,23 +34,25 @@ export function attachTextMarquee(
   marquee: HTMLElement,
   opts: TextMarqueeOptions = {},
 ): TextMarqueeHandle {
-  const delayMs = opts.delayMs ?? ButtonSmartMarqueeDelayMs;
-  const restartDelayMs = opts.restartDelayMs ?? ButtonSmartMarqueeRestartDelayMs;
-  const dpPerSecond = opts.dpPerSecond ?? ButtonSmartMarqueeDpPerSecond;
-  const minGapPx = opts.minGapPx ?? 24;
+  const delayMs = opts.delayMs ?? TextMarqueeDelayMs;
+  const restartDelayMs = opts.restartDelayMs ?? TextMarqueeRestartDelayMs;
+  const dpPerSecond = opts.dpPerSecond ?? TextMarqueeDpPerSecond;
+  const minGapPx = opts.minGapPx ?? TextMarqueeMinGapPx;
 
   let animation: Animation | null = null;
   let restartTimer: ReturnType<typeof setTimeout> | undefined;
   let disposed = false;
 
-  const track =
-    () =>
-      (marquee.querySelector('.meta-track, .track') as HTMLElement | null);
-  const label =
-    () =>
-      (marquee.querySelector(
-        '.meta-label:not(.ghost), .label:not(.ghost)',
-      ) as HTMLElement | null);
+  const track = (): HTMLElement | null =>
+    marquee.querySelector('.meta-track, .track');
+  const label = (): HTMLElement | null =>
+    marquee.querySelector('.meta-label:not(.ghost), .label:not(.ghost)');
+
+  const clearGapVars = (t: HTMLElement): void => {
+    t.style.removeProperty('--k3-text-marquee-gap');
+    /* Legacy alias used by older button-smart CSS */
+    t.style.removeProperty('--k3-button-smart-marquee-gap');
+  };
 
   const cancel = (): void => {
     animation?.cancel();
@@ -61,11 +64,11 @@ export function attachTextMarquee(
     const t = track();
     if (t) {
       t.style.transform = '';
-      t.style.removeProperty('--k3-text-marquee-gap');
+      clearGapVars(t);
     }
   };
 
-  const stop = (): void => {
+  const clearScrolling = (): void => {
     cancel();
     marquee.classList.remove('scrolling');
     marquee.removeAttribute('data-scrolling');
@@ -76,7 +79,7 @@ export function attachTextMarquee(
     cancel();
     const textEl = label();
     if (!textEl) {
-      stop();
+      clearScrolling();
       return;
     }
 
@@ -87,13 +90,13 @@ export function attachTextMarquee(
     textEl.style.maxWidth = prevMax;
 
     if (containerWidth <= 0 || textWidth <= 0) {
-      stop();
+      clearScrolling();
       return;
     }
 
     const overflow = textWidth - containerWidth;
     if (overflow <= 0 || prefersReducedMotion()) {
-      stop();
+      clearScrolling();
       return;
     }
 
@@ -104,7 +107,9 @@ export function attachTextMarquee(
     if (!t) return;
 
     const gap = Math.max(containerWidth, minGapPx);
-    t.style.setProperty('--k3-text-marquee-gap', `${gap}px`);
+    const gapCss = `${gap}px`;
+    t.style.setProperty('--k3-text-marquee-gap', gapCss);
+    t.style.setProperty('--k3-button-smart-marquee-gap', gapCss);
     void t.offsetWidth;
 
     const distance = textWidth + gap;
@@ -134,7 +139,15 @@ export function attachTextMarquee(
     refresh,
     stop: () => {
       disposed = true;
-      stop();
+      clearScrolling();
     },
   };
 }
+
+export {
+  TextMarqueeDelayMs,
+  TextMarqueeDpPerSecond,
+  TextMarqueeMinGapPx,
+  TextMarqueeRestartDelayMs,
+  TextMarqueeSpecs,
+} from './text-marquee.specs.js';

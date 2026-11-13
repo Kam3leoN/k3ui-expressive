@@ -2,7 +2,59 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.2.0] — 2026-11-13
+
+### Changed — Date / time picker open motion (Noph / dialog spring)
+
+- `k3-date-picker` / `k3-time-picker` open with the same FastSpatial **scaleY** spring as menus and basic dialogs (`enterScaleYPopover`) — replaces the short2 / standard fade; **scaleY close** via `data-closing`
+- Modal pickers use **center** transform-origin (like `enterDialogMotion`); docked keeps top / flip-bottom
+- Docked: prefer below the **field outline** (8dp gap); flip above only when below is tight; `data-clip` + overflow auto so dial cannot paint over the field
+- Dial face enter/leave uses **spatial-fast** (snappier than panel morph)
+- Modal scrim: pickers join `overlayStack`; `wouldOpenBeside` blocks a second dialog/picker beside an open scrim (nested from inside still OK)
+- Motion: `allowsExpressiveMotion()` — **standard** / reduce = brute (no spring enter/exit / dial morph); expressive keeps springs
+- Time dial while open: **dial ↔ keyboard** scales the face (0.8↔1) and **morphSize**s the panel height (Noph `setMode`); hand angle unwraps the short way (11→12 = +30°)
+- `morphSize` / `spatialDefaultTiming` in `src/motion/morph.ts`
+- Tests: dial enter/leave, docked top parity, overlay beside-scrim
+
+### Changed — `k3-nav-rail` (M3 Expressive)
+
+- `layout` `modal` (default) · `standard` — modal = flush start edge + end-side radii; standard = flush rail, no inset sheet; elevation-1 on compact and expanded; `appearance` kept as alias
+- `position` `start` · `center` · `bottom` — leading destinations group alignment
+- Slots `leading` / `trailing` (horizontal divider); deprecated `foot` still works
+- Compact: end border removed in favour of elevation level 1
+
+### Added — Lighthouse gauges on the playground home
+
+- Section "Lighthouse K3[UI] scores": four 270° gauges (curved label, icon, value, Lighthouse colour bands 0–49 / 50–89 / 90–100 with legend), Desktop / Mobile tabs, FCP / LCP / TBT / CLS / Speed Index with band shapes (not colour only), last audit date and Lighthouse version. Gauges animate to each new score (reduced motion: instant), `role="meter"` with values
+- Stored audit `playground/public/lighthouse.json` (`npm run lighthouse`: Lighthouse 12.8.2 in Chromium, desktop + mobile)
+- Live audit button: dev / preview server endpoint `/__k3-lighthouse` (`run`, `ping`, full HTML `report`) running Lighthouse in headless Chromium — loopback clients with a localhost Host header only, same-origin paths only, one audit at a time; PageSpeed Insights on public hosts
+- Loaded on demand when the section nears the viewport: no change to the home start-up (Lighthouse home desktop 100 / 100 / 100 / 100, mobile 97–99); its strings are merged with `i18n.extend()` from the section module, not added to the library catalogs
+- Tests: 8 unit (summary, bands, arc, endpoint guards), 3 e2e (stored scores per form factor, live run with spinner then animation, no endpoint)
+
+### Added — `k3-coverflow` / `k3-coverflow-item`
+
+- `effect="slide"`: carousel without the 3D effect — covers side by side filling the viewport (as many as reach the edges), the centred one growing to `active-scale` (default 1.4) with the neighbours making room continuously (no overlap while sliding); horizontal and vertical, 1:1 drag, same lightbox / arrows / bullets / flip / optional mirror reflection as coverflow. `coverflowSlidePose()`, `coverflowSlideVisible()`. Playground toolbar Coverflow|Slide + Horizontal|Vertical; 7 unit tests, 1 e2e test
+
+- `orientation="vertical"`: covers stacked top to bottom on the y axis, tilting around x towards the centre, fading at the top and bottom edges; ↑ ↓ keys, vertical drag (touch `pan-x`) and wheel, up / down arrows on the side, bullet column with the active bullet 3× taller, flip covers turn over around x, no reflection; viewport height `--k3-coverflow-height`; `full-width` fits the covers to the top and bottom edges. Playground toolbar Horizontal|Vertical, 5 unit tests, 1 e2e test
+
+- 3D cover flow: centred cover facing the viewer, side covers turned towards it, mirror reflection (`no-reflection`), endless loop by default (`mode="bounded"` to stop at the ends). Covers only — no captions, categories or scrollbar
+- Each cover is a link (`href` / `target` / `rel`, unsafe schemes dropped, `noopener noreferrer` added for `_blank`) or turns over (`flip`, `slot="back"`, `k3-flip`, cancelable through `k3-change-start`); a side cover first comes to the centre on click
+- Drag / swipe with momentum (exact critically damped spring, rubber band when bounded), arrow keys / Home / End with roving focus (RTL mirrored), horizontal wheel (`wheel` for the vertical one); `goTo()`, `next()`, `prev()`, `index`, `k3-change`; geometry props `angle`, `gap`, `spacing`, `depth`, `visible`
+- A11y: `region` with `aria-roledescription`, covers named "alt (n of total)", off-centre covers `aria-hidden` and out of the tab order, live announcement; reduced motion: instant moves and flips
+- `lightbox`: the centred link cover opens its image in a built-in viewer — scrim, top layer through the Popover API (no `<dialog>`, no new tab), image preloaded before it opens, ← → / side buttons / swipe move the covers and the image, Escape / scrim / close button, focus trapped and returned to the centred cover, Escape shared with the modal overlay stack; `open()`, `close()`, `k3-open`, `k3-close`; link gets `aria-haspopup="dialog"`
+- `arrows`: previous / next side buttons (hidden at the ends when bounded, mirrored in RTL)
+- `bullets`: one per cover, the active one 3× wider — width and colour follow the stage position frame by frame (drag included); roving focus, `aria-current`
+- `full-width`: side covers and spacing computed (`coverflowFit`, perspective-exact `coverflowExtent`) so the covers reach both edges of the container; refitted on resize
+- Direction read from the element's own computed style (arrows / bullets and covers always agree)
+- Playground page `#/coverflow` (lightbox, flip and full-width demos), usage snippet, API tables. Demo images are royalty-free only: ten scenes painted from code (CC0, `scripts/coverflow-art.py`) and four CC0 / public-domain photos from the scikit-image sample data — `playground/public/coverflow/CREDITS.md`
+- Tests: 32 unit tests, 8 e2e tests
+- Bundle budget 610 → 620 kB gzip (`k3ui.js` 616.9 kB: +10.1 kB with the component, its options and doc strings)
+
+### Tests — suite élargie (see `docs/TESTING.md`)
+
+- Playwright : projets mobile Chromium (Pixel 5 + iPhone 12 metrics), specs clavier, mémoire, stress, visuel (snapshots), concurrent destroy/recreate ; CI `e2e` avec `K3UI_E2E_MOBILE=1`
+- Vitest : fuzz sanitizer HTML/SVG, matrice config init, lifecycle registre, composants simultanés
+- Budgets bundle JS **620** / CSS 28 kB gzip (relevé pour `k3-coverflow` + lightbox / arrows / bullets)
 
 ### Lighthouse — playground (see `docs/LIGHTHOUSE_2026-11.md`)
 

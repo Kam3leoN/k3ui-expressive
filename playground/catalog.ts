@@ -1,12 +1,17 @@
 /**
  * Docs catalog — one entry per component (material.io /components style).
+ * `product` scopes UI (k3ui) vs UX animations (k3ux) in the shared Vercel doc.
  */
+export type DocProduct = 'k3ui' | 'k3ux';
+
 export interface DocComponent {
   id: string;
   category: string;
   title: string;
   titleKey: string;
   blurbKey: string;
+  /** Defaults to `k3ui`. */
+  product?: DocProduct;
 }
 
 export const DOC_CATEGORIES = [
@@ -23,6 +28,22 @@ export const DOC_CATEGORIES = [
   'Resources',
 ] as const;
 
+let activeDocProduct: DocProduct = 'k3ui';
+
+export function getDocProduct(): DocProduct {
+  return activeDocProduct;
+}
+
+export function setDocProduct(product: DocProduct): void {
+  if (activeDocProduct === product) return;
+  activeDocProduct = product;
+  byCategory.clear();
+}
+
+function matchesDocProduct(c: DocComponent): boolean {
+  return (c.product ?? 'k3ui') === activeDocProduct;
+}
+
 /**
  * Nav / catalog labels follow **Family → Type**, then alphabetical.
  * Base type = family name alone (e.g. "Buttons", "FAB").
@@ -35,7 +56,10 @@ export const DOC_CATEGORIES = [
 export const PAGE_ID_ALIASES: Record<string, string> = {
   button: 'buttons',
   'icon-button': 'buttons-icon',
-  'button-arrow': 'buttons-arrow',
+  'button-arrow': 'buttons-group',
+  'buttons-arrow': 'buttons-group',
+  'button-card': 'buttons',
+  'buttons-card': 'buttons',
   'button-grid': 'buttons-grid',
   'button-group': 'buttons-group',
   'button-menu': 'buttons-menu',
@@ -56,6 +80,8 @@ export const PAGE_ID_ALIASES: Record<string, string> = {
   'm2-colors': 'color-extras',
   /* Styles → Icons removed — full catalog lives under Resources */
   icons: 'material-symbols',
+  /* k3ux — heart-burst renamed icons-burst (icon prop is choosable) */
+  'heart-burst': 'icons-burst',
 };
 
 /** Canonical page id (applies aliases). */
@@ -64,27 +90,13 @@ export function resolvePageId(id: string): string {
 }
 
 export const DOC_COMPONENTS: DocComponent[] = [
-  // Buttons — Family Type · alpha: Arrow · Grid · Group · Icon · Menu · Pad · Pill · Smart · Split
+  // Buttons — Family Type · alpha: Grid · Group · Icon · Menu · Pad · Pill · Smart · Split
   {
     id: 'buttons',
     category: 'Buttons',
     title: 'Buttons',
     titleKey: 'doc.button.title',
     blurbKey: 'doc.button.blurb',
-  },
-  {
-    id: 'buttons-arrow',
-    category: 'Buttons',
-    title: 'Buttons Arrow',
-    titleKey: 'doc.button-arrow.title',
-    blurbKey: 'doc.button-arrow.blurb',
-  },
-  {
-    id: 'buttons-card',
-    category: 'Buttons',
-    title: 'Buttons Card',
-    titleKey: 'doc.button-card.title',
-    blurbKey: 'doc.button-card.blurb',
   },
   {
     id: 'buttons-grid',
@@ -283,6 +295,7 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Signature',
     titleKey: 'doc.signature.title',
     blurbKey: 'doc.signature.blurb',
+    product: 'k3ux',
   },
   {
     id: 'slider',
@@ -297,6 +310,7 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Rating',
     titleKey: 'doc.rating.title',
     blurbKey: 'doc.rating.blurb',
+    product: 'k3ux',
   },
   {
     id: 'date-picker',
@@ -325,6 +339,7 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Wheel picker',
     titleKey: 'doc.wheel-picker.title',
     blurbKey: 'doc.wheel-picker.blurb',
+    product: 'k3ux',
   },
   // Feedback
   {
@@ -396,6 +411,7 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Countdown',
     titleKey: 'doc.countdown.title',
     blurbKey: 'doc.countdown.blurb',
+    product: 'k3ux',
   },
   {
     id: 'marquee',
@@ -403,13 +419,7 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Marquee',
     titleKey: 'doc.marquee.title',
     blurbKey: 'doc.marquee.blurb',
-  },
-  {
-    id: 'confetti',
-    category: 'Feedback',
-    title: 'Confetti',
-    titleKey: 'doc.confetti.title',
-    blurbKey: 'doc.confetti.blurb',
+    product: 'k3ux',
   },
   {
     id: 'sound-fx',
@@ -417,50 +427,48 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Sound FX',
     titleKey: 'doc.sound-fx.title',
     blurbKey: 'doc.sound-fx.blurb',
+    product: 'k3ux',
+  },
+  // k3ux — decorative UX / animations (companion package)
+  {
+    id: 'confetti',
+    category: 'Animation',
+    title: 'Confetti',
+    titleKey: 'doc.confetti.title',
+    blurbKey: 'doc.confetti.blurb',
+    product: 'k3ux',
   },
   {
-    id: 'audio-player',
-    category: 'Feedback',
-    title: 'Audio player',
-    titleKey: 'doc.audio-player.title',
-    blurbKey: 'doc.audio-player.blurb',
+    id: 'snow',
+    category: 'Animation',
+    title: 'Snow',
+    titleKey: 'doc.snow.title',
+    blurbKey: 'doc.snow.blurb',
+    product: 'k3ux',
   },
   {
-    id: 'qr-code',
-    category: 'Feedback',
-    title: 'QR code',
-    titleKey: 'doc.qr-code.title',
-    blurbKey: 'doc.qr-code.blurb',
-  },
-  // Charts — bar / line / other (k3-chart pages)
-  {
-    id: 'charts-bar',
-    category: 'Charts',
-    title: 'Bar charts',
-    titleKey: 'doc.charts-bar.title',
-    blurbKey: 'doc.charts-bar.blurb',
+    id: 'firework',
+    category: 'Animation',
+    title: 'Firework',
+    titleKey: 'doc.firework.title',
+    blurbKey: 'doc.firework.blurb',
+    product: 'k3ux',
   },
   {
-    id: 'charts-line',
-    category: 'Charts',
-    title: 'Line charts',
-    titleKey: 'doc.charts-line.title',
-    blurbKey: 'doc.charts-line.blurb',
+    id: 'voice-ring',
+    category: 'Animation',
+    title: 'Voice ring',
+    titleKey: 'doc.voice-ring.title',
+    blurbKey: 'doc.voice-ring.blurb',
+    product: 'k3ux',
   },
-  {
-    id: 'charts-other',
-    category: 'Charts',
-    title: 'Other charts',
-    titleKey: 'doc.charts-other.title',
-    blurbKey: 'doc.charts-other.blurb',
-  },
-  // Animation — decorative WAAPI effects (extend with morph / particles later)
   {
     id: 'text-bounce',
     category: 'Animation',
     title: 'Text bounce',
     titleKey: 'doc.text-bounce.title',
     blurbKey: 'doc.text-bounce.blurb',
+    product: 'k3ux',
   },
   {
     id: 'text-scramble',
@@ -468,13 +476,15 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Text scramble',
     titleKey: 'doc.text-scramble.title',
     blurbKey: 'doc.text-scramble.blurb',
+    product: 'k3ux',
   },
   {
-    id: 'heart-burst',
+    id: 'icons-burst',
     category: 'Animation',
-    title: 'Heart burst',
-    titleKey: 'doc.heart-burst.title',
-    blurbKey: 'doc.heart-burst.blurb',
+    title: 'Icons burst',
+    titleKey: 'doc.icons-burst.title',
+    blurbKey: 'doc.icons-burst.blurb',
+    product: 'k3ux',
   },
   {
     id: 'halftone',
@@ -482,8 +492,74 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Halftone',
     titleKey: 'doc.halftone.title',
     blurbKey: 'doc.halftone.blurb',
+    product: 'k3ux',
   },
-  // Containment
+  {
+    id: 'card-holo',
+    category: 'Containment',
+    title: 'Card holographic',
+    titleKey: 'doc.card-holo.title',
+    blurbKey: 'doc.card-holo.blurb',
+    product: 'k3ux',
+  },
+  {
+    id: 'card-lenticular',
+    category: 'Containment',
+    title: 'Card lenticular',
+    titleKey: 'doc.card-lenticular.title',
+    blurbKey: 'doc.card-lenticular.blurb',
+    product: 'k3ux',
+  },
+  {
+    id: 'card-scratch',
+    category: 'Containment',
+    title: 'Card scratch',
+    titleKey: 'doc.card-scratch.title',
+    blurbKey: 'doc.card-scratch.blurb',
+    product: 'k3ux',
+  },
+  {
+    id: 'audio-player',
+    category: 'Feedback',
+    title: 'Audio player',
+    titleKey: 'doc.audio-player.title',
+    blurbKey: 'doc.audio-player.blurb',
+    product: 'k3ux',
+  },
+  {
+    id: 'qr-code',
+    category: 'Feedback',
+    title: 'QR code',
+    titleKey: 'doc.qr-code.title',
+    blurbKey: 'doc.qr-code.blurb',
+    product: 'k3ux',
+  },
+  // Charts — bar / line / other (k3-chart pages) → k3ux
+  {
+    id: 'charts-bar',
+    category: 'Charts',
+    title: 'Bar charts',
+    titleKey: 'doc.charts-bar.title',
+    blurbKey: 'doc.charts-bar.blurb',
+    product: 'k3ux',
+  },
+  {
+    id: 'charts-line',
+    category: 'Charts',
+    title: 'Line charts',
+    titleKey: 'doc.charts-line.title',
+    blurbKey: 'doc.charts-line.blurb',
+    product: 'k3ux',
+  },
+  {
+    id: 'charts-other',
+    category: 'Charts',
+    title: 'Other charts',
+    titleKey: 'doc.charts-other.title',
+    blurbKey: 'doc.charts-other.blurb',
+    product: 'k3ux',
+  },
+  // Containment — decorative card effects (holo / lenticular / scratch) live in `k3ux`
   {
     id: 'avatar',
     category: 'Containment',
@@ -520,33 +596,18 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.carousel.blurb',
   },
   {
+    id: 'coverflow',
+    category: 'Containment',
+    title: 'Cover flow',
+    titleKey: 'doc.coverflow.title',
+    blurbKey: 'doc.coverflow.blurb',
+  },
+  {
     id: 'card',
     category: 'Containment',
     title: 'Cards',
     titleKey: 'doc.card.title',
     blurbKey: 'doc.card.blurb',
-  },
-  // Cards family — submenu under Containment (Standard + effect demos)
-  {
-    id: 'card-holo',
-    category: 'Containment',
-    title: 'Card holographic',
-    titleKey: 'doc.card-holo.title',
-    blurbKey: 'doc.card-holo.blurb',
-  },
-  {
-    id: 'card-lenticular',
-    category: 'Containment',
-    title: 'Card lenticular',
-    titleKey: 'doc.card-lenticular.title',
-    blurbKey: 'doc.card-lenticular.blurb',
-  },
-  {
-    id: 'card-scratch',
-    category: 'Containment',
-    title: 'Card scratch',
-    titleKey: 'doc.card-scratch.title',
-    blurbKey: 'doc.card-scratch.blurb',
   },
   {
     id: 'menu',
@@ -568,6 +629,7 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Iso filter',
     titleKey: 'doc.iso-filter.title',
     blurbKey: 'doc.iso-filter.blurb',
+    product: 'k3ux',
   },
   {
     id: 'masonry',
@@ -575,6 +637,7 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Masonry',
     titleKey: 'doc.masonry.title',
     blurbKey: 'doc.masonry.blurb',
+    product: 'k3ux',
   },
   {
     id: 'table',
@@ -718,7 +781,7 @@ export const DOC_COMPONENTS: DocComponent[] = [
     titleKey: 'doc.scrollbar.title',
     blurbKey: 'doc.scrollbar.blurb',
   },
-  // Styles — Color family (submenu under Color in Styles nav)
+  // Styles — k3ui pack only
   {
     id: 'color-roles',
     category: 'Styles',
@@ -754,12 +817,14 @@ export const DOC_COMPONENTS: DocComponent[] = [
     titleKey: 'doc.grid.title',
     blurbKey: 'doc.grid.blurb',
   },
+  /* Resources (Material Symbols browser) — k3ux companion pack */
   {
     id: 'material-symbols',
     category: 'Resources',
     title: 'Material Symbols',
     titleKey: 'doc.material-symbols.title',
     blurbKey: 'doc.material-symbols.blurb',
+    product: 'k3ux',
   },
   {
     id: 'motion',
@@ -803,10 +868,13 @@ const byCategory = new Map<string, readonly DocComponent[]>();
 
 /** Components in a category, sorted Family → Type (alpha). Fresh array, memoized sort. */
 export function componentsInCategory(category: string): DocComponent[] {
-  let sorted = byCategory.get(category);
+  const cacheKey = `${activeDocProduct}:${category}`;
+  let sorted = byCategory.get(cacheKey);
   if (!sorted) {
-    sorted = DOC_COMPONENTS.filter((c) => c.category === category).sort(compareDocTitle);
-    byCategory.set(category, sorted);
+    sorted = DOC_COMPONENTS.filter((c) => c.category === category && matchesDocProduct(c)).sort(
+      compareDocTitle,
+    );
+    byCategory.set(cacheKey, sorted);
   }
   return [...sorted];
 }
@@ -834,6 +902,12 @@ export function orderedComponents(): DocComponent[] {
 }
 
 export function findComponent(id: string): DocComponent | undefined {
+  const canonical = resolvePageId(id);
+  return DOC_COMPONENTS.find((c) => c.id === canonical && matchesDocProduct(c));
+}
+
+/** Any product — used when switching packs so deep links can flip the switch. */
+export function findComponentAnyProduct(id: string): DocComponent | undefined {
   const canonical = resolvePageId(id);
   return DOC_COMPONENTS.find((c) => c.id === canonical);
 }

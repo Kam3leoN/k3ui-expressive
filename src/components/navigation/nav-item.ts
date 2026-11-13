@@ -284,6 +284,9 @@ export class K3NavItem extends K3Element {
         min-height: 0;
         padding: 0;
         width: auto;
+        transition:
+          min-height var(--k3-nav-pill-motion),
+          padding var(--k3-nav-pill-motion);
       }
       :host([layout='horizontal']) .shell {
         display: inline-flex;
@@ -295,6 +298,12 @@ export class K3NavItem extends K3Element {
         height: var(--k3-nav-pill-h-row);
         padding: 0;
         padding-inline: var(--k3-nav-pill-pad-inline);
+        transition:
+          width var(--k3-nav-pill-motion),
+          height var(--k3-nav-pill-motion),
+          gap var(--k3-nav-pill-motion),
+          padding var(--k3-nav-pill-motion),
+          padding-inline var(--k3-nav-pill-motion);
       }
       :host([layout='horizontal']) .label {
         display: flex;
@@ -303,23 +312,87 @@ export class K3NavItem extends K3Element {
         font-size: var(--k3-sys-typescale-label-large-size, 0.875rem);
         line-height: 1;
         text-align: start;
-        max-width: none;
+        max-width: 12rem;
+        opacity: 1;
+        overflow: hidden;
+        transition:
+          max-width var(--k3-nav-pill-motion),
+          opacity var(--k3-nav-pill-effects),
+          height var(--k3-nav-pill-motion),
+          font-size var(--k3-nav-pill-effects),
+          color var(--k3-sys-motion-duration-short4)
+            var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects));
       }
       :host([layout='horizontal'][active]) .label {
         color: var(--k3-sys-color-on-secondary-container);
       }
 
-      /* Rail large — full-width destination row */
-      :host([layout='horizontal']):host-context(k3-nav-rail) {
+      /*
+       * Rail destinations — compact track + start-aligned expand morph.
+       * Spatial = geometry · effects = label opacity (M3E).
+       */
+      :host([layout='horizontal']):host-context(k3-nav-rail),
+      :host([layout='vertical']):host-context(k3-nav-rail) {
+        --k3-nav-icon-track: calc(var(--k3-nav-rail-compact, 6.5rem) - 1rem);
         width: 100%;
         align-self: stretch;
+        display: flex;
+        justify-content: flex-start;
       }
       :host([layout='horizontal']):host-context(k3-nav-rail) .item {
         width: 100%;
+        justify-content: flex-start;
       }
       :host([layout='horizontal']):host-context(k3-nav-rail) .shell {
         width: 100%;
         justify-content: flex-start;
+      }
+      :host([layout='vertical']):host-context(k3-nav-rail) .item {
+        width: min(100%, var(--k3-nav-icon-track));
+        max-width: var(--k3-nav-icon-track);
+        margin-inline: auto;
+        align-items: center;
+      }
+      :host([layout='vertical']):host-context(k3-nav-rail) .label {
+        opacity: 1;
+        transition: color var(--k3-nav-pill-effects);
+      }
+
+      /* Expand tuck — icon inset fixed; label reveals beside it */
+      :host([layout='horizontal']):host-context(k3-nav-rail[data-expanding]) {
+        display: flex;
+        justify-content: flex-start;
+      }
+      :host([layout='horizontal']):host-context(k3-nav-rail[data-expanding]) .shell {
+        width: var(--k3-nav-pill-w);
+        height: var(--k3-nav-pill-h);
+        max-width: var(--k3-nav-pill-w);
+        padding-inline: 1rem 0;
+        gap: 0;
+        justify-content: flex-start;
+        transition:
+          width var(--k3-nav-pill-motion),
+          height var(--k3-nav-pill-motion),
+          max-width var(--k3-nav-pill-motion),
+          gap var(--k3-nav-pill-motion),
+          padding-inline var(--k3-nav-pill-motion);
+      }
+      :host([layout='horizontal']):host-context(k3-nav-rail[data-expanding]) .label {
+        max-width: 0;
+        opacity: 0;
+        height: 0;
+        padding: 0;
+        margin: 0;
+        transition:
+          max-width var(--k3-nav-pill-motion),
+          height var(--k3-nav-pill-motion),
+          opacity var(--k3-nav-pill-effects);
+      }
+      :host([layout='horizontal']):host-context(k3-nav-rail[data-expanding]) .item {
+        justify-content: flex-start;
+        transition:
+          min-height var(--k3-nav-pill-motion),
+          padding var(--k3-nav-pill-motion);
       }
     `,
   ];

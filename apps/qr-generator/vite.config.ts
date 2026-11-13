@@ -10,6 +10,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@k3ui': k3src,
+      '@k3ux': resolve(__dirname, '../../../k3ux/src'),
+      k3ui: resolve(__dirname, '../../src/index.ts'),
+      k3ux: resolve(__dirname, '../../../k3ux/src/index.ts'),
     },
   },
   server: {
@@ -17,6 +20,9 @@ export default defineConfig({
     strictPort: true,
     open: false,
     host: true,
+    fs: {
+      allow: [resolve(__dirname, '../..'), resolve(__dirname, '../../../k3ux')],
+    },
   },
   preview: {
     port: 4174,

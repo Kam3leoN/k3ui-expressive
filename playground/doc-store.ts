@@ -71,4 +71,8 @@ export const DocKeys = {
   uiGrid: 'ui.grid',
   /** Animations enabled (default true). false → data-k3-reduce-motion */
   uiAnimations: 'ui.animations',
+  /** Shell-wide snowfall overlay (independent from Snow demo page). */
+  uiSnow: 'ui.snow',
+  /** Docs pack: k3ui (UI) or k3ux (UX animations) */
+  docProduct: 'doc.product',
 } as const;

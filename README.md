@@ -138,39 +138,59 @@ own `inks`), each ink gets its own rotated screen and dot sizes follow the tones
 Cross-origin images need CORS (`crossorigin="anonymous"`) — otherwise the component falls back
 to its CSS dot overlay and fires `k3-error`. Any other slotted content keeps that overlay.
 
-## Card effects
+## Animations & card effects (`k3ux`)
 
-Three decorative cards for collectible or reward UIs — mouse, touch, keyboard and, after
-`enableMotion()` (call it from a tap), the device tilt.
+Decorative UX effects (confetti, text bounce/scramble, heart burst, halftone, holo / scratch /
+lenticular cards) live in the companion package **`k3ux`** so `k3ui` stays UI-only.
 
-```html
-<k3-holo-card><img src="card.png" alt="Aurora crystal" /></k3-holo-card>
-
-<k3-scratch-card cover="gold" type="spray">
-  <img src="prize.png" alt="You won a rare card" />
-</k3-scratch-card>
-
-<k3-lenticular-card>
-  <img src="day.jpg" alt="The city by day" />
-  <img src="night.jpg" alt="The city by night" />
-</k3-lenticular-card>
+```bash
+npm i k3ui k3ux
 ```
-
-`k3-holo-card` ships one foil, `prism`. Thirteen more — `holo`, `reverse`, `cosmos`, `rainbow`,
-`rainbow-alt`, `secret`, `v`, `vmax`, `vstar`, `full-art`, `shiny`, `radiant`, `full-art-wave` — come
-in an optional add-on adapted from [pokemon-cards-css](https://github.com/simeydotme/pokemon-cards-css):
 
 ```js
-import 'k3ui/holo-effects.css'; // dist/holo-effects/ — CSS + img/ + LICENSE
+import 'k3ui';
+import 'k3ui/k3ui.css';
+import 'k3ux';
+import 'k3ux/holo-effects.css'; // optional GPL-3.0 foils for k3-holo-card
 ```
+
+## Cover flow
+
+`<k3-coverflow>` turns a row of covers in 3D: the centred one faces you, the others turn
+towards it. Endless by default (`mode="bounded"` stops at the ends), with a mirror reflection
+(`no-reflection` removes it). Covers only — no caption, category or scrollbar. Each cover is a
+link (`href`, `target`, `rel`) or turns over (`flip`, `slot="back"`) once centred.
 
 ```html
-<k3-holo-card effect="cosmos"><img src="card.png" alt="Aurora crystal" /></k3-holo-card>
+<k3-coverflow label="Gallery" lightbox arrows bullets full-width>
+  <k3-coverflow-item href="big/dunes.webp"><img src="dunes.webp" alt="Desert dunes" /></k3-coverflow-item>
+  <k3-coverflow-item flip>
+    <img src="2.webp" alt="Card" />
+    <img slot="back" src="2-back.webp" alt="" />
+  </k3-coverflow-item>
+</k3-coverflow>
 ```
 
-The add-on is **GPL-3.0** (its source lives in `addons/holo-effects/`): it is never bundled into
-`k3ui.js` / `k3ui.css`, which stay MIT — load it only if your project accepts the GPL. Your own foils
-can also paint `::part(card|shine|glare)` from the `--k3-holo-*` variables.
+- `lightbox` — the centred link cover opens its `href` image in a built-in viewer: scrim, top
+  layer (Popover API, no `<dialog>`, no new tab), ← → / side buttons / swipe, Escape or a click
+  on the scrim to close, focus trapped then returned. `open()` / `close()`, `k3-open` / `k3-close`.
+- `arrows` — previous / next buttons on the sides (hidden at the ends when bounded).
+- `bullets` — one per cover; the active one is 3× wider and the width follows the motion.
+- `full-width` — side covers and spacing are computed so the covers reach both edges of the
+  container (narrow screens keep the default layout).
+- `orientation="vertical"` — covers stacked top to bottom, tilting around x and fading at the
+  edges: ↑ ↓ keys, vertical drag and wheel, arrows on the side, bullets in a column, flips around
+  x, no reflection. Height from `--k3-coverflow-height` (default 2.6 × cover height).
+- `effect="slide"` — no 3D: a flat row (or column, with `orientation="vertical"`) that fills the
+  viewport, the centred cover growing to `active-scale` (default 1.4) while its neighbours make
+  room as it slides. Same navigation, lightbox, arrows, bullets, flip and optional mirror reflection.
+
+Drag / swipe with momentum, click a side cover, ← → Home End, horizontal wheel (`wheel` adds the
+vertical one). `k3-change` `{ index }` when a cover is centred, `k3-flip` `{ flipped }`. Size with
+`--k3-coverflow-item-width` / `--k3-coverflow-item-height` / `--k3-coverflow-bullet-size`; tune
+with `angle`, `gap`, `spacing`, `depth`, `visible`. Only `http(s)`, `mailto`, `tel` and relative
+links are followed. The playground demo images are CC0 / public domain
+(`playground/public/coverflow/CREDITS.md`).
 
 ## Untrusted content
 
@@ -192,6 +212,27 @@ syntax.highlight('SELECT 1', 'mysql');
 
 Default `theme="dark"` uses a fixed dark panel; `theme="material"` follows M3 roles.
 Override any `--k3-code-*` variable for custom colours. Source uses JetBrains Mono.
+
+## Lighthouse scores (playground home)
+
+The playground home shows its own Lighthouse scores as gauges (performance, accessibility, best
+practices, SEO — desktop and mobile, with the FCP / LCP / TBT / CLS / Speed Index metrics).
+
+- **Stored audit** — `playground/public/lighthouse.json`, refreshed with Lighthouse in Chromium:
+
+  ```bash
+  npm run build:playground && npm run preview   # other terminal
+  npm run lighthouse                            # or: npm run lighthouse -- http://127.0.0.1:4173/
+  ```
+
+- **Live audit** — the "Run the audit" button measures the page now. On `localhost` the dev /
+  preview server runs Lighthouse in headless Chromium (`/__k3-lighthouse/*`, loopback clients
+  only, same-origin pages only) and links the full HTML report; use `npm run preview` for
+  representative performance. On a public address the page asks PageSpeed Insights (Lighthouse
+  in Chrome, Google) — set `data-psi-key` on `#lighthouse-root` for a higher quota.
+
+Lighthouse is not a dependency: the runner uses a local install, `LIGHTHOUSE_BIN`, or
+`npm exec lighthouse@12.8.2`. Chrome / Chromium is found automatically (`CHROME_PATH` to force one).
 
 ## Development
 

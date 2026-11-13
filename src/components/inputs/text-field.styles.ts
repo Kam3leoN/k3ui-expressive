@@ -14,7 +14,7 @@ export const textFieldStyles = css`
   :host {
     display: block;
     width: 100%;
-    max-width: var(--k3-text-field-max-width, 22rem); /* 352 — M3 form field */
+    max-width: var(--k3-text-field-max-width, 26rem); /* 416 — fits ISO date ranges + trailing */
     overflow: visible;
     --k3-tf-h: 3.5rem; /* 56 */
     --k3-tf-icon: 1.5rem; /* 24 */
@@ -612,7 +612,19 @@ export const textFieldStyles = css`
     font-size: var(--k3-sys-typescale-body-large-size);
     line-height: var(--k3-sys-typescale-body-large-line-height);
     letter-spacing: var(--k3-sys-typescale-body-large-tracking);
+    font-variant-numeric: tabular-nums;
     resize: vertical;
+  }
+  /*
+   * Native <input> defaults to size=20 (~20ch). With width:100% + flex:auto the
+   * used width often sticks at that intrinsic size — value clips mid-string while
+   * empty space remains before trailing icons (date ranges: 2026-11-24 - 20…).
+   * flex-basis 0 + width 0 forces grow into .body; min-width floors ISO ranges.
+   */
+  input.control {
+    flex: 1 1 0%;
+    width: 0;
+    min-width: 26ch;
   }
   .control::placeholder {
     color: var(--k3-sys-color-on-surface-variant);

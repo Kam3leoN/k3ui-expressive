@@ -180,6 +180,8 @@ export class K3ButtonGroup extends K3Element {
     if (root === el) return;
     const connected = this.variant === 'connected';
     root.toggleAttribute('data-connected', connected);
+    root.toggleAttribute('data-group-select', this.selection !== 'none');
+    root.setAttribute('data-orient', this.orientation);
     root.toggleAttribute('selected', this.isSelected(el));
     root.toggleAttribute('data-pressed', el.hasAttribute('data-pressed'));
     if (this.disabled || el.disabled || el.hasAttribute('disabled')) {
@@ -314,6 +316,7 @@ export class K3ButtonGroup extends K3Element {
 
   private syncChildChrome(): void {
     const radio = this.selection === 'single';
+    const groupSelect = this.selection !== 'none';
     const hideLabels = this.labels === 'selected';
     const connected = this.variant === 'connected';
 
@@ -325,7 +328,11 @@ export class K3ButtonGroup extends K3Element {
       }
       el.radio = radio;
       el.toggleAttribute('data-radio', radio);
+      /* Selectable groups remap unselected filled→tonal; selection=none keeps paint */
+      el.toggleAttribute('data-group-select', groupSelect);
       el.toggleAttribute('data-connected', connected);
+      /* Icon-button cells swap W/H in horizontal so they match a rotated vertical */
+      el.setAttribute('data-orient', this.orientation);
       if (this.disabled) {
         el.disabled = true;
         el.setAttribute('disabled', '');

@@ -27,8 +27,9 @@ describe('registry dependencies', () => {
   });
 
   it('defines the children when only the parent is registered', async () => {
-    await register('k3-audio-player');
-    for (const dep of COMPONENT_DEPS['k3-audio-player']!) {
+    const parent = 'k3-dialog';
+    await register(parent);
+    for (const dep of COMPONENT_DEPS[parent]!) {
       expect(customElements.get(dep), dep).toBeTruthy();
     }
   });

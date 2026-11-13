@@ -3,8 +3,8 @@
  * 1 · Contenu (9 types statiques) → 2 · Design (cadre, forme, logo, réglages)
  * → 3 · Téléchargement (PNG, SVG, JPG, copie).
  */
-import type { QrEcc } from '@k3ui/components/media/qr-code.encoder.js';
-import type { QrContentType } from '@k3ui/components/media/qr-code.payload.js';
+import type { QrEcc } from '@k3ux/components/media/qr-code.encoder.js';
+import type { QrContentType } from '@k3ux/components/media/qr-code.payload.js';
 import type {
   QrDotStyle,
   QrEyeBallStyle,
@@ -13,7 +13,7 @@ import type {
   QrFrameStyle,
   QrGradient,
   QrLogoIcon,
-} from '@k3ui/components/media/qr-code.render.js';
+} from '@k3ux/components/media/qr-code.render.js';
 
 /** Everything the Design step controls — serialisable (JSON-safe). */
 export interface QrDesign {

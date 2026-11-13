@@ -27,6 +27,8 @@ export const IndexListSpecs = {
   stickyOffset: 0,
   hideEmptyKeys: true,
   railScrub: true,
+  /** Rail index change → `haptic.selection` when global haptics are on. */
+  haptic: true,
   indexKeyAttr: 'data-index-key',
 } as const;
 
@@ -40,10 +42,25 @@ export function resolveIndexKeyFromLabel(label: string, locale = IndexListSpecs.
   if (first === '—' || first === '–') return '—';
   if (first === ' ') return ' ';
 
+  /* Élodie / Amélie → E / A (annuaire FR) — NFD strips combining marks. */
   const upper = first.toLocaleUpperCase(locale);
-  if (upper >= 'A' && upper <= 'Z') return upper;
-  if (upper >= '0' && upper <= '9') return upper;
+  const base = upper.normalize('NFD').replace(/\p{M}/gu, '');
+  if (base >= 'A' && base <= 'Z') return base;
+  if (base >= '0' && base <= '9') return base;
   return '#';
+}
+
+/** Accessible rail label — mirrors K3ui v1 `indexKeyToAriaLabel`. */
+export function indexKeyToAriaLabel(key: string, sectionLabel = 'Section {key}'): string {
+  const names: Record<string, string> = {
+    '#': 'symboles',
+    '-': 'tiret',
+    _: 'underscore',
+    '—': 'tiret cadratin',
+    ' ': 'espace',
+  };
+  const name = names[key] ?? key;
+  return sectionLabel.replace('{key}', name);
 }
 
 export function compareIndexKeys(a: string, b: string): number {

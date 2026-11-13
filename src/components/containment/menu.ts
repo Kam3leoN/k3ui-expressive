@@ -149,6 +149,17 @@ export class K3Menu extends K3Element {
     this._navLockedUntil = performance.now() + NAV_LOCK_MS;
   }
 
+  /**
+   * Re-run viewport fit after changing `positioningAnchor` / `positioningEdge`
+   * while the menu stays open (e.g. nav-rail hover dest switches).
+   */
+  refit(): void {
+    if (!this.visible && !this.open) return;
+    /* Force RO rebind so a new anchor is observed */
+    this.unbindFitListeners();
+    void this.scheduleFit(1);
+  }
+
   /** Panel rect for submenu anchoring (layout box — ignores visual transform). */
   getPanelRect(): DOMRect | null {
     const panel = this.panelEl();

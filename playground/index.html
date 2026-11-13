@@ -1,17 +1,21 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" data-k3-booting>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>K3ui · Material 3 Expressive</title>
     <style>
-      /* Critical first paint — full stylesheet loads async (see vite transform) */
+      /*
+       * Critical first paint — use CSS vars so vite prepaintTheme (expressive 2025)
+       * can paint the real surface before JS. Fallbacks = seed #6750A4 expressive light.
+       * Do NOT hardcode the old tonal #fef7ff (reads as rose vs final #fff7ff).
+       */
       html,
       body {
         margin: 0;
         min-height: 100vh;
-        background: #fef7ff;
-        color: #1d1b20;
+        background: var(--k3-sys-color-surface, #fff7ff);
+        color: var(--k3-sys-color-on-surface, #3d2a51);
         font-family: system-ui, sans-serif;
       }
       .comp-page[hidden] {
@@ -19,6 +23,59 @@
       }
       #boot-error[hidden] {
         display: none;
+      }
+      #doc-page-loading {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin: 0;
+        padding: 2rem;
+        box-sizing: border-box;
+        background: var(--k3-sys-color-surface, #fff7ff);
+        color: var(--k3-sys-color-on-surface, #3d2a51);
+        pointer-events: all;
+      }
+      html[data-k3-booting] #doc-page-loading,
+      #doc-page-loading.is-on {
+        display: flex !important;
+      }
+      #doc-page-loading[hidden]:not(.is-on) {
+        display: none !important;
+      }
+      /* Pre-upgrade stand-in for k3-loading-indicator (M3 SoftBurst · contained) */
+      #doc-page-loading k3-loading-indicator:not(:defined) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        background: var(--k3-sys-color-primary-container, #cab6ff);
+        color: var(--k3-sys-color-on-primary-container, #442c7f);
+      }
+      #doc-page-loading k3-loading-indicator:not(:defined) svg {
+        width: 79.166%;
+        height: 79.166%;
+        display: block;
+        animation: k3-loading-spin 4666ms linear infinite;
+      }
+      #doc-page-loading k3-loading-indicator:not(:defined) path {
+        fill: currentColor;
+      }
+      @keyframes k3-loading-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #doc-page-loading .doc-page-loading-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--k3-sys-color-on-surface-variant, #6b5681);
       }
     </style>
     <meta
@@ -61,8 +118,8 @@
 
     <div class="app" data-nav="rail">
       <script>
-        /* Pre-paint shell mode — mirrors applyAdaptiveShell() (app.ts) so the static
-           page is visible immediately and never jumps when the app boots (LCP / CLS). */
+        /* Pre-paint shell mode — mirrors applyAdaptiveShell() (app.ts).
+           Loader is the first paint (html[data-k3-booting]); content boots underneath. */
         (function (app) {
           var bar = matchMedia('(max-width: 599.98px)').matches;
           var medium = matchMedia('(min-width: 600px) and (max-width: 839.98px)').matches;
@@ -72,10 +129,17 @@
             '--k3-nav-chrome-inset-block-end',
             bar ? 'calc(4rem + env(safe-area-inset-bottom, 0px))' : '0px',
           );
-          /* Deep link: veil instead of a flash of the home page (cleared by app.ts) */
           if (/^#\/?(?!home$)[a-z0-9-]+$/i.test(location.hash)) {
             document.documentElement.setAttribute('data-k3-deeplink', '');
           }
+          /* Hero brand matches saved pack once the title node exists (under the boot veil) */
+          document.addEventListener('DOMContentLoaded', function () {
+            try {
+              var prod = JSON.parse(localStorage.getItem('k3ui.doc.doc.product') || 'null');
+              var title = document.getElementById('home-hero-title');
+              if (title) title.textContent = prod === 'k3ux' ? 'K3ux' : 'K3ui';
+            } catch (e) {}
+          });
         })(document.currentScript.parentElement);
       </script>
       <!-- Desktop / tablet ≥600dp: navigation rail (theme + motion at foot, like m3.material.io) -->
@@ -320,16 +384,22 @@
 
         <!-- Scrollport only — keeps app bar above sheet/scrim (fixed) -->
         <div class="shell-scroll k3-scroll">
-        <!-- Page load — visible from first paint (incl. F5) until navigateDocPage finishes -->
+        <!-- Boot + SPA page load — first paint is this veil; app clears it when ready -->
         <div
           id="doc-page-loading"
-          class="doc-page-loading"
-          hidden
-          aria-hidden="true"
-          aria-busy="false"
+          class="doc-page-loading is-on"
+          aria-hidden="false"
+          aria-busy="true"
           role="status"
         >
-          <k3-loading-indicator contained></k3-loading-indicator>
+          <k3-loading-indicator contained aria-hidden="true">
+            <!-- Light-DOM SoftBurst until the CE upgrades (then shadow takes over). -->
+            <svg viewBox="0 0 1 1" aria-hidden="true">
+              <path
+                d="M0.18664 0.27242C0.19362 0.26276 0.19729 0.2507 0.19633 0.23807C0.19403 0.20813 0.19174 0.1782 0.18945 0.14826C0.18651 0.10985 0.22501 0.08176 0.26069 0.09629C0.28866 0.10767 0.31662 0.11905 0.34459 0.13043C0.36806 0.13999 0.395 0.13118 0.40828 0.1096C0.42402 0.08403 0.43976 0.05847 0.4555 0.0329C0.4757 0.0001 0.52336 0 0.54369 0.03273C0.55963 0.05837 0.57556 0.08402 0.59149 0.10967C0.60487 0.13119 0.63184 0.1399 0.65527 0.13025C0.68303 0.11882 0.71079 0.10739 0.73855 0.09596C0.77418 0.08129 0.81279 0.10922 0.81001 0.14765C0.80782 0.17776 0.80564 0.20788 0.80345 0.23799C0.80162 0.26327 0.81833 0.28616 0.84295 0.29213C0.87213 0.2992 0.90131 0.30627 0.93049 0.31334C0.96793 0.32241 0.98275 0.36771 0.95791 0.39716C0.93844 0.42024 0.91897 0.44332 0.8995 0.4664C0.88316 0.48577 0.88322 0.51411 0.89964 0.53341C0.91909 0.55628 0.93854 0.57915 0.95799 0.60202C0.98295 0.63137 0.96831 0.67673 0.9309 0.68595C0.90159 0.69318 0.87227 0.70041 0.84296 0.70764C0.81835 0.7137 0.80174 0.73667 0.80367 0.76193C0.80597 0.79187 0.80826 0.8218 0.81055 0.85174C0.81349 0.89015 0.77499 0.91824 0.73931 0.90371C0.71134 0.89233 0.68338 0.88095 0.65541 0.86957C0.63194 0.86001 0.605 0.86882 0.59172 0.8904C0.57598 0.91597 0.56024 0.94153 0.5445 0.9671C0.5243 0.9999 0.47664 1 0.45631 0.96727C0.44037 0.94163 0.42444 0.91598 0.40851 0.89033C0.39513 0.86881 0.36816 0.8601 0.34473 0.86975C0.31697 0.88118 0.28921 0.89261 0.26145 0.90404C0.22582 0.91871 0.18721 0.89078 0.18999 0.85235C0.19218 0.82224 0.19436 0.79212 0.19655 0.76201C0.19838 0.73673 0.18167 0.71384 0.15705 0.70787C0.12787 0.7008 0.09869 0.69373 0.06951 0.68666C0.03207 0.67759 0.01725 0.63229 0.04209 0.60284C0.06156 0.57976 0.08103 0.55668 0.1005 0.5336C0.11684 0.51423 0.11678 0.48589 0.10036 0.46659C0.08091 0.44372 0.06146 0.42085 0.04201 0.39798C0.01705 0.36863 0.03169 0.32327 0.0691 0.31405C0.09841 0.30682 0.12773 0.29959 0.15704 0.29236C0.16934 0.28933 0.17965 0.28207 0.18664 0.27242Z"
+              />
+            </svg>
+          </k3-loading-indicator>
           <span class="doc-page-loading-label" data-i18n="playground.page.loading">Loading…</span>
         </div>
         <!-- Full-surface Material ambient (shell, not .k3-container) — toggled in showPage -->
@@ -339,9 +409,33 @@
 
         <!-- HOME — component index -->
         <article class="comp-page home-page is-active" data-page="home" id="page-home">
+          <section class="home-hero-banner" aria-labelledby="home-hero-title">
+            <div class="home-hero-banner__glow" aria-hidden="true"></div>
+            <div class="home-hero-banner__copy">
+              <p class="eyebrow" data-i18n="playground.eyebrow">Material 3 Expressive · Web</p>
+              <h1 id="home-hero-title" class="k3-display-large hero-title">K3ui</h1>
+              <p class="hero-lead" data-doc-product="k3ui" data-i18n="playground.lead">
+                Shape morph, five sizes, expressive motion — custom elements drop-in (k3ui.js +
+                k3ui.css).
+              </p>
+              <p class="hero-lead" data-doc-product="k3ux" hidden data-i18n="playground.lead.k3ux">
+                Decorative UX animations companion — confetti, text effects, holographic cards
+                (k3ux.js on top of k3ui).
+              </p>
+              <div class="home-hero-banner__actions">
+                <k3-button variant="filled" size="md" data-nav="quick-start"
+                  ><span data-i18n="playground.cta.start">Get started</span></k3-button
+                >
+              </div>
+            </div>
+            <div
+              class="home-hero-morph"
+              id="home-hero-morph"
+              aria-hidden="true"
+              data-home-hero-morph
+            ></div>
+          </section>
           <header class="section-head home-hero">
-            <p class="eyebrow" data-i18n="playground.eyebrow">Material 3 Expressive · Web</p>
-            <h1 class="k3-display-large hero-title">K3ui</h1>
             <div class="product-switch">
               <k3-button-group
                 id="product-switch"
@@ -361,14 +455,6 @@
                 >
               </k3-button-group>
             </div>
-            <p class="hero-lead" data-doc-product="k3ui" data-i18n="playground.lead">
-              Shape morph, five sizes, expressive motion — custom elements drop-in (k3ui.js +
-              k3ui.css).
-            </p>
-            <p class="hero-lead" data-doc-product="k3ux" hidden data-i18n="playground.lead.k3ux">
-              Decorative UX animations companion — confetti, text effects, holographic cards
-              (k3ux.js on top of k3ui).
-            </p>
           </header>
           <p class="catalog-intro" data-doc-product="k3ui" data-i18n="doc.catalog.intro">
             Browse components — one page per component, like m3.material.io.
@@ -551,7 +637,7 @@ import 'k3ux/holo-effects.css';
                 <div>
                   <h2 data-i18n="doc.quick-start.k3ux.scope.title">What ships in k3ux</h2>
                   <p data-i18n="doc.quick-start.k3ux.scope.blurb">
-                    Confetti, text bounce / scramble, heart burst, halftone, holographic /
+                    Confetti, text bounce / scramble, Icons burst, halftone, holographic /
                     lenticular / scratch cards — decorative only. UI controls stay in k3ui.
                   </p>
                 </div>
@@ -5616,6 +5702,90 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                     <k3-switch selected>Wi‑Fi</k3-switch>
                   </div>
                   <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.switch.option.icons">icons</h3>
+              <p data-i18n="doc.switch.option.icons.desc">
+                Handle shows close when off and check when on.
+              </p>
+            </header>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.switch.icons.off">Off · close</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.switch.icons.on">On · check</span>
+              </li>
+            </ol>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-switch icons>Do not disturb</k3-switch>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-switch icons selected>Notifications</k3-switch>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.switch.option.variant">variant</h3>
+              <p data-i18n="doc.switch.option.variant.desc">
+                status — red track when off, green when on (optional icons).
+              </p>
+            </header>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span
+                ><span class="variant-label" data-i18n="doc.switch.variant.off">status · off</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span
+                ><span class="variant-label" data-i18n="doc.switch.variant.on">status · on</span>
+              </li>
+              <li>
+                <span class="pill-num">3</span
+                ><span class="variant-label" data-i18n="doc.switch.variant.icons"
+                  >status + icons</span
+                >
+              </li>
+            </ol>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-switch variant="status">Alarm</k3-switch>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-switch variant="status" selected>Ready</k3-switch>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-switch variant="status" icons selected>Online</k3-switch>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
                 </div>
               </div>
             </div>
@@ -12526,6 +12696,350 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </div>
         </article>
 
+        <!-- ANIMATION: SNOW (react-snowfall options, independent engine) -->
+        <article class="comp-page" data-page="snow" id="page-snow" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.snow.title">Snow</h1>
+            <p data-i18n="doc.snow.blurb">
+              Canvas snowfall — same options as react-snowfall · independent engine (no React dep).
+            </p>
+            <p class="doc-intro" data-i18n="doc.snow.intro">
+              Fullscreen body overlay (confetti-style). Tune count, speed, wind, radius, color, and
+              images from the options dialog. Reduced motion is honored by default.
+            </p>
+          </header>
+          <!-- Started by wireSnowDemo when the page is active (not on CE upgrade while hidden). -->
+          <k3-snow id="demo-snow" snowflake-count="150"></k3-snow>
+          <section class="doc-section">
+            <h2 data-i18n="doc.snow.section.overlay">Fullscreen overlay</h2>
+            <p data-i18n="doc.snow.section.overlay.blurb">
+              Snow starts immediately. Pause or reset, and open Options to tweak the react-snowfall
+              knobs live.
+            </p>
+          </section>
+          <div
+            class="surface row wrap"
+            style="gap: var(--k3-sys-spacing-space300); margin-block-start: var(--k3-sys-spacing-space300)"
+          >
+            <k3-button id="snow-toggle" variant="filled" data-snow-action="toggle">Stop</k3-button>
+            <k3-button
+              id="snow-reset"
+              variant="outlined"
+              data-snow-action="reset"
+              data-i18n="doc.snow.action.reset"
+              >Reset</k3-button
+            >
+            <k3-button
+              id="snow-options"
+              variant="tonal"
+              data-snow-action="options"
+              data-i18n="doc.snow.action.options"
+              >Options</k3-button
+            >
+          </div>
+          <k3-dialog id="snow-options-dialog" variant="basic">
+            <span slot="headline" data-i18n="doc.snow.dialog.title">Snow options</span>
+            <div
+              class="stack k3-scroll"
+              style="
+                gap: var(--k3-sys-spacing-space300);
+                max-block-size: min(70vh, 32rem);
+                padding-inline-end: var(--k3-sys-spacing-space100);
+                --k3-scroll-track-inset: var(--k3-sys-shape-corner-large, 1rem);
+              "
+            >
+              <k3-slider
+                id="snow-count"
+                label="Snowflake Count · 150"
+                min="0"
+                max="500"
+                step="1"
+                value="150"
+                value-indicator
+              ></k3-slider>
+              <k3-slider
+                id="snow-speed"
+                variant="range"
+                label="Speed · 1 – 3"
+                min="0"
+                max="10"
+                step="0.1"
+                value-start="1"
+                value-end="3"
+                value-indicator
+              ></k3-slider>
+              <k3-slider
+                id="snow-wind"
+                variant="range"
+                label="Wind · −0.5 – 2"
+                min="-10"
+                max="10"
+                step="0.1"
+                value-start="-0.5"
+                value-end="2"
+                value-indicator
+              ></k3-slider>
+              <k3-slider
+                id="snow-radius"
+                variant="range"
+                label="Radius · 0.5 – 3"
+                min="0.5"
+                max="30"
+                step="0.5"
+                value-start="0.5"
+                value-end="3"
+                value-indicator
+              ></k3-slider>
+              <k3-switch id="snow-use-images">
+                <span data-i18n="doc.snow.knob.images">Use Images</span>
+              </k3-switch>
+              <label class="row wrap items-center" style="gap: var(--k3-sys-spacing-space200)">
+                <span data-i18n="doc.snow.knob.color">Color</span>
+                <input
+                  id="snow-color"
+                  type="color"
+                  value="#1c1b1f"
+                  aria-label="Snowflake color"
+                  style="width: 2.5rem; height: 2rem; border: none; background: transparent; cursor: pointer"
+                />
+                <k3-text-field
+                  id="snow-color-hex"
+                  value="#1c1b1f"
+                  style="width: 7rem"
+                  aria-label="Snowflake color hex"
+                ></k3-text-field>
+              </label>
+            </div>
+            <k3-button slot="actions" variant="filled" id="snow-options-done" data-i18n="doc.snow.dialog.done"
+              >Done</k3-button
+            >
+          </k3-dialog>
+        </article>
+
+        <!-- ANIMATION: FIREWORK (K3ui v1 canvas engine) -->
+        <article class="comp-page" data-page="firework" id="page-firework" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.firework.title">Firework</h1>
+            <p data-i18n="doc.firework.blurb">
+              Fullscreen canvas fireworks — ported from K3ui v1 · pointer-events none.
+            </p>
+            <p class="doc-intro" data-i18n="doc.firework.intro">
+              k3-firework mounts a transparent overlay and fires shells (burst, finale, celebrate).
+              Clicks pass through. Sound uses the exact K3ui v1 mp3 samples by default (enable after
+              a user gesture; synth via sound-mode). Reduced motion is honored by default.
+            </p>
+          </header>
+          <k3-firework
+            id="demo-firework"
+            auto-start
+            layer="front"
+            size="3"
+            quality="3"
+            sound
+            sound-mode="samples"
+          ></k3-firework>
+          <section class="doc-section">
+            <h2 data-i18n="doc.firework.section.overlay">Fullscreen overlay</h2>
+            <p data-i18n="doc.firework.section.overlay.blurb">
+              Starts immediately. Pause / reset, open Options, or trigger salvos.
+            </p>
+          </section>
+          <div
+            class="surface row wrap"
+            style="gap: var(--k3-sys-spacing-space300); margin-block-start: var(--k3-sys-spacing-space300)"
+          >
+            <k3-button id="fw-toggle" variant="filled" data-fw-action="toggle">Stop</k3-button>
+            <k3-button
+              id="fw-reset"
+              variant="outlined"
+              data-fw-action="reset"
+              data-i18n="doc.firework.action.reset"
+              >Reset</k3-button
+            >
+            <k3-button
+              id="fw-options"
+              variant="tonal"
+              data-fw-action="options"
+              data-i18n="doc.firework.action.options"
+              >Options</k3-button
+            >
+          </div>
+          <div
+            class="surface row wrap"
+            style="gap: var(--k3-sys-spacing-space200); margin-block-start: var(--k3-sys-spacing-space300)"
+          >
+            <k3-button variant="filled" data-fw-action="burst" data-fw-count="2" data-i18n="doc.firework.salvo.2"
+              >Salvo ×2</k3-button
+            >
+            <k3-button variant="tonal" data-fw-action="burst" data-fw-count="3" data-i18n="doc.firework.salvo.3"
+              >Salvo ×3</k3-button
+            >
+            <k3-button variant="tonal" data-fw-action="finale" data-i18n="doc.firework.salvo.finale"
+              >Finale</k3-button
+            >
+            <k3-button variant="filled" data-fw-action="celebrate" data-i18n="doc.firework.salvo.celebrate"
+              >Celebrate 2›3›2›finale</k3-button
+            >
+          </div>
+          <k3-dialog id="fw-options-dialog" variant="basic">
+            <span slot="headline" data-i18n="doc.firework.dialog.title">Firework options</span>
+            <div
+              class="stack k3-scroll"
+              style="
+                gap: var(--k3-sys-spacing-space300);
+                max-block-size: min(70vh, 32rem);
+                padding-inline-end: var(--k3-sys-spacing-space100);
+                --k3-scroll-track-inset: var(--k3-sys-shape-corner-large, 1rem);
+              "
+            >
+              <k3-slider
+                id="fw-quality"
+                label="Quality · 3"
+                min="1"
+                max="3"
+                step="1"
+                value="3"
+                value-indicator
+              ></k3-slider>
+              <k3-slider
+                id="fw-size"
+                label="Size · 3"
+                min="0.5"
+                max="5"
+                step="0.1"
+                value="3"
+                value-indicator
+              ></k3-slider>
+              <k3-slider
+                id="fw-scale"
+                label="Scale · 1"
+                min="0.4"
+                max="1.6"
+                step="0.05"
+                value="1"
+                value-indicator
+              ></k3-slider>
+              <k3-select id="fw-shell" label="Shell" value="Random" variant="outlined">
+                <k3-menu-item value="Random">Random</k3-menu-item>
+                <k3-menu-item value="Crackle">Crackle</k3-menu-item>
+                <k3-menu-item value="Crossette">Crossette</k3-menu-item>
+                <k3-menu-item value="Crysanthemum">Crysanthemum</k3-menu-item>
+                <k3-menu-item value="Falling Leaves">Falling Leaves</k3-menu-item>
+                <k3-menu-item value="Floral">Floral</k3-menu-item>
+                <k3-menu-item value="Ghost">Ghost</k3-menu-item>
+                <k3-menu-item value="Horse Tail">Horse Tail</k3-menu-item>
+                <k3-menu-item value="Palm">Palm</k3-menu-item>
+                <k3-menu-item value="Ring">Ring</k3-menu-item>
+                <k3-menu-item value="Strobe">Strobe</k3-menu-item>
+                <k3-menu-item value="Willow">Willow</k3-menu-item>
+              </k3-select>
+              <k3-switch id="fw-sound" selected>
+                <span data-i18n="doc.firework.knob.sound">Sound</span>
+              </k3-switch>
+              <k3-switch id="fw-trails" selected>
+                <span data-i18n="doc.firework.knob.trails">Trails</span>
+              </k3-switch>
+              <k3-switch id="fw-auto">
+                <span data-i18n="doc.firework.knob.auto">Auto launch</span>
+              </k3-switch>
+              <k3-switch id="fw-finale-mode">
+                <span data-i18n="doc.firework.knob.finale">Finale mode</span>
+              </k3-switch>
+            </div>
+            <k3-button slot="actions" variant="filled" id="fw-options-done" data-i18n="doc.firework.dialog.done"
+              >Done</k3-button
+            >
+          </k3-dialog>
+        </article>
+
+        <!-- ANIMATION: VOICE RING (color spectrum — independent engine) -->
+        <article class="comp-page" data-page="voice-ring" id="page-voice-ring" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.voice-ring.title">Voice ring</h1>
+            <p data-i18n="doc.voice-ring.blurb">
+              Color spectrum ring that reacts to voice — canvas engine, no third-party import.
+            </p>
+            <p class="doc-intro" data-i18n="doc.voice-ring.intro">
+              k3-voice-ring draws glassy spectrum ribbons that breathe in idle, follow a mic or
+              level source while listening / speaking, and spin a highlight while processing.
+              Color ring only (no mono tube variant). Drive with getUserMedia or setLevel(0…1).
+            </p>
+          </header>
+          <section class="doc-section">
+            <h2 data-i18n="doc.voice-ring.section.demo">Live ring</h2>
+            <p data-i18n="doc.voice-ring.section.demo.blurb">
+              Pick a state, open the mic, or drive a simulated level.
+            </p>
+          </section>
+          <div
+            class="surface stack items-center"
+            style="gap: var(--k3-sys-spacing-space400); padding-block: var(--k3-sys-spacing-space400)"
+          >
+            <k3-voice-ring
+              id="demo-voice-ring"
+              size="240"
+              state="idle"
+              auto-start
+            ></k3-voice-ring>
+            <div
+              class="surface row wrap justify-center"
+              style="gap: var(--k3-sys-spacing-space200)"
+            >
+              <k3-button variant="tonal" data-vr-state="idle" data-i18n="doc.voice-ring.state.idle"
+                >Idle</k3-button
+              >
+              <k3-button variant="filled" data-vr-state="listening" data-i18n="doc.voice-ring.state.listening"
+                >Listening</k3-button
+              >
+              <k3-button variant="tonal" data-vr-state="speaking" data-i18n="doc.voice-ring.state.speaking"
+                >Speaking</k3-button
+              >
+              <k3-button variant="tonal" data-vr-state="processing" data-i18n="doc.voice-ring.state.processing"
+                >Processing</k3-button
+              >
+            </div>
+            <div
+              class="surface row wrap justify-center"
+              style="gap: var(--k3-sys-spacing-space200)"
+            >
+              <k3-button id="vr-mic" variant="filled" data-vr-action="mic" data-i18n="doc.voice-ring.action.mic"
+                >Microphone</k3-button
+              >
+              <k3-button
+                id="vr-mic-stop"
+                variant="outlined"
+                data-vr-action="mic-stop"
+                data-i18n="doc.voice-ring.action.micStop"
+                >Stop mic</k3-button
+              >
+            </div>
+            <div
+              class="surface row wrap justify-center items-center"
+              style="gap: var(--k3-sys-spacing-space300); inline-size: min(100%, 28rem)"
+            >
+              <k3-select id="vr-emotion" label="Emotion" value="" variant="outlined" style="flex: 1; min-inline-size: 10rem">
+                <k3-menu-item value="" data-i18n="doc.voice-ring.emotion.none">Spectrum</k3-menu-item>
+                <k3-menu-item value="positive" data-i18n="doc.voice-ring.emotion.positive">Positive</k3-menu-item>
+                <k3-menu-item value="calm" data-i18n="doc.voice-ring.emotion.calm">Calm</k3-menu-item>
+                <k3-menu-item value="negative" data-i18n="doc.voice-ring.emotion.negative">Negative</k3-menu-item>
+              </k3-select>
+              <k3-slider
+                id="vr-direction"
+                label="Direction · 0"
+                min="-1"
+                max="1"
+                step="0.05"
+                value="0"
+                value-indicator
+                style="flex: 1; min-inline-size: 12rem"
+              ></k3-slider>
+            </div>
+          </div>
+        </article>
+
         <!-- ANIMATION: TEXT BOUNCE -->
         <article class="comp-page" data-page="text-bounce" id="page-text-bounce" hidden>
           <header class="section-head">
@@ -12664,44 +13178,44 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </div>
         </article>
 
-        <!-- ANIMATION: HEART BURST -->
-        <article class="comp-page" data-page="heart-burst" id="page-heart-burst" hidden>
+        <!-- ANIMATION: Icons burst -->
+        <article class="comp-page" data-page="icons-burst" id="page-icons-burst" hidden>
           <header class="section-head">
             <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
-            <h1 data-i18n="doc.heart-burst.title">Heart burst</h1>
-            <p data-i18n="doc.heart-burst.blurb">
+            <h1 data-i18n="doc.icons-burst.title">Icons burst</h1>
+            <p data-i18n="doc.icons-burst.blurb">
               Pointer-following particles — heart / star / like · hover on the target only · WAAPI only.
             </p>
-            <p class="doc-intro" data-i18n="doc.heart-burst.intro">
+            <p class="doc-intro" data-i18n="doc.icons-burst.intro">
               Only the slotted surface triggers. Without clip, particles may rise above (card). With
               clip, flight stays inside the text box and fades out — no hard cut.
             </p>
           </header>
           <section class="doc-section">
-            <h2 data-i18n="doc.heart-burst.section.demo">Demo</h2>
-            <p data-i18n="doc.heart-burst.section.demo.blurb">
+            <h2 data-i18n="doc.icons-burst.section.demo">Demo</h2>
+            <p data-i18n="doc.icons-burst.section.demo.blurb">
               Three targets side by side — hover the control only; card stars may rise above; text stays soft-contained.
             </p>
           </section>
           <div class="demo-block">
-            <div class="demo-frame demo-frame--cases grid-3 demo-frame--heart-burst" data-demo-enhance="off">
+            <div class="demo-frame demo-frame--cases grid-3 demo-frame--icons-burst" data-demo-enhance="off">
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--burst">
-                  <k3-heart-burst continuous color="#ff4b4b" icon="heart">
+                  <k3-icons-burst continuous color="#ff4b4b" icon="heart">
                     <k3-button
                       variant="filled"
                       style="--k3-button-container-color: #3a2424; --k3-button-label-color: #ff4b4b; gap: 0.5rem"
                     >
                       <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="favorite" aria-hidden="true"></span>
-                      <span data-i18n="doc.heart-burst.sponsor">Sponsor</span>
+                      <span data-i18n="doc.icons-burst.sponsor">Sponsor</span>
                     </k3-button>
-                  </k3-heart-burst>
+                  </k3-icons-burst>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--burst demo-case-stage--burst-card">
-                  <k3-heart-burst block continuous icon="star" color="#ffb300">
+                  <k3-icons-burst block continuous icon="star" color="#ffb300">
                     <k3-card variant="outlined" style="padding: var(--k3-sys-spacing-space300); box-sizing: border-box">
                       <div style="display: flex; align-items: flex-start; gap: 0.5rem">
                         <span
@@ -12713,25 +13227,25 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
                           style="color: #ffb300; font-variation-settings: 'FILL' 1"
                         ></span>
                         <div>
-                          <strong data-i18n="doc.heart-burst.demo.card.title">Hover the card</strong>
-                          <p style="margin: 0.35rem 0 0; opacity: 0.8; font-size: 0.875rem" data-i18n="doc.heart-burst.demo.card.body">
+                          <strong data-i18n="doc.icons-burst.demo.card.title">Hover the card</strong>
+                          <p style="margin: 0.35rem 0 0; opacity: 0.8; font-size: 0.875rem" data-i18n="doc.icons-burst.demo.card.body">
                             Stars rise above the card — hover only on the card.
                           </p>
                         </div>
                       </div>
                     </k3-card>
-                  </k3-heart-burst>
+                  </k3-icons-burst>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">2</span>
               </div>
               <div class="demo-case">
                 <div class="demo-case-stage demo-case-stage--burst">
-                  <k3-heart-burst
+                  <k3-icons-burst
                     continuous
                     icon="like"
                     color="#1e88e5"
                     count="4"
-                    style="--k3-heart-burst-particle-size: 1.85rem"
+                    style="--k3-icons-burst-particle-size: 1.85rem"
                   >
                     <h2
                       style="margin: 0; font-size: 1.35rem; display: inline-flex; align-items: center; gap: 0.4rem"
@@ -12744,9 +13258,9 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
                         aria-hidden="true"
                         style="color: #1e88e5; font-variation-settings: 'FILL' 1"
                       ></span>
-                      <span data-i18n="doc.heart-burst.demo.heading">Love this headline</span>
+                      <span data-i18n="doc.icons-burst.demo.heading">Love this headline</span>
                     </h2>
-                  </k3-heart-burst>
+                  </k3-icons-burst>
                 </div>
                 <span class="demo-case-num" aria-hidden="true">3</span>
               </div>
@@ -12754,15 +13268,15 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             <ol class="variant-guide">
               <li>
                 <span class="pill-num">1</span
-                ><span class="variant-label" data-i18n="doc.heart-burst.demo.guide.button">Button · hearts</span>
+                ><span class="variant-label" data-i18n="doc.icons-burst.demo.guide.button">Button · hearts</span>
               </li>
               <li>
                 <span class="pill-num">2</span
-                ><span class="variant-label" data-i18n="doc.heart-burst.demo.guide.card">Card · stars</span>
+                ><span class="variant-label" data-i18n="doc.icons-burst.demo.guide.card">Card · stars</span>
               </li>
               <li>
                 <span class="pill-num">3</span
-                ><span class="variant-label" data-i18n="doc.heart-burst.demo.guide.text">Text · likes</span>
+                ><span class="variant-label" data-i18n="doc.icons-burst.demo.guide.text">Text · likes</span>
               </li>
             </ol>
           </div>
@@ -13707,7 +14221,7 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
             <p class="doc-intro" data-i18n="doc.index-list.intro">
               Index lists group long directories by letter with sticky section headers and an optional
               scrub rail. Provide items as JSON or slotted rows; scrollToKey jumps to a section and
-              k3-section-change tracks the visible group.
+              k3-section-change tracks the visible group. Accented names (Élodie) fold into A–Z.
             </p>
           </header>
 
@@ -13716,35 +14230,61 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
               <h2 data-i18n="doc.section.examples">Examples</h2>
             </header>
             <header class="section-head sub">
-              <h3 data-i18n="doc.index-list.option.rail">show-rail / sticky-headers</h3>
-              <p data-i18n="doc.index-list.option.rail.desc">A–Z scrub rail and sticky section titles.</p>
+              <h3 data-i18n="doc.index-list.option.rail">Annuaire · rail + sticky</h3>
+              <p data-i18n="doc.index-list.option.rail.desc">
+                Scroll the list or scrub the A–Z rail (click / drag). Active section updates live.
+              </p>
             </header>
-<div class="demo-block">
-            <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
-              <div class="demo-case">
-                <div class="demo-case-stage" style="width: 100%; max-width: 22rem">
-                  <k3-index-list
-                    style="max-height: 14rem; display: block"
-                    items='[{"label":"Alice Dupont"},{"label":"Bob Martin"},{"label":"Marta Vega"},{"label":"Zoe Zen"}]'
-                  ></k3-index-list>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1"
+                data-demo-enhance="off"
+                style="overflow: visible"
+              >
+                <div class="demo-case" style="grid-column: 1 / -1">
+                  <div
+                    class="demo-case-stage"
+                    style="width: 100%; max-width: 44rem; margin-inline: auto; overflow: visible"
+                  >
+                    <k3-index-list
+                      id="demo-index-list"
+                      show-rail
+                      sticky-headers
+                      rail-scrub
+                      hide-empty-keys
+                      style="--k3-index-list-max-height: min(72dvh, 40rem); display: block; width: 100%"
+                    ></k3-index-list>
+                    <p
+                      class="hint"
+                      style="margin-block-start: var(--k3-sys-spacing-space200); font-size: 0.875rem"
+                    >
+                      <span data-i18n="doc.index-list.active">Section active :</span>
+                      <strong id="demo-index-list-active">—</strong>
+                    </p>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
                 </div>
-                <span class="demo-case-num" aria-hidden="true">1</span>
               </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.index-list.guide.contacts"
+                    >Contacts · scrub rail</span
+                  >
+                </li>
+              </ol>
             </div>
-            <ol class="variant-guide">
-              <li><span class="pill-num">1</span><span class="variant-label">Rail · sticky headers</span></li>
-            </ol>
-          </div>
           </div>
 
           <div class="surface stack gap-md">
             <header class="section-head sub">
               <h2 data-i18n="doc.section.states">States</h2>
             </header>
-            <p data-i18n="doc.index-list.states.blurb">Active section tracks scroll; rail scrub jumps via scrollToKey.</p>
+            <p data-i18n="doc.index-list.states.blurb">
+              Active section tracks scroll; rail scrub jumps via scrollToKey.
+            </p>
           </div>
-
-</article>
+        </article>
 
         <!-- NAVIGATION: SCROLL TO TOP -->
         <article class="comp-page" data-page="scroll-to-top" id="page-scroll-to-top" hidden>
@@ -14440,6 +14980,7 @@ static styles = [
                     >Fidelity</k3-button
                   >
                   <k3-button data-color-variant="expressive" size="xs" selected>Expressive</k3-button>
+                  <k3-button data-color-variant="content" size="xs" variant="tonal">Content</k3-button>
                   <k3-button data-color-variant="monochrome" size="xs" variant="tonal"
                     >Monochrome</k3-button
                   >
@@ -14453,6 +14994,13 @@ static styles = [
               <p class="color-hct hint code-inline"></p>
               <p class="hint" data-i18n="doc.color-lab.copy-hint">
                 Click a swatch to copy HEX · Alt+click to copy the CSS variable.
+              </p>
+              <p class="hint" data-i18n="doc.color-lab.noph-note">
+                Same MCU package can still disagree with other libs: Noph ships
+                <code>Content</code> + seed <code>#5fb9e9</code> (and uses
+                <code>@materialx/material-color-utilities</code>). K3ui defaults to
+                <code>Expressive</code> + <code>#6750A4</code>. Match seed + variant +
+                spec 2025 to compare roles apples-to-apples.
               </p>
             </div>
             <section class="color-preview stack gap-sm" aria-label="Preview">
@@ -14538,6 +15086,7 @@ K3UI.theme.apply({ seed: '#6750A4', mode: 'auto', variant: 'expressive' });
                     >Fidelity</k3-button
                   >
                   <k3-button data-color-variant="expressive" size="xs" selected>Expressive</k3-button>
+                  <k3-button data-color-variant="content" size="xs" variant="tonal">Content</k3-button>
                   <k3-button data-color-variant="monochrome" size="xs" variant="tonal"
                     >Monochrome</k3-button
                   >
@@ -15564,6 +16113,13 @@ K3UI.theme.apply({ seed: '#6750A4', mode: 'auto', variant: 'expressive' });
       <div id="shell-nav-sheet-body" class="shell-nav-sheet-body"></div>
     </k3-sheet>
 
+    <!-- Shell snowfall (settings toggle) — never auto-start; independent from #demo-snow -->
+    <k3-snow
+      id="shell-snow"
+      snowflake-count="120"
+      disable-for-reduced-motion
+    ></k3-snow>
+
     <!-- Settings side sheet — m3e-style colorimetry + contrast -->
     <k3-sheet
       id="settings-sheet"
@@ -15648,6 +16204,9 @@ K3UI.theme.apply({ seed: '#6750A4', mode: 'auto', variant: 'expressive' });
                 </k3-button>
                 <k3-button data-settings-variant="expressive" size="xs" variant="tonal">
                   <span data-i18n="playground.ctrl.variant.expressive">Expressive</span>
+                </k3-button>
+                <k3-button data-settings-variant="content" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.content">Content</span>
                 </k3-button>
                 <k3-button data-settings-variant="monochrome" size="xs" variant="tonal">
                   <span data-i18n="playground.ctrl.variant.monochrome">Monochrome</span>
@@ -15848,6 +16407,16 @@ K3UI.theme.apply({ seed: '#6750A4', mode: 'auto', variant: 'expressive' });
                   >Animations</span
                 >
                 <k3-switch id="settings-animations" aria-label="Animations"></k3-switch>
+              </div>
+              <div class="settings-row settings-row--switch">
+                <span class="settings-label" data-i18n="playground.ctrl.snow"
+                  >Snow</span
+                >
+                <k3-switch
+                  id="settings-snow"
+                  aria-label="Snow"
+                  data-i18n-aria-label="playground.ctrl.snow"
+                ></k3-switch>
               </div>
             </div>
           </k3-card>

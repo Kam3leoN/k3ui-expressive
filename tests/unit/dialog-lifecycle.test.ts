@@ -33,4 +33,29 @@ describe('k3-dialog lifecycle', () => {
     expect(canceled).toBe(false);
     el.remove();
   });
+
+  it('closes on backdrop / outside pointerdown', async () => {
+    window.K3UI_MANUAL = true;
+    await init({ components: ['k3-dialog'], theme: { mode: 'light' } });
+    const el = document.createElement('k3-dialog') as HTMLElement & {
+      show: () => Promise<boolean>;
+      open: boolean;
+      updateComplete: Promise<unknown>;
+    };
+    el.innerHTML = `<span slot="headline">Hi</span><p>Body</p>`;
+    document.body.appendChild(el);
+    await el.updateComplete;
+    expect(await el.show()).toBe(true);
+    await el.updateComplete;
+    /* Settle outside-dismiss microtask from activateModal */
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const backdrop = el.shadowRoot?.querySelector('.backdrop') as HTMLElement;
+    expect(backdrop).toBeTruthy();
+    backdrop.dispatchEvent(new Event('pointerdown', { bubbles: true, cancelable: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    expect(el.open).toBe(false);
+    el.remove();
+  });
 });

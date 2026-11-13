@@ -49,6 +49,18 @@ describe('overlayStack', () => {
     expect(overlayStack.size).toBe(0);
   });
 
+  it('detects opening beside an existing modal scrim', () => {
+    const outside = document.createElement('button');
+    document.body.append(a, outside);
+    overlayStack.push(a, () => undefined);
+    expect(overlayStack.topHost()).toBe(a);
+    expect(overlayStack.wouldOpenBeside(b, outside)).toBe(true);
+    const inside = document.createElement('button');
+    a.append(inside);
+    expect(overlayStack.wouldOpenBeside(b, inside)).toBe(false);
+    outside.remove();
+  });
+
   it('locks scroll (opt-in) while at least one modal is open, then restores', () => {
     const root = document.documentElement;
     root.style.overflow = 'clip';

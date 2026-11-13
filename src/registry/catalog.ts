@@ -28,8 +28,6 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-shape-chip', load: () => import('../components/actions/shape-chip.js') },
   { tag: 'k3-button-pill', load: () => import('../components/actions/button-pill.js') },
   { tag: 'k3-button-smart', load: () => import('../components/actions/button-smart.js') },
-  { tag: 'k3-button-arrow', load: () => import('../components/actions/button-arrow.js') },
-  { tag: 'k3-button-card', load: () => import('../components/actions/button-card.js') },
   { tag: 'k3-button-pad', load: () => import('../components/actions/button-pad.js') },
   { tag: 'k3-button-grid', load: () => import('../components/actions/button-grid.js') },
   {
@@ -48,9 +46,7 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-chip', load: () => import('../components/inputs/chip.js') },
   { tag: 'k3-chip-set', load: () => import('../components/inputs/chip-set.js') },
   { tag: 'k3-counter', load: () => import('../components/inputs/counter.js') },
-  { tag: 'k3-signature', load: () => import('../components/inputs/signature.js') },
   { tag: 'k3-slider', load: () => import('../components/inputs/slider.js') },
-  { tag: 'k3-rating', load: () => import('../components/inputs/rating.js') },
   { tag: 'k3-select', load: () => import('../components/inputs/select.js') },
   { tag: 'k3-autocomplete', load: () => import('../components/inputs/autocomplete.js') },
   { tag: 'k3-search', load: () => import('../components/inputs/search.js') },
@@ -63,23 +59,7 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-alert', load: () => import('../components/feedback/alert.js') },
   { tag: 'k3-tooltip', load: () => import('../components/feedback/tooltip.js') },
   { tag: 'k3-badge', load: () => import('../components/feedback/badge.js') },
-  { tag: 'k3-countdown', load: () => import('../components/feedback/countdown.js') },
-  { tag: 'k3-marquee', load: () => import('../components/feedback/marquee.js') },
-  { tag: 'k3-confetti', load: () => import('../components/feedback/confetti.js') },
-  { tag: 'k3-sound-fx', load: () => import('../components/feedback/sound-fx.js') },
-  // animation (decorative WAAPI effects — no animejs/gsap)
-  { tag: 'k3-text-bounce', load: () => import('../components/animation/text-bounce.js') },
-  { tag: 'k3-text-scramble', load: () => import('../components/animation/text-scramble.js') },
-  { tag: 'k3-heart-burst', load: () => import('../components/animation/heart-burst.js') },
-  { tag: 'k3-halftone', load: () => import('../components/animation/halftone.js') },
-  { tag: 'k3-holo-card', load: () => import('../components/animation/holo-card.js') },
-  { tag: 'k3-scratch-card', load: () => import('../components/animation/scratch-card.js') },
-  { tag: 'k3-lenticular-card', load: () => import('../components/animation/lenticular-card.js') },
-  // charts
-  { tag: 'k3-chart', load: () => import('../components/charts/chart.js') },
-  // media
-  { tag: 'k3-audio-player', load: () => import('../components/media/audio-player.js') },
-  { tag: 'k3-qr-code', load: () => import('../components/media/qr-code.js') },
+  // UX extras (countdown, marquee, sound-fx, chart, audio, qr, …) → package `k3ux`
   // containment
   { tag: 'k3-divider', load: () => import('../components/containment/divider.js') },
   { tag: 'k3-dialog', load: () => import('../components/containment/dialog.js') },
@@ -98,8 +78,8 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-codeblock', load: () => import('../components/containment/codeblock.js') },
   { tag: 'k3-carousel', load: () => import('../components/containment/carousel.js') },
   { tag: 'k3-carousel-item', load: () => import('../components/containment/carousel-item.js') },
-  { tag: 'k3-masonry', load: () => import('../components/containment/masonry.js') },
-  { tag: 'k3-iso-filter', load: () => import('../components/containment/iso-filter.js') },
+  { tag: 'k3-coverflow', load: () => import('../components/containment/coverflow.js') },
+  { tag: 'k3-coverflow-item', load: () => import('../components/containment/coverflow-item.js') },
   { tag: 'k3-table', load: () => import('../components/containment/table.js') },
   { tag: 'k3-avatar', load: () => import('../components/containment/avatar.js') },
   {
@@ -152,7 +132,6 @@ export const catalog: ComponentDef[] = [
     tag: 'k3-mood-calendar',
     load: () => import('../components/pickers/mood-calendar.js'),
   },
-  { tag: 'k3-wheel-picker', load: () => import('../components/pickers/wheel-picker.js') },
   // theme
   { tag: 'k3-theme', load: () => import('../components/theme/theme.js') },
 ];

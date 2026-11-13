@@ -258,7 +258,12 @@ document.querySelector("k3-button-pad")?.addEventListener("k3-navigate", (e) => 
   switch: {
     components: ['k3-switch'],
     html: `<k3-switch>Bluetooth</k3-switch>
-<k3-switch selected>Wi‑Fi</k3-switch>`,
+<k3-switch selected>Wi‑Fi</k3-switch>
+<k3-switch icons>Do not disturb</k3-switch>
+<k3-switch icons selected>Notifications</k3-switch>
+<k3-switch variant="status">Alarm</k3-switch>
+<k3-switch variant="status" selected>Ready</k3-switch>
+<k3-switch variant="status" icons selected>Online</k3-switch>`,
   },
   chip: {
     components: ['k3-chip', 'k3-chip-set'],
@@ -943,6 +948,59 @@ ConfettiPresets.fireBasic();
 ConfettiPresets.fireFireworks();
 rain({ count: 250, gravity: 0.9, duration: 3 });`,
   },
+  firework: {
+    components: ['k3-firework', 'k3-button'],
+    html: `<k3-firework id="fw" auto-start layer="front" sound sound-mode="samples" size="3" quality="3"></k3-firework>
+<k3-button variant="filled" onclick="document.getElementById('fw').launchBurst(2)">
+  Salvo ×2
+</k3-button>
+<k3-button variant="tonal" onclick="document.getElementById('fw').celebrate()">
+  Celebrate
+</k3-button>`,
+    jsExtra: `const fw = document.getElementById('fw');
+fw.enableSound(); // after a user gesture — exact v1 mp3 samples
+fw.launchBurst(3);
+fw.playSequence([{ count: 2 }, { count: 3 }, { finale: true }]);
+
+import { getFireworkSoundSourcesWithFallback } from 'k3ux';
+// Base64 + remote + local fallbacks (same as K3ui v1)`,
+  },
+  'voice-ring': {
+    components: ['k3-voice-ring', 'k3-button'],
+    html: `<k3-voice-ring id="vr" size="240" state="listening" auto-start></k3-voice-ring>
+<k3-button variant="filled" onclick="document.getElementById('vr').listen()">
+  Microphone
+</k3-button>
+<k3-button variant="tonal" onclick="document.getElementById('vr').state='processing'">
+  Processing
+</k3-button>`,
+    jsExtra: `const vr = document.getElementById('vr');
+vr.emotion = 'calm';
+vr.direction = -0.4;
+// Or drive without a mic:
+vr.setLevel(() => analyserRms); // 0…1 each frame
+vr.state = 'speaking';`,
+  },
+  snow: {
+    components: ['k3-snow', 'k3-button'],
+    html: `<k3-snow id="snowfall" auto-start snowflake-count="150"></k3-snow>
+<k3-button variant="filled" onclick="const s=document.getElementById('snowfall'); s.isRunning ? s.stop() : s.start()">
+  Stop / Start
+</k3-button>
+<k3-button variant="outlined" onclick="document.getElementById('snowfall').reset()">
+  Reset
+</k3-button>`,
+    jsExtra: `const el = document.getElementById('snowfall');
+el.speed = [1, 3];
+el.wind = [-0.5, 2];
+el.radius = [0.5, 3];
+// omit color → --k3-sys-color-on-surface (visible on light & dark)
+el.snowflakeCount = 200;
+
+import { SnowEngine } from 'k3ux';
+const engine = new SnowEngine(null, { snowflakeCount: 150 });
+engine.start();`,
+  },
   'text-bounce': {
     components: ['k3-text-bounce', 'k3-button'],
     html: `<k3-text-bounce id="hello" text="HELLO WORLD" loop loop-delay="1000"></k3-text-bounce>
@@ -971,23 +1029,23 @@ el.play();`,
 <k3-button onclick="Object.assign(document.getElementById('chars'),{chars:'blocks'}).play()">Blocks</k3-button>`,
     jsExtra: `document.querySelector('k3-text-scramble')?.play();`,
   },
-  'heart-burst': {
-    components: ['k3-heart-burst', 'k3-button', 'k3-card'],
+  'icons-burst': {
+    components: ['k3-icons-burst', 'k3-button', 'k3-card'],
     html: `<!-- Button — hearts may float past the chrome -->
-<k3-heart-burst continuous icon="heart" color="#ff4b4b">
+<k3-icons-burst continuous icon="heart" color="#ff4b4b">
   <k3-button variant="filled">Sponsor</k3-button>
-</k3-heart-burst>
+</k3-icons-burst>
 
 <!-- Card — hover only on the card; stars may rise above -->
-<k3-heart-burst block continuous icon="star" color="#ffb300">
+<k3-icons-burst block continuous icon="star" color="#ffb300">
   <k3-card variant="outlined">Hover me</k3-card>
-</k3-heart-burst>
+</k3-icons-burst>
 
 <!-- Text — fewer / larger likes that rise like the button hearts -->
-<k3-heart-burst continuous icon="like" color="#1e88e5" count="4" style="--k3-heart-burst-particle-size: 1.85rem">
+<k3-icons-burst continuous icon="like" color="#1e88e5" count="4" style="--k3-icons-burst-particle-size: 1.85rem">
   <h1>Love this headline</h1>
-</k3-heart-burst>`,
-    jsExtra: `document.querySelector('k3-heart-burst')?.burst(12);`,
+</k3-icons-burst>`,
+    jsExtra: `document.querySelector('k3-icons-burst')?.burst(12);`,
   },
   halftone: {
     components: ['k3-halftone'],
@@ -1213,9 +1271,29 @@ qr.addEventListener("k3-download", (e) => {
   'index-list': {
     components: ['k3-index-list'],
     html: `<k3-index-list
-  style="max-height:16rem"
-  items='[{"label":"Alice"},{"label":"Bob"},{"label":"Zoe"}]'
+  id="contacts"
+  show-rail
+  sticky-headers
+  rail-scrub
+  hide-empty-keys
+  haptic
+  style="--k3-index-list-max-height: min(72dvh, 40rem)"
 ></k3-index-list>`,
+    jsExtra: `const list = document.getElementById('contacts');
+list.setItems([
+  { label: '#Support K3UI' },
+  { label: 'Alice Dupont' },
+  { label: 'Amélie Bernard' },
+  { label: 'Bob Martin' },
+  { label: 'Élodie Martin' },
+  { label: 'François Petit' },
+  { label: 'Zoe Zen' },
+  // …full A–Z directory
+]);
+list.addEventListener('k3-section-change', (e) => {
+  console.log('active', e.detail.key);
+});
+list.scrollToKey('A');`,
   },
   'scroll-to-top': {
     components: ['k3-scroll-to-top'],

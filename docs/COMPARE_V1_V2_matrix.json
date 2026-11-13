@@ -387,9 +387,9 @@
   {
     "id": "button-arrow",
     "v1": "ButtonArrow",
-    "v2": "k3-button-arrow",
+    "v2": "k3-button-group[connected] + 2× k3-icon-button",
     "prio": "P1",
-    "status": "porte"
+    "status": "absorbe"
   },
   {
     "id": "button-grid",

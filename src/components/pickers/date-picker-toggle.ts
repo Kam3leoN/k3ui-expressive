@@ -3,13 +3,14 @@ import { property } from 'lit/decorators.js';
 import { K3Element, resolveIdRef } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import type K3DatePicker from './date-picker.js';
-import type { CalendarSelectionTarget } from './calendar.types.js';
 import { syncTriggerAria, TOGGLE_HOST_SELECTOR } from './time-picker.utils.js';
 
 /**
  * Invisible hit-target nested inside a clickable host.
  * Opens the `k3-date-picker` whose `id` matches `for`.
- * Optional `edge` (`start` | `end`) targets that end of a dual-field range.
+ *
+ * For range, one or two fields share the same picker — `edge` is kept for
+ * markup compatibility but ignored (Noph: both fields open the same dialog).
  */
 export class K3DatePickerToggle extends K3Element {
   static override styles = [
@@ -25,7 +26,7 @@ export class K3DatePickerToggle extends K3Element {
   ];
 
   @property() for = '';
-  /** Dual-field range: which date this toggle edits. */
+  /** @deprecated Ignored — range uses one shared modal (Noph). */
   @property({ reflect: true }) edge: '' | 'start' | 'end' = '';
 
   private hostEl: HTMLElement | null = null;
@@ -62,11 +63,7 @@ export class K3DatePickerToggle extends K3Element {
     await customElements.whenDefined('k3-date-picker');
     const picker = resolveIdRef<K3DatePicker>(this, this.for);
     if (!picker || typeof picker.show !== 'function' || picker.disabled) return;
-    const edge =
-      this.edge === 'start' || this.edge === 'end'
-        ? (this.edge as CalendarSelectionTarget)
-        : null;
-    await picker.show(this.hostEl ?? this.parentElement, edge);
+    await picker.show(this.hostEl ?? this.parentElement);
   }
 
   override render() {

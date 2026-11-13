@@ -5,12 +5,15 @@ import {
   K3Element,
   runOpenClose,
   afterPaint,
+  waitForMotion,
   FocusTrap,
   edgeScrollbarStyles,
   stateLayerStyles,
   hasNamedSlot,
   LayerPortal,
   haptic,
+  attachOutsideDismiss,
+  type OutsideDismissController,
 } from '../../core/index.js';
 import { overlayStack } from '../../core/overlay-stack.js';
 import { hostReset } from '../_shared.js';
@@ -99,6 +102,8 @@ export class K3Dialog extends K3Element {
   private readonly portal = new LayerPortal();
   /** In-flight enter — shared by show() and `open` attribute. */
   private enterPromise: Promise<void> | null = null;
+  /** Scrim / outside pointer — closes basic dialog (panel is the “inside”). */
+  private _outsideDismiss: OutsideDismissController | null = null;
 
   /** Effective fullscreen after adaptive swap. */
   private isFullscreen(): boolean {
@@ -174,6 +179,10 @@ export class K3Dialog extends K3Element {
   }
 
   async show(): Promise<boolean> {
+    /* Scrim already up — do not open another dialog beside it (nested from inside OK). */
+    if (overlayStack.wouldOpenBeside(this, document.activeElement as HTMLElement | null)) {
+      return false;
+    }
     const ok = await runOpenClose(
       this,
       'open',
@@ -209,6 +218,8 @@ export class K3Dialog extends K3Element {
         this.open = false;
         this.deactivateModal(true);
         haptic.light();
+        /* Host is `display:contents` — spring runs on `.panel`, not the host. */
+        if (this.panelEl) await waitForMotion(this.panelEl, 500);
       },
       { source },
     );
@@ -227,15 +238,46 @@ export class K3Dialog extends K3Element {
     this.modalActive = true;
     this.trap.activate(this.panelEl);
     overlayStack.push(this, () => void this.hide('escape'));
+    this.bindOutsideDismiss();
   }
 
   /** @param restore — return focus to the element focused before opening. */
   private deactivateModal(restore: boolean): void {
+    this.unbindOutsideDismiss();
     overlayStack.remove(this);
     if (!this.modalActive) return;
     this.modalActive = false;
     this.trap.deactivate({ restore });
   }
+
+  /** Close on pointer outside the panel (scrim / page under fullscreen chrome). */
+  private bindOutsideDismiss(): void {
+    this.unbindOutsideDismiss();
+    if (!this.panelEl || this.isFullscreen()) return;
+    queueMicrotask(() => {
+      if (!this.panelEl || !this.modalActive) return;
+      this._outsideDismiss = attachOutsideDismiss(this.panelEl, {
+        isActive: () => this.visible && this.open && !this.isFullscreen(),
+        onDismiss: (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          void this.hide('backdrop');
+        },
+      });
+    });
+  }
+
+  private unbindOutsideDismiss(): void {
+    this._outsideDismiss?.detach();
+    this._outsideDismiss = null;
+  }
+
+  /** Scrim click — same source as outside-dismiss (`backdrop`). */
+  private onBackdropPointer = (e: Event): void => {
+    e.preventDefault();
+    e.stopPropagation();
+    void this.hide('backdrop');
+  };
 
   private syncSlots = (): void => {
     this.hasIcon = hasNamedSlot(this, 'icon');
@@ -349,7 +391,7 @@ export class K3Dialog extends K3Element {
       <div
         class=${classMap({ backdrop: true, open: this.visible })}
         part="backdrop"
-        @click=${() => this.hide('backdrop')}
+        @pointerdown=${this.onBackdropPointer}
       ></div>
       <div
         class=${classMap({

@@ -15,7 +15,10 @@ const cssPath = path.join(root, 'dist/k3ui.css');
  * card effects (~14 kB: holo, scratch, lenticular + their strings) / ~13 kB CSS.
  * Raise only on purpose — and tighten again once components ship as chunks. */
 const LIMITS = {
-  jsGzipKb: Number(process.env.K3UI_BUDGET_JS_KB ?? 610),
+  /* 610 → 620 with k3-coverflow (+ its doc strings): ≈ +5.8 kB gzip, then
+   * its lightbox, side arrows, bullets and full-width fit: ≈ +4.2 kB.
+   * 620 → 625: nav-rail modal sheet chrome + menu side-dock / refit. */
+  jsGzipKb: Number(process.env.K3UI_BUDGET_JS_KB ?? 625),
   /* Raised with layout helpers (display/flex/spacing/visibility) in k3ui.css */
   cssGzipKb: Number(process.env.K3UI_BUDGET_CSS_KB ?? 28),
 };

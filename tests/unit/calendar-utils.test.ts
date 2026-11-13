@@ -7,6 +7,9 @@ import {
   clampCivil,
   compareCivil,
   daysInMonth,
+  DEFAULT_YEAR_MAX,
+  DEFAULT_YEAR_MIN,
+  formatMonthName,
   inRange,
   isDisabledCivil,
   multiYearPageStart,
@@ -17,9 +20,13 @@ import {
   monthsToCoverRange,
   extractSingleIsoDate,
   formatHeadline,
+  formatLocaleInputDate,
   formatRangeFieldValue,
   formatRangeHeadline,
+  localeDatePlaceholder,
+  parseLocaleInputDate,
   parseRangeFieldValue,
+  yearBounds,
 } from '../../src/components/pickers/calendar.utils.js';
 
 describe('calendar utils', () => {
@@ -68,6 +75,16 @@ describe('calendar utils', () => {
     expect(multiYearPageStart(2026)).toBe(Math.floor(2026 / YEARS_PER_PAGE) * YEARS_PER_PAGE);
   });
 
+  it('formats month name and year bounds for split header', () => {
+    expect(formatMonthName({ year: 2026, month: 11, day: 1 }, 'fr-FR').toLowerCase()).toContain(
+      'novembre',
+    );
+    expect(yearBounds(null, null)).toEqual([DEFAULT_YEAR_MIN, DEFAULT_YEAR_MAX]);
+    expect(
+      yearBounds({ year: 2000, month: 1, day: 1 }, { year: 2030, month: 12, day: 31 }),
+    ).toEqual([2000, 2030]);
+  });
+
   it('detects in-range', () => {
     const a = { year: 2026, month: 1, day: 5 };
     const b = { year: 2026, month: 1, day: 10 };
@@ -88,13 +105,25 @@ describe('calendar utils', () => {
     ).toBe(4);
   });
 
-  it('range headline includes years only when span crosses a year', () => {
+  it('range headline always includes 4-digit years on both ends', () => {
     const same = formatRangeHeadline(
-      { year: 2026, month: 10, day: 21 },
-      { year: 2026, month: 11, day: 15 },
+      { year: 2026, month: 11, day: 24 },
+      { year: 2026, month: 11, day: 27 },
       'en-US',
     );
-    expect(same).not.toMatch(/2026/);
+    expect(same).toMatch(/2026/);
+    expect(same).toMatch(/24/);
+    expect(same).toMatch(/27/);
+    expect(same).not.toMatch(/Wed|Tue|Mon|Sun/i); /* no weekday — keeps years readable */
+    const fr = formatRangeHeadline(
+      { year: 2026, month: 12, day: 22 },
+      { year: 2027, month: 1, day: 16 },
+      'fr-FR',
+    );
+    expect(fr).toMatch(/2026/);
+    expect(fr).toMatch(/2027/);
+    expect(fr).toMatch(/22/);
+    expect(fr).toMatch(/16/);
     const cross = formatRangeHeadline(
       { year: 2026, month: 10, day: 21 },
       { year: 2027, month: 9, day: 26 },
@@ -107,20 +136,14 @@ describe('calendar utils', () => {
     );
   });
 
-  it('formats and parses two-line Du/Au range field values', () => {
-    const nbsp = '\u00a0';
-    expect(
-      formatRangeFieldValue('2027-01-01', '2027-02-15', { from: 'Du', to: 'Au' }),
-    ).toBe(`Du:${nbsp}2027-01-01\nAu:${nbsp}2027-02-15`);
-    expect(parseRangeFieldValue(`Du:${nbsp}2027-01-01\nAu:${nbsp}2027-02-15`)).toEqual({
-      start: '2027-01-01',
-      end: '2027-02-15',
-    });
+  it('formats and parses compact range field values', () => {
+    expect(formatRangeFieldValue('2026-11-24', '2026-11-27')).toBe('2026-11-24 - 2026-11-27');
+    expect(formatRangeFieldValue('2027-01-01', '2027-02-15')).toBe('2027-01-01 - 2027-02-15');
     expect(parseRangeFieldValue('Du : 2027-01-01\nAu : 2027-02-15')).toEqual({
       start: '2027-01-01',
       end: '2027-02-15',
     });
-    expect(parseRangeFieldValue('2027-01-01 – 2027-02-15')).toEqual({
+    expect(parseRangeFieldValue('2027-01-01 - 2027-02-15')).toEqual({
       start: '2027-01-01',
       end: '2027-02-15',
     });
@@ -129,5 +152,15 @@ describe('calendar utils', () => {
       end: '2027-02-15',
     });
     expect(extractSingleIsoDate('Du : 2026-10-21 – 2026-11-30')).toBe('2026-10-21');
+  });
+
+  it('formats and parses locale-typed dates for modal input', () => {
+    expect(localeDatePlaceholder('fr-FR')).toMatch(/DD/);
+    expect(localeDatePlaceholder('fr-FR')).toMatch(/MM/);
+    expect(localeDatePlaceholder('fr-FR')).toMatch(/YYYY/);
+    const d = { year: 2026, month: 11, day: 18 };
+    const fr = formatLocaleInputDate(d, 'fr-FR');
+    expect(parseLocaleInputDate(fr, 'fr-FR')).toEqual(d);
+    expect(parseLocaleInputDate('2026-11-18', 'fr-FR')).toEqual(d);
   });
 });

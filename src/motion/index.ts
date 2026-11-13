@@ -19,5 +19,13 @@ export {
   enterSheetSide,
   enterSheetSlide,
   type EnterScaleYOptions,
+  type EnterScaleYPopoverOptions,
   type SlideAxis,
 } from './enter.js';
+export {
+  morphSize,
+  parseMotionToken,
+  spatialDefaultTiming,
+  spatialFastTiming,
+  canWebAnimate,
+} from './morph.js';

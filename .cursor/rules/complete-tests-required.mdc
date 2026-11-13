@@ -1,0 +1,47 @@
+---
+description: Toujours ajouter la suite de tests complète manquante (Vitest, Playwright, a11y, perf…)
+alwaysApply: true
+---
+
+# Tests complets — obligatoire si absents
+
+Quand tu **ajoutes** ou **modifies** une feature / un composant / un flux playground, vérifie la couverture et **crée les tests manquants** dans la même tâche. Ne pas reporter. Réf. `docs/TESTING.md`.
+
+## Checklist (ajouter ce qui n’existe pas encore pour le changement)
+
+| Besoin | Où |
+|---|---|
+| Vitest unitaire | `tests/unit/**` |
+| Playwright e2e | `tests/e2e/**` |
+| Chromium | défaut `playwright.config.ts` |
+| Firefox / WebKit | `K3UI_E2E_ALL_BROWSERS=1` (CI informative OK) |
+| Mobile | `K3UI_E2E_MOBILE=1` + specs viewport |
+| Clavier | Tab / Escape / flèches / Enter |
+| ARIA | rôles, noms, `aria-*` forward |
+| Visuel | `toHaveScreenshot` (CI : `K3UI_E2E_VISUAL=1`) |
+| Régression | cas bug + comportement nominal |
+| Performance | seuils mesurables (`perf.spec` / budgets) |
+| Mémoire | create/destroy, pas de fuites évidentes |
+| Stress | N instances, open/close répétés |
+| Sécurité | sanitize / XSS / config hostile |
+| Fuzzing | corpus déterministe si entrée libre |
+| Configuration | `init` / options / variantes |
+| Registre | deps + `register` enfants |
+| Concurrent + destroy/recreate | overlays empilés, remount |
+
+## Règles dures
+
+1. **Si le test n’existe pas → l’écrire** (pas seulement documenter).
+2. Couvrir **composants utilisés ensemble** et **destruction / recréation**.
+3. Seuils de perf **mesurables** et absolus.
+4. **Ne jamais** relever `budget:bundle` / limites gzip juste pour faire passer.
+5. Échec test = à corriger ; ne pas skipper sans justification dans le test.
+
+```
+// ❌ BAD — feature livrée sans tests nouveaux
+// (rien dans tests/unit ni tests/e2e)
+
+// ✅ GOOD — même PR / même tâche
+tests/unit/mon-composant.test.ts
+tests/e2e/… (clavier / a11y / concurrent si UI)
+```

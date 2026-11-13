@@ -1,11 +1,10 @@
 /**
  * Custom elements each component renders in its own template (shadow DOM or
  * light-DOM children it manages). `registry.register(tag)` defines them first,
- * so `K3UI.init({ components: ['k3-audio-player'] })` also upgrades its slider,
- * buttons and progress. Kept in sync by tests/unit/registry-deps.test.ts.
+ * Kept in sync by tests/unit/registry-deps.test.ts.
+ * (Audio / sound-fx deps live in companion package `k3ux`.)
  */
 export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
-  'k3-audio-player': ['k3-button', 'k3-button-group', 'k3-button-segmented', 'k3-card', 'k3-icon-button', 'k3-list', 'k3-list-item', 'k3-loading-indicator', 'k3-slider', 'k3-tooltip'],
   'k3-autocomplete': ['k3-text-field'],
   'k3-bubble': ['k3-avatar'],
   'k3-button': ['k3-ripple'],
@@ -14,6 +13,7 @@ export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
   'k3-card-set': ['k3-card', 'k3-menu', 'k3-menu-item'],
   'k3-carousel': ['k3-carousel-item', 'k3-icon-button'],
   'k3-chip-set': ['k3-chip'],
+  'k3-coverflow': ['k3-coverflow-item'],
   'k3-codeblock': ['k3-button', 'k3-icon-button', 'k3-tabs', 'k3-tooltip'],
   'k3-date-picker': ['k3-button', 'k3-calendar', 'k3-date-picker-toggle', 'k3-icon-button', 'k3-text-field'],
   'k3-dialog': ['k3-button'],
@@ -32,7 +32,6 @@ export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
   'k3-quote': ['k3-avatar'],
   'k3-select': ['k3-menu-item', 'k3-text-field'],
   'k3-skeleton': ['k3-card'],
-  'k3-sound-fx': ['k3-button'],
   'k3-split-button': ['k3-menu'],
   'k3-table': ['k3-chip'],
   'k3-time-picker': ['k3-button', 'k3-icon-button', 'k3-text-field', 'k3-time-picker-dial', 'k3-time-picker-toggle'],

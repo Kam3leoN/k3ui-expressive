@@ -1,7 +1,7 @@
 import { html, nothing, type PropertyValues, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { K3Element, focusRingStyles } from '../../core/index.js';
+import { K3Element, edgeScrollbarStyles, focusRingStyles } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
 import { calendarStyles } from './calendar.styles.js';
@@ -14,7 +14,6 @@ import type {
   SpecialDatesFn,
 } from './calendar.types.js';
 import {
-  YEARS_PER_PAGE,
   addMonths,
   addYears,
   buildMonthGrid,
@@ -23,6 +22,7 @@ import {
   daysInMonth,
   firstWeekday,
   formatFullDate,
+  formatMonthName,
   formatPeriodLabel,
   inRange,
   isDisabledCivil,
@@ -30,11 +30,12 @@ import {
   monthLabels,
   monthSpan,
   monthsToCoverRange,
-  multiYearPageStart,
+  pad2,
   parseCivilDate,
   sameCivil,
   todayCivil,
   weekdayLabels,
+  yearBounds,
   civilToValue,
 } from './calendar.utils.js';
 
@@ -43,8 +44,9 @@ const SCROLL_MONTHS_DEFAULT = 24;
 
 /**
  * Material 3 calendar — month / year / multi-year.
+ * Header: month (left) + year (right). Year menu scrolls continuously;
+ * month menu is a fixed column grid (12 fit).
  * Multi-month ranges use side-by-side panes (`months` ≥ 2, `layout` paged).
- * Vertical scroll is available via `layout="scroll"` when preferred.
  *
  * @see https://m3.material.io/components/date-pickers/guidelines
  * @see https://matraic.github.io/m3e/components/calendar.html
@@ -53,7 +55,7 @@ const SCROLL_MONTHS_DEFAULT = 24;
  * @fires k3-view-change — `{ view }`
  */
 export class K3Calendar extends K3Element {
-  static override styles = [hostReset, focusRingStyles, calendarStyles];
+  static override styles = [hostReset, focusRingStyles, edgeScrollbarStyles, calendarStyles];
 
   @property() value = '';
   @property({ attribute: 'start-at' }) startAt = '';
@@ -91,6 +93,17 @@ export class K3Calendar extends K3Element {
   @state() private selected: CivilDate | null = null;
   @state() private rStart: CivilDate | null = null;
   @state() private rEnd: CivilDate | null = null;
+  /** Day-grid slide direction after month/year step. */
+  @state() private slideDir: 'next' | 'prev' | null = null;
+  /** Bumps to re-trigger selected-day pop animation. */
+  @state() private valueAnim = 0;
+
+  private slideClearTimer = 0;
+  /**
+   * Stable first month of the scroll list — set once per open/seed so selecting
+   * the range end never rebuilds panes and jumps the dialog scroll to top.
+   */
+  private scrollAnchor: CivilDate | null = null;
 
   private get min(): CivilDate | null {
     return parseCivilDate(this.minDate);
@@ -103,7 +116,10 @@ export class K3Calendar extends K3Element {
   }
 
   private get resolvedLayout(): 'paged' | 'scroll' {
-    return this.layout === 'scroll' ? 'scroll' : 'paged';
+    if (this.layout === 'scroll') return 'scroll';
+    if (this.layout === 'paged') return 'paged';
+    /* auto — Noph range scrolls months continuously */
+    return this.range ? 'scroll' : 'paged';
   }
 
   private get paneCount(): number {
@@ -125,20 +141,33 @@ export class K3Calendar extends K3Element {
       changed.has('startAt') ||
       changed.has('startView')
     ) {
-      this.syncFromProps(false);
+      this.syncFromProps(false, changed);
     }
     if (changed.has('layout') || changed.has('range') || changed.has('months')) {
       this.dataset.layout = this.resolvedLayout;
     }
   }
 
-  private syncFromProps(initial: boolean): void {
+  private syncFromProps(initial: boolean, changed?: PropertyValues): void {
     this.selected = parseCivilDate(this.value);
     this.rStart = parseCivilDate(this.rangeStart);
     this.rEnd = parseCivilDate(this.rangeEnd);
-    const start = parseCivilDate(this.startAt) ?? this.selected ?? this.rStart ?? todayCivil();
-    this.active = clampCivil(start, this.min, this.max);
-    if (initial || !this.view) this.view = this.startView || 'month';
+    /*
+     * Only re-seed `active` / scroll list on open or explicit startAt — never on
+     * rangeEnd (2nd tap): that used to yank active back to the start month and
+     * scrollIntoView jumped the dialog to the top.
+     */
+    const seedActive =
+      initial || !!changed?.has('startAt') || !!changed?.has('startView');
+    if (seedActive) {
+      const start =
+        parseCivilDate(this.startAt) ?? this.selected ?? this.rStart ?? todayCivil();
+      this.active = clampCivil(start, this.min, this.max);
+      this.scrollAnchor = null;
+    }
+    if (initial || !this.view || changed?.has('startView')) {
+      this.view = this.startView || 'month';
+    }
   }
 
   resetActiveView(): void {
@@ -150,17 +179,6 @@ export class K3Calendar extends K3Element {
       '.cell[tabindex="0"], .cell[aria-pressed="true"]',
     );
     el?.focus();
-  }
-
-  /** Scroll the range list so `active` month is in view. */
-  private scrollActiveIntoView(): void {
-    if (this.resolvedLayout !== 'scroll') return;
-    queueMicrotask(() => {
-      const pane = this.renderRoot.querySelector<HTMLElement>(
-        `.month-pane[data-ym="${this.active.year}-${this.active.month}"]`,
-      );
-      pane?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    });
   }
 
   private emitChange(): void {
@@ -177,10 +195,12 @@ export class K3Calendar extends K3Element {
     this.emit('k3-view-change', { view: v });
   }
 
-  private togglePeriodMenu(): void {
-    if (this.view === 'month') this.setView('year');
-    else if (this.view === 'year') this.setView('multi-year');
-    else this.setView('month');
+  private toggleMonthMenu(): void {
+    this.setView(this.view === 'year' ? 'month' : 'year');
+  }
+
+  private toggleYearMenu(): void {
+    this.setView(this.view === 'multi-year' ? 'month' : 'multi-year');
   }
 
   /** Month-view step: one page of panes (multi-month) or one month. */
@@ -188,48 +208,78 @@ export class K3Calendar extends K3Element {
     return this.resolvedLayout === 'paged' ? this.paneCount : 1;
   }
 
-  private get canPrev(): boolean {
+  private get canPrevMonth(): boolean {
     if (!this.min) return true;
-    if (this.view === 'month') {
-      const prev = addMonths(this.active, -this.monthStep);
-      return (
-        compareCivil({ year: prev.year, month: prev.month, day: daysEnd(prev) }, this.min) >= 0
-      );
-    }
-    if (this.view === 'year') return this.active.year - 1 >= this.min.year;
-    return multiYearPageStart(this.active.year) - YEARS_PER_PAGE >= multiYearPageStart(this.min.year);
-  }
-
-  private get canNext(): boolean {
-    if (!this.max) return true;
-    if (this.view === 'month') {
-      const next = addMonths(this.active, this.monthStep);
-      return compareCivil({ year: next.year, month: next.month, day: 1 }, this.max) <= 0;
-    }
-    if (this.view === 'year') return this.active.year + 1 <= this.max.year;
+    const prev = addMonths(this.active, -this.monthStep);
     return (
-      multiYearPageStart(this.active.year) + YEARS_PER_PAGE <= multiYearPageStart(this.max.year)
+      compareCivil({ year: prev.year, month: prev.month, day: daysEnd(prev) }, this.min) >= 0
     );
   }
 
-  private movePrev(): void {
-    if (!this.canPrev) return;
-    if (this.view === 'month') this.active = addMonths(this.active, -this.monthStep);
-    else if (this.view === 'year') this.active = addYears(this.active, -1);
-    else this.active = addYears(this.active, -YEARS_PER_PAGE);
+  private get canNextMonth(): boolean {
+    if (!this.max) return true;
+    const next = addMonths(this.active, this.monthStep);
+    return compareCivil({ year: next.year, month: next.month, day: 1 }, this.max) <= 0;
   }
 
-  private moveNext(): void {
-    if (!this.canNext) return;
-    if (this.view === 'month') this.active = addMonths(this.active, this.monthStep);
-    else if (this.view === 'year') this.active = addYears(this.active, 1);
-    else this.active = addYears(this.active, YEARS_PER_PAGE);
+  private get canPrevYear(): boolean {
+    if (!this.min) return true;
+    return this.active.year - 1 >= this.min.year;
+  }
+
+  private get canNextYear(): boolean {
+    if (!this.max) return true;
+    return this.active.year + 1 <= this.max.year;
+  }
+
+  private bumpSlide(dir: 'next' | 'prev'): void {
+    this.slideDir = dir;
+    window.clearTimeout(this.slideClearTimer);
+    this.slideClearTimer = window.setTimeout(() => {
+      this.slideDir = null;
+    }, 400);
+  }
+
+  private moveMonth(delta: number): void {
+    if (delta < 0 && !this.canPrevMonth) return;
+    if (delta > 0 && !this.canNextMonth) return;
+    this.bumpSlide(delta > 0 ? 'next' : 'prev');
+    this.active = addMonths(this.active, delta * this.monthStep);
+    if (this.view !== 'month') this.setView('month');
+  }
+
+  private moveYear(delta: number): void {
+    if (delta < 0 && !this.canPrevYear) return;
+    if (delta > 0 && !this.canNextYear) return;
+    this.bumpSlide(delta > 0 ? 'next' : 'prev');
+    this.active = addYears(this.active, delta);
+    if (this.view !== 'month') this.setView('month');
+  }
+
+  protected override updated(changed: PropertyValues): void {
+    if (changed.has('view') && this.view === 'multi-year') {
+      queueMicrotask(() => this.scrollActiveYearIntoView());
+    }
+  }
+
+  private scrollActiveYearIntoView(): void {
+    const el = this.renderRoot.querySelector<HTMLElement>(
+      '.grid.multi-year .cell[aria-pressed="true"]',
+    );
+    if (typeof el?.scrollIntoView === 'function') {
+      el.scrollIntoView({ block: 'center', behavior: 'auto' });
+    }
+  }
+
+  override disconnectedCallback(): void {
+    window.clearTimeout(this.slideClearTimer);
+    super.disconnectedCallback();
   }
 
   /** True when `d`'s month is already shown in the current paged/scroll panes. */
   private isMonthVisible(d: CivilDate): boolean {
     if (this.resolvedLayout === 'scroll') {
-      return true; /* list covers many months; scrollIntoView handles focus */
+      return true; /* continuous list — never page-jump on day tap */
     }
     return monthSpan(this.active, this.paneCount).some(
       (p) => p.year === d.year && p.month === d.month,
@@ -259,20 +309,13 @@ export class K3Calendar extends K3Element {
   private selectDay(d: CivilDate): void {
     if (isDisabledCivil(d, this.min, this.max, this.blackoutDates)) return;
     if (this.range) {
+      /* Noph range: 1st tap = start, 2nd = end, tap before start = new range.
+       * `selectionTarget` start|end only when a dual field explicitly retargets. */
       if (this.selectionTarget === 'start') {
         this.applyRangeStart(d);
       } else if (this.selectionTarget === 'end') {
-        /* Dual End field: allow end without start (don't steal into start). */
-        if (!this.rStart) {
-          this.rEnd = d;
-          this.selected = d;
-          this.rangeStart = '';
-          this.rangeEnd = civilToValue(d);
-          this.value = civilToValue(d);
-        } else {
-          this.applyRangeEnd(d);
-        }
-      } else if (!this.rStart || (this.rStart && this.rEnd)) {
+        this.applyRangeEnd(d);
+      } else if (!this.rStart || this.rEnd) {
         this.applyRangeStart(d);
         this.rEnd = null;
         this.rangeEnd = '';
@@ -289,102 +332,145 @@ export class K3Calendar extends K3Element {
       this.rStart = null;
       this.rEnd = null;
     }
+    this.valueAnim += 1;
     /* Keep current multi-month page if the day is already visible (no jump to 3rd month). */
     if (!this.isMonthVisible(d)) {
+      const before = this.active;
       this.active = { year: d.year, month: d.month, day: 1 };
+      const delta =
+        this.active.year * 12 + this.active.month - (before.year * 12 + before.month);
+      if (delta !== 0) this.bumpSlide(delta > 0 ? 'next' : 'prev');
     }
+    /* Scroll layout: never scrollIntoView on day tap — stay on the month just picked. */
     this.emitChange();
-    this.scrollActiveIntoView();
   }
 
   private selectMonth(month: number): void {
+    const before = this.active;
     this.active = clampCivil(
       { year: this.active.year, month, day: 1 },
       this.min,
       this.max,
     );
+    const delta =
+      this.active.year * 12 + this.active.month - (before.year * 12 + before.month);
+    if (delta !== 0) this.bumpSlide(delta > 0 ? 'next' : 'prev');
     this.setView('month');
   }
 
   private selectYear(year: number): void {
+    const before = this.active;
     this.active = clampCivil(
       { year, month: this.active.month, day: 1 },
       this.min,
       this.max,
     );
+    if (this.active.year !== before.year) {
+      this.bumpSlide(this.active.year > before.year ? 'next' : 'prev');
+    }
     this.setView('year');
   }
 
-  private navLabel(): string {
-    if (this.view === 'month') return i18n.t('datepicker.prevMonth');
-    if (this.view === 'year') return i18n.t('datepicker.prevYear');
-    return i18n.t('datepicker.prevMultiYear');
-  }
-
-  private nextNavLabel(): string {
-    if (this.view === 'month') return i18n.t('datepicker.nextMonth');
-    if (this.view === 'year') return i18n.t('datepicker.nextYear');
-    return i18n.t('datepicker.nextMultiYear');
+  private renderNavBtn(
+    dir: 'prev' | 'next',
+    label: string,
+    disabled: boolean,
+    onClick: () => void,
+  ): TemplateResult {
+    return html`
+      <button
+        type="button"
+        class="nav-btn k3-focus-ring"
+        aria-label=${label}
+        ?disabled=${disabled}
+        @click=${onClick}
+      >
+        <span
+          class="ms notranslate"
+          translate="no"
+          lang="zxx"
+          data-k3-icon=${dir === 'prev' ? 'chevron_left' : 'chevron_right'}
+          aria-hidden="true"
+        ></span>
+      </button>
+    `;
   }
 
   private renderHeader(): TemplateResult {
-    const label = formatPeriodLabel(
-      this.resolvedLayout === 'scroll' && this.view === 'month' ? 'year' : this.view,
-      this.active,
-      i18n.locale,
-    );
-    const headerLabel =
-      this.resolvedLayout === 'scroll' && this.view === 'month'
-        ? String(this.active.year)
-        : formatPeriodLabel(this.view, this.active, i18n.locale);
+    const monthOpen = this.view === 'year';
+    const yearOpen = this.view === 'multi-year';
+    const showSteppers = this.view === 'month';
+    const monthName = formatMonthName(this.active, i18n.locale);
+    const yearLabel = String(this.active.year);
     return html`
       <div class="header">
-        <button
-          type="button"
-          class="period-btn k3-focus-ring"
-          aria-label=${label}
-          @click=${() => this.togglePeriodMenu()}
-        >
-          <span>${headerLabel}</span>
-          <span
-            class="chev ms notranslate"
-            translate="no"
-            lang="zxx"
-            data-k3-icon="arrow_drop_down"
-            aria-hidden="true"
-          ></span>
-        </button>
-        <div class="nav">
+        <div class="period period--month">
+          ${showSteppers
+            ? this.renderNavBtn(
+                'prev',
+                i18n.t('datepicker.prevMonth'),
+                !this.canPrevMonth,
+                () => this.moveMonth(-1),
+              )
+            : nothing}
           <button
             type="button"
-            class="nav-btn k3-focus-ring"
-            aria-label=${this.navLabel()}
-            ?disabled=${!this.canPrev}
-            @click=${() => this.movePrev()}
+            class="period-btn k3-focus-ring"
+            aria-label=${i18n.t('datepicker.selectMonth')}
+            aria-expanded=${monthOpen ? 'true' : 'false'}
+            @click=${() => this.toggleMonthMenu()}
           >
+            <span class="label">${monthName}</span>
             <span
-              class="ms notranslate"
+              class="chev ms notranslate"
               translate="no"
               lang="zxx"
-              data-k3-icon="chevron_left"
+              data-k3-icon="arrow_drop_down"
               aria-hidden="true"
             ></span>
           </button>
+          ${showSteppers
+            ? this.renderNavBtn(
+                'next',
+                i18n.t('datepicker.nextMonth'),
+                !this.canNextMonth,
+                () => this.moveMonth(1),
+              )
+            : nothing}
+        </div>
+        <div class="period period--year">
+          ${showSteppers
+            ? this.renderNavBtn(
+                'prev',
+                i18n.t('datepicker.prevYear'),
+                !this.canPrevYear,
+                () => this.moveYear(-1),
+              )
+            : nothing}
           <button
             type="button"
-            class="nav-btn k3-focus-ring"
-            aria-label=${this.nextNavLabel()}
-            ?disabled=${!this.canNext}
-            @click=${() => this.moveNext()}
+            class="period-btn k3-focus-ring"
+            aria-label=${i18n.t('datepicker.selectYear')}
+            aria-expanded=${yearOpen ? 'true' : 'false'}
+            @click=${() => this.toggleYearMenu()}
           >
+            <span class="label">${yearLabel}</span>
             <span
-              class="ms notranslate"
+              class="chev ms notranslate"
               translate="no"
               lang="zxx"
-              data-k3-icon="chevron_right"
+              data-k3-icon="arrow_drop_down"
               aria-hidden="true"
             ></span>
           </button>
+          ${showSteppers
+            ? this.renderNavBtn(
+                'next',
+                i18n.t('datepicker.nextYear'),
+                !this.canNextYear,
+                () => this.moveYear(1),
+              )
+            : nothing}
         </div>
       </div>
     `;
@@ -452,6 +538,7 @@ export class K3Calendar extends K3Element {
           aria-pressed=${selected ? 'true' : 'false'}
           aria-current=${isToday ? 'date' : nothing}
           aria-label=${formatFullDate(d, i18n.locale)}
+          data-value-anim=${selected && this.valueAnim > 0 ? String(this.valueAnim) : nothing}
           ?disabled=${disabled || outside}
           @click=${() => this.selectDay(d)}
         >
@@ -468,7 +555,7 @@ export class K3Calendar extends K3Element {
     const cells = buildMonthGrid(anchor.year, anchor.month, this.weekStart);
     const title = formatPeriodLabel('month', anchor, i18n.locale);
     return html`
-      <section class="month-pane" data-ym="${anchor.year}-${anchor.month}">
+      <section class="month-pane" data-ym="${anchor.year}-${pad2(anchor.month)}">
         ${opts.showSubhead ? html`<h3 class="month-subhead">${title}</h3>` : nothing}
         ${this.renderWeekdays()}
         <div class="grid month" role="grid" aria-label=${title}>
@@ -492,6 +579,30 @@ export class K3Calendar extends K3Element {
     `;
   }
 
+  /** First pane of the continuous list — stable across range taps. */
+  private ensureScrollAnchor(): CivilDate {
+    if (!this.scrollAnchor) {
+      let start = addMonths(
+        { year: this.active.year, month: this.active.month, day: 1 },
+        -1,
+      );
+      if (this.rStart) {
+        const rs = { year: this.rStart.year, month: this.rStart.month, day: 1 };
+        if (compareCivil(rs, start) < 0) start = rs;
+      }
+      if (this.min) {
+        const ms = { year: this.min.year, month: this.min.month, day: 1 };
+        if (compareCivil(start, ms) < 0) start = ms;
+      }
+      this.scrollAnchor = start;
+    } else if (this.rStart) {
+      /* Allow extending earlier if a new start is before the anchor — never jump forward. */
+      const rs = { year: this.rStart.year, month: this.rStart.month, day: 1 };
+      if (compareCivil(rs, this.scrollAnchor) < 0) this.scrollAnchor = rs;
+    }
+    return this.scrollAnchor;
+  }
+
   private renderScrollMonths(): TemplateResult {
     /* Cover selection range + buffer; at least scrollMonths / paneCount */
     const cover = monthsToCoverRange(this.rStart, this.rEnd, this.paneCount);
@@ -500,22 +611,9 @@ export class K3Calendar extends K3Element {
       cover + 2,
       this.paneCount,
     );
-    /* Start a bit before active so user can scroll up */
-    let start = addMonths({ year: this.active.year, month: this.active.month, day: 1 }, -1);
-    if (this.rStart) {
-      const rs = { year: this.rStart.year, month: this.rStart.month, day: 1 };
-      if (compareCivil(rs, start) < 0) start = rs;
-    }
-    if (this.min) {
-      const ms = { year: this.min.year, month: this.min.month, day: 1 };
-      if (compareCivil(start, ms) < 0) start = ms;
-    }
-    const panes = monthSpan(start, total);
+    const panes = monthSpan(this.ensureScrollAnchor(), total);
     return html`
-      <div
-        class="months-scroll"
-        style=${`--k3-cal-scroll-max-h: ${Math.max(2, this.paneCount) * 11}rem`}
-      >
+      <div class="months-scroll">
         ${panes.map((a) =>
           this.renderMonthPane(a, { showSubhead: true, hideOutside: true }),
         )}
@@ -563,45 +661,54 @@ export class K3Calendar extends K3Element {
   }
 
   private renderMultiYear(): TemplateResult {
-    const start = multiYearPageStart(this.active.year);
+    const [yMin, yMax] = yearBounds(this.min, this.max);
+    const years: number[] = [];
+    for (let y = yMin; y <= yMax; y++) years.push(y);
     return html`
       <div
-        class="grid multi-year"
-        role="grid"
-        aria-label=${`${start} – ${start + YEARS_PER_PAGE - 1}`}
+        class="years-scroll k3-scroll"
+        role="presentation"
       >
-        ${Array.from({ length: YEARS_PER_PAGE }, (_, i) => {
-          const year = start + i;
-          const disabled =
-            (this.min && year < this.min.year) || (this.max && year > this.max.year);
-          const selected = this.active.year === year;
-          return html`
-            <div role="gridcell">
-              <button
-                type="button"
-                class=${classMap({ cell: true, 'k3-focus-ring': true })}
-                aria-pressed=${selected ? 'true' : 'false'}
-                ?disabled=${!!disabled}
-                @click=${() => this.selectYear(year)}
-              >
-                ${year}
-              </button>
-            </div>
-          `;
-        })}
+        <div
+          class="grid multi-year"
+          role="grid"
+          aria-label=${i18n.t('datepicker.selectYear')}
+        >
+          ${years.map((year) => {
+            const disabled =
+              (this.min && year < this.min.year) || (this.max && year > this.max.year);
+            const selected = this.active.year === year;
+            return html`
+              <div role="gridcell">
+                <button
+                  type="button"
+                  class=${classMap({ cell: true, 'k3-focus-ring': true })}
+                  aria-pressed=${selected ? 'true' : 'false'}
+                  ?disabled=${!!disabled}
+                  @click=${() => this.selectYear(year)}
+                >
+                  ${year}
+                </button>
+              </div>
+            `;
+          })}
+        </div>
       </div>
     `;
   }
 
   override render() {
+    const slide = this.view === 'month' && this.slideDir ? this.slideDir : nothing;
     return html`
       ${this.renderHeader()}
-      <div class="body">
-        ${this.view === 'month'
-          ? this.renderMonthBody()
-          : this.view === 'year'
-            ? this.renderYear()
-            : this.renderMultiYear()}
+      <div class="body" data-slide=${slide}>
+        <div class="body-inner">
+          ${this.view === 'month'
+            ? this.renderMonthBody()
+            : this.view === 'year'
+              ? this.renderYear()
+              : this.renderMultiYear()}
+        </div>
       </div>
     `;
   }

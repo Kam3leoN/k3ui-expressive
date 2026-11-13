@@ -44,6 +44,8 @@ export class K3TimePickerDial extends K3Element {
 
   @state() private dragging = false;
   private dragRect: DOMRect | null = null;
+  /** Unwrapped hand angle so 11→12 turns +30°, not −330° (Noph ClockDial). */
+  private handUnwrapped = 0;
 
   override firstUpdated(): void {
     this.updateHand();
@@ -64,13 +66,16 @@ export class K3TimePickerDial extends K3Element {
   private updateHand(): void {
     const hand = this.renderRoot.querySelector<HTMLElement>('.handle');
     if (!hand) return;
-    let angle: number | null = null;
+    let angle = 0; /* empty → point at 00 (top) */
     let active = false;
     let inner = false;
     if (this.view === 'hour' && this.hour != null) {
       angle = (this.hour % 12) * 30;
       active = true;
       inner = this.format === '24' && (this.hour < 1 || this.hour > 12);
+    } else if (this.view === 'hour') {
+      /* Unset hour — still show hand on 00 (inner ring in 24h). */
+      inner = this.format === '24';
     } else if (this.view === 'minute' && this.minute != null) {
       angle = this.minute * 6;
       active = this.minute % 5 === 0;
@@ -80,8 +85,9 @@ export class K3TimePickerDial extends K3Element {
     }
     hand.classList.toggle('active', active);
     hand.classList.toggle('inner', inner);
-    if (angle != null) hand.style.setProperty('--_hand-angle', String(angle));
-    else hand.style.removeProperty('--_hand-angle');
+    const delta = ((((angle - this.handUnwrapped) % 360) + 540) % 360) - 180;
+    this.handUnwrapped += delta;
+    hand.style.setProperty('--_hand-angle', String(this.handUnwrapped));
   }
 
   private blocked(hour: number, minute: number, second: number): boolean {
@@ -271,17 +277,19 @@ export class K3TimePickerDial extends K3Element {
           ? 12
           : i
         : hour24FromDisplay(i === 0 ? 12 : i, this.period, '12');
-      const active =
+      const selected =
         this.hour != null &&
         (use24
           ? this.hour > 0 && this.hour <= 12 && this.hour % 12 === i
           : this.hour % 12 === i);
+      /* Empty hand rests on 12 (outer top) in 12h — keep on-primary under thumb */
+      const underEmptyHand = this.hour == null && !use24 && i === 0;
       return this.renderNumeral({
         label: i === 0 ? '12' : String(i),
         angle: i * 30,
         value: hour24,
         kind: 'hour',
-        active,
+        active: selected || underEmptyHand,
         disabled: this.isDisabled('hour', hour24),
       });
     });
@@ -289,12 +297,14 @@ export class K3TimePickerDial extends K3Element {
       ? nothing
       : Array.from({ length: 12 }, (_, i) => {
           const hour = i === 0 ? 0 : i + 12;
+          /* Empty hand rests on 00 — on-primary like a selected value */
+          const underEmptyHand = this.hour == null && hour === 0;
           return this.renderNumeral({
             label: hour === 0 ? '00' : String(hour),
             angle: i * 30,
             value: hour,
             kind: 'hour',
-            active: this.hour === hour,
+            active: this.hour === hour || underEmptyHand,
             disabled: this.isDisabled('hour', hour),
             inner: true,
           });
@@ -318,12 +328,13 @@ export class K3TimePickerDial extends K3Element {
     >
       ${Array.from({ length: Math.floor(60 / labelStep) }, (_, i) => {
         const v = i * labelStep;
+        const underEmptyHand = current == null && v === 0;
         return this.renderNumeral({
           label: pad2(v),
           angle: v * 6,
           value: v,
           kind,
-          active: current === v,
+          active: current === v || underEmptyHand,
           disabled: this.isDisabled(kind, v),
         });
       })}
@@ -331,10 +342,6 @@ export class K3TimePickerDial extends K3Element {
   }
 
   override render() {
-    const hasValue =
-      (this.view === 'hour' && this.hour != null) ||
-      (this.view === 'minute' && this.minute != null) ||
-      (this.view === 'second' && this.second != null);
     const labelKey =
       this.view === 'hour'
         ? 'timepicker.hour'
@@ -353,7 +360,7 @@ export class K3TimePickerDial extends K3Element {
         @pointerup=${this.onPointerUp}
         @pointercancel=${this.onPointerUp}
       >
-        ${hasValue ? html`<div class="handle" aria-hidden="true"></div>` : nothing}
+        <div class="handle" aria-hidden="true"></div>
         ${this.renderHourFace()}${this.renderStepFace('minute')}${this.showSeconds
           ? this.renderStepFace('second')
           : nothing}

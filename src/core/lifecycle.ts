@@ -45,6 +45,16 @@ export function prefersReducedMotion(): boolean {
   return matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+/**
+ * Expressive spatial motion (springs / scale enter).
+ * False when reduced-motion OR `data-k3-motion="standard"` (brut / strongly reduced).
+ */
+export function allowsExpressiveMotion(): boolean {
+  if (prefersReducedMotion()) return false;
+  if (typeof document === 'undefined') return true;
+  return document.documentElement.getAttribute('data-k3-motion') !== 'standard';
+}
+
 /** Emit a k3-* lifecycle CustomEvent. Returns false if canceled. */
 export function emitLifecycle(
   el: EventTarget,

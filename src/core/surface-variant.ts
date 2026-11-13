@@ -25,7 +25,7 @@ export function syncResolvedSurface(
   resolved: ResolvedSurfaceVariant,
 ): void {
   host.dataset.resolvedVariant = resolved;
-  host.toggleAttribute('aria-modal', resolved === 'modal');
+  host.setAttribute('aria-modal', resolved === 'modal' ? 'true' : 'false');
 }
 
 export interface DockedFitOptions {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { init } from '../../src/index.js';
 import type { K3TimePicker } from '../../src/components/pickers/time-picker.js';
 
@@ -216,6 +216,34 @@ describe('k3-time-picker', () => {
     await el.hide(false);
   });
 
+  it('stages dial enter/leave when toggling keyboard↔dial while open', async () => {
+    const el = createPicker({ format: '24', mode: 'dial', variant: 'modal' });
+    await el.updateComplete;
+    await el.show();
+    await el.updateComplete;
+    expect(el.dataset.mode).toBe('dial');
+    const modeBtn = () =>
+      el.shadowRoot?.querySelector('.ms-btn:not(.fmt-btn)') as HTMLButtonElement;
+
+    // Dial → keyboard: leaving attr while dial still painted, then input.
+    modeBtn().click();
+    expect(el.hasAttribute('data-dial-leaving')).toBe(true);
+    expect(el.dataset.mode).toBe('dial');
+    await vi.waitFor(() => {
+      expect(el.dataset.mode).toBe('input');
+      expect(el.hasAttribute('data-dial-leaving')).toBe(false);
+    });
+
+    // Keyboard → dial: entering staging then settle.
+    modeBtn().click();
+    await vi.waitFor(() => {
+      expect(el.dataset.mode).toBe('dial');
+      expect(el.hasAttribute('data-dial-entering')).toBe(false);
+    });
+    expect(el.shadowRoot?.querySelector('.dial-host')).toBeTruthy();
+    await el.hide(false);
+  });
+
   it('input advances focus from hour to minute after two digits', async () => {
     const el = createPicker({ variant: 'modal', mode: 'input', format: '24' });
     await el.updateComplete;
@@ -231,5 +259,38 @@ describe('k3-time-picker', () => {
     await new Promise<void>((r) => queueMicrotask(() => r()));
     expect(el.shadowRoot?.activeElement ?? document.activeElement).toBe(minute);
     await el.hide(false);
+  });
+
+  it('shows dial hand at 00 when value is unset', async () => {
+    const el = createPicker({ variant: 'modal', format: '24' });
+    await el.updateComplete;
+    await el.show();
+    await el.updateComplete;
+    const dial = el.shadowRoot?.querySelector('k3-time-picker-dial') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+    };
+    await dial?.updateComplete;
+    const hand = dial?.shadowRoot?.querySelector('.handle') as HTMLElement;
+    expect(hand).toBeTruthy();
+    expect(hand.classList.contains('inner')).toBe(true); /* 24h → 00 on inner ring */
+    expect(hand.style.getPropertyValue('--_hand-angle')).toBe('0');
+    const zero = dial?.shadowRoot?.querySelector('.numeral.inner[data-value="0"]');
+    expect(zero?.classList.contains('active')).toBe(true); /* on-primary under thumb */
+    await el.hide(false);
+  });
+
+  it('modal closes on scrim click', async () => {
+    const el = createPicker({ variant: 'modal', format: '24' });
+    await el.updateComplete;
+    expect(await el.show()).toBe(true);
+    await el.updateComplete;
+    await Promise.resolve();
+    await Promise.resolve();
+    const scrim = el.shadowRoot?.querySelector('.scrim') as HTMLElement;
+    expect(scrim).toBeTruthy();
+    expect(getComputedStyle(scrim).display).not.toBe('none');
+    scrim.click();
+    await new Promise((r) => setTimeout(r, 500));
+    expect(el.open).toBe(false);
   });
 });

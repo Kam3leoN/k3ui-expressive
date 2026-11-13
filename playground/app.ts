@@ -108,6 +108,8 @@ import { canHoverOpen } from '../src/components/containment/menu.types.js';
  */
 const SHELL_COMPONENTS = [
   'k3-theme',
+  /* Boot veil — upgrade ASAP so SoftBurst CE replaces the light-DOM stand-in. */
+  'k3-loading-indicator',
   'k3-nav-rail',
   'k3-nav-bar',
   'k3-nav-item',
@@ -126,7 +128,6 @@ const SHELL_COMPONENTS = [
   'k3-top-app-bar',
   'k3-button',
   'k3-button-group',
-  'k3-loading-indicator',
 ] as const;
 
 /** Registered right after first paint — not needed for LCP text. */
@@ -153,6 +154,8 @@ let themeMode: ColorMode = (() => {
 })();
 /** Animations on by default — opt out via rail foot (desktop) or app-bar (phone). */
 let animationsOn = docStore.get<boolean>(DocKeys.uiAnimations, true);
+/** Shell snowfall (settings) — never drives #demo-snow on the Snow page. */
+let shellSnowOn = docStore.get<boolean>(DocKeys.uiSnow, false) === true;
 /** M3 motion scheme — Expressive (spring) default · Standard (utilitarian). */
 /** Material color spec — 2025 (M3 Expressive) or 2021 (legacy hues). */
 let colorSpec: ColorSpecVersion = (() => {
@@ -169,6 +172,7 @@ const COLOR_VARIANTS: readonly ColorVariant[] = [
   'vibrant',
   'fidelity',
   'expressive',
+  'content',
   'monochrome',
   'neutral',
   'rainbow',
@@ -309,21 +313,30 @@ const KEYBOARD_SUBPAGES = [
 const KEYBOARD_CHILD_IDS = new Set<string>(KEYBOARD_SUBPAGES.map(([id]) => id));
 
 /**
- * Cards family — Components → Containment → Cards.
- * Decorative holo / lenticular / scratch demos live in the companion package `k3ux`.
+ * Cards family variants (k3ux) — nested under Containment → Cards.
+ * k3ui: the main Cards page (`card`) is a normal leaf, no Standard submenu.
  */
-const CARD_SUBPAGES = [['card', 'doc.cards.nav.overview']] as const;
+const CARD_VARIANT_SUBPAGES = [
+  ['card-holo', 'doc.cards.nav.holo'],
+  ['card-lenticular', 'doc.cards.nav.lenticular'],
+  ['card-scratch', 'doc.cards.nav.scratch'],
+] as const;
 
-const CARD_CHILD_IDS = new Set<string>(CARD_SUBPAGES.map(([id]) => id));
+const CARD_VARIANT_IDS = new Set<string>(CARD_VARIANT_SUBPAGES.map(([id]) => id));
 
-/** Nested `k3-menu-item` — Containment → Cards → children (3rd level). */
+/** Card effect leaves visible for the active docs pack (k3ux only). */
+function cardSubpagesForProduct(): readonly (readonly [string, string])[] {
+  return CARD_VARIANT_SUBPAGES.filter(([id]) => !!findComponent(id));
+}
+
+/** Nested `k3-menu-item` — Containment → Cards → holo / lenticular / scratch. */
 function makeCardsFamilyMenuItem(
   pageId: string,
   selectCurrent: boolean,
 ): HTMLElement {
   const resolved = articlePageId(pageId);
   const cardsParent = document.createElement('k3-menu-item');
-  cardsParent.setAttribute('value', 'card');
+  cardsParent.setAttribute('value', 'cards');
   cardsParent.setAttribute('has-submenu', '');
   cardsParent.slot = 'submenu';
   cardsParent.append(menuItemIcon('dashboard'), t('doc.cards.title'));
@@ -331,7 +344,7 @@ function makeCardsFamilyMenuItem(
   if (selectCurrent && isCardFamilyPage(pageId)) {
     cardsParent.setAttribute('selected', '');
   }
-  for (const [value, labelKey] of CARD_SUBPAGES) {
+  for (const [value, labelKey] of cardSubpagesForProduct()) {
     const child = document.createElement('k3-menu-item');
     child.setAttribute('value', value);
     child.slot = 'submenu';
@@ -360,7 +373,7 @@ function isKeyboardFamilyPage(hashId: string): boolean {
 }
 
 function isCardFamilyPage(hashId: string): boolean {
-  return CARD_CHILD_IDS.has(articlePageId(hashId));
+  return CARD_VARIANT_IDS.has(articlePageId(hashId));
 }
 
 function setCeProp(el: HTMLElement, prop: string, attr: string, value: string): void {
@@ -594,6 +607,11 @@ function syncSettingsSheet(): void {
     | null;
   if (anim) anim.selected = animationsOn;
 
+  const snowSw = document.getElementById('settings-snow') as
+    | (HTMLElement & { selected?: boolean })
+    | null;
+  if (snowSw) snowSw.selected = shellSnowOn;
+
   const grid = document.getElementById('settings-grid') as
     | (HTMLElement & { selected?: boolean })
     | null;
@@ -658,6 +676,82 @@ function applyAnimationsPreference(): void {
   else root.setAttribute('data-k3-reduce-motion', '');
   docStore.set(DocKeys.uiAnimations, animationsOn);
   syncMotionControls();
+  void applyShellSnow();
+}
+
+type ShellSnowHost = HTMLElement & {
+  start?: () => void;
+  stop?: () => void;
+  reset?: () => void;
+  teardown?: () => void;
+  isRunning?: boolean;
+  disableForReducedMotion?: boolean;
+};
+
+function shellSnowEl(): ShellSnowHost | null {
+  return document.getElementById('shell-snow') as ShellSnowHost | null;
+}
+
+/** Demo-only host on the Snow page — never the shell overlay. */
+function demoSnowEl(): ShellSnowHost | null {
+  return document.getElementById('demo-snow') as ShellSnowHost | null;
+}
+
+/** Tear down a snow host (clear + remove lib canvas). */
+function teardownSnowHost(host: ShellSnowHost | null): void {
+  if (!host) return;
+  if (typeof host.teardown === 'function') host.teardown();
+  else host.reset?.();
+}
+
+/** Remove any leftover fullscreen snow canvases (orphans from races / old sessions). */
+function purgeSnowLibCanvases(): void {
+  document
+    .querySelectorAll('canvas[data-k3-snow="lib"]')
+    .forEach((node) => node.remove());
+}
+
+/** True only when the Snow article is the visible page. */
+function isSnowDemoPageActive(): boolean {
+  if (articlePageId(currentPageId()) !== 'snow') return false;
+  const page = document.getElementById('page-snow');
+  return !!page && !page.hidden;
+}
+
+/** Clear page demo snow when leaving the Snow article. */
+function pauseDemoSnow(): void {
+  teardownSnowHost(demoSnowEl());
+  /* Demo must not leave a body canvas behind after navigation. */
+  if (!shellSnowOn || !animationsOn) purgeSnowLibCanvases();
+}
+
+/**
+ * Settings snow → `#shell-snow` on every page except Snow.
+ * Never drives `#demo-snow`. When off (or on Snow page), shell is fully torn down.
+ */
+async function applyShellSnow(
+  pageId: string = articlePageId(currentPageId()),
+): Promise<void> {
+  shellSnowOn = shellSnowOn === true;
+  docStore.set(DocKeys.uiSnow, shellSnowOn);
+  const onSnowDemoPage = articlePageId(pageId) === 'snow';
+  /* Preference can stay ON while browsing Snow — shell overlay is suppressed there. */
+  const want = shellSnowOn && animationsOn && !onSnowDemoPage;
+  if (want) await ensureK3ux();
+  const host = shellSnowEl();
+  if (want) {
+    if (!host) return;
+    await customElements.whenDefined('k3-snow');
+    host.disableForReducedMotion = false;
+    host.start?.();
+    return;
+  }
+  /* Off / suppressed: tear down shell; also kill a runaway demo if we're not on Snow. */
+  teardownSnowHost(host);
+  if (!onSnowDemoPage) {
+    teardownSnowHost(demoSnowEl());
+    purgeSnowLibCanvases();
+  }
 }
 
 const MUSIC_MUTE_KEY = 'k3-music-muted';
@@ -1151,9 +1245,9 @@ function buildNavSheet(destId: string): void {
       ul.id = panelId;
       ul.hidden = pageCat !== group.category;
 
-      if (group.category === 'Containment' && getDocProduct() === 'k3ui') {
+      if (group.category === 'Containment' && cardSubpagesForProduct().length) {
         const peers = componentsInCategory('Containment').filter(
-          (c) => !CARD_CHILD_IDS.has(c.id),
+          (c) => !CARD_VARIANT_IDS.has(c.id),
         );
         const wrap = document.createElement('li');
         wrap.className = 'shell-sheet-cards-wrap';
@@ -1167,7 +1261,7 @@ function buildNavSheet(destId: string): void {
         cardsPanel.className = 'shell-sheet-children';
         cardsPanel.id = cardsPanelId;
         const resolved = articlePageId(pageId);
-        for (const [hash, labelKey] of CARD_SUBPAGES) {
+        for (const [hash, labelKey] of cardSubpagesForProduct()) {
           const cli = document.createElement('li');
           const a = document.createElement('a');
           a.className = 'shell-sheet-link';
@@ -1433,10 +1527,10 @@ function fillNavMenu(destId?: string | null): {
         parent.append(menuItemIcon(group.icon), t(group.labelKey));
         appendEnSupporting(parent, group.labelKey);
 
-        if (group.category === 'Containment' && getDocProduct() === 'k3ui') {
-          /* Flat peers except Cards family → one nested flyout under Cartes */
+        if (group.category === 'Containment' && cardSubpagesForProduct().length) {
+          /* Flat peers except card variants → nested flyout under Cartes (k3ux) */
           const peers = componentsInCategory('Containment').filter(
-            (c) => !CARD_CHILD_IDS.has(c.id),
+            (c) => !CARD_VARIANT_IDS.has(c.id),
           );
           const cardsItem = makeCardsFamilyMenuItem(pageId, selectCurrent);
           let cardsInserted = false;
@@ -1551,10 +1645,10 @@ function fillNavMenu(destId?: string | null): {
  * Secondary destinations in an M3E menu (rail / tablet+):
  * - Components → parent categories with child pages as submenu
  * - Utilities → flat list; Keyboard expands to Basics / Media
- * - Animations → flat list (text-bounce, heart-burst, …)
- * - Resources → Material Symbols browser page
+ * - Animations → flat list (text-bounce, icons-burst, …)
+ * - Resources → Material Symbols browser (k3ux pack)
  * - Styles → flat list; Color expands to Roles / Palettes / Additional
- * - Components → Containment → Cards expands to Standard / Holo / Lenticular / Scratch
+ * - Components → Containment → Cards is a normal leaf on k3ui; on k3ux it expands to Holo · Lenticular · Scratch
  */
 function buildNavMenu(
   opts: { open?: boolean; anchor?: HTMLElement | null; destId?: string | null } = {},
@@ -1668,9 +1762,12 @@ let catalogHtml: string | null = null;
 /** Doc pages whose CEs live in companion package `k3ux`. */
 const K3UX_PAGES = new Set([
   'confetti',
+  'snow',
+  'firework',
+  'voice-ring',
   'text-bounce',
   'text-scramble',
-  'heart-burst',
+  'icons-burst',
   'halftone',
   'card-holo',
   'card-lenticular',
@@ -1756,7 +1853,7 @@ function applyDocProduct(product: DocProduct, opts?: { navigateHome?: boolean })
     el.hidden = el.dataset.docProduct !== product;
   });
   syncProductSwitchButtons(product);
-  const title = document.querySelector('.home-hero .hero-title');
+  const title = document.getElementById('home-hero-title');
   if (title) title.textContent = product === 'k3ux' ? 'K3ux' : 'K3ui';
   if (changed) {
     catalogHtml = null;
@@ -1865,6 +1962,9 @@ function setDocPageLoading(on: boolean): void {
   el.classList.toggle('is-on', on);
   el.setAttribute('aria-hidden', on ? 'false' : 'true');
   el.setAttribute('aria-busy', on ? 'true' : 'false');
+  /* Single K3ui indicator — SoftBurst light-DOM until CE upgrades, then morph CE. */
+  const ce = el.querySelector<HTMLElement>('k3-loading-indicator');
+  if (ce) ce.hidden = false;
 }
 
 /** Wait two frames so the loading veil paints before heavy work. */
@@ -1899,6 +1999,9 @@ function showPage(id: string): void {
     }
   }
   const resolvedId = articleId === 'home' || !found ? 'home' : articleId;
+  /* Demo snow only on Snow page; shell snow is suppressed there (settings switch ignored). */
+  if (resolvedId !== 'snow') pauseDemoSnow();
+  void applyShellSnow(resolvedId);
   const ambient = document.getElementById('home-ambient');
   if (ambient) ambient.hidden = resolvedId !== 'home';
   buildPrimaryNav();
@@ -3154,6 +3257,8 @@ async function boot(): Promise<void> {
     if (ver) ver.textContent = `v${api.version}`;
     /* Boot in short tasks: each step's component renders stay in its own task. */
     await yieldToMain();
+    /* Hero morph ASAP — CSS d keyframes must start on first home paint. */
+    void import('./hero-morph/mount.js').then((m) => m.mountHomeHeroMorph());
 
     applyAdaptiveShell();
     containerOn = docStore.get(DocKeys.uiContainer, true);
@@ -3168,6 +3273,13 @@ async function boot(): Promise<void> {
     await yieldToMain();
     buildCatalogGrid();
     void mountHomeAmbient();
+    document.querySelectorAll<HTMLElement>('[data-nav="quick-start"]').forEach((btn) => {
+      if (btn.dataset.wiredNav) return;
+      btn.dataset.wiredNav = '1';
+      btn.addEventListener('click', () => {
+        void navigateDocPage('quick-start', ensurePageComponents);
+      });
+    });
     rebuildGridOverlay();
     setDocumentDir(docStore.get(DocKeys.uiDir, 'ltr'));
     applyAnimationsPreference();
@@ -3272,6 +3384,10 @@ async function boot(): Promise<void> {
       if (articleId === 'text-bounce') wireTextBounceDemo();
       if (articleId === 'text-scramble') wireTextScrambleDemo();
       if (articleId === 'confetti') wireConfettiDemo();
+      if (articleId === 'snow') wireSnowDemo();
+      if (articleId === 'firework') wireFireworkDemo();
+      if (articleId === 'voice-ring') wireVoiceRingDemo();
+      if (articleId === 'index-list') wireIndexListDemo();
       if (articleId === 'card-holo') {
         /* Sibling package source (playground alias also maps k3ux/holo-effects.css). */
         await import('../../k3ux/addons/holo-effects/holo-effects.scss');
@@ -3298,10 +3414,10 @@ async function boot(): Promise<void> {
       const page = document.querySelector(`.comp-page[data-page="${CSS.escape(initialArticle)}"]`);
       await registerPresentK3Tags(collectPageK3Tags(page));
     }
-    /* Veil for real CE registration — home is near-instant; deep links show the loader */
+    /* Veil already on from first paint (data-k3-booting) — finish under it, then lift. */
     await navigateDocPage(initialPage, ensurePageComponents);
-    /* Requested page is on screen — drop the pre-paint deep-link veil. */
     document.documentElement.removeAttribute('data-k3-deeplink');
+    document.documentElement.removeAttribute('data-k3-booting');
 
     window.addEventListener('hashchange', () => {
       void navigateDocPage(currentPageId(), ensurePageComponents);
@@ -3548,9 +3664,12 @@ async function boot(): Promise<void> {
 
     app?.classList.add('is-ready');
     document.documentElement.classList.add('k3-ready');
+    document.documentElement.removeAttribute('data-k3-booting');
   } catch (err) {
     console.error(err);
     document.documentElement.removeAttribute('data-k3-deeplink');
+    document.documentElement.removeAttribute('data-k3-booting');
+    setDocPageLoading(false);
     if (errBox) {
       errBox.hidden = false;
       errBox.textContent = `K3ui init failed: ${err instanceof Error ? err.message : String(err)}`;
@@ -3636,6 +3755,8 @@ async function boot(): Promise<void> {
   wireShellChrome();
   await yieldToMain();
   wireDemoPages();
+  /* Demo wiring must never leave snow running when the settings toggle is off. */
+  void applyShellSnow(articlePageId(currentPageId()));
 }
 
 /** App-bar chrome — locale + settings sheet (theme / motion / layout / seed). */
@@ -3753,6 +3874,16 @@ function wireShellChrome(): void {
     animationsOn = selected;
     applyAnimationsPreference();
     void showFlash(t(selected ? 'playground.ctrl.motion.on' : 'playground.ctrl.motion.off'));
+  });
+
+  document.getElementById('settings-snow')?.addEventListener('k3-change', (e) => {
+    const selected = (e as CustomEvent<{ selected?: boolean }>).detail?.selected;
+    if (typeof selected !== 'boolean') return;
+    shellSnowOn = selected;
+    void applyShellSnow().then(() => {
+      syncSettingsSheet();
+      flashToggle('playground.ctrl.snow', selected);
+    });
   });
 
   document.getElementById('settings-container')?.addEventListener('k3-change', (e) => {
@@ -4088,6 +4219,8 @@ function wireDemoPages(): void {
   wireCountdownLab();
   wireCarouselLab();
   wireConfettiDemo();
+  wireSnowDemo();
+  wireFireworkDemo();
   wireTextBounceDemo();
   wireTextScrambleDemo();
   wireChartDemos();
@@ -4735,6 +4868,696 @@ function wireConfettiDemo(): void {
     if (typeof host.presetFire === 'function') host.presetFire(preset);
     else if (typeof host.fire === 'function') host.fire();
   }) as EventListener);
+}
+
+type SnowHost = HTMLElement & {
+  start?: () => void;
+  stop?: () => void;
+  reset?: () => void;
+  snowflakeCount?: number;
+  color?: string;
+  speed?: [number, number];
+  wind?: [number, number];
+  radius?: [number, number];
+  images?: CanvasImageSource[] | undefined;
+  disableForReducedMotion?: boolean;
+  isRunning?: boolean;
+};
+
+type SnowRangeSlider = HTMLElement & {
+  valueStart?: number;
+  valueEnd?: number;
+  value?: number;
+  label?: string;
+};
+type SnowSwitchEl = HTMLElement & { selected?: boolean };
+type SnowFieldEl = HTMLElement & { value?: string };
+type SnowDialogEl = HTMLElement & {
+  show?: () => Promise<boolean>;
+  hide?: () => Promise<boolean>;
+};
+
+/** Tiny SVG snowflake images for the “Use Images” toggle. */
+function makeSnowDemoImages(): HTMLImageElement[] {
+  const svgs = [
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><g fill="none" stroke="#dee4fd" stroke-width="4" stroke-linecap="round"><path d="M32 4v56M8 18l48 28M8 46l48-28"/><path d="M32 16l-8-6M32 16l8-6M32 48l-8 6M32 48l8 6M16 22l-10 0M16 22l-4 8M48 42l10 0M48 42l4-8M16 42l-10 0M16 42l-4-8M48 22l10 0M48 22l4 8"/></g></svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="6" fill="#dee4fd"/><g fill="none" stroke="#dee4fd" stroke-width="3" stroke-linecap="round"><path d="M32 6v52M10 20l44 24M10 44l44-24"/><path d="M32 14l-6-5M32 14l6-5M32 50l-6 5M32 50l6 5"/></g></svg>`,
+  ];
+  return svgs.map((svg) => {
+    const img = new Image();
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    return img;
+  });
+}
+
+function formatSnowNum(n: number): string {
+  const rounded = Math.round(n * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+/** Restart Snow page demo (safe after shell teardown / leaving the page). */
+async function ensureDemoSnowRunning(): Promise<void> {
+  /* Never start from boot wiring / races while another page is visible. */
+  if (!isSnowDemoPageActive()) return;
+  await ensureK3ux();
+  await customElements.whenDefined('k3-snow');
+  if (!isSnowDemoPageActive()) return;
+  const host = demoSnowEl();
+  if (!host) return;
+  host.disableForReducedMotion = false;
+  if (!host.isRunning) host.start?.();
+  const btn = document.getElementById('snow-toggle') as
+    | (HTMLElement & { variant?: string })
+    | null;
+  if (btn) {
+    btn.textContent = t('doc.snow.action.stop');
+    btn.variant = 'filled';
+  }
+}
+
+/** Snow playground — fullscreen overlay + options dialog. */
+function wireSnowDemo(): void {
+  const page = document.getElementById('page-snow');
+  if (!page) return;
+
+  /* Re-enter: listeners already bound — restart only when Snow is visible. */
+  if (page.dataset.snowWired) {
+    if (isSnowDemoPageActive()) void ensureDemoSnowRunning();
+    return;
+  }
+  page.dataset.snowWired = '1';
+
+  /* Always #demo-snow — never #shell-snow (settings overlay). */
+  const snow = () => document.getElementById('demo-snow') as SnowHost | null;
+  const toggleBtn = () => document.getElementById('snow-toggle');
+  const dialog = () =>
+    document.getElementById('snow-options-dialog') as SnowDialogEl | null;
+  const snowImages = makeSnowDemoImages();
+  /** Color picker only overrides theme default after the user edits it. */
+  let snowColorCustomized = false;
+
+  const readOnSurfaceHex = (): string => {
+    try {
+      const raw = getComputedStyle(document.documentElement)
+        .getPropertyValue('--k3-sys-color-on-surface')
+        .trim();
+      if (/^#[0-9a-fA-F]{6}$/.test(raw)) return raw.toLowerCase();
+      if (/^#[0-9a-fA-F]{3}$/.test(raw)) {
+        const r = raw[1]!;
+        const g = raw[2]!;
+        const b = raw[3]!;
+        return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+      }
+      /* rgb(r, g, b) → hex for <input type="color"> */
+      const m = raw.match(
+        /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i,
+      );
+      if (m) {
+        const hex = (n: string) =>
+          Number(n).toString(16).padStart(2, '0');
+        return `#${hex(m[1]!)}${hex(m[2]!)}${hex(m[3]!)}`;
+      }
+    } catch {
+      /* ignore */
+    }
+    return '#1c1b1f';
+  };
+
+  const syncColorFieldsFromTheme = (): void => {
+    if (snowColorCustomized) return;
+    const hex = readOnSurfaceHex();
+    const colorInput = document.getElementById('snow-color') as HTMLInputElement | null;
+    const colorHex = document.getElementById('snow-color-hex') as SnowFieldEl | null;
+    if (colorInput) colorInput.value = hex;
+    if (colorHex) colorHex.value = hex;
+  };
+
+  const el = snow();
+  if (el) {
+    el.disableForReducedMotion = false;
+    /* Theme default — do not pin a hardcoded flake color. */
+    el.color = '';
+  }
+
+  const syncToggleLabel = (): void => {
+    const btn = toggleBtn() as (HTMLElement & { variant?: string }) | null;
+    const host = snow();
+    if (!btn) return;
+    const running = !!host?.isRunning;
+    btn.textContent = running ? t('doc.snow.action.stop') : t('doc.snow.action.start');
+    btn.variant = running ? 'filled' : 'tonal';
+  };
+
+  const syncSliderLabels = (): void => {
+    const count = document.getElementById('snow-count') as SnowRangeSlider | null;
+    const speed = document.getElementById('snow-speed') as SnowRangeSlider | null;
+    const wind = document.getElementById('snow-wind') as SnowRangeSlider | null;
+    const radius = document.getElementById('snow-radius') as SnowRangeSlider | null;
+    if (count && count.value != null) {
+      count.label = `${t('doc.snow.knob.count')} · ${formatSnowNum(count.value)}`;
+    }
+    if (speed && speed.valueStart != null && speed.valueEnd != null) {
+      speed.label = `${t('doc.snow.knob.speed')} · ${formatSnowNum(speed.valueStart)} – ${formatSnowNum(speed.valueEnd)}`;
+    }
+    if (wind && wind.valueStart != null && wind.valueEnd != null) {
+      wind.label = `${t('doc.snow.knob.wind')} · ${formatSnowNum(wind.valueStart)} – ${formatSnowNum(wind.valueEnd)}`;
+    }
+    if (radius && radius.valueStart != null && radius.valueEnd != null) {
+      radius.label = `${t('doc.snow.knob.radius')} · ${formatSnowNum(radius.valueStart)} – ${formatSnowNum(radius.valueEnd)}`;
+    }
+  };
+
+  const syncSnow = (): void => {
+    const host = snow();
+    if (!host) return;
+    const count = document.getElementById('snow-count') as SnowRangeSlider | null;
+    const speed = document.getElementById('snow-speed') as SnowRangeSlider | null;
+    const wind = document.getElementById('snow-wind') as SnowRangeSlider | null;
+    const radius = document.getElementById('snow-radius') as SnowRangeSlider | null;
+    const images = document.getElementById('snow-use-images') as SnowSwitchEl | null;
+    const colorInput = document.getElementById('snow-color') as HTMLInputElement | null;
+
+    if (count?.value != null) host.snowflakeCount = count.value;
+    if (speed?.valueStart != null && speed.valueEnd != null) {
+      host.speed = [speed.valueStart, speed.valueEnd];
+    }
+    if (wind?.valueStart != null && wind.valueEnd != null) {
+      host.wind = [wind.valueStart, wind.valueEnd];
+    }
+    if (radius?.valueStart != null && radius.valueEnd != null) {
+      host.radius = [radius.valueStart, radius.valueEnd];
+    }
+    if (snowColorCustomized && colorInput?.value) host.color = colorInput.value;
+    else host.color = '';
+    host.images = images?.selected ? snowImages : undefined;
+    syncSliderLabels();
+  };
+
+  const ensureRunning = (): void => {
+    if (!isSnowDemoPageActive()) return;
+    const host = snow();
+    if (!host) return;
+    syncSnow();
+    if (!host.isRunning) host.start?.();
+    syncToggleLabel();
+  };
+
+  page.addEventListener('k3-click', ((e: Event) => {
+    const path = e.composedPath() as EventTarget[];
+    const btn = path.find(
+      (n): n is HTMLElement =>
+        n instanceof HTMLElement && n.hasAttribute('data-snow-action'),
+    );
+    if (!btn) return;
+    const action = btn.getAttribute('data-snow-action');
+    const host = snow();
+    if (!action) return;
+
+    if (action === 'options') {
+      syncColorFieldsFromTheme();
+      void dialog()?.show?.();
+      return;
+    }
+    if (!host) return;
+    if (action === 'toggle') {
+      if (host.isRunning) host.stop?.();
+      else {
+        syncSnow();
+        host.start?.();
+      }
+      syncToggleLabel();
+      return;
+    }
+    if (action === 'reset') {
+      host.reset?.();
+      syncSnow();
+      host.start?.();
+      syncToggleLabel();
+    }
+  }) as EventListener);
+
+  document.getElementById('snow-options-done')?.addEventListener('k3-click', () => {
+    void dialog()?.hide?.();
+  });
+
+  for (const id of ['snow-count', 'snow-speed', 'snow-wind', 'snow-radius']) {
+    const node = document.getElementById(id);
+    node?.addEventListener('k3-input', () => {
+      syncSnow();
+    });
+    node?.addEventListener('k3-change', () => {
+      syncSnow();
+    });
+  }
+
+  document.getElementById('snow-use-images')?.addEventListener('k3-change', () => {
+    syncSnow();
+  });
+
+  const colorInput = document.getElementById('snow-color') as HTMLInputElement | null;
+  const colorHex = document.getElementById('snow-color-hex') as SnowFieldEl | null;
+  colorInput?.addEventListener('input', () => {
+    snowColorCustomized = true;
+    if (colorHex && colorInput.value) colorHex.value = colorInput.value;
+    syncSnow();
+  });
+  colorHex?.addEventListener('k3-change', () => {
+    const v = (colorHex.value || '').trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v) && colorInput) {
+      snowColorCustomized = true;
+      colorInput.value = v;
+      syncSnow();
+    }
+  });
+  syncColorFieldsFromTheme();
+
+  /*
+   * Boot also calls wireSnowDemo via wireDemoPages — only auto-start when the
+   * Snow article is actually visible (not while buried under [hidden]).
+   */
+  void (async () => {
+    const host = snow();
+    if (!host) return;
+    await customElements.whenDefined('k3-snow');
+    await (host as HTMLElement & { updateComplete?: Promise<unknown> }).updateComplete;
+    if (!isSnowDemoPageActive()) {
+      teardownSnowHost(host);
+      return;
+    }
+    ensureRunning();
+  })();
+}
+
+type FireworkHost = HTMLElement & {
+  start?: () => void;
+  pause?: () => void;
+  stop?: () => void;
+  reset?: () => void;
+  launchBurst?: (n: number) => void;
+  celebrate?: () => void;
+  playSequence?: (salvos: Array<{ finale?: boolean; finaleCount?: number }>) => void;
+  enableSound?: () => void;
+  quality?: number;
+  size?: number;
+  scaleFactor?: number;
+  shell?: string;
+  soundEnabled?: boolean;
+  trails?: boolean;
+  autoLaunch?: boolean;
+  finale?: boolean;
+  isRunning?: boolean;
+  disableForReducedMotion?: boolean;
+};
+
+type FireworkDialogEl = HTMLElement & {
+  show?: () => Promise<boolean>;
+  hide?: () => Promise<boolean>;
+};
+
+/** Firework playground — fullscreen overlay + salvos + options dialog. */
+function wireFireworkDemo(): void {
+  const page = document.getElementById('page-firework');
+  if (!page || page.dataset.fwWired) return;
+  page.dataset.fwWired = '1';
+
+  const fw = () => document.getElementById('demo-firework') as FireworkHost | null;
+  const toggleBtn = () =>
+    document.getElementById('fw-toggle') as (HTMLElement & { variant?: string }) | null;
+  const dialog = () =>
+    document.getElementById('fw-options-dialog') as FireworkDialogEl | null;
+
+  const host0 = fw();
+  if (host0) host0.disableForReducedMotion = false;
+
+  const syncToggleLabel = (): void => {
+    const btn = toggleBtn();
+    const host = fw();
+    if (!btn) return;
+    const running = !!host?.isRunning;
+    btn.textContent = running
+      ? t('doc.firework.action.stop')
+      : t('doc.firework.action.start');
+    btn.variant = running ? 'filled' : 'tonal';
+  };
+
+  const formatNum = (n: number): string => {
+    const r = Math.round(n * 10) / 10;
+    return Number.isInteger(r) ? String(r) : r.toFixed(1);
+  };
+
+  const syncSliderLabels = (): void => {
+    type S = HTMLElement & { value?: number; label?: string };
+    const quality = document.getElementById('fw-quality') as S | null;
+    const size = document.getElementById('fw-size') as S | null;
+    const scale = document.getElementById('fw-scale') as S | null;
+    if (quality?.value != null) {
+      quality.label = `${t('doc.firework.knob.quality')} · ${formatNum(quality.value)}`;
+    }
+    if (size?.value != null) {
+      size.label = `${t('doc.firework.knob.size')} · ${formatNum(size.value)}`;
+    }
+    if (scale?.value != null) {
+      scale.label = `${t('doc.firework.knob.scale')} · ${formatNum(scale.value)}`;
+    }
+  };
+
+  const syncFw = (): void => {
+    const host = fw();
+    if (!host) return;
+    type S = HTMLElement & { value?: number };
+    type Sw = HTMLElement & { selected?: boolean };
+    type Sel = HTMLElement & { value?: string };
+    const quality = document.getElementById('fw-quality') as S | null;
+    const size = document.getElementById('fw-size') as S | null;
+    const scale = document.getElementById('fw-scale') as S | null;
+    const shell = document.getElementById('fw-shell') as Sel | null;
+    const sound = document.getElementById('fw-sound') as Sw | null;
+    const trails = document.getElementById('fw-trails') as Sw | null;
+    const auto = document.getElementById('fw-auto') as Sw | null;
+    const finale = document.getElementById('fw-finale-mode') as Sw | null;
+    if (quality?.value != null) host.quality = Math.round(quality.value) as 1 | 2 | 3;
+    if (size?.value != null) host.size = size.value;
+    if (scale?.value != null) host.scaleFactor = scale.value;
+    if (shell?.value) host.shell = shell.value;
+    if (sound) {
+      host.soundEnabled = !!sound.selected;
+      if (sound.selected) host.enableSound?.();
+    }
+    if (trails) host.trails = !!trails.selected;
+    if (auto) host.autoLaunch = !!auto.selected;
+    if (finale) host.finale = !!finale.selected;
+    syncSliderLabels();
+  };
+
+  page.addEventListener('k3-click', ((e: Event) => {
+    const path = e.composedPath() as EventTarget[];
+    const btn = path.find(
+      (n): n is HTMLElement =>
+        n instanceof HTMLElement && n.hasAttribute('data-fw-action'),
+    );
+    if (!btn) return;
+    const action = btn.getAttribute('data-fw-action');
+    const host = fw();
+    if (!action) return;
+
+    if (action === 'options') {
+      void dialog()?.show?.();
+      return;
+    }
+    if (!host) return;
+
+    if (action === 'toggle') {
+      if (host.isRunning) host.pause?.();
+      else {
+        syncFw();
+        host.start?.();
+      }
+      syncToggleLabel();
+      return;
+    }
+    if (action === 'reset') {
+      host.reset?.();
+      syncFw();
+      host.start?.();
+      syncToggleLabel();
+      return;
+    }
+    syncFw();
+    if (!host.isRunning) host.start?.();
+    if (action === 'burst') {
+      const n = Number(btn.getAttribute('data-fw-count') || '2');
+      host.launchBurst?.(n);
+    } else if (action === 'finale') {
+      host.playSequence?.([{ finale: true, finaleCount: 24 }]);
+    } else if (action === 'celebrate') {
+      host.celebrate?.();
+    }
+    syncToggleLabel();
+  }) as EventListener);
+
+  document.getElementById('fw-options-done')?.addEventListener('k3-click', () => {
+    void dialog()?.hide?.();
+  });
+
+  for (const id of ['fw-quality', 'fw-size', 'fw-scale']) {
+    const node = document.getElementById(id);
+    node?.addEventListener('k3-input', () => syncFw());
+    node?.addEventListener('k3-change', () => syncFw());
+  }
+  for (const id of ['fw-sound', 'fw-trails', 'fw-auto', 'fw-finale-mode', 'fw-shell']) {
+    document.getElementById(id)?.addEventListener('k3-change', () => syncFw());
+  }
+
+  void (async () => {
+    const host = fw();
+    if (!host) return;
+    await customElements.whenDefined('k3-firework');
+    await (host as HTMLElement & { updateComplete?: Promise<unknown> }).updateComplete;
+    syncFw();
+    host.start?.();
+    syncToggleLabel();
+  })();
+}
+
+type VoiceRingHost = HTMLElement & {
+  state?: string;
+  emotion?: string;
+  direction?: number;
+  start?: () => void;
+  stop?: () => void;
+  listen?: () => Promise<MediaStream>;
+  detachStream?: () => void;
+  setLevel?: (n: number | (() => number) | undefined) => void;
+  disableForReducedMotion?: boolean;
+  updateComplete?: Promise<unknown>;
+};
+
+/** Voice ring playground — state / mic / emotion / direction. */
+function wireVoiceRingDemo(): void {
+  const page = document.getElementById('page-voice-ring');
+  if (!page || page.dataset.vrWired) return;
+  page.dataset.vrWired = '1';
+
+  const vr = () =>
+    document.getElementById('demo-voice-ring') as VoiceRingHost | null;
+
+  const host0 = vr();
+  if (host0) host0.disableForReducedMotion = false;
+
+  const syncDirectionLabel = (): void => {
+    type S = HTMLElement & { value?: number; label?: string };
+    const dir = document.getElementById('vr-direction') as S | null;
+    if (dir?.value != null) {
+      const n = Math.round(dir.value * 100) / 100;
+      dir.label = `${t('doc.voice-ring.knob.direction')} · ${n}`;
+    }
+  };
+
+  const applyControls = (): void => {
+    const host = vr();
+    if (!host) return;
+    type Sel = HTMLElement & { value?: string };
+    type S = HTMLElement & { value?: number };
+    const emotion = document.getElementById('vr-emotion') as Sel | null;
+    const dir = document.getElementById('vr-direction') as S | null;
+    if (emotion) host.emotion = emotion.value ?? '';
+    if (dir?.value != null) host.direction = dir.value;
+    syncDirectionLabel();
+  };
+
+  page.addEventListener('k3-click', ((e: Event) => {
+    const path = e.composedPath() as EventTarget[];
+    const btn = path.find(
+      (n): n is HTMLElement =>
+        n instanceof HTMLElement &&
+        (n.hasAttribute('data-vr-state') || n.hasAttribute('data-vr-action')),
+    );
+    if (!btn) return;
+    const host = vr();
+    if (!host) return;
+
+    const state = btn.getAttribute('data-vr-state');
+    if (state) {
+      host.state = state;
+      page.querySelectorAll<HTMLElement>('[data-vr-state]').forEach((el) => {
+        (el as HTMLElement & { variant?: string }).variant =
+          el === btn ? 'filled' : 'tonal';
+      });
+      return;
+    }
+
+    const action = btn.getAttribute('data-vr-action');
+    if (action === 'mic') {
+      void (async () => {
+        try {
+          host.state = 'listening';
+          await host.listen?.();
+        } catch {
+          /* permission denied / insecure context */
+        }
+      })();
+      return;
+    }
+    if (action === 'mic-stop') {
+      host.detachStream?.();
+      host.setLevel?.(undefined);
+      host.state = 'idle';
+    }
+  }) as EventListener);
+
+  document.getElementById('vr-emotion')?.addEventListener('k3-change', () => {
+    applyControls();
+  });
+  document.getElementById('vr-direction')?.addEventListener('k3-input', () => {
+    applyControls();
+  });
+  document.getElementById('vr-direction')?.addEventListener('k3-change', () => {
+    applyControls();
+  });
+
+  void (async () => {
+    const host = vr();
+    if (!host) return;
+    await customElements.whenDefined('k3-voice-ring');
+    await host.updateComplete;
+    applyControls();
+    host.start?.();
+  })();
+}
+
+/** Practical contact directory — dense A–Z (K3ui v1 symbols + annuaire usable). */
+const INDEX_LIST_DEMO_CONTACTS = [
+  '#Support K3UI',
+  '@social',
+  '-Legacy Systems',
+  '_internal',
+  '—Note spéciale',
+  '0123 Numéro',
+  '42 Answer Ltd',
+  '7-Eleven',
+  'Alice Dupont',
+  'Amélie Bernard',
+  'Antoine Lefèvre',
+  'Aurore Marchand',
+  'Bob Martin',
+  'Bruno Costa',
+  'Béatrice Noel',
+  'Camille Roux',
+  'Claire Dubois',
+  'Corentin Vidal',
+  'David Nguyen',
+  'Diane Moreau',
+  'Dylan Pereira',
+  'Élodie Martin',
+  'Emma Garcia',
+  'Estelle Fabre',
+  'François Petit',
+  'Fatima Benali',
+  'Félix Garnier',
+  'Gabriel Simon',
+  'Gisèle Renault',
+  'Guillaume Petit',
+  'Hélène Blanc',
+  'Hugo Leroy',
+  'Hamza Belkacem',
+  'Inès Morel',
+  'Isabelle Caron',
+  'Ivan Petrov',
+  'Julien Fabre',
+  'Jade Fontaine',
+  'Jacques Perrin',
+  'Karim Haddad',
+  'Karen Davis',
+  'Kevin Marchal',
+  'Léa Girard',
+  'Lucas Bernard',
+  'Louise Mercier',
+  'Marie Curie',
+  'Marc Antoine',
+  'Manon Lefebvre',
+  'Nicolas Roux',
+  'Nora Benali',
+  'Noémie Pascal',
+  'Olivia Chevalier',
+  'Olivier Deschamps',
+  'Omar Said',
+  'Paul Durand',
+  'Pauline Roy',
+  'Pierre Lambert',
+  'Quentin Vidal',
+  'Quincy Adams',
+  'Rachel Cohen',
+  'Romain Gerard',
+  'Rita Oliveira',
+  'Sophie Lambert',
+  'Samuel Petit',
+  'Sarah Nguyen',
+  'Thomas Garnier',
+  'Théo Marchand',
+  'Tina Robinson',
+  'Ursula Becker',
+  'Ulysse Moreau',
+  'Victor Hugo',
+  'Valérie Simon',
+  'Vincent Blanc',
+  'Wendy Hall',
+  'William Scott',
+  'Xavier Young',
+  'Xia Li',
+  'Yasmine Said',
+  'Yoann Petit',
+  'Yvonne Marchal',
+  'Zoe Zen',
+  'Zacharie Noel',
+  'Zineb Amrani',
+] as const;
+
+type IndexListHost = HTMLElement & {
+  setItems?: (items: Array<{ label: string }>) => void;
+  items?: Array<{ label: string }>;
+  getActiveKey?: () => string | null;
+  disableForReducedMotion?: boolean;
+  updateComplete?: Promise<unknown>;
+};
+
+/** Index list playground — long contacts + active section readout. */
+function wireIndexListDemo(): void {
+  const page = document.getElementById('page-index-list');
+  if (!page || page.dataset.indexListWired) return;
+  page.dataset.indexListWired = '1';
+
+  const host = () =>
+    document.getElementById('demo-index-list') as IndexListHost | null;
+  const activeEl = () => document.getElementById('demo-index-list-active');
+
+  const syncActive = (key?: string | null): void => {
+    const el = activeEl();
+    if (!el) return;
+    el.textContent = key && key.length ? key : '—';
+  };
+
+  page.addEventListener('k3-section-change', ((e: Event) => {
+    const detail = (e as CustomEvent<{ key?: string }>).detail;
+    if (detail?.key != null) syncActive(detail.key);
+  }) as EventListener);
+
+  void (async () => {
+    const list = host();
+    if (!list) return;
+    await customElements.whenDefined('k3-index-list');
+    await list.updateComplete;
+    const items = INDEX_LIST_DEMO_CONTACTS.map((label) => ({ label }));
+    if (typeof list.setItems === 'function') list.setItems(items);
+    else list.items = items;
+    await list.updateComplete;
+    /* Open on A so the letter directory is immediately visible (symbols stay above). */
+    const scrollable = list as IndexListHost & {
+      scrollToKey?: (key: string, fromUser?: boolean) => void;
+    };
+    scrollable.scrollToKey?.('A', false);
+    await list.updateComplete;
+    syncActive(list.getActiveKey?.() ?? 'A');
+  })();
 }
 
 /** Buttons Group arrows / Pad / Grid — live value labels on demo pages. */

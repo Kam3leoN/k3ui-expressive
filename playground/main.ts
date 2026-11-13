@@ -2,12 +2,19 @@
 import '../src/fonts/fonts-ui.css';
 import './icons.css';
 import '../src/styles/k3ui.scss';
+/* Companion UX FOUC placeholders (charts, sticky audio) — sibling package. */
+import '../../k3ux/src/styles/k3ux.scss';
 /* Holo foils (GPL-3.0 add-on) load with the Card holographic page — app.ts */
 
 /*
- * Paint the static page first, then boot the app. The hero and catalog intro are
- * final HTML (default locale prerendered at build), so LCP never waits for the
- * app bundle, which is requested right after that first frame.
+ * k3ux peer-imports `k3ui` (aliased to src/index). Mark MANUAL before the app
+ * chunk loads so index autoBootstrap does not race the playground init().
+ */
+(window as Window & { K3UI_MANUAL?: boolean }).K3UI_MANUAL = true;
+
+/*
+ * First paint is the boot loader (html[data-k3-booting]). Start the app right
+ * after that frame so modules load under the veil — never wait for hero LCP.
  */
 let started = false;
 const start = (): void => {
@@ -15,19 +22,8 @@ const start = (): void => {
   started = true;
   void import('./app.js');
 };
-const lcpObservable =
-  typeof PerformanceObserver === 'function' &&
-  PerformanceObserver.supportedEntryTypes?.includes('largest-contentful-paint');
 if (document.visibilityState === 'hidden') {
   start();
-} else if (lcpObservable) {
-  /* Request the app once the static page has actually painted its largest
-     element — its download never competes with the first frame. */
-  new PerformanceObserver((_list, observer) => {
-    observer.disconnect();
-    setTimeout(start, 0);
-  }).observe({ type: 'largest-contentful-paint', buffered: true });
-  setTimeout(start, 3000); /* safety net — e.g. a page without contentful paint */
 } else {
   requestAnimationFrame(() => setTimeout(start, 0));
 }

@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { build as esbuild } from 'esbuild';
 import { catalogGridHtml } from './catalog.js';
+import { lighthouseLive } from './lighthouse-live.js';
 import {
   DEFAULT_THEME,
   THEME_CACHE_KEY,
@@ -158,6 +159,7 @@ export default defineConfig({
   publicDir: resolve(__dirname, 'public'),
   plugins: [
     tailwindcss(),
+    lighthouseLive(),
     {
       name: 'k3-lh-html',
       configureServer(server) {
@@ -177,10 +179,15 @@ export default defineConfig({
         order: 'post',
         async handler(html, ctx) {
           const bundle = ctx.bundle;
-          if (!bundle) return deferInactivePages(html, false);
+          const prepaint = await prepaintTheme();
+          /* Dev must also inject prepaint — otherwise first paint keeps the static
+             #fef7ff SCSS fallback (rose) until JS applies expressive #fff7ff. */
+          if (!bundle) {
+            return deferInactivePages(html, false).replace('</head>', `${prepaint}  </head>`);
+          }
           let out = deferInactivePages(compactHtml(prerenderCatalog(prerenderI18n(html))), true).replace(
             '</head>',
-            `${await prepaintTheme()}  </head>`,
+            `${prepaint}  </head>`,
           );
           const font = Object.keys(bundle).find((k) =>
             k.includes('google-sans-latin-400-normal'),
@@ -200,9 +207,34 @@ export default defineConfig({
     },
   ],
   resolve: {
-    alias: {
-      '@k3ui': resolve(__dirname, '../src'),
-    },
+    /* One Lit graph for playground + sibling k3ux (avoids lit-html _$AT crashes). */
+    dedupe: ['lit', 'lit-html', 'lit-element', '@lit/reactive-element'],
+    alias: [
+      {
+        /* Exact package entry — do not swallow k3ux/holo-effects.css */
+        find: /^k3ux$/,
+        replacement: resolve(__dirname, '../../k3ux/src/index.ts'),
+      },
+      {
+        find: 'k3ux/holo-effects.css',
+        replacement: resolve(__dirname, '../../k3ux/addons/holo-effects/holo-effects.scss'),
+      },
+      {
+        /* Peer import from k3ux sources — never the built dist (bundled Lit). */
+        find: /^k3ui$/,
+        replacement: resolve(__dirname, '../src/index.ts'),
+      },
+      { find: '@k3ui', replacement: resolve(__dirname, '../src') },
+      {
+        find: /^lit$/,
+        replacement: resolve(__dirname, '../node_modules/lit'),
+      },
+      {
+        /* Trailing `/` required: resolve() drops it on Windows → litdecorators.js */
+        find: /^lit\//,
+        replacement: `${resolve(__dirname, '../node_modules/lit')}/`,
+      },
+    ],
   },
   server: {
     port: 5173,

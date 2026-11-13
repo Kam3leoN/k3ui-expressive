@@ -8,8 +8,6 @@ import {
   ButtonSmartInsetDp,
   ButtonSmartLabelGapDp,
   ButtonSmartLabelSizeDp,
-  ButtonSmartPadInlineEndDp,
-  ButtonSmartPadInlineStartDp,
   ButtonSmartRadiusOnDp,
   ButtonSmartSubtitleSizeDp,
 } from './button-smart.specs.js';
@@ -20,8 +18,8 @@ const px = (dp: number) => unsafeCSS(`${dp}px`);
 /**
  * Button Smart — shadow styles (tile chrome + marquee).
  *
- * Geometry matches AOSP `qs_tile_*` (height 80 · padding 12 · icon box 56 ·
- * glyph 20 · start pad 16 · grid gap 8). Runtime sets snapped `--k3-button-smart-*`
+ * Geometry matches AOSP Compose `CommonTileDefaults` (height 72 · padding 8 ·
+ * icon box 56 · glyph 28 · grid gap 8). Runtime sets snapped `--k3-button-smart-*`
  * px vars so fractional DPR (Windows 125%) stays integer device pixels.
  *
  * OFF keeps a dark charcoal QS surface for strong contrast on light themes
@@ -43,8 +41,9 @@ export const buttonSmartStyles = css`
 
     --k3-button-smart-height: ${px(ButtonSmartHeightDp)};
     --k3-button-smart-inset: ${px(ButtonSmartInsetDp)};
-    --k3-button-smart-pad-inline-start: ${px(ButtonSmartPadInlineStartDp)};
-    --k3-button-smart-pad-inline-end: ${px(ButtonSmartPadInlineEndDp)};
+    /* Pad aliases → inset (Compose TilePadding is uniform) */
+    --k3-button-smart-pad-inline-start: var(--k3-button-smart-inset);
+    --k3-button-smart-pad-inline-end: var(--k3-button-smart-inset);
     --k3-button-smart-icon-size: ${px(ButtonSmartIconBoxDp)};
     --k3-button-smart-glyph: ${px(ButtonSmartGlyphDp)};
     --k3-button-smart-radius-off: calc(var(--k3-button-smart-height) / 2);
@@ -61,6 +60,7 @@ export const buttonSmartStyles = css`
       --k3-sys-motion-easing-emphasized,
       var(--k3-sys-motion-easing-spatial-fast, cubic-bezier(0.2, 0, 0, 1))
     );
+    --k3-button-smart-icon-fill: 0;
     --k3-button-smart-marquee-gap: 0px;
 
     display: block;
@@ -74,6 +74,10 @@ export const buttonSmartStyles = css`
   :host([disabled]) {
     pointer-events: none;
     opacity: 0.38;
+  }
+
+  :host([active]) {
+    --k3-button-smart-icon-fill: 1;
   }
 
   .tile {
@@ -131,7 +135,7 @@ export const buttonSmartStyles = css`
     font-weight: normal;
     speak: never;
     font-variation-settings:
-      'FILL' 0,
+      'FILL' var(--k3-button-smart-icon-fill),
       'wght' 400,
       'GRAD' 0,
       'opsz' 24;
@@ -150,11 +154,6 @@ export const buttonSmartStyles = css`
     );
     background-color: var(--k3-button-smart-on-icon-bg);
     color: var(--k3-button-smart-on-icon-fg);
-    font-variation-settings:
-      'FILL' 1,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 24;
   }
 
   .icon ::slotted(*),
@@ -220,7 +219,10 @@ export const buttonSmartStyles = css`
     align-items: center;
     flex-wrap: nowrap;
     max-width: none;
-    gap: var(--k3-button-smart-marquee-gap, 0px);
+    gap: var(
+      --k3-text-marquee-gap,
+      var(--k3-button-smart-marquee-gap, 0px)
+    );
     will-change: transform;
   }
 

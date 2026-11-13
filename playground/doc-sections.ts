@@ -420,6 +420,8 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     theming: [
       ['track', '52×32', 'Track size'],
       ['--k3-switch-travel', 'spatial-fast spring', 'Thumb travel'],
+      ['--k3-switch-status-off', 'error', 'Status off track (variant=status)'],
+      ['--k3-switch-status-on', 'green-700', 'Status on track (variant=status)'],
     ],
     keyboard: [
       ['Space / Enter', 'Toggle selected'],
@@ -430,7 +432,7 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
       ['Toggle', 'Thumb FastSpatial spring + haptic', 'Instant when reduced'],
     ],
     a11y: 'doc.switch.a11y',
-    versions: { na: 'Single on/off control' },
+    versions: 'doc.switch.versions.blurb',
   },
   'chip': {
     theming: [
@@ -747,6 +749,30 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     a11y: { na: "Pending gabarit migration" },
     versions: { na: "Pending gabarit migration" },
   },
+  snow: {
+    theming: { na: "Pending gabarit migration" },
+    keyboard: { na: "Pending gabarit migration" },
+    focus: { na: "Pending gabarit migration" },
+    motion: { na: "Pending gabarit migration" },
+    a11y: { na: "Pending gabarit migration" },
+    versions: { na: "Pending gabarit migration" },
+  },
+  firework: {
+    theming: { na: "Pending gabarit migration" },
+    keyboard: { na: "Pending gabarit migration" },
+    focus: { na: "Pending gabarit migration" },
+    motion: { na: "Pending gabarit migration" },
+    a11y: { na: "Pending gabarit migration" },
+    versions: { na: "Pending gabarit migration" },
+  },
+  'voice-ring': {
+    theming: { na: "Pending gabarit migration" },
+    keyboard: { na: "Pending gabarit migration" },
+    focus: { na: "Pending gabarit migration" },
+    motion: { na: "Pending gabarit migration" },
+    a11y: { na: "Pending gabarit migration" },
+    versions: { na: "Pending gabarit migration" },
+  },
   'text-bounce': {
     theming: { na: "Pending gabarit migration" },
     keyboard: { na: "Pending gabarit migration" },
@@ -763,7 +789,7 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     a11y: { na: "Pending gabarit migration" },
     versions: { na: "Pending gabarit migration" },
   },
-  'heart-burst': {
+  'icons-burst': {
     theming: { na: "Pending gabarit migration" },
     keyboard: { na: "Pending gabarit migration" },
     focus: { na: "Pending gabarit migration" },

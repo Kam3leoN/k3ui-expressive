@@ -224,12 +224,18 @@ export const dialogStyles: CSSResultGroup = [
         margin-inline-start: 0;
       }
 
-      /* Body — only region that scrolls; scrollbar flush to panel edge */
+      /* Body — only region that scrolls; discreet k3-scroll flush to right edge */
       .body {
         flex: 1 1 auto;
         min-height: 0;
         display: flex;
         flex-direction: column;
+      }
+      .body.k3-scroll {
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        --k3-scroll-size: 0.375rem; /* 6dp discreet — right edge, no Windows arrows */
       }
       .body-inner {
         box-sizing: border-box;

@@ -10,8 +10,12 @@ import {
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 
+export type SwitchVariant = '' | 'status';
+
 /**
  * M3 Switch — track 52×32, handle 16 (off) / 24 (on).
+ * Optional `icons` — close on the handle when off, check when on (24dp handle both ways).
+ * Optional `variant="status"` — error/red track when off, green when on.
  * 48×48 state layer centered on the thumb (see `selectionThumbStateStyles`).
  * RTL-safe via inset-inline + margin-inline (no translateX).
  *
@@ -35,6 +39,10 @@ export class K3Switch extends K3Element {
             --k3-sys-motion-easing-spatial-fast,
             var(--k3-sys-motion-easing-expressive-spatial-fast)
           );
+        --k3-switch-status-off: var(--k3-sys-color-error);
+        --k3-switch-status-off-on: var(--k3-sys-color-on-error);
+        --k3-switch-status-on: var(--k3-ref-palette-green-700, #388e3c);
+        --k3-switch-status-on-on: #ffffff;
       }
       .track {
         position: relative;
@@ -78,7 +86,34 @@ export class K3Switch extends K3Element {
           height var(--k3-switch-travel),
           margin-top var(--k3-switch-travel),
           background var(--k3-sys-motion-duration-short4)
+            var(--k3-sys-motion-easing-expressive-effects),
+          color var(--k3-sys-motion-duration-short4)
             var(--k3-sys-motion-easing-expressive-effects);
+      }
+      .handle-icon {
+        font-family: var(
+          --k3-sys-icon-font-family,
+          'Material Symbols Rounded',
+          'Material Symbols Outlined',
+          sans-serif
+        );
+        font-weight: 600;
+        font-style: normal;
+        font-size: 1rem; /* 16dp inside 24dp handle */
+        line-height: 1;
+        width: 1em;
+        height: 1em;
+        display: grid;
+        place-items: center;
+        speak: never;
+        user-select: none;
+        pointer-events: none;
+        font-variation-settings:
+          'FILL' 1,
+          'wght' 600,
+          'GRAD' 0,
+          'opsz' 20;
+        font-feature-settings: 'liga';
       }
       .track:active .handle {
         width: 1.75rem;
@@ -103,6 +138,47 @@ export class K3Switch extends K3Element {
         margin-top: -0.875rem;
         inset-inline-start: calc(100% - 1.75rem - 0.125rem);
       }
+
+      /* Icons — larger handle off+on so close/check stay legible */
+      :host([icons]) .handle {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-top: -0.75rem;
+      }
+      :host([icons]:not([selected])) .handle {
+        inset-inline-start: 0.25rem;
+        color: var(--k3-sys-color-surface-container-highest);
+      }
+      :host([icons][selected]) .handle {
+        inset-inline-start: calc(100% - 1.5rem - 0.25rem);
+      }
+      :host([icons]) .track:active .handle {
+        width: 1.75rem;
+        height: 1.75rem;
+        margin-top: -0.875rem;
+      }
+      :host([icons][selected]) .track:active .handle {
+        inset-inline-start: calc(100% - 1.75rem - 0.125rem);
+      }
+
+      /* Status — red off / green on */
+      :host([variant='status']:not([selected])) .track {
+        background: var(--k3-switch-status-off);
+        border-color: var(--k3-switch-status-off);
+      }
+      :host([variant='status']:not([selected])) .handle {
+        background: var(--k3-switch-status-off-on);
+        color: var(--k3-switch-status-off);
+      }
+      :host([variant='status'][selected]) .track {
+        background: var(--k3-switch-status-on);
+        border-color: var(--k3-switch-status-on);
+      }
+      :host([variant='status'][selected]) .handle {
+        background: var(--k3-switch-status-on-on);
+        color: var(--k3-switch-status-on);
+      }
+
       :host([disabled]) {
         opacity: 0.38;
         pointer-events: none;
@@ -123,6 +199,10 @@ export class K3Switch extends K3Element {
   internals = attachInternals(this);
   @property({ type: Boolean, reflect: true }) selected = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Show close (off) / check (on) glyphs in the handle. */
+  @property({ type: Boolean, reflect: true }) icons = false;
+  /** `status` → red track when off, green when on. */
+  @property({ reflect: true }) variant: SwitchVariant = '';
   @property() name = '';
   @property() value = 'on';
   /** Accessible name when no visible label is slotted (host `aria-label`). */
@@ -157,7 +237,18 @@ export class K3Switch extends K3Element {
         ?disabled=${this.disabled}
         @click=${this.toggle}
       >
-        <span class="handle" part="handle"></span>
+        <span class="handle" part="handle"
+          >${this.icons
+            ? html`<span
+                class="handle-icon notranslate"
+                part="icon"
+                translate="no"
+                lang="zxx"
+                data-k3-icon=${this.selected ? 'check' : 'close'}
+                aria-hidden="true"
+              ></span>`
+            : nothing}</span
+        >
       </button>
       <span part="label" id="label"><slot @slotchange=${this.onLabelSlot}></slot></span>`;
   }

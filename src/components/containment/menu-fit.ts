@@ -155,10 +155,37 @@ export function sideAnchorRect(
 }
 
 /**
- * Vertical dock — keep the panel glued to the trigger.
- * Cap `maxHeight` on overflow instead of clamping `top` alone (that left a
- * gap on flip-above for tall hover menus near the viewport bottom).
+ * Cap panel height when the preferred dock overflows the viewport.
+ * Prefer maxHeight over shifting `top` alone — keeps side menus glued to the
+ * trigger band (nav-rail) and avoids a gap on flip-above near the bottom.
+ *
+ * @param shrinkFrom When `preferredTop < EDGE`, set maxHeight from this edge
+ *   (e.g. trigger bottom). Omit to only pin `top` without shrinking.
  */
+function dockTopWithMaxHeight(
+  panel: HTMLElement,
+  preferredTop: number,
+  ph: number,
+  vh: number,
+  shrinkFrom?: number,
+): number {
+  if (preferredTop < EDGE) {
+    if (shrinkFrom != null) {
+      panel.style.maxHeight = `${Math.round(Math.max(MIN_H, shrinkFrom - EDGE))}px`;
+    } else {
+      panel.style.maxHeight = '';
+    }
+    return EDGE;
+  }
+  if (preferredTop + ph > vh - EDGE) {
+    panel.style.maxHeight = `${Math.round(Math.max(MIN_H, vh - EDGE - preferredTop))}px`;
+  } else {
+    panel.style.maxHeight = '';
+  }
+  return Math.round(preferredTop);
+}
+
+/** Vertical dock — keep the panel glued to the trigger. */
 function placeVerticalDocked(
   panel: HTMLElement,
   tr: DOMRectReadOnly,
@@ -174,26 +201,15 @@ function placeVerticalDocked(
 
   if (above) {
     const dockBottom = tr.top - GAP;
-    let top = dockBottom - ph;
-    if (top < EDGE) {
-      const maxH = Math.max(MIN_H, dockBottom - EDGE);
-      panel.style.maxHeight = `${Math.round(maxH)}px`;
-      top = EDGE;
-    } else {
-      panel.style.maxHeight = '';
-    }
-    return { top: Math.round(top), above: true };
+    const top = dockTopWithMaxHeight(panel, dockBottom - ph, ph, vh, dockBottom);
+    return { top, above: true };
   }
 
-  const top = tr.bottom + GAP;
-  if (top + ph > vh - EDGE) {
-    panel.style.maxHeight = `${Math.round(Math.max(MIN_H, vh - EDGE - top))}px`;
-  } else {
-    panel.style.maxHeight = '';
-  }
-  return { top: Math.round(top), above: false };
+  const top = dockTopWithMaxHeight(panel, tr.bottom + GAP, ph, vh);
+  return { top, above: false };
 }
 
+/** Side dock (nav-rail secondary) — horizontal flip + vertical maxHeight cap. */
 function placeSide(
   panel: HTMLElement,
   tr: DOMRectReadOnly,
@@ -224,10 +240,13 @@ function placeSide(
   panel.style.left = `${Math.round(left)}px`;
   panel.style.right = 'auto';
 
-  let top = sideAlignEnd(position) ? tr.bottom - ph : tr.top;
-  if (top + ph > vh - EDGE) top = Math.max(EDGE, vh - EDGE - ph);
-  if (top < EDGE) top = EDGE;
-  return { top: Math.round(top), left: Math.round(left) };
+  if (sideAlignEnd(position)) {
+    const top = dockTopWithMaxHeight(panel, tr.bottom - ph, ph, vh, tr.bottom);
+    return { top, left: Math.round(left) };
+  }
+
+  const top = dockTopWithMaxHeight(panel, tr.top, ph, vh);
+  return { top, left: Math.round(left) };
 }
 
 /**

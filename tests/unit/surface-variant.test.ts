@@ -14,13 +14,13 @@ describe('resolveSurfaceVariant', () => {
 });
 
 describe('syncResolvedSurface', () => {
-  it('sets dataset and aria-modal', () => {
+  it('sets dataset and aria-modal true/false', () => {
     const host = document.createElement('div');
     syncResolvedSurface(host, 'modal');
     expect(host.dataset.resolvedVariant).toBe('modal');
-    expect(host.hasAttribute('aria-modal')).toBe(true);
+    expect(host.getAttribute('aria-modal')).toBe('true');
     syncResolvedSurface(host, 'docked');
     expect(host.dataset.resolvedVariant).toBe('docked');
-    expect(host.hasAttribute('aria-modal')).toBe(false);
+    expect(host.getAttribute('aria-modal')).toBe('false');
   });
 });

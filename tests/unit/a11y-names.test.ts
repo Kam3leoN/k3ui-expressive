@@ -16,7 +16,7 @@ async function mount<T extends LitEl>(html: string): Promise<T> {
 beforeAll(async () => {
   window.K3UI_MANUAL = true;
   await init({
-    components: ['k3-button', 'k3-fab', 'k3-icon-button', 'k3-select', 'k3-menu-item', 'k3-list', 'k3-list-item', 'k3-quote', 'k3-text-field', 'k3-slider', 'k3-alert', 'k3-text-bounce'],
+    components: ['k3-button', 'k3-fab', 'k3-icon-button', 'k3-select', 'k3-menu-item', 'k3-list', 'k3-list-item', 'k3-quote', 'k3-text-field', 'k3-slider', 'k3-alert'],
     theme: { mode: 'light' },
   });
 });
@@ -90,13 +90,6 @@ describe('ARIA structure', () => {
     el.remove();
   });
 
-  it('k3-text-bounce exposes its text without aria-label on a <p>', async () => {
-    const el = await mount<LitEl & { text: string }>('<k3-text-bounce text="Hello"></k3-text-bounce>');
-    const p = el.shadowRoot!.querySelector('p')!;
-    expect(p.hasAttribute('aria-label')).toBe(false);
-    expect(p.querySelector('.sr-only')?.textContent).toBe(el.text);
-    el.remove();
-  });
 });
 
 describe('startup under fake timers', () => {

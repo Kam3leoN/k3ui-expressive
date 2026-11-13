@@ -1,9 +1,12 @@
 import type { CivilDate } from './calendar.types.js';
 
-/** Matraic: 18 years per multi-year page, 3 columns; months 4 per row. */
+/** Legacy page size (tests / utils); year picker now scrolls continuously. */
 export const YEARS_PER_PAGE = 18;
 export const YEARS_PER_ROW = 3;
 export const MONTHS_PER_ROW = 4;
+/** Default year menu bounds when `min` / `max` omit a year (Noph `yearRange`). */
+export const DEFAULT_YEAR_MIN = 1900;
+export const DEFAULT_YEAR_MAX = 2100;
 
 export function pad2(n: number): string {
   return String(n).padStart(2, '0');
@@ -178,6 +181,20 @@ export function formatPeriodLabel(
   return `${start} – ${start + YEARS_PER_PAGE - 1}`;
 }
 
+/** Long month name only (header left — Noph-style split). */
+export function formatMonthName(active: CivilDate, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { month: 'long' }).format(
+    new Date(active.year, active.month - 1, 1),
+  );
+}
+
+/** Inclusive year menu bounds from optional civil min/max. */
+export function yearBounds(min: CivilDate | null, max: CivilDate | null): [number, number] {
+  const lo = min?.year ?? DEFAULT_YEAR_MIN;
+  const hi = max?.year ?? DEFAULT_YEAR_MAX;
+  return lo <= hi ? [lo, hi] : [hi, lo];
+}
+
 export function weekdayLabels(locale: string, weekStart: number): { short: string; long: string }[] {
   const fmtShort = new Intl.DateTimeFormat(locale, { weekday: 'narrow' });
   const fmtLong = new Intl.DateTimeFormat(locale, { weekday: 'long' });
@@ -220,18 +237,31 @@ export function formatHeadline(
 }
 
 /**
- * Range headline — includes years when the span crosses a year boundary (M3 yMMMd).
- * @example "Wed, Oct 21, 2026 – Sun, Sep 26, 2027"
+ * Compact day+month+year for range headlines (no weekday — keeps 4-digit years readable).
+ * @example "24 nov. 2026"
+ */
+export function formatRangePart(d: CivilDate, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric', /* always 4 digits */
+  }).format(new Date(d.year, d.month - 1, d.day));
+}
+
+/**
+ * Range headline — always includes 4-digit years on both ends.
+ * @example "24 nov. 2026 – 27 nov. 2026"
+ * @example "23 déc. 2026 – 9 janv. 2027"
  */
 export function formatRangeHeadline(
   start: CivilDate | null,
   end: CivilDate | null,
   locale: string,
 ): string {
-  const crossYear = !!(start && end && start.year !== end.year);
-  const fa = formatHeadline(start, locale, { withYear: crossYear }) || '–';
-  const fb = formatHeadline(end, locale, { withYear: crossYear }) || '–';
-  return `${fa} – ${fb}`;
+  if (!start && !end) return '';
+  if (start && !end) return formatRangePart(start, locale);
+  if (!start && end) return formatRangePart(end, locale);
+  return `${formatRangePart(start!, locale)} – ${formatRangePart(end!, locale)}`;
 }
 
 /** First `yyyy-MM-dd` in a string (dual Start/End fields: one date only). */
@@ -243,25 +273,71 @@ export function extractSingleIsoDate(raw: string): string {
 }
 
 /**
- * Single-field range — **exactly two lines** (no soft wrap):
- * ```
- * Du: 2026-10-21
- * Au: 2026-11-30
- * ```
- * Host must be `multiline rows="2"`. Use NBSP after `:` so label+date stay one line.
+ * Single-field range — one compact ISO line (same height as dual Start/End fields):
+ * `2026-10-21 - 2026-11-30`
  */
 export function formatRangeFieldValue(
   start: string,
   end: string,
-  labels: { from: string; to: string } = { from: 'From', to: 'To' },
+  _labels?: { from: string; to: string },
 ): string {
   const a = extractSingleIsoDate(start);
   const b = extractSingleIsoDate(end);
-  const nbsp = '\u00a0';
   if (!a && !b) return '';
-  if (a && !b) return `${labels.from}:${nbsp}${a}`;
-  if (!a && b) return `${labels.to}:${nbsp}${b}`;
-  return `${labels.from}:${nbsp}${a}\n${labels.to}:${nbsp}${b}`;
+  if (a && !b) return a;
+  if (!a && b) return b;
+  return `${a} - ${b}`;
+}
+
+/** Locale digit order placeholder — e.g. `DD/MM/YYYY` (fr) or `MM/DD/YYYY` (en-US). */
+export function localeDatePlaceholder(locale: string): string {
+  const parts = new Intl.DateTimeFormat(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).formatToParts(new Date(2026, 10, 17));
+  return parts
+    .map((p) => {
+      if (p.type === 'day') return 'DD';
+      if (p.type === 'month') return 'MM';
+      if (p.type === 'year') return 'YYYY';
+      return p.value;
+    })
+    .join('');
+}
+
+/** Format civil date for a typed modal field (locale digit order). */
+export function formatLocaleInputDate(d: CivilDate, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(d.year, d.month - 1, d.day));
+}
+
+/** Parse typed modal input — ISO or locale-ordered numeric (17/08/2025). */
+export function parseLocaleInputDate(raw: string, locale: string): CivilDate | null {
+  const s = raw.trim();
+  if (!s) return null;
+  const iso = parseCivilDate(s);
+  if (iso) return iso;
+  const digits = s.match(/\d+/g);
+  if (!digits || digits.length < 3) return null;
+  const order = new Intl.DateTimeFormat(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+    .formatToParts(new Date(2026, 10, 17))
+    .filter((p) => p.type === 'day' || p.type === 'month' || p.type === 'year')
+    .map((p) => p.type as 'day' | 'month' | 'year');
+  const map: Partial<Record<'day' | 'month' | 'year', number>> = {};
+  order.forEach((t, i) => {
+    map[t] = Number(digits[i]);
+  });
+  if (map.day == null || map.month == null || map.year == null) return null;
+  const year = map.year < 100 ? 2000 + map.year : map.year;
+  return parseCivilDate(`${year}-${pad2(map.month)}-${pad2(map.day)}`);
 }
 
 /** Parse single-field range (two-line Du/Au, ` – `, `/`, ` · `, or embedded ISO dates). */

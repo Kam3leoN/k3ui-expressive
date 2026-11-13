@@ -1,11 +1,5 @@
 export { K3Element, type Density } from './k3-element.js';
-export {
-  getSoundFx,
-  SoundFxController,
-  resetSoundFxForTests,
-  type SoundFxEvent,
-  type SoundFxOptions,
-} from './sound-fx.js';
+/* Interaction SFX engine → companion package `k3ux` (`getSoundFx`). */
 export { hasSlot, hasLightSlot, hasNamedSlot, slotHasContent } from './slots.js';
 export { LayerPortal } from './layer-portal.js';
 export {
@@ -23,6 +17,7 @@ export {
   afterPaint,
   runOpenClose,
   prefersReducedMotion,
+  allowsExpressiveMotion,
   type LifecyclePhase,
   type LifecycleDetail,
 } from './lifecycle.js';

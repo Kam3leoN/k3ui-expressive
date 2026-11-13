@@ -3,7 +3,7 @@
  *
  * | Surface | Motion | Spring / easing |
  * |---|---|---|
- * | Menu / flyout / docked picker | scaleY expand | expressive spatial fast (bounce) |
+ * | Menu / flyout / date·time picker | scaleY expand | expressive spatial fast (bounce) |
  * | FAB menu items (separate) | scaleX + stagger | same FastSpatial tokens — not this helper |
  * | Snackbar | scaleY from bottom | standard (no bounce) — M3E |
  * | Dialog basic | scaleY from center | expressive spatial fast (same bounce as menus) |
@@ -143,27 +143,42 @@ export function enterScaleY(
   `;
 }
 
+export interface EnterScaleYPopoverOptions extends Pick<EnterScaleYOptions, 'origin'> {
+  /**
+   * Exit selector (default `:host([data-closing])`).
+   * Modal pickers animate `.surface` while the host stays full-viewport.
+   */
+  closingSelector?: string;
+}
+
 /**
  * Popover / `:host([open])` enter — keeps `scaleY(1)` when open + `@starting-style`
  * (date/time docked pickers, M3E popover pattern).
+ *
+ * Same spring contract as `enterScaleY` / `enterDialogMotion`:
+ * - Enter: **animation** owns transform (spatial-fast overshoot) — do not also
+ *   transition `transform` or the bounce fights and dies.
+ * - Exit (`data-closing`): transition transform with spatial-fast spring.
  */
 export function enterScaleYPopover(
   openSelector: string,
-  options: Pick<EnterScaleYOptions, 'origin'> = {},
+  options: EnterScaleYPopoverOptions = {},
 ): CSSResult {
   const origin = options.origin ?? 'top center';
+  const closing = options.closingSelector ?? ':host([data-closing])';
   return css`
     ${enterScaleYKeyframes}
     ${unsafeCSS(openSelector)} {
       opacity: 1;
-      transform: scaleY(1);
+      /* Settled = none — keeping scaleY(1) leaves a transform on scrollports (glitch). */
+      transform: none;
       transform-origin: ${unsafeCSS(origin)};
-      animation: k3-enter-scale-y ${motionSpatialFast} backwards;
+      /* Animation owns enter transform — same as menus / k3-dialog basic */
       transition:
         opacity ${motionEffectsFast},
-        transform ${motionSpatialFast},
         overlay ${motionEffectsFast} allow-discrete,
         display ${motionEffectsFast} allow-discrete;
+      animation: k3-enter-scale-y ${motionSpatialFast} backwards;
     }
     @starting-style {
       ${unsafeCSS(openSelector)} {
@@ -171,11 +186,34 @@ export function enterScaleYPopover(
         transform: scaleY(0.8);
       }
     }
+    /* Exit — elastic scaleY collapse (pair with data-closing before hide). */
+    ${unsafeCSS(closing)} {
+      opacity: 0;
+      transform: scaleY(0.8);
+      animation: none;
+      transition:
+        opacity ${motionEffectsFast},
+        transform ${motionSpatialFast},
+        overlay ${motionEffectsFast} allow-discrete,
+        display ${motionEffectsFast} allow-discrete;
+    }
+    /*
+     * Reduced OS preference — brute. data-k3-motion=standard keeps a short
+     * non-overshooting spring via token remap in _motion.scss (no selector war).
+     */
     @media (prefers-reduced-motion: reduce) {
-      ${unsafeCSS(openSelector)} {
+      ${unsafeCSS(openSelector)},
+      ${unsafeCSS(closing)} {
         transition: none !important;
         animation: none !important;
-        transform: none;
+      }
+      ${unsafeCSS(openSelector)} {
+        transform: scaleY(1);
+        opacity: 1;
+      }
+      ${unsafeCSS(closing)} {
+        transform: scaleY(0.8);
+        opacity: 0;
       }
     }
   `;

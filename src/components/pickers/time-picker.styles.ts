@@ -1,14 +1,38 @@
-import { css } from 'lit';
+import { css, type CSSResultGroup } from 'lit';
+import { enterScaleYPopover } from '../../motion/enter.js';
 
 /**
  * M3 / M3E time picker — docked popover or modal.
  * Horizontal orientation applies to dial layout only; keyboard is always vertical.
  * Field boxes: 96×80 everywhere (dial · keyboard · 12h · 24h · V/H).
  *
+ * Open enter = FastSpatial scaleY spring (`enterScaleYPopover`, same as menus / dialogs).
+ * Dial face: scale 0.8→1 when switching keyboard→dial (Noph ClockDial enter).
+ *
  * @see https://m3.material.io/components/time-pickers/specs
  * @see https://matraic.github.io/m3e/components/timepicker.html
+ * @see https://noph.dev/components/time-picker
  */
-export const timePickerStyles = css`
+export const timePickerStyles: CSSResultGroup = [
+  /* Docked — host is the animated panel (scoped close — never modal host) */
+  enterScaleYPopover(
+    ':host([open][data-resolved-variant="docked"]), :host(:popover-open[data-resolved-variant="docked"])',
+    {
+      origin: 'top center',
+      closingSelector:
+        ':host([data-closing][data-resolved-variant="docked"]), :host([data-closing]:popover-open[data-resolved-variant="docked"])',
+    },
+  ),
+  /* Modal — surface scales like k3-dialog basic (center · spatial-fast bounce) */
+  enterScaleYPopover(
+    ':host([open][data-resolved-variant="modal"]) .surface, :host(:popover-open[data-resolved-variant="modal"]) .surface',
+    {
+      origin: 'center center',
+      closingSelector:
+        ':host([data-closing][data-resolved-variant="modal"]) .surface',
+    },
+  ),
+  css`
   :host {
     --k3-tp-pad: 1.5rem; /* 24 */
     --k3-tp-dial-size: 16rem; /* 256 */
@@ -42,25 +66,6 @@ export const timePickerStyles = css`
   :host([open]),
   :host(:popover-open) {
     display: flex !important;
-    opacity: 1;
-    transform: scaleY(1);
-    transition:
-      opacity var(--k3-sys-motion-duration-short2, 100ms)
-        var(--k3-sys-motion-easing-standard, ease),
-      transform var(--k3-sys-motion-duration-short2, 100ms)
-        var(--k3-sys-motion-easing-standard, ease),
-      overlay var(--k3-sys-motion-duration-short2, 100ms)
-        var(--k3-sys-motion-easing-standard, ease) allow-discrete,
-      display var(--k3-sys-motion-duration-short2, 100ms)
-        var(--k3-sys-motion-easing-standard, ease) allow-discrete;
-  }
-
-  @starting-style {
-    :host([open]),
-    :host(:popover-open) {
-      opacity: 0;
-      transform: scaleY(0.8);
-    }
   }
 
   /* Docked — beat UA popover inset:0 / margin:auto */
@@ -81,42 +86,105 @@ export const timePickerStyles = css`
     transform-origin: top center;
   }
 
+  /*
+   * First docked open: stage closed paint after showPopover, then release so
+   * scaleY enter actually runs (@starting-style alone skips first popover show).
+   */
+  :host([open][data-resolved-variant='docked'][data-enter]),
+  :host(:popover-open[data-resolved-variant='docked'][data-enter]) {
+    opacity: 0 !important;
+    transform: scaleY(0.8) !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /*
+   * Docked tight viewport — host scrolls with k3 edge scrollbar (never UA arrows).
+   * Bare overflow:auto = Windows classic gutter; keep clip + discreet thumb.
+   */
+  :host([open][data-resolved-variant='docked'][data-clip]),
+  :host(:popover-open[data-resolved-variant='docked'][data-clip]) {
+    overflow-x: hidden !important;
+    /* scroll (not auto) — thumb stays put while clipped; no appear/hide flash */
+    overflow-y: scroll !important;
+    overscroll-behavior: contain;
+    --k3-scroll-size: 0.375rem; /* 6dp */
+    --k3-scroll-track-inset: var(--k3-tp-shape-docked);
+  }
+  :host([open][data-resolved-variant='docked'][data-clip])::-webkit-scrollbar,
+  :host(:popover-open[data-resolved-variant='docked'][data-clip])::-webkit-scrollbar {
+    width: var(--k3-scroll-size, 0.375rem);
+    height: var(--k3-scroll-size, 0.375rem);
+  }
+  :host([open][data-resolved-variant='docked'][data-clip])::-webkit-scrollbar-button,
+  :host(:popover-open[data-resolved-variant='docked'][data-clip])::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+  :host([open][data-resolved-variant='docked'][data-clip])::-webkit-scrollbar-track,
+  :host(:popover-open[data-resolved-variant='docked'][data-clip])::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: var(--k3-scroll-track-inset, 0);
+  }
+  :host([open][data-resolved-variant='docked'][data-clip])::-webkit-scrollbar-thumb,
+  :host(:popover-open[data-resolved-variant='docked'][data-clip])::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--k3-sys-color-on-surface-variant) 40%, transparent);
+    border-radius: var(--k3-sys-shape-corner-full, 999px);
+    min-height: 2rem;
+  }
+  :host([open][data-resolved-variant='docked'][data-clip])::-webkit-scrollbar-corner,
+  :host(:popover-open[data-resolved-variant='docked'][data-clip])::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
   :host([open][data-resolved-variant='docked'][data-flip='top']),
   :host(:popover-open[data-resolved-variant='docked'][data-flip='top']) {
     transform-origin: bottom center;
   }
 
+  /*
+   * Modal — full-viewport host (scrim + centered surface).
+   * Popover UA ::backdrop is pointer-events:none; real .scrim closes on click.
+   */
   :host([open][data-resolved-variant='modal']),
   :host(:popover-open[data-resolved-variant='modal']) {
     position: fixed !important;
     inset: 0 !important;
-    margin: auto !important;
-    width: max-content;
-    height: max-content;
-    min-width: 22.75rem;
-    max-width: calc(100vw - 2rem);
-    max-height: calc(100vh - 2rem);
-    background: var(--k3-sys-color-surface-container-high);
-    border-radius: var(--k3-tp-shape);
-    transform-origin: top center;
+    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0;
+    max-width: none;
+    max-height: none;
+    padding: 0 !important;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    display: grid !important;
+    place-items: center;
+    opacity: 1;
+    transform: none;
+    overflow: hidden !important;
   }
 
   :host(:popover-open[data-resolved-variant='docked'])::backdrop {
     background: transparent;
   }
   :host(:popover-open[data-resolved-variant='modal'])::backdrop {
-    background: color-mix(in srgb, var(--k3-sys-color-scrim, #000) 32%, transparent);
+    background: transparent;
   }
 
   .scrim {
     display: none;
   }
-  :host([open][data-resolved-variant='modal']:not(:popover-open)) .scrim {
+  :host([open][data-resolved-variant='modal']) .scrim,
+  :host(:popover-open[data-resolved-variant='modal']) .scrim {
     display: block;
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: color-mix(in srgb, var(--k3-sys-color-scrim, #000) 32%, transparent);
-    z-index: -1;
+    z-index: 0;
   }
 
   .surface {
@@ -124,6 +192,67 @@ export const timePickerStyles = css`
     flex-direction: column;
     gap: 0;
     min-width: 0;
+  }
+
+  /*
+   * Modal chrome — animates (enterScaleY). Scroll lives on .surface-scroll so
+   * transform animation never sits on the overflow element (native gutter + jank).
+   */
+  :host([open][data-resolved-variant='modal']) .surface,
+  :host(:popover-open[data-resolved-variant='modal']) .surface {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 22.75rem;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+    padding: 0;
+    background: var(--k3-sys-color-surface-container-high);
+    border-radius: var(--k3-tp-shape);
+    box-shadow: var(--k3-sys-elevation-level3);
+    overflow: hidden; /* clip radius; do not scroll here */
+  }
+
+  :host([open][data-resolved-variant='modal']) .surface-scroll,
+  :host(:popover-open[data-resolved-variant='modal']) .surface-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: inherit;
+    box-sizing: border-box;
+    --k3-scroll-size: 0.375rem; /* 6dp discreet */
+    --k3-scroll-track-inset: var(--k3-tp-shape);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* Force k3 edge scrollbar — beat UA / classic Windows arrows */
+  :host([open][data-resolved-variant='modal']) .surface-scroll.k3-scroll::-webkit-scrollbar,
+  :host(:popover-open[data-resolved-variant='modal']) .surface-scroll.k3-scroll::-webkit-scrollbar {
+    width: var(--k3-scroll-size);
+    height: var(--k3-scroll-size);
+  }
+  :host([open][data-resolved-variant='modal']) .surface-scroll.k3-scroll::-webkit-scrollbar-button,
+  :host(:popover-open[data-resolved-variant='modal']) .surface-scroll.k3-scroll::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+  :host([open][data-resolved-variant='modal']) .surface-scroll.k3-scroll::-webkit-scrollbar-thumb,
+  :host(:popover-open[data-resolved-variant='modal']) .surface-scroll.k3-scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--k3-sys-color-on-surface-variant) 40%, transparent);
+    border-radius: var(--k3-sys-shape-corner-full, 999px);
+  }
+  :host([open][data-resolved-variant='modal']) .surface-scroll.k3-scroll::-webkit-scrollbar-track,
+  :host(:popover-open[data-resolved-variant='modal']) .surface-scroll.k3-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: var(--k3-scroll-track-inset, 0);
+  }
+
+  :host([open][data-resolved-variant='modal']) .surface-inner,
+  :host(:popover-open[data-resolved-variant='modal']) .surface-inner {
+    padding: var(--k3-tp-pad);
   }
 
   .headline {
@@ -322,6 +451,19 @@ export const timePickerStyles = css`
     margin-block-start: 1.5rem; /* 24 */
     min-height: 2.5rem;
   }
+  /* Hold footer invisible while keyboard→dial morphs; fade in with dial enter. */
+  @media (prefers-reduced-motion: no-preference) {
+    :host-context([data-k3-motion='expressive']) .actions,
+    :host-context(:root:not([data-k3-motion='standard']):not([data-k3-reduce-motion])) .actions {
+      transition: opacity var(--k3-sys-motion-duration-effects-fast)
+        var(--k3-sys-motion-easing-effects-fast, var(--k3-sys-motion-easing-effects));
+    }
+  }
+  :host([data-dial-entering]) .actions {
+    opacity: 0;
+    pointer-events: none;
+    transition: none;
+  }
   .spacer {
     flex: 1 1 auto;
   }
@@ -365,12 +507,43 @@ export const timePickerStyles = css`
     width: var(--k3-tp-dial-size);
     height: var(--k3-tp-dial-size);
     flex: 0 0 auto;
+    transform-origin: center center;
   }
 
-  :host([data-mode='input']) .dial-host {
+  /*
+   * Dial face ↔ keyboard (Noph ClockDial):
+   * - data-dial-entering: dial + .actions staged invisible during panel morph;
+   *   remove attr → dial scale 0.8→1 + footer fade (same beat)
+   * - data-dial-leaving: scale 1→0.8 before dial→keyboard (WAAPI / CSS)
+   * Not on first open already in dial. Panel height morphs via morphSize().
+   */
+  /* Dial face motion — spatial-fast (snappy); standard / reduce = brute. */
+  @media (prefers-reduced-motion: no-preference) {
+    :host-context([data-k3-motion='expressive']) .dial-host,
+    :host-context(:root:not([data-k3-motion='standard']):not([data-k3-reduce-motion])) .dial-host {
+      transition:
+        transform var(--k3-sys-motion-duration-spatial-fast)
+          var(--k3-sys-motion-easing-spatial-fast, var(--k3-sys-motion-easing-expressive-spatial-fast)),
+        opacity var(--k3-sys-motion-duration-effects-fast)
+          var(--k3-sys-motion-easing-effects-fast, var(--k3-sys-motion-easing-effects));
+    }
+  }
+
+  :host([data-dial-entering]) .dial-host {
+    transform: scale(0.8);
+    opacity: 0;
+    transition: none;
+  }
+
+  /* Keep dial in layout while WAAPI scales it out (toggleModeAsync). */
+  :host([data-dial-leaving]) .dial-host {
+    pointer-events: none;
+  }
+
+  :host([data-mode='input']:not([data-dial-leaving])) .dial-host {
     display: none;
   }
-  :host([data-mode='input']) .body {
+  :host([data-mode='input']:not([data-dial-leaving])) .body {
     gap: 0;
   }
 
@@ -378,4 +551,5 @@ export const timePickerStyles = css`
     pointer-events: none;
     opacity: 0.38;
   }
-`;
+  `,
+];

@@ -10,6 +10,7 @@ import {
   runOpenClose,
   waitForMotion,
   prefersReducedMotion,
+  allowsExpressiveMotion,
   edgeScrollbarStyles,
   attachDrag,
   setAxisTranslate,
@@ -126,8 +127,12 @@ export {
   motionSheetEnter,
   motionSheetExit,
   motionDialogEnter,
-} from './motion/index.js';
-export {
+  morphSize,
+  parseMotionToken,
+  spatialDefaultTiming,
+  spatialFastTiming,
+  canWebAnimate,
+} from './motion/index.js';export {
   MATERIAL_SHAPE_NAMES,
   MATERIAL_SHAPE_SVG,
   materialShapeSvg,
@@ -150,11 +155,49 @@ export {
   MOTION_DURATION_TOKENS,
   type M3StyleCategory,
 } from './tokens/meta.js';
+export { K3Element, type Density } from './core/k3-element.js';
+export { LayerPortal } from './core/layer-portal.js';
+export { isRtl } from './core/rtl.js';
+export { attachInternals, setFormValue } from './core/form-associated.js';
+export { focusRingStyles } from './core/focus-ring.js';
+export { stateLayerStyles } from './core/state-layer.js';
+export {
+  attachOutsideDismiss,
+  type OutsideDismissOptions,
+  type OutsideDismissController,
+} from './core/outside-dismiss.js';
+export { sysColorCssVars } from './theme/css-vars.js';
+export {
+  GAP_DP,
+  LINEAR_WAVE_AMP,
+  LINEAR_WAVE_LEN,
+  STOP_DP,
+  drawFlatBar,
+  drawOscillationBars,
+  drawStop,
+  drawWavyBar,
+  indicatorAmplitudeFactor,
+} from './components/feedback/progress-draw.js';
+export {
+  loadWaveformPeaks,
+  oscillationBarCount,
+  resamplePeaks,
+} from './components/media/waveform-pcm.js';
+export {
+  SLIDER_HANDLE_GAP,
+  SLIDER_HANDLE_GAP_PRESSED,
+  SLIDER_HANDLE_WIDTH_PRESSED,
+} from './components/inputs/slider-tokens.js';
+export {
+  attachTextMarquee,
+  type TextMarqueeHandle,
+} from './components/feedback/text-marquee.js';
 export {
   emitLifecycle,
   runOpenClose,
   waitForMotion,
   prefersReducedMotion,
+  allowsExpressiveMotion,
   edgeScrollbarStyles,
   attachDrag,
   setAxisTranslate,
@@ -261,152 +304,20 @@ export {
   type SnackbarPosition,
 } from './components/feedback/snackbar.js';
 export {
-  ConfettiCannon,
-  ConfettiPresets,
-  ConfettiSpecs,
-  firePreset,
-  fireRain,
-  rain,
-  shapeFromPath,
-  shapeFromText,
-  type ConfettiFireOptions,
-  type ConfettiPresetId,
-  type ConfettiRainOptions,
-} from './components/feedback/confetti.js';
+  K3Coverflow,
+  type CoverflowMode,
+  type CoverflowOrientation,
+  type CoverflowEffect,
+} from './components/containment/coverflow.js';
+export { K3CoverflowItem } from './components/containment/coverflow-item.js';
 export {
-  K3TextBounce,
-  TextBounceSpecs,
-} from './components/animation/text-bounce.js';
-export {
-  K3TextScramble,
-  TextScrambleSpecs,
-  SCRAMBLE_CHAR_PRESETS,
-  type ScrambleCharPreset,
-  type ScrambleFrom,
-} from './components/animation/text-scramble.js';
-export {
-  K3HeartBurst,
-  HeartBurstSpecs,
-  type HeartBurstTrigger,
-  type HeartBurstIcon,
-} from './components/animation/heart-burst.js';
-export {
-  K3Halftone,
-  HalftoneSpecs,
-  type HalftoneTone,
-} from './components/animation/halftone.js';
-export {
-  K3HoloCard,
-  HoloCardSpecs,
-  type HoloCardEffect,
-} from './components/animation/holo-card.js';
-export {
-  K3ScratchCard,
-  ScratchCardSpecs,
-  type ScratchType,
-  type ScratchMetal,
-} from './components/animation/scratch-card.js';
-export {
-  K3LenticularCard,
-  LenticularCardSpecs,
-  type LenticularAxis,
-} from './components/animation/lenticular-card.js';
-export {
-  K3Chart,
-  ChartSpecs,
-  type K3ChartType,
-} from './components/charts/chart.js';
-export {
-  K3Masonry,
-  MasonrySpecs,
-} from './components/containment/masonry.js';
-export {
-  packMasonryItems,
-  type MasonryPackOptions,
-} from './components/containment/masonry-pack.js';
-export {
-  K3IsoFilter,
-  IsoFilterSpecs,
-  type IsoFilterLayout,
-} from './components/containment/iso-filter.js';
-export {
-  ensureChartEngine,
-  ensureChartJsRegistered,
-  Chart as ChartEngine,
-  Chart as ChartJs,
-  type ChartConfiguration,
-  type ChartData,
-  type ChartOptions,
-  type ChartType,
-} from './components/charts/chart.register.js';
-export {
-  buildDefaultOptions,
-  mergeChartOptions,
-} from './components/charts/chart.theme.js';
-export {
-  getSoundFx,
-  SoundFxController,
-  SoundFxSpecs,
-  resetSoundFxForTests,
-  type SoundFxEvent,
-  type SoundFxOptions,
-} from './components/feedback/sound-fx.js';
-export {
-  AudioPlayerSpecs,
-  resolveAudioPlayerVariant,
-  type AudioTrack,
-  type AudioPlayerVariant,
-  type AudioPlayerVariantAlias,
-  type AudioPlayerView,
-  type AudioRepeatMode,
-} from './components/media/audio-player.js';
-export {
-  QrCodeSpecs,
-  encodeQr,
-  QrCapacityError,
-  qrDetectMode,
-  qrByteCapacity,
-  renderQr,
-  renderQrSvg,
-  contrastRatio,
-  QR_DOT_STYLES,
-  QR_EYE_FRAME_STYLES,
-  QR_EYE_BALL_STYLES,
-  QR_FRAME_STYLES,
-  QR_FRAME_FONTS,
-  QR_LOGO_ICONS,
-  type QrEcc,
-  type QrMatrix,
-  type QrMode,
-  type QrEncodeOptions,
-  type QrDotStyle,
-  type QrEyeFrameStyle,
-  type QrEyeBallStyle,
-  type QrGradient,
-  type QrFrameStyle,
-  type QrFrameFont,
-  type QrLogoIcon,
-  type QrRenderOptions,
-  type QrCodeSize,
-  type QrExportFormat,
-  type QrRenderDetail,
-  type QrDownloadDetail,
-  type QrExportOptions,
-} from './components/media/qr-code.js';
-export {
-  QR_CONTENT_TYPES,
-  buildQrPayload,
-  emptyQrPayloads,
-  validateQrPayload,
-  normalizeUrl,
-  normalizePhone,
-  type QrContentType,
-  type QrPayloadMap,
-  type QrFieldError,
-  type QrFieldErrors,
-  type QrWifiEncryption,
-} from './components/media/qr-code.payload.js';
-export type { K3SoundFx } from './components/feedback/sound-fx.js';
+  CoverflowSpecs,
+  coverflowOffset,
+  coverflowPose,
+  type CoverflowGeometry,
+  type CoverflowPose,
+} from './components/containment/coverflow.specs.js';
+/* Charts, audio, QR, sound-fx, masonry, iso-filter → companion package `k3ux`. */
 export type { K3Lazy } from './components/feedback/lazy.js';
 export {
   LazySpecs,
@@ -431,8 +342,6 @@ export {
   type SyntaxLanguageInfo,
 } from './syntax/index.js';
 export type { CodeBlockTheme } from './components/containment/codeblock.js';
-export type { K3AudioPlayer } from './components/media/audio-player.js';
-export type { K3QrCode } from './components/media/qr-code.js';
 
 export const K3UI: K3UIGlobal = {
   version: VERSION,

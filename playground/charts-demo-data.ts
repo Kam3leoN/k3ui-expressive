@@ -1,4 +1,4 @@
-import type { ChartData, ChartOptions } from '../src/index.js';
+import type { ChartData, ChartOptions } from 'k3ux';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 

@@ -16,12 +16,12 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "rootDir": ".",
     "paths": {
-      "@k3ui/*": ["./src/*"]
+      "@k3ui/*": ["./src/*"],
+      "k3ux": ["./types/k3ux-peer.d.ts"]
     },
     "types": ["vitest/globals", "node"]
   },
-  "include": ["src", "tests", "playground", "vite.config.ts", "vitest.config.ts"],
+  "include": ["src", "tests", "playground", "types", "vite.config.ts", "vitest.config.ts"],
   "exclude": ["dist", "node_modules"]
 }

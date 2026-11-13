@@ -138,4 +138,37 @@ describe('fitMenuPanel', () => {
     expect(panel.hasAttribute('data-fitted')).toBe(false);
     expect(panel.style.position).toBe('');
   });
+
+  it('end-start docks top to the item and caps maxHeight (no jump-up)', () => {
+    /* Tall side menu near viewport bottom — must stay glued to trigger.top */
+    Object.defineProperty(panel, 'offsetHeight', { configurable: true, value: 400 });
+    Object.defineProperty(panel, 'scrollHeight', { configurable: true, value: 400 });
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue({
+      top: 0,
+      bottom: 400,
+      left: 0,
+      right: 160,
+      width: 160,
+      height: 400,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      top: 420,
+      bottom: 460,
+      left: 0,
+      right: 80,
+      width: 80,
+      height: 40,
+      x: 0,
+      y: 420,
+      toJSON: () => ({}),
+    });
+
+    const { top } = fitMenuPanel(panel, trigger, 'end-start', false);
+    expect(top).toBe(420);
+    expect(Number.parseFloat(panel.style.maxHeight)).toBeGreaterThan(0);
+    expect(Number.parseFloat(panel.style.maxHeight)).toBeLessThanOrEqual(600 - 8 - 420);
+  });
 });

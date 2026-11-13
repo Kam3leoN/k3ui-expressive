@@ -269,6 +269,8 @@ export const COMPONENT_SPECS: Record<string, SpecRow[]> = {
     { token: 'track', value: '52 × 32 dp' },
     { token: 'handle.off', value: '16 dp, outline' },
     { token: 'handle.on', value: '24 dp, on-primary' },
+    { token: 'handle.icons', value: '24 dp both · close off / check on' },
+    { token: 'variant.status', value: 'error (off) · green-700 (on)' },
     { token: 'target', value: '48 × 48 dp on thumb' },
     { token: 'track.off', value: 'outlined surface-container-highest' },
   ],

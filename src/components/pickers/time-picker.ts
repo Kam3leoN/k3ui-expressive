@@ -5,10 +5,13 @@ import {
   K3Element,
   runOpenClose,
   afterPaint,
+  waitForMotion,
   FocusTrap,
   LayerPortal,
-  prefersReducedMotion,
+  overlayStack,
+  allowsExpressiveMotion,
   focusRingStyles,
+  edgeScrollbarStyles,
   SURFACE_COMPACT_MQ,
   resolveSurfaceVariant,
   syncResolvedSurface,
@@ -26,6 +29,7 @@ import {
   supportsPopoverApi,
 } from './time-picker.open.js';
 import { applyDockedPosition } from './time-picker.position.js';
+import { canWebAnimate, morphSize, spatialFastTiming } from '../../motion/morph.js';
 import K3TimePickerDial from './time-picker-dial.js';
 import K3Button from '../actions/button.js';
 import type {
@@ -96,7 +100,7 @@ if (!customElements.get('k3-button')) {
  * ```
  */
 export class K3TimePicker extends K3Element {
-  static override styles = [hostReset, focusRingStyles, timePickerStyles];
+  static override styles = [hostReset, focusRingStyles, edgeScrollbarStyles, timePickerStyles];
 
   @property() value = '';
   @property() for = '';
@@ -223,6 +227,11 @@ export class K3TimePicker extends K3Element {
   async show(anchor?: HTMLElement | null): Promise<boolean> {
     if (this.open || this.disabled) return false;
     this.anchor = anchor ?? this.findAnchor();
+    this.resolveLayout();
+    /* Scrim already up — do not open another picker/dialog beside it. */
+    if (overlayStack.wouldOpenBeside(this, this.anchor ?? this.forEl())) {
+      return false;
+    }
     const seeded = this.for
       ? this.readForValue()
       : (parseTimeToParts(this.value) ?? this.readForValue());
@@ -237,6 +246,10 @@ export class K3TimePicker extends K3Element {
       this,
       'open',
       async () => {
+        this.removeAttribute('data-closing');
+        const dockedEnter =
+          this.resolvedVariant === 'docked' && allowsExpressiveMotion();
+        if (dockedEnter) this.setAttribute('data-enter', '');
         this.open = true;
         await this.updateComplete;
         await afterPaint();
@@ -247,10 +260,22 @@ export class K3TimePicker extends K3Element {
         }
         this.positionDocked();
         this.bindFitListeners();
-        await afterPaint();
+        if (dockedEnter) {
+          void this.offsetWidth; /* commit closed transform */
+          await afterPaint();
+          this.removeAttribute('data-enter');
+          await this.updateComplete;
+          await afterPaint();
+        } else {
+          await afterPaint();
+        }
+        /* Final fit after enter settle — scrollHeight-stable, no clip flash */
         this.positionDocked();
         this.trap.activate(this.surfaceEl ?? this);
         this.bindDismiss();
+        if (this.resolvedVariant === 'modal') {
+          overlayStack.push(this, () => void this.hide(false));
+        }
         this.focusActiveInput();
       },
       { source: 'api' },
@@ -267,17 +292,25 @@ export class K3TimePicker extends K3Element {
         this.unbindDismiss();
         this.unbindFitListeners();
         this.trap.deactivate({ restore: true });
-        const wait = prefersReducedMotion() ? 0 : 100;
-        if (wait) await new Promise((r) => setTimeout(r, wait));
+        if (allowsExpressiveMotion()) {
+          this.setAttribute('data-closing', '');
+          await this.updateComplete;
+          await waitForMotion(this, 400);
+        }
         closePopoverLayer(this);
         this.open = false;
+        this.removeAttribute('data-closing');
+        this.removeAttribute('data-enter');
         this.portal.restore(this);
+        overlayStack.remove(this);
         if (supportsPopoverApi(this) && !this.hasAttribute('popover')) {
           this.setAttribute('popover', 'manual');
         }
         this.removeAttribute('data-flip');
+        this.removeAttribute('data-clip');
         this.style.removeProperty('--k3-tp-top');
         this.style.removeProperty('--k3-tp-left');
+        this.style.maxHeight = '';
       },
       { source: 'api' },
     );
@@ -370,12 +403,19 @@ export class K3TimePicker extends K3Element {
 
   private bindDismiss(): void {
     this.unbindDismiss();
-    if (this.resolvedVariant !== 'docked') return;
+    /* Docked: host is the panel. Modal: host is full-viewport; “inside” = .surface
+     * so scrim / outside pointerdown closes (popover ::backdrop is non-interactive). */
     queueMicrotask(() => {
-      this._outsideDismiss = attachOutsideDismiss(this, {
-        isActive: () => this.open && this.resolvedVariant === 'docked',
+      const inside =
+        this.resolvedVariant === 'modal' ? (this.surfaceEl ?? this) : this;
+      this._outsideDismiss = attachOutsideDismiss(inside, {
+        isActive: () => this.open,
         ignoreNodes: () => [this.anchor, this.forEl()],
-        onDismiss: () => void this.hide(false),
+        onDismiss: (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          void this.hide(false);
+        },
       });
     });
   }
@@ -435,14 +475,93 @@ export class K3TimePicker extends K3Element {
     else if (d.minute != null) this.view = nextView(this.view, 'minute', this.showSeconds);
   }
 
-  private toggleMode(): void {
-    this.uiMode = this.uiMode === 'dial' ? 'input' : 'dial';
+  /** Apply dial ↔ keyboard without motion (reduced motion / closed). */
+  private applyUiMode(next: TimePickerUiMode): void {
+    this.uiMode = next;
     this.editRaw = null;
-    this.dataset.mode = this.uiMode;
-    if (this.uiMode === 'input') {
-      this.view = 'hour';
-      void this.updateComplete.then(() => this.focusActiveInput());
+    this.dataset.mode = next;
+    this.removeAttribute('data-dial-entering');
+    this.removeAttribute('data-dial-leaving');
+    if (next === 'input') this.view = 'hour';
+  }
+
+  /** Panel that actually changes size — modal host is full-viewport. */
+  private panelMorphEl(): HTMLElement {
+    return this.resolvedVariant === 'modal' ? (this.surfaceEl ?? this) : this;
+  }
+
+  /**
+   * Toggle dial ↔ keyboard while open (Noph TimePickerDialog `setMode`):
+   * dial scales out/in + panel morphSize so the dialog does not jump.
+   */
+  private toggleMode(): void {
+    void this.toggleModeAsync();
+  }
+
+  private async toggleModeAsync(): Promise<void> {
+    const next: TimePickerUiMode = this.uiMode === 'dial' ? 'input' : 'dial';
+    const animate = allowsExpressiveMotion();
+
+    if (!animate || !this.open) {
+      this.applyUiMode(next);
+      await this.updateComplete;
+      if (this.open && this.resolvedVariant === 'docked') this.positionDocked();
+      if (next === 'input') this.focusActiveInput();
+      return;
     }
+
+    if (next === 'input') {
+      // Dial → keyboard: scale dial out, then morph panel height.
+      this.setAttribute('data-dial-leaving', '');
+      await afterPaint();
+      const dial = this.renderRoot.querySelector<HTMLElement>('.dial-host');
+      if (dial && canWebAnimate(dial)) {
+        const { duration, easing } = spatialFastTiming(this);
+        if (duration > 0) {
+          try {
+            await dial
+              .animate(
+                [
+                  { transform: 'scale(1)', opacity: 1 },
+                  { transform: 'scale(0.8)', opacity: 0 },
+                ],
+                { duration, easing },
+              )
+              .finished;
+          } catch {
+            /* cancelled */
+          }
+        }
+      }
+      await morphSize(this.panelMorphEl(), async () => {
+        this.applyUiMode('input');
+        await this.updateComplete;
+      });
+      if (this.resolvedVariant === 'docked') this.positionDocked();
+      this.focusActiveInput();
+      return;
+    }
+
+    // Keyboard → dial: morph panel with dial+actions staged hidden, then reveal
+    // together (CSS spatial-fast on dial, effects-fast on .actions).
+    await morphSize(this.panelMorphEl(), async () => {
+      this.uiMode = 'dial';
+      this.editRaw = null;
+      this.dataset.mode = 'dial';
+      this.setAttribute('data-dial-entering', '');
+      this.removeAttribute('data-dial-leaving');
+      await this.updateComplete;
+    });
+    await afterPaint();
+    this.removeAttribute('data-dial-entering');
+    void this.renderRoot.querySelector<HTMLElement>('.dial-host')?.offsetWidth;
+    const { duration } = spatialFastTiming(this);
+    if (duration > 0) {
+      await new Promise<void>((r) => {
+        window.setTimeout(r, duration);
+      });
+    }
+    if (this.resolvedVariant === 'docked') this.positionDocked();
   }
 
   /** Focus the hour / minute / second `<input>` matching `view` (input mode). */
@@ -701,29 +820,40 @@ export class K3TimePicker extends K3Element {
         : this.dialLabel || i18n.t('timepicker.dialLabel');
     return html`
       <div class="scrim" @click=${() => void this.hide(false)}></div>
-      <div id=${this.surfaceId} class="surface" part="surface" @keydown=${this.onKeydown}>
-        <p class="headline" id="${this.surfaceId}-title">${headline}</p>
-        <div class="body">
-          ${this.renderFields()}
-          <div class="dial-host">
-            <k3-time-picker-dial
-              .view=${this.view}
-              .format=${this.clockFormat}
-              .hour=${this.draft.hour}
-              .minute=${this.draft.minute}
-              .second=${this.draft.second}
-              .period=${this.period}
-              ?show-seconds=${this.showSeconds}
-              .minuteStep=${this.minuteStep}
-              .secondStep=${this.secondStep}
-              .minParts=${this.minParts}
-              .maxParts=${this.maxParts}
-              .blackoutTimes=${this.blackoutTimes}
-              @k3-change=${this.onDialChange}
-            ></k3-time-picker-dial>
+      <div
+        id=${this.surfaceId}
+        class="surface"
+        part="surface"
+        @keydown=${this.onKeydown}
+      >
+        <div
+          class="surface-scroll${this.resolvedVariant === 'modal' ? ' k3-scroll' : ''}"
+        >
+          <div class="surface-inner">
+            <p class="headline" id="${this.surfaceId}-title">${headline}</p>
+            <div class="body">
+              ${this.renderFields()}
+              <div class="dial-host">
+                <k3-time-picker-dial
+                  .view=${this.view}
+                  .format=${this.clockFormat}
+                  .hour=${this.draft.hour}
+                  .minute=${this.draft.minute}
+                  .second=${this.draft.second}
+                  .period=${this.period}
+                  ?show-seconds=${this.showSeconds}
+                  .minuteStep=${this.minuteStep}
+                  .secondStep=${this.secondStep}
+                  .minParts=${this.minParts}
+                  .maxParts=${this.maxParts}
+                  .blackoutTimes=${this.blackoutTimes}
+                  @k3-change=${this.onDialChange}
+                ></k3-time-picker-dial>
+              </div>
+            </div>
+            ${this.renderActions()}
           </div>
         </div>
-        ${this.renderActions()}
       </div>
     `;
   }

@@ -113,12 +113,12 @@
 | --- | --- |
 | `iso-filter`, `masonry` | `product: k3ux` + composants retirés de `src/components/containment/` |
 | `signature`, `rating`, `wheel-picker` | `product: k3ux` (sources retirées / lot UX) |
-| `countdown`, `marquee`, `sound-fx`, `confetti`, `text-bounce`, `text-scramble`, `heart-burst`, `halftone` | `product: k3ux` (animation) |
+| `countdown`, `marquee`, `sound-fx`, `confetti`, `text-bounce`, `text-scramble`, `icons-burst`, `halftone` | `product: k3ux` (animation) |
 | `card-holo`, `card-lenticular`, `card-scratch` | `product: k3ux` (cartes effets) |
 | `audio-player`, `qr-code` | `product: k3ux` (médias / utilitaires UX) |
 | `charts-bar`, `charts-line`, `charts-other` | `product: k3ux` (charts) |
 
-Liste exacte (21) : `signature`, `rating`, `wheel-picker`, `countdown`, `marquee`, `sound-fx`, `confetti`, `text-bounce`, `text-scramble`, `heart-burst`, `halftone`, `card-holo`, `card-lenticular`, `card-scratch`, `audio-player`, `qr-code`, `charts-bar`, `charts-line`, `charts-other`, `iso-filter`, `masonry`.
+Liste exacte (21) : `signature`, `rating`, `wheel-picker`, `countdown`, `marquee`, `sound-fx`, `confetti`, `text-bounce`, `text-scramble`, `icons-burst`, `halftone`, `card-holo`, `card-lenticular`, `card-scratch`, `audio-player`, `qr-code`, `charts-bar`, `charts-line`, `charts-other`, `iso-filter`, `masonry`.
 
 Note : `keyboard-media` est **migrée** (k3ui) ; la démo playground peut encore référencer `k3-audio-player` retiré — bloqué UX, pas PENDING gabarit.
 

@@ -22,7 +22,7 @@ import K3Slider from '@k3ui/components/inputs/slider.js';
 import K3Switch from '@k3ui/components/inputs/switch.js';
 import K3TextField from '@k3ui/components/inputs/text-field.js';
 import K3Tabs from '@k3ui/components/navigation/tabs.js';
-import '@k3ui/components/media/qr-code.js';
+import '@k3ux/components/media/qr-code.js';
 
 /* Children that rely on the registry — define them so the generator also works standalone. */
 for (const [tag, ctor] of [
@@ -38,10 +38,10 @@ for (const [tag, ctor] of [
 ] as const) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
-import type { K3QrCode, QrRenderDetail } from '@k3ui/components/media/qr-code.js';
-import type { QrExportFormat } from '@k3ui/components/media/qr-code.specs.js';
+import type { K3QrCode, QrRenderDetail } from '@k3ux/components/media/qr-code.js';
+import type { QrExportFormat } from '@k3ux/components/media/qr-code.specs.js';
 import type { TextFieldType } from '@k3ui/components/inputs/field-types.js';
-import { encodeQr, type QrEcc, type QrMatrix } from '@k3ui/components/media/qr-code.encoder.js';
+import { encodeQr, type QrEcc, type QrMatrix } from '@k3ux/components/media/qr-code.encoder.js';
 import {
   QR_CONTENT_TYPES,
   buildQrPayload,
@@ -52,7 +52,7 @@ import {
   type QrFieldErrors,
   type QrPayloadMap,
   type QrWifiEncryption,
-} from '@k3ui/components/media/qr-code.payload.js';
+} from '@k3ux/components/media/qr-code.payload.js';
 import {
   QR_DOT_STYLES,
   QR_EYE_BALL_STYLES,
@@ -71,7 +71,7 @@ import {
   type QrEyeFrameStyle,
   type QrFrameStyle,
   type QrLogoIcon,
-} from '@k3ui/components/media/qr-code.render.js';
+} from '@k3ux/components/media/qr-code.render.js';
 import {
   QR_DESIGN_DEFAULTS,
   QR_LOGO_PRESETS,
@@ -98,7 +98,7 @@ export {
   validateQrPayload,
   type QrContentType,
   type QrPayloadMap,
-} from '@k3ui/components/media/qr-code.payload.js';
+} from '@k3ux/components/media/qr-code.payload.js';
 
 /** Partial preset per content type (`generator.data = { wifi: { ssid: 'Home' } }`). */
 export type QrGeneratorData = { [K in QrContentType]?: Partial<QrPayloadMap[K]> };

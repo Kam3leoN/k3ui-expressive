@@ -4,6 +4,7 @@ import {
   Hct,
   SchemeTonalSpot,
   SchemeExpressive,
+  SchemeContent,
   SchemeVibrant,
   SchemeFidelity,
   SchemeMonochrome,
@@ -58,6 +59,7 @@ export type ColorVariant =
   | 'vibrant'
   | 'fidelity'
   | 'expressive'
+  | 'content'
   | 'monochrome'
   | 'neutral'
   | 'rainbow'
@@ -201,6 +203,9 @@ function buildScheme(
   switch (variant) {
     case 'expressive':
       return new SchemeExpressive(source, dark, c, spec, 'phone');
+    case 'content':
+      /* Noph default — seed sits on primaryContainer (≠ Expressive hue recipe). */
+      return new SchemeContent(source, dark, c, spec, 'phone');
     case 'vibrant':
       return new SchemeVibrant(source, dark, c, spec, 'phone');
     case 'fidelity':

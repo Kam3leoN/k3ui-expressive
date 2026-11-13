@@ -1,6 +1,12 @@
-import { html, css, nothing, type PropertyValues } from 'lit';
+import { html, nothing, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
-import { K3Element, emitLifecycle, stateLayerStyles, hasSlot } from '../../core/index.js';
+import {
+  K3Element,
+  emitLifecycle,
+  stateLayerStyles,
+  hasSlot,
+  prefersReducedMotion,
+} from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import {
   armNavActive,
@@ -9,296 +15,59 @@ import {
   queryNavItems,
   type ArmNavHandle,
 } from './nav-selection.js';
+import { navRailStyles } from './nav-rail.styles.js';
 
 /** Width / destination layout */
 export type NavRailSize = 'compact' | 'large';
-/** Embedding — standard (inline) · modal (elevated overlay) */
-export type NavRailAppearance = 'standard' | 'modal';
-
+/**
+ * Expanded chrome — M3 Expressive
+ * (@see https://m3.material.io/components/navigation-rail/specs).
+ * - `modal` (default) — overlays content; flush to the start edge; end-side corners only
+ * - `standard` — beside content; no inset sheet (flush rail, no inner container radius)
+ */
+export type NavRailLayout = 'standard' | 'modal';
+/** @deprecated use `layout` */
+export type NavRailAppearance = NavRailLayout;
+/** Leading destinations group alignment */
+export type NavRailPosition = 'start' | 'center' | 'bottom';
 /** @deprecated use size / expanded */
 export type NavRailMode = 'compact' | 'expanded';
+
+/** Fallback if `transitionend` is skipped (tab backgrounded / display:none). */
+const WIDTH_SETTLE_FALLBACK_MS = 560;
 
 /**
  * Navigation rail — mid/expanded windows (≥600dp).
  *
  * - **size** `compact` (104dp, icon above label) · `large` (expanded rows)
  * - **expanded** mirrors large — toggle via **collapsible** (`menu` / `menu_open`)
- * - **appearance** `standard` (inline, divider) · `modal` (elevated, rounded)
- * - Slot **fab** — optional header FAB (compact) / extended FAB (when expanded)
+ * - **layout** `modal` (default, edge-docked + end radii) · `standard` (flush, no sheet)
+ * - **position** `start` · `center` · `bottom` — leading destinations group
+ * - Slots **leading** (or default) · **trailing** (bottom + divider) · **fab**
  *
- * Compact is slightly wider than the M3 80–88dp token so long labels
- * (Components, Containment) stay untruncated at label-medium.
+ * Compact + expanded use elevation level 1 (no end border).
+ * Expand/collapse: spatial spring on width; destinations go vertical at collapse
+ * start (labels stay visible); extended FAB morphs via `data-rail-collapsed`.
  *
  * @see https://m3.material.io/components/navigation-rail/guidelines
  */
 export class K3NavRail extends K3Element {
-  static override styles = [
-    hostReset,
-    stateLayerStyles,
-    css`
-      :host {
-        display: block;
-        height: 100%;
-        width: var(--k3-nav-rail-width);
-        --k3-nav-rail-width: 6.5rem; /* 104 — fits “Containment” @ 12px */
-        background: transparent;
-        /*
-         * Expand/collapse — M3E spatial spring (scheme-aware).
-         * Expressive overshoots; Standard eases in (data-k3-motion).
-         */
-        transition: width var(--k3-sys-motion-duration-spatial-default, 500ms)
-          var(--k3-sys-motion-easing-spatial, var(--k3-sys-motion-easing-expressive-spatial));
-      }
-      :host([size='large']),
-      :host([expanded]),
-      :host([mode='expanded']) {
-        --k3-nav-rail-width: 16rem;
-      }
-      .rail {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.25rem;
-        box-sizing: border-box;
-        width: 100%;
-        height: 100%;
-        min-height: 100%;
-        padding: 0.75rem 0.5rem 1rem;
-        /* Visible — foot tooltips (position=end) must paint into the content pane */
-        overflow: visible;
-        background: var(--k3-nav-rail-bg, var(--k3-sys-color-surface));
-        border-inline-end: var(
-          --k3-nav-rail-divider,
-          1px solid var(--k3-sys-color-outline-variant)
-        );
-        border-radius: var(--k3-nav-rail-radius, 0);
-      }
-      :host([appearance='modal']) .rail {
-        background: var(--k3-sys-color-surface-container);
-        border-inline-end: 0;
-        border-radius: var(--k3-sys-shape-corner-extra-large);
-        box-shadow: var(--k3-sys-elevation-level2, 0 1px 3px rgb(0 0 0 / 0.15));
-        margin: 0;
-        height: 100%;
-        min-height: 100%;
-      }
-
-      /* Menu toggle — 48×48 state layer above FAB (M3 collapsed / expanded) */
-      .toggle {
-        display: none;
-        place-items: center;
-        place-content: center;
-        align-self: center;
-        box-sizing: border-box;
-        width: var(--k3-sys-touch-target, 3rem); /* 48dp */
-        height: var(--k3-sys-touch-target, 3rem);
-        margin-bottom: 0.25rem;
-        padding: 0;
-        border: 0;
-        border-radius: var(--k3-sys-shape-corner-full, 999px);
-        background: transparent;
-        color: var(--k3-sys-color-on-surface-variant);
-        cursor: pointer;
-        font: inherit;
-        perspective: 2.5rem;
-      }
-      :host([collapsible]) .toggle {
-        display: grid;
-      }
-      :host([size='large']) .toggle,
-      :host([expanded]) .toggle,
-      :host([mode='expanded']) .toggle {
-        align-self: flex-start;
-        margin-inline-start: 0.25rem;
-      }
-      /*
-       * Single glyph (menu_open) — mirrored by expand/collapse + dir.
-       * Expanded LTR: chevron ← (collapse) · Collapsed LTR: flip → (expand).
-       */
-      .toggle-icon {
-        display: block;
-        font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', sans-serif;
-        font-weight: normal;
-        font-style: normal;
-        font-size: 1.5rem;
-        line-height: 1;
-        font-variation-settings:
-          'FILL' 0,
-          'wght' 400,
-          'GRAD' 0,
-          'opsz' 24;
-        transform: rotateY(0deg);
-        transition: transform var(--k3-sys-motion-duration-spatial-default, 500ms)
-          var(--k3-sys-motion-easing-spatial, var(--k3-sys-motion-easing-expressive-spatial));
-      }
-      /* Collapsed — flip so chevron points toward content (expand) */
-      .rail[data-size='compact'] .toggle-icon {
-        transform: rotateY(180deg);
-      }
-      /* RTL — invert (rail on the end edge) */
-      :host(:dir(rtl)) .rail[data-size='large'] .toggle-icon {
-        transform: rotateY(180deg);
-      }
-      :host(:dir(rtl)) .rail[data-size='compact'] .toggle-icon {
-        transform: rotateY(0deg);
-      }
-
-      /*
-       * Header FAB — morph FAB ↔ extended FAB (width), not scale.
-       * Expanded: content-sized (M3 extended FAB) — never full-bleed of the rail.
-       */
-      .fab {
-        --k3-nav-rail-fab-size: 3.5rem; /* 56 — default FAB */
-        --k3-nav-rail-fab-max: 17.5rem; /* 280 — M3 extended label cap */
-        --k3-nav-rail-fab-motion: var(--k3-sys-motion-duration-spatial-default, 500ms);
-        --k3-nav-rail-fab-ease: var(
-          --k3-sys-motion-easing-spatial,
-          var(--k3-sys-motion-easing-expressive-spatial)
-        );
-        --k3-nav-rail-fab-fade: var(
-          --k3-sys-motion-easing-effects,
-          var(--k3-sys-motion-easing-expressive-effects)
-        );
-        display: none;
-        width: 100%;
-        margin-bottom: 0.75rem;
-        box-sizing: border-box;
-        min-height: var(--k3-nav-rail-fab-size);
-      }
-      .fab.has {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: auto;
-        justify-items: center;
-        align-items: center;
-      }
-      :host([size='large']) .fab.has,
-      :host([expanded]) .fab.has,
-      :host([mode='expanded']) .fab.has {
-        padding-inline: 0.25rem;
-        justify-items: start; /* M3 expanded rail — start-aligned, not stretch */
-      }
-
-      ::slotted(k3-fab),
-      ::slotted(.rail-fab-compact),
-      ::slotted(k3-extended-fab),
-      ::slotted(.rail-fab-extended) {
-        grid-area: 1 / 1;
-        display: inline-flex !important;
-        box-sizing: border-box !important;
-      }
-
-      /* Compact FAB — stays put; only opacity (no transform) */
-      ::slotted(k3-fab),
-      ::slotted(.rail-fab-compact) {
-        z-index: 1;
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-        transition:
-          opacity var(--k3-sys-motion-duration-short4, 200ms) var(--k3-nav-rail-fab-fade),
-          visibility 0ms linear 0ms;
-      }
-      :host([size='large']) ::slotted(k3-fab),
-      :host([size='large']) ::slotted(.rail-fab-compact),
-      :host([expanded]) ::slotted(k3-fab),
-      :host([expanded]) ::slotted(.rail-fab-compact),
-      :host([mode='expanded']) ::slotted(k3-fab),
-      :host([mode='expanded']) ::slotted(.rail-fab-compact) {
-        z-index: 0;
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transition:
-          opacity var(--k3-sys-motion-duration-short3, 150ms) var(--k3-nav-rail-fab-fade),
-          visibility 0ms linear var(--k3-sys-motion-duration-short3, 150ms);
-      }
-
-      /*
-       * Extended FAB — morph 56dp ↔ content width (M3 fixed / hug-content).
-       * max-width animates; width stays fit-content so it never goes full-rail.
-       */
-      ::slotted(k3-extended-fab),
-      ::slotted(.rail-fab-extended) {
-        z-index: 0;
-        justify-self: center;
-        width: fit-content;
-        min-width: var(--k3-nav-rail-fab-size);
-        max-width: var(--k3-nav-rail-fab-size);
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        overflow: hidden;
-        transition:
-          max-width var(--k3-nav-rail-fab-motion) var(--k3-nav-rail-fab-ease),
-          min-width var(--k3-nav-rail-fab-motion) var(--k3-nav-rail-fab-ease),
-          opacity var(--k3-sys-motion-duration-short4, 200ms) var(--k3-nav-rail-fab-fade),
-          visibility 0ms linear var(--k3-nav-rail-fab-motion);
-      }
-      :host([size='large']) ::slotted(k3-extended-fab),
-      :host([size='large']) ::slotted(.rail-fab-extended),
-      :host([expanded]) ::slotted(k3-extended-fab),
-      :host([expanded]) ::slotted(.rail-fab-extended),
-      :host([mode='expanded']) ::slotted(k3-extended-fab),
-      :host([mode='expanded']) ::slotted(.rail-fab-extended) {
-        z-index: 1;
-        justify-self: start;
-        width: fit-content;
-        min-width: var(--k3-nav-rail-fab-size);
-        max-width: min(100%, var(--k3-nav-rail-fab-max));
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-        transition:
-          max-width var(--k3-nav-rail-fab-motion) var(--k3-nav-rail-fab-ease),
-          min-width var(--k3-nav-rail-fab-motion) var(--k3-nav-rail-fab-ease),
-          opacity var(--k3-sys-motion-duration-short4, 200ms) var(--k3-nav-rail-fab-fade),
-          visibility 0ms linear 0ms;
-      }
-
-      .destinations {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.25rem;
-        flex: 1;
-        min-width: 0;
-        /* Must not mix visible + auto — CSS coerces x to auto → h-scrollbar */
-        overflow-x: hidden;
-        overflow-y: auto;
-        background: transparent;
-      }
-      .foot {
-        margin-top: auto;
-        padding-top: 0.75rem;
-      }
-      ::slotted(k3-nav-item) {
-        flex: 0 0 auto;
-        width: 100%;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        :host {
-          transition: none;
-        }
-        .toggle-icon {
-          transition: none;
-        }
-        ::slotted(k3-fab),
-        ::slotted(.rail-fab-compact),
-        ::slotted(k3-extended-fab),
-        ::slotted(.rail-fab-extended) {
-          transition: none !important;
-        }
-      }
-    `,
-  ];
+  static override styles = [hostReset, stateLayerStyles, navRailStyles];
 
   @property({ type: Number }) active = 0;
   /** compact (104) · large (expanded row items) */
   @property({ reflect: true }) size: NavRailSize = 'compact';
-  /** standard · modal */
-  @property({ reflect: true }) appearance: NavRailAppearance = 'standard';
+  /**
+   * Expanded chrome: `modal` (default) · `standard`.
+   * Modal = edge-docked, end radii · Standard = flush rail, no inset sheet.
+   */
+  @property({ reflect: true }) layout: NavRailLayout = 'modal';
+  /**
+   * @deprecated use `layout` — attribute `appearance` still accepted (maps to layout).
+   */
+  @property({ attribute: 'appearance' }) appearance: NavRailAppearance | null = null;
+  /** Leading destinations alignment: start · center · bottom */
+  @property({ reflect: true }) position: NavRailPosition = 'start';
   /**
    * Expanded rail (large destinations + extended FAB).
    * Synced with `size="large"` / deprecated `mode="expanded"`.
@@ -311,8 +80,13 @@ export class K3NavRail extends K3Element {
 
   private ready = false;
   private arm: ArmNavHandle | null = null;
+  /** True while collapse width spring is in flight (`data-collapsing` reflected). */
+  private collapsing = false;
+  private collapseTimer = 0;
   /** Slot `fab` content — tracked via slotchange (hasSlot is false on first paint). */
   @state() private hasFab = false;
+  /** Slot `trailing` / deprecated `foot`. */
+  @state() private hasTrailing = false;
 
   /** Layout width — `size` (+ deprecated `mode`) is the source of truth. */
   private resolvedSize(): NavRailSize {
@@ -323,13 +97,92 @@ export class K3NavRail extends K3Element {
     return this.resolvedSize() === 'large';
   }
 
+  private resolvedLayout(): NavRailLayout {
+    return this.layout === 'standard' ? 'standard' : 'modal';
+  }
+
+  private clearCollapseTimer(): void {
+    if (!this.collapseTimer) return;
+    window.clearTimeout(this.collapseTimer);
+    this.collapseTimer = 0;
+  }
+
+  private clearCollapseArm(): void {
+    this.collapsing = false;
+    this.removeAttribute('data-collapsing');
+    this.removeAttribute('data-expanding');
+    this.removeEventListener('transitionend', this.onWidthTransitionEnd);
+    this.clearCollapseTimer();
+  }
+
+  private onWidthTransitionEnd = (e: TransitionEvent): void => {
+    if (e.target !== this || e.propertyName !== 'width') return;
+    this.settleCollapse();
+  };
+
+  /** Finish collapse: clear morph flag after width spring (items already vertical). */
+  private settleCollapse(): void {
+    if (!this.collapsing) return;
+    this.collapsing = false;
+    this.removeEventListener('transitionend', this.onWidthTransitionEnd);
+    this.clearCollapseTimer();
+    if (!this.isExpanded()) this.syncItemLayout();
+    this.removeAttribute('data-collapsing');
+  }
+
+  /**
+   * Collapse — vertical destinations immediately (labels stay under icons),
+   * then wait for width `transitionend` to clear `data-collapsing`.
+   */
+  private armCollapseSettle(): void {
+    this.collapsing = true;
+    this.setAttribute('data-collapsing', '');
+    this.removeAttribute('data-expanding');
+    this.syncItemLayout();
+    if (prefersReducedMotion()) {
+      this.settleCollapse();
+      return;
+    }
+    this.removeEventListener('transitionend', this.onWidthTransitionEnd);
+    this.addEventListener('transitionend', this.onWidthTransitionEnd);
+    this.clearCollapseTimer();
+    this.collapseTimer = window.setTimeout(
+      () => this.settleCollapse(),
+      WIDTH_SETTLE_FALLBACK_MS,
+    );
+  }
+
+  /** Expand — horizontal from a tucked start (`data-expanding`), then release. */
+  private armExpandMorph(): void {
+    this.collapsing = false;
+    this.removeAttribute('data-collapsing');
+    this.removeEventListener('transitionend', this.onWidthTransitionEnd);
+    this.clearCollapseTimer();
+    this.setAttribute('data-expanding', '');
+    this.size = 'large';
+    this.expanded = true;
+    this.syncItemLayout();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (this.isExpanded()) this.removeAttribute('data-expanding');
+      });
+    });
+  }
+
   /** Flip collapsed ↔ expanded (collapsible toggle). */
   private setExpanded(next: boolean): void {
     if (this.isExpanded() === next) return;
     if (!emitLifecycle(this, 'change-start', { source: 'user', expanded: next })) return;
-    this.size = next ? 'large' : 'compact';
-    this.expanded = next;
-    if (!next && this.mode === 'expanded') this.mode = 'compact';
+    if (next) {
+      this.armExpandMorph();
+    } else {
+      this.size = 'compact';
+      this.expanded = false;
+      if (this.mode === 'expanded') this.mode = 'compact';
+      /* Lock FAB px width while still painted expanded — then spring to 56dp. */
+      this.syncFabMorph();
+      this.armCollapseSettle();
+    }
     emitLifecycle(this, 'change-end', { source: 'user', expanded: next });
     this.emit('k3-expand', { expanded: next });
   }
@@ -340,7 +193,7 @@ export class K3NavRail extends K3Element {
     if (this.expanded !== next) this.expanded = next;
   }
 
-  private syncLayout(): void {
+  private syncItemLayout(): void {
     const layout = this.resolvedSize() === 'large' ? 'horizontal' : 'vertical';
     for (const el of queryNavItems(this)) el.layout = layout;
   }
@@ -369,72 +222,92 @@ export class K3NavRail extends K3Element {
 
   private syncFabSlot = (): void => {
     this.hasFab = hasSlot(this, 'fab');
-    this.syncFabMorph();
+    /* Animate only after boot — first paint must be instant compact/expanded */
+    this.syncFabMorph(this.ready);
   };
 
+  private syncTrailingSlot = (): void => {
+    this.hasTrailing = hasSlot(this, 'trailing') || hasSlot(this, 'foot');
+  };
+
+  /** True for the extended FAB that owns the rail pill↔square morph. */
+  private isRailMorphFab(el: HTMLElement): boolean {
+    return el.localName === 'k3-extended-fab' || el.classList.contains('rail-fab-extended');
+  }
+
   /**
-   * Drive extended-FAB collapsed chrome (icon-only square) while the rail
-   * is compact — enables width morph FAB ↔ extended without scale transforms.
+   * Drive extended-FAB rail morph (pill ↔ square) via setRailCollapsed.
+   * @param animate false on first paint so compact boot isn’t a flash morph
    */
-  private syncFabMorph(): void {
-    const expanded = this.isExpanded();
+  private syncFabMorph(animate = true): void {
+    const collapsed = !this.isExpanded();
     for (const el of this.querySelectorAll<HTMLElement>(':scope > [slot="fab"]')) {
-      if (el.localName !== 'k3-extended-fab' && !el.classList.contains('rail-fab-extended')) {
-        continue;
+      if (!this.isRailMorphFab(el)) continue;
+      const fab = el as HTMLElement & {
+        setRailCollapsed?: (c: boolean, a?: boolean) => void;
+      };
+      if (typeof fab.setRailCollapsed === 'function') {
+        fab.setRailCollapsed(collapsed, animate);
+      } else {
+        el.toggleAttribute('data-rail-collapsed', collapsed);
       }
-      el.toggleAttribute('data-rail-collapsed', !expanded);
     }
   }
 
   override willUpdate(changed: PropertyValues): void {
-    /* Convenience: expanded alone drives size (unless size also changed). */
     if (changed.has('expanded') && !changed.has('size') && this.mode !== 'expanded') {
       this.size = this.expanded ? 'large' : 'compact';
+    }
+    if (changed.has('appearance') && !changed.has('layout') && this.appearance) {
+      this.layout = this.appearance;
     }
   }
 
   override firstUpdated(): void {
     const marked = findMarkedNavIndex(queryNavItems(this));
     if (marked >= 0) this.active = marked;
-    this.ready = true;
     this.syncFabSlot();
+    this.syncTrailingSlot();
     this.syncExpandedAttr();
-    this.syncFabMorph();
-    this.syncLayout();
+    this.syncFabMorph(false);
+    this.syncItemLayout();
     this.applyActive(true);
+    this.ready = true;
   }
 
   override updated(changed: PropertyValues): void {
     super.updated(changed);
     if (!this.ready) return;
-    if (changed.has('size') || changed.has('mode') || changed.has('expanded')) {
+    const sizeChanged =
+      changed.has('size') || changed.has('mode') || changed.has('expanded');
+    if (sizeChanged) {
       this.syncExpandedAttr();
       this.syncFabMorph();
-      this.syncLayout();
+      /* During collapse, items are already vertical from armCollapseSettle. */
+      if (this.isExpanded() || !this.collapsing) this.syncItemLayout();
     }
-    if (
-      changed.has('active') ||
-      changed.has('size') ||
-      changed.has('mode') ||
-      changed.has('expanded')
-    ) {
+    if (sizeChanged || changed.has('active')) {
       this.applyActive(changed.has('active'));
     }
   }
 
   override disconnectedCallback(): void {
     this.arm?.cancel();
+    this.clearCollapseArm();
     super.disconnectedCallback();
   }
 
   override render() {
     const large = this.isExpanded();
+    const chrome = this.resolvedLayout();
     const toggleLabel = large ? 'Collapse navigation' : 'Expand navigation';
     return html`<nav
       class="rail"
       part="container"
       data-size=${this.resolvedSize()}
-      data-appearance=${this.appearance}
+      data-layout=${chrome}
+      data-appearance=${chrome}
+      data-position=${this.position}
       @click=${this.onClick}
     >
       ${this.collapsible
@@ -458,10 +331,21 @@ export class K3NavRail extends K3Element {
       <div class="fab ${this.hasFab ? 'has' : ''}" part="fab">
         <slot name="fab" @slotchange=${this.syncFabSlot}></slot>
       </div>
-      <div class="destinations" part="destinations">
+      <div
+        class="destinations"
+        part="destinations"
+        data-position=${this.position}
+      >
+        <slot name="leading"></slot>
         <slot></slot>
       </div>
-      <div class="foot" part="foot"><slot name="foot"></slot></div>
+      <div
+        class="trailing ${this.hasTrailing ? 'has' : ''}"
+        part="trailing"
+      >
+        <slot name="trailing" @slotchange=${this.syncTrailingSlot}></slot>
+        <slot name="foot" @slotchange=${this.syncTrailingSlot}></slot>
+      </div>
     </nav>`;
   }
 }

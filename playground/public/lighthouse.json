@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-07T12:50:57.148Z",
+  "source": "chromium",
+  "url": "/",
+  "desktop": {
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "fcp": {
+        "value": "0.3 s",
+        "score": 1
+      },
+      "lcp": {
+        "value": "0.5 s",
+        "score": 1
+      },
+      "tbt": {
+        "value": "0 ms",
+        "score": 1
+      },
+      "cls": {
+        "value": "0",
+        "score": 1
+      },
+      "si": {
+        "value": "0.6 s",
+        "score": 1
+      }
+    }
+  },
+  "lighthouse": "12.8.2",
+  "mobile": {
+    "scores": {
+      "performance": 97,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "fcp": {
+        "value": "1.4 s",
+        "score": 0.98
+      },
+      "lcp": {
+        "value": "1.7 s",
+        "score": 0.99
+      },
+      "tbt": {
+        "value": "170 ms",
+        "score": 0.93
+      },
+      "cls": {
+        "value": "0",
+        "score": 1
+      },
+      "si": {
+        "value": "1.6 s",
+        "score": 1
+      }
+    }
+  }
+}

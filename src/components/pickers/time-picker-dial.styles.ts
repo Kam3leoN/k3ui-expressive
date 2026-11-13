@@ -107,15 +107,17 @@ export const timePickerDialStyles = css`
     pointer-events: none;
     z-index: 3;
   }
-  /* Inner = outer radius − numeral size */
+  /* Inner = outer radius − numeral size (same ink as outer — not muted) */
   .numeral.inner {
     font-size: var(--k3-sys-typescale-body-small-size);
-    color: var(--k3-sys-color-on-surface-variant);
+    color: var(--k3-sys-color-on-surface);
     transform: rotate(var(--_numeral-angle))
       translateY(calc(-1 * var(--_numeral-radius) + var(--_numeral-size)))
       rotate(calc(-1 * var(--_numeral-angle)));
   }
-  .numeral.active {
+  /* Selected / under-hand — on-primary (white on primary thumb) */
+  .numeral.active,
+  .numeral.inner.active {
     color: var(--k3-sys-color-on-primary);
   }
   .numeral.disabled {

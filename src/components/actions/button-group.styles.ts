@@ -217,20 +217,34 @@ export const buttonGroupStyles = css`
     --k3-btn-res: var(--k3-btn-group-inner);
   }
 
-  /* Leading — outer start more pronounced, facing end = inner */
-  :host([variant='connected']) ::slotted([data-bg='first']) {
+  /* Leading — outer start more pronounced, facing end = inner (horizontal) */
+  :host([variant='connected']:not([orientation='vertical'])) ::slotted([data-bg='first']) {
     --k3-btn-rss: var(--k3-btn-group-outer);
     --k3-btn-res: var(--k3-btn-group-outer);
     --k3-btn-rse: var(--k3-btn-group-inner);
     --k3-btn-ree: var(--k3-btn-group-inner);
   }
 
-  /* Trailing — outer end more pronounced, facing start = inner */
-  :host([variant='connected']) ::slotted([data-bg='last']) {
+  /* Trailing — outer end more pronounced, facing start = inner (horizontal) */
+  :host([variant='connected']:not([orientation='vertical'])) ::slotted([data-bg='last']) {
     --k3-btn-rse: var(--k3-btn-group-outer);
     --k3-btn-ree: var(--k3-btn-group-outer);
     --k3-btn-rss: var(--k3-btn-group-inner);
     --k3-btn-res: var(--k3-btn-group-inner);
+  }
+
+  /* Vertical — first = outer top · last = outer bottom · facing = inner */
+  :host([variant='connected'][orientation='vertical']) ::slotted([data-bg='first']) {
+    --k3-btn-rss: var(--k3-btn-group-outer);
+    --k3-btn-rse: var(--k3-btn-group-outer);
+    --k3-btn-res: var(--k3-btn-group-inner);
+    --k3-btn-ree: var(--k3-btn-group-inner);
+  }
+  :host([variant='connected'][orientation='vertical']) ::slotted([data-bg='last']) {
+    --k3-btn-res: var(--k3-btn-group-outer);
+    --k3-btn-ree: var(--k3-btn-group-outer);
+    --k3-btn-rss: var(--k3-btn-group-inner);
+    --k3-btn-rse: var(--k3-btn-group-inner);
   }
 
   :host([variant='connected']) ::slotted([data-bg='only']) {
@@ -241,13 +255,21 @@ export const buttonGroupStyles = css`
   }
 
   /* Pressed — facing edges → 4dp (already 4dp for square) */
-  :host([variant='connected']) ::slotted([data-pressed][data-bg='first']) {
+  :host([variant='connected']:not([orientation='vertical'])) ::slotted([data-pressed][data-bg='first']) {
     --k3-btn-rse: var(--k3-btn-group-inner-pressed);
     --k3-btn-ree: var(--k3-btn-group-inner-pressed);
   }
-  :host([variant='connected']) ::slotted([data-pressed][data-bg='last']) {
+  :host([variant='connected']:not([orientation='vertical'])) ::slotted([data-pressed][data-bg='last']) {
     --k3-btn-rss: var(--k3-btn-group-inner-pressed);
     --k3-btn-res: var(--k3-btn-group-inner-pressed);
+  }
+  :host([variant='connected'][orientation='vertical']) ::slotted([data-pressed][data-bg='first']) {
+    --k3-btn-res: var(--k3-btn-group-inner-pressed);
+    --k3-btn-ree: var(--k3-btn-group-inner-pressed);
+  }
+  :host([variant='connected'][orientation='vertical']) ::slotted([data-pressed][data-bg='last']) {
+    --k3-btn-rss: var(--k3-btn-group-inner-pressed);
+    --k3-btn-rse: var(--k3-btn-group-inner-pressed);
   }
   :host([variant='connected']) ::slotted([data-pressed][data-bg='middle']) {
     --k3-btn-rss: var(--k3-btn-group-inner-pressed);

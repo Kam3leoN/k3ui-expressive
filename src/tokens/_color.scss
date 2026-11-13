@@ -1,9 +1,9 @@
 :root {
   /* Reference / system color roles (overridden by theme.apply) */
-  --k3-sys-color-primary: #6750a4;
-  --k3-sys-color-on-primary: #ffffff;
-  --k3-sys-color-primary-container: #eaddff;
-  --k3-sys-color-on-primary-container: #21005d;
+  --k3-sys-color-primary: #6850a5;
+  --k3-sys-color-on-primary: #fdf7ff;
+  --k3-sys-color-primary-container: #cab6ff;
+  --k3-sys-color-on-primary-container: #442c7f;
   --k3-sys-color-secondary: #625b71;
   --k3-sys-color-on-secondary: #ffffff;
   --k3-sys-color-secondary-container: #e8def8;
@@ -37,26 +37,27 @@
   --k3-sys-color-note-container: #fff1b8;
   --k3-sys-color-on-note-container: #1c1b1f;
 
-  --k3-sys-color-background: #fef7ff;
-  --k3-sys-color-on-background: #1d1b20;
-  --k3-sys-color-surface: #fef7ff;
-  --k3-sys-color-on-surface: #1d1b20;
-  --k3-sys-color-surface-variant: #e7e0ec;
-  --k3-sys-color-on-surface-variant: #49454f;
-  --k3-sys-color-outline: #79747e;
-  --k3-sys-color-outline-variant: #cac4d0;
+  /* Fallbacks = seed #6750A4 · expressive · light · spec 2025 (matches themeCssVars). */
+  --k3-sys-color-background: #fff7ff;
+  --k3-sys-color-on-background: #3d2a51;
+  --k3-sys-color-surface: #fff7ff;
+  --k3-sys-color-on-surface: #3d2a51;
+  --k3-sys-color-surface-variant: #efdbff;
+  --k3-sys-color-on-surface-variant: #6b5681;
+  --k3-sys-color-outline: #88729e;
+  --k3-sys-color-outline-variant: #c1a8d8;
   --k3-sys-color-shadow: #000000;
   --k3-sys-color-scrim: #000000;
   --k3-sys-color-inverse-surface: #322f35;
   --k3-sys-color-inverse-on-surface: #f5eff7;
   --k3-sys-color-inverse-primary: #d0bcff;
-  --k3-sys-color-surface-dim: #ded8e1;
-  --k3-sys-color-surface-bright: #fef7ff;
+  --k3-sys-color-surface-dim: #e9d1ff;
+  --k3-sys-color-surface-bright: #fff7ff;
   --k3-sys-color-surface-container-lowest: #ffffff;
-  --k3-sys-color-surface-container-low: #f7f2fa;
-  --k3-sys-color-surface-container: #f3edf7;
-  --k3-sys-color-surface-container-high: #ece6f0;
-  --k3-sys-color-surface-container-highest: #e6e0e9;
+  --k3-sys-color-surface-container-low: #fbf0ff;
+  --k3-sys-color-surface-container: #f7e9ff;
+  --k3-sys-color-surface-container-high: #f3e2ff;
+  --k3-sys-color-surface-container-highest: #efdbff;
   --k3-sys-color-surface-tint: var(--k3-sys-color-primary);
 
   /* Fixed accent roles (overridden by theme.apply / MCU) */

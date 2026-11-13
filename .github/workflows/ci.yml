@@ -31,10 +31,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      # Keyboard / ARIA / forms / performance budgets (Chromium)
+      # Keyboard / ARIA / forms / performance / memory / stress / visual / mobile (Chromium)
       - run: npm run test:e2e
         env:
           CI: '1'
+          K3UI_E2E_MOBILE: '1'
 
   # Same specs on Firefox + WebKit — informative until they have been green once.
   e2e-cross-browser:

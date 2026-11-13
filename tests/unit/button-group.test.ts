@@ -257,6 +257,40 @@ describe('k3-button-group', () => {
     );
   });
 
+  it('connected + 2 icon-buttons (arrow stepper) keeps selection=none and marks ends', async () => {
+    host.innerHTML = `
+      <k3-button-group
+        variant="connected"
+        selection="none"
+        orientation="horizontal"
+        size="md"
+        sync
+        shape="round"
+        label="Step"
+      >
+        <k3-icon-button variant="filled" width="narrow" label="Previous" data-arrow-step="-1"></k3-icon-button>
+        <k3-icon-button variant="filled" width="narrow" label="Next" data-arrow-step="1"></k3-icon-button>
+      </k3-button-group>
+    `;
+    const el = host.querySelector('k3-button-group') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+      selection: string;
+    };
+    await el.updateComplete;
+    await Promise.resolve();
+
+    expect(el.selection).toBe('none');
+    expect(el.getAttribute('selection')).toBe('none');
+    const icons = [...el.querySelectorAll('k3-icon-button')];
+    expect(icons).toHaveLength(2);
+    expect(icons.map((i) => i.getAttribute('data-bg'))).toEqual(['first', 'last']);
+    expect(icons.every((i) => i.hasAttribute('data-connected'))).toBe(true);
+    /* selection=none — no unselected→tonal remap; filled stays filled */
+    expect(icons.every((i) => !i.hasAttribute('data-group-select'))).toBe(true);
+    expect(icons.every((i) => i.getAttribute('variant') === 'filled')).toBe(true);
+    expect(icons.every((i) => i.getAttribute('data-orient') === 'horizontal')).toBe(true);
+  });
+
   it('connected marks positions, preserves child variant, sets data-connected', async () => {
     host.innerHTML = `
       <k3-button-group variant="connected" size="md" shape="square" sync selection="single">
@@ -365,9 +399,10 @@ describe('k3-button-group', () => {
     ).styles;
     const cssText = (sheets ?? []).map((s) => s.cssText ?? '').join('');
     expect(cssText).toContain(':host([selected])');
-    expect(cssText).toContain(':host([data-bg]:not([selected]))');
+    expect(cssText).toContain(':host([data-group-select][data-bg]:not([selected]))');
     expect(cssText).toContain('--k3-sys-color-primary');
     expect(cssText).toContain('--k3-sys-color-secondary-container');
+    expect(items.every((i) => i.hasAttribute('data-group-select'))).toBe(true);
   });
 
   it('standard icon-button press does not morph shell width', async () => {

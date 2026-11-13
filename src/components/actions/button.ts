@@ -269,18 +269,18 @@ export class K3Button extends K3Element {
       }
 
       /*
-       * ToggleButtonDefaults — groups have no color (data-bg = any group child).
+       * ToggleButtonDefaults — selectable groups only (data-group-select).
        * Unchecked filled/tonal → secondary-container · outlined → outline
-       * Checked → primary / on-primary
+       * Checked → primary / on-primary · selection="none" keeps variant paint
        * @see https://m3.material.io/components/button-groups/specs
        */
-      :host([data-bg]:not([selected])) .filled,
-      :host([data-bg]:not([selected])) .tonal {
+      :host([data-group-select][data-bg]:not([selected])) .filled,
+      :host([data-group-select][data-bg]:not([selected])) .tonal {
         background: var(--k3-sys-color-secondary-container);
         color: var(--k3-sys-color-on-secondary-container);
         box-shadow: none;
       }
-      :host([data-bg]:not([selected])) .outlined {
+      :host([data-group-select][data-bg]:not([selected])) .outlined {
         background: transparent;
         color: var(--k3-sys-color-on-surface-variant);
         box-shadow: inset 0 0 0 1px var(--k3-sys-color-outline-variant);

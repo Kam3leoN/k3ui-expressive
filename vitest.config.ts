@@ -5,6 +5,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@k3ui': resolve(__dirname, 'src'),
+      '@k3ux': resolve(__dirname, '../k3ux/src'),
+      k3ux: resolve(__dirname, '../k3ux/src/index.ts'),
+      /* Peer resolve for @k3ux sources that import 'k3ui'. */
+      k3ui: resolve(__dirname, 'src/index.ts'),
+    },
+  },
+  server: {
+    fs: {
+      allow: [resolve(__dirname), resolve(__dirname, '../k3ux')],
     },
   },
   test: {

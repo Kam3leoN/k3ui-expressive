@@ -62,14 +62,28 @@ export const iconButtonStyles = css`
     min-height: var(--k3-ib-hit-h);
   }
 
-  /* Connected — host fills flex cell */
+  /*
+   * Connected — vertical cell = W×H (narrow×tall). Horizontal = exact rotate (H×W)
+   * so a connected chevron pair matches when turned 90°.
+   */
   :host([data-connected]) {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: auto;
-    min-width: 0;
-    height: var(--k3-ib-hit-h);
+    box-sizing: border-box;
+    width: var(--k3-ib-w);
+    min-width: var(--k3-ib-w);
+    height: var(--k3-ib-h);
+    min-height: var(--k3-ib-h);
+  }
+  :host([data-connected][data-orient='horizontal']) {
+    width: var(--k3-ib-h);
+    min-width: var(--k3-ib-h);
+    height: var(--k3-ib-w);
+    min-height: var(--k3-ib-w);
+    /* Outer CornerFull tracks the short axis after the swap */
+    --k3-ib-radius-round: calc(var(--k3-ib-w) / 2);
+    --k3-btn-corner: var(--k3-ib-radius-round);
   }
 
   /* ── Size · height + icon + radii ─────────────────────────────────────── */
@@ -229,18 +243,29 @@ export const iconButtonStyles = css`
     margin: 0;
     border: 0;
     line-height: 0;
-    border-radius: var(--k3-ib-radius);
+    /* Per-corner when in a connected group (--k3-btn-r* from k3-button-group) */
+    border-start-start-radius: var(--k3-btn-rss, var(--k3-ib-radius));
+    border-start-end-radius: var(--k3-btn-rse, var(--k3-ib-radius));
+    border-end-end-radius: var(--k3-btn-ree, var(--k3-ib-radius));
+    border-end-start-radius: var(--k3-btn-res, var(--k3-ib-radius));
     color: var(--k3-sys-color-on-surface-variant);
     background: transparent;
     overflow: visible;
     cursor: inherit;
     /* Shape morph — M3E FastSpatial (scheme-aware aliases) */
-    transition: border-radius var(--k3-sys-motion-duration-spatial-fast, 350ms)
-      var(--k3-sys-motion-easing-spatial-fast, cubic-bezier(0.42, 1.67, 0.21, 0.9));
+    transition:
+      border-start-start-radius var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-spatial-fast, cubic-bezier(0.42, 1.67, 0.21, 0.9)),
+      border-start-end-radius var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-spatial-fast, cubic-bezier(0.42, 1.67, 0.21, 0.9)),
+      border-end-end-radius var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-spatial-fast, cubic-bezier(0.42, 1.67, 0.21, 0.9)),
+      border-end-start-radius var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-spatial-fast, cubic-bezier(0.42, 1.67, 0.21, 0.9));
   }
   :host([data-connected]) .btn {
     width: 100%;
-    height: var(--k3-ib-h);
+    height: 100%;
     flex: 1 1 auto;
   }
 
@@ -262,25 +287,26 @@ export const iconButtonStyles = css`
   }
 
   /*
-   * Toggle / group unselected — tonal/filled → secondary-container
-   * (ToggleButtonDefaults / button-group).
+   * Toggle / selectable group unselected — tonal/filled → secondary-container
+   * (ToggleButtonDefaults / button-group). selection="none" keeps declared variant
+   * (e.g. connected chevron steppers stay filled).
    */
   :host([toggle]:not([selected])) .btn.filled,
   :host([toggle]:not([selected])) .btn.tonal,
-  :host([data-bg]:not([selected])) .btn.filled,
-  :host([data-bg]:not([selected])) .btn.tonal {
+  :host([data-group-select][data-bg]:not([selected])) .btn.filled,
+  :host([data-group-select][data-bg]:not([selected])) .btn.tonal {
     background: var(--k3-sys-color-secondary-container);
     color: var(--k3-sys-color-on-secondary-container);
     box-shadow: none;
   }
   :host([toggle]:not([selected])) .btn.outlined,
-  :host([data-bg]:not([selected])) .btn.outlined {
+  :host([data-group-select][data-bg]:not([selected])) .btn.outlined {
     background: transparent;
     color: var(--k3-sys-color-on-surface-variant);
     box-shadow: inset 0 0 0 1px var(--k3-sys-color-outline-variant);
   }
   :host([toggle]:not([selected])) .btn.standard,
-  :host([data-bg]:not([selected])) .btn.standard {
+  :host([data-group-select][data-bg]:not([selected])) .btn.standard {
     background: transparent;
     color: var(--k3-sys-color-on-surface-variant);
   }

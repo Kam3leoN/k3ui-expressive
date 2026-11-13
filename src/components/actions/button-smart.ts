@@ -1,43 +1,32 @@
 import { html, nothing, type PropertyValues } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
+import { property, query } from 'lit/decorators.js';
 import {
   K3Element,
   emitLifecycle,
   focusRingStyles,
   haptic,
-  prefersReducedMotion,
   devicePixelSnapCss,
   watchDevicePixelRatio,
 } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import {
+  attachTextMarquee,
+  type TextMarqueeHandle,
+} from '../feedback/text-marquee.js';
+import {
   ButtonSmartDefaultActiveSubtitle,
   ButtonSmartDefaultHapticDuration,
-  ButtonSmartFadeDp,
-  ButtonSmartGlyphDp,
+  ButtonSmartGeometryCssVars,
   ButtonSmartGridGapDp,
-  ButtonSmartHeightDp,
-  ButtonSmartIconBoxDp,
-  ButtonSmartInsetDp,
-  ButtonSmartLabelGapDp,
-  ButtonSmartLabelSizeDp,
-  ButtonSmartMarqueeDelayMs,
-  ButtonSmartMarqueeRestartDelayMs,
   ButtonSmartMorphMs,
-  ButtonSmartPadInlineEndDp,
-  ButtonSmartPadInlineStartDp,
-  ButtonSmartRadiusOnDp,
-  ButtonSmartSpecs,
-  ButtonSmartSubtitleSizeDp,
 } from './button-smart.specs.js';
 import { buttonSmartStyles } from './button-smart.styles.js';
 
 /**
- * Button Smart — Material You Quick Settings tile (AOSP).
+ * Button Smart — Material You Quick Settings tile (AOSP Compose).
  *
  * OFF: pill · charcoal surface · ON: squircle · `primary-container`.
- * Label marquee scrolls with a ghost clone when overflowing (Web Animations API).
+ * Label marquee via {@link attachTextMarquee} when overflowing.
  *
  * ```html
  * <k3-button-smart label="Wi‑Fi" active>
@@ -80,40 +69,24 @@ export class K3ButtonSmart extends K3Element {
   @property({ type: Number, attribute: 'haptic-duration' })
   hapticDuration = ButtonSmartDefaultHapticDuration;
 
-  /** Drives marquee mask + ghost visibility (must survive Lit re-render). */
-  @state() private scrolling = false;
-
   @query('.marquee') private marqueeEl?: HTMLElement;
-  @query('.track') private trackEl?: HTMLElement;
-  @query('.label:not(.ghost)') private labelEl?: HTMLElement;
 
-  private animation: Animation | null = null;
-  private restartTimer: ReturnType<typeof setTimeout> | undefined;
+  private marquee: TextMarqueeHandle | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private isAnimating = false;
+  private morphTimer: ReturnType<typeof setTimeout> | null = null;
   private marqueeRaf = 0;
-  private _unwatchDpr: (() => void) | null = null;
+  private unwatchDpr: (() => void) | null = null;
 
   /**
    * Lock AOSP geometry to CSS px (= dp) with DPR snap — avoids rem/font
    * scaling and fractional hairlines at Windows 125%.
    */
   private applyGeometryTokens = (): void => {
-    const set = (name: string, dp: number): void => {
+    for (const [name, dp] of ButtonSmartGeometryCssVars) {
       this.style.setProperty(name, devicePixelSnapCss(dp));
-    };
-    set('--k3-button-smart-height', ButtonSmartHeightDp);
-    set('--k3-button-smart-inset', ButtonSmartInsetDp);
-    set('--k3-button-smart-pad-inline-start', ButtonSmartPadInlineStartDp);
-    set('--k3-button-smart-pad-inline-end', ButtonSmartPadInlineEndDp);
-    set('--k3-button-smart-icon-size', ButtonSmartIconBoxDp);
-    set('--k3-button-smart-glyph', ButtonSmartGlyphDp);
-    set('--k3-button-smart-radius-on', ButtonSmartRadiusOnDp);
-    set('--k3-button-smart-fade', ButtonSmartFadeDp);
-    set('--k3-button-smart-label-gap', ButtonSmartLabelGapDp);
-    set('--k3-button-smart-label-size', ButtonSmartLabelSizeDp);
-    set('--k3-button-smart-subtitle-size', ButtonSmartSubtitleSizeDp);
-    /* Parent QS grid — AOSP qs_tile_margin_horizontal (8dp). */
+    }
+    /* Parent QS grid — qs_tile_margin_horizontal / Compose tile gap (8dp). */
     const grid = this.parentElement;
     if (grid?.classList.contains('btn-smart-grid')) {
       grid.style.setProperty('gap', devicePixelSnapCss(ButtonSmartGridGapDp));
@@ -123,22 +96,16 @@ export class K3ButtonSmart extends K3Element {
   override connectedCallback(): void {
     super.connectedCallback();
     this.applyGeometryTokens();
-    this._unwatchDpr?.();
-    this._unwatchDpr = watchDevicePixelRatio(this.applyGeometryTokens);
-    this.setupMarqueeObserver();
-    this.scheduleMarquee();
+    this.unwatchDpr?.();
+    this.unwatchDpr = watchDevicePixelRatio(this.applyGeometryTokens);
+    this.bindMarquee();
   }
 
   override disconnectedCallback(): void {
-    this._unwatchDpr?.();
-    this._unwatchDpr = null;
-    this.stopMarquee();
-    this.resizeObserver?.disconnect();
-    this.resizeObserver = null;
-    if (this.marqueeRaf) {
-      cancelAnimationFrame(this.marqueeRaf);
-      this.marqueeRaf = 0;
-    }
+    this.unwatchDpr?.();
+    this.unwatchDpr = null;
+    this.clearMorphTimer();
+    this.teardownMarquee();
     super.disconnectedCallback();
   }
 
@@ -150,7 +117,7 @@ export class K3ButtonSmart extends K3Element {
       changed.has('activeSubtitle') ||
       changed.has('inactiveSubtitle')
     ) {
-      this.scheduleMarquee();
+      this.scheduleMarqueeRefresh();
     }
   }
 
@@ -175,12 +142,21 @@ export class K3ButtonSmart extends K3Element {
 
     this.emit('k3-toggle', { active: this.active });
 
-    window.setTimeout(() => {
+    this.clearMorphTimer();
+    this.morphTimer = setTimeout(() => {
+      this.morphTimer = null;
       this.isAnimating = false;
       emitLifecycle(this, active ? 'open-end' : 'close-end', {
         source: 'user',
       });
     }, ButtonSmartMorphMs);
+  }
+
+  private clearMorphTimer(): void {
+    if (this.morphTimer != null) {
+      clearTimeout(this.morphTimer);
+      this.morphTimer = null;
+    }
   }
 
   private onActivate = (e: Event): void => {
@@ -214,112 +190,42 @@ export class K3ButtonSmart extends K3Element {
     return this.label + (sub ? `, ${sub}` : '');
   }
 
-  private setupMarqueeObserver(): void {
-    if (typeof ResizeObserver === 'undefined') return;
-    this.resizeObserver?.disconnect();
-    this.resizeObserver = new ResizeObserver(() => this.scheduleMarquee());
-    /* Observe after first paint — marquee may not exist yet */
+  private bindMarquee(): void {
+    this.teardownMarquee();
     void this.updateComplete.then(() => {
-      if (this.marqueeEl && this.resizeObserver) {
-        this.resizeObserver.observe(this.marqueeEl);
-      }
+      if (!this.isConnected || !this.marqueeEl) return;
+      this.marquee = attachTextMarquee(this.marqueeEl);
+      this.setupMarqueeObserver();
+      this.scheduleMarqueeRefresh();
     });
   }
 
-  private scheduleMarquee(): void {
+  private teardownMarquee(): void {
+    if (this.marqueeRaf) {
+      cancelAnimationFrame(this.marqueeRaf);
+      this.marqueeRaf = 0;
+    }
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    this.marquee?.stop();
+    this.marquee = null;
+  }
+
+  private setupMarqueeObserver(): void {
+    if (typeof ResizeObserver === 'undefined' || !this.marqueeEl) return;
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = new ResizeObserver(() => this.scheduleMarqueeRefresh());
+    this.resizeObserver.observe(this.marqueeEl);
+  }
+
+  private scheduleMarqueeRefresh(): void {
     if (this.marqueeRaf) cancelAnimationFrame(this.marqueeRaf);
     this.marqueeRaf = requestAnimationFrame(() => {
       this.marqueeRaf = requestAnimationFrame(() => {
         this.marqueeRaf = 0;
-        void this.setupMarquee();
+        this.marquee?.refresh();
       });
     });
-  }
-
-  private cancelMarqueeAnimation(): void {
-    this.animation?.cancel();
-    this.animation = null;
-    if (this.restartTimer !== undefined) {
-      clearTimeout(this.restartTimer);
-      this.restartTimer = undefined;
-    }
-    if (this.trackEl) {
-      this.trackEl.style.transform = '';
-      this.trackEl.style.removeProperty('--k3-button-smart-marquee-gap');
-    }
-  }
-
-  /**
-   * AOSP TextView.Marquee — track = [label][gap][ghost];
-   * translate by (textWidth + gap). Skip when reduced-motion → ellipsis.
-   */
-  private async setupMarquee(): Promise<void> {
-    const marquee = this.marqueeEl;
-    const textEl = this.labelEl;
-    if (!marquee || !textEl) return;
-
-    this.cancelMarqueeAnimation();
-
-    const containerWidth = marquee.clientWidth;
-    const prevMaxWidth = textEl.style.maxWidth;
-    textEl.style.maxWidth = 'none';
-    const textWidth = textEl.scrollWidth;
-    textEl.style.maxWidth = prevMaxWidth;
-
-    if (containerWidth <= 0 || textWidth <= 0) {
-      this.scrolling = false;
-      return;
-    }
-
-    const overflow = textWidth - containerWidth;
-    if (overflow <= 0 || prefersReducedMotion()) {
-      this.scrolling = false;
-      return;
-    }
-
-    if (!this.scrolling) this.scrolling = true;
-    await this.updateComplete;
-
-    const track = this.trackEl;
-    if (!track || !this.scrolling) return;
-
-    const gap = Math.max(containerWidth, 24);
-    track.style.setProperty('--k3-button-smart-marquee-gap', `${gap}px`);
-    void track.offsetWidth;
-
-    const distance = textWidth + gap;
-    const durationMs =
-      (distance / ButtonSmartSpecs.behaviors.marqueeDpPerSecond) * 1000;
-
-    const rtl = getComputedStyle(track).direction === 'rtl';
-    const shift = rtl ? distance : -distance;
-
-    const play = (): void => {
-      this.animation = track.animate(
-        [
-          { transform: 'translateX(0)' },
-          { transform: `translateX(${shift}px)` },
-        ],
-        {
-          delay: ButtonSmartMarqueeDelayMs,
-          duration: durationMs,
-          easing: 'linear',
-          fill: 'none',
-        },
-      );
-      this.animation.onfinish = () => {
-        this.restartTimer = setTimeout(
-          play,
-          ButtonSmartMarqueeRestartDelayMs,
-        );
-      };
-    };
-    play();
-  }
-
-  private stopMarquee(): void {
-    this.cancelMarqueeAnimation();
-    this.scrolling = false;
   }
 
   override render() {
@@ -346,10 +252,7 @@ export class K3ButtonSmart extends K3Element {
           <slot name="icon"></slot>
         </span>
         <span class="text" part="text">
-          <span
-            class=${classMap({ marquee: true, scrolling: this.scrolling })}
-            part="marquee"
-          >
+          <span class="marquee" part="marquee">
             <span class="track" part="track">
               <span class="label" part="label">${label}</span>
               <span class="label ghost" aria-hidden="true">${label}</span>
@@ -372,5 +275,6 @@ if (!customElements.get('k3-button-smart')) {
   customElements.define('k3-button-smart', K3ButtonSmart as CustomElementConstructor);
 }
 
+export { ButtonSmartSpecs } from './button-smart.specs.js';
 /** Re-export for tree-shaking-friendly grid helper consumers. */
 export { buttonSmartGridStyles } from './button-smart.styles.js';

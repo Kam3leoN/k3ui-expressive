@@ -193,6 +193,22 @@ describe('time-picker docked position', () => {
     expect(r.top).toBe(148); /* 140 + 8 */
   });
 
+  it('keeps the same top for short keyboard vs tall dial (no lift)', () => {
+    const anchor = {
+      top: 100,
+      bottom: 140,
+      left: 50,
+      right: 250,
+      width: 200,
+      height: 40,
+    } as DOMRect;
+    const dial = computeDockedPosition(anchor, { width: 364, height: 480 }, { width: 800, height: 900 });
+    const input = computeDockedPosition(anchor, { width: 364, height: 220 }, { width: 800, height: 900 });
+    expect(dial.flip).toBe('bottom');
+    expect(input.flip).toBe('bottom');
+    expect(input.top).toBe(dial.top);
+  });
+
   it('flips above when below is tight', () => {
     const r = computeDockedPosition(
       { top: 500, bottom: 540, left: 50, right: 250, width: 200, height: 40 } as DOMRect,
@@ -201,5 +217,29 @@ describe('time-picker docked position', () => {
     );
     expect(r.flip).toBe('top');
     expect(r.top).toBeLessThan(500);
+  });
+});
+
+describe('applyDockedPosition (picker)', () => {
+  it('pins below the field outline with an 8px gap', async () => {
+    const { applyDockedPosition } = await import(
+      '../../src/components/pickers/time-picker.position.js'
+    );
+    const anchor = document.createElement('div');
+    Object.defineProperty(anchor, 'getBoundingClientRect', {
+      value: () => new DOMRect(40, 80, 200, 56),
+    });
+    Object.defineProperty(anchor, 'offsetWidth', { value: 200 });
+    Object.defineProperty(anchor, 'offsetHeight', { value: 56 });
+    const host = document.createElement('div');
+    Object.defineProperty(host, 'offsetWidth', { value: 364 });
+    Object.defineProperty(host, 'offsetHeight', { value: 220 });
+    document.body.append(anchor, host);
+    const r = applyDockedPosition(host, anchor);
+    expect(r.flip).toBe('bottom');
+    expect(r.top).toBe(80 + 56 + 8);
+    expect(host.style.getPropertyValue('--k3-tp-top')).toBe(`${r.top}px`);
+    host.remove();
+    anchor.remove();
   });
 });

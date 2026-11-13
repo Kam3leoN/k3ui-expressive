@@ -76,6 +76,24 @@ export const overlayStack = {
     return stack[stack.length - 1]?.host === host;
   },
 
+  /** Top-most modal host, or `null`. */
+  topHost(): HTMLElement | null {
+    return stack[stack.length - 1]?.host ?? null;
+  },
+
+  /**
+   * True when opening `host` from `anchor` would sit beside an existing
+   * modal scrim (anchor outside the top modal). Nested opens from inside
+   * the top modal (confirm, etc.) are allowed.
+   */
+  wouldOpenBeside(host: HTMLElement, anchor?: HTMLElement | null): boolean {
+    const top = this.topHost();
+    if (!top || top === host) return false;
+    if (anchor && top.contains(anchor)) return false;
+    if (top.contains(host)) return false;
+    return true;
+  },
+
   /** Open modal overlays, bottom → top. */
   get size(): number {
     return stack.length;

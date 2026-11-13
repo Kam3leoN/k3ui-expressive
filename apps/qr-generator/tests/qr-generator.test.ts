@@ -8,7 +8,7 @@ import type {
   QrGeneratorChangeDetail,
 } from '../src/qr-generator.js';
 import { QR_DESIGN_DEFAULTS } from '../src/qr-generator.specs.js';
-import type { K3QrCode } from '@k3ui/components/media/qr-code.js';
+import type { K3QrCode } from '@k3ux/components/media/qr-code.js';
 
 const settle = async (el: K3QrGenerator): Promise<void> => {
   await el.updateComplete;
