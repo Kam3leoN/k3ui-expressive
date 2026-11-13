@@ -3,17 +3,24 @@ import { resolve } from 'node:path';
 
 const root = resolve(__dirname);
 const k3src = resolve(__dirname, '../../src');
+const k3uxSrc = resolve(__dirname, '../../../k3ux/src');
+const litRoot = resolve(__dirname, '../../node_modules/lit');
 
 export default defineConfig({
   root,
   publicDir: false,
   resolve: {
-    alias: {
-      '@k3ui': k3src,
-      '@k3ux': resolve(__dirname, '../../../k3ux/src'),
-      k3ui: resolve(__dirname, '../../src/index.ts'),
-      k3ux: resolve(__dirname, '../../../k3ux/src/index.ts'),
-    },
+    /* One Lit graph for app + sibling k3ux (peer lit lives in k3ui node_modules). */
+    dedupe: ['lit', 'lit-html', 'lit-element', '@lit/reactive-element'],
+    alias: [
+      { find: '@k3ui', replacement: k3src },
+      { find: '@k3ux', replacement: k3uxSrc },
+      { find: /^k3ui$/, replacement: resolve(__dirname, '../../src/index.ts') },
+      { find: /^k3ux$/, replacement: resolve(__dirname, '../../../k3ux/src/index.ts') },
+      { find: /^lit$/, replacement: litRoot },
+      /* Trailing `/` required: resolve() drops it on Windows → litdecorators.js */
+      { find: /^lit\//, replacement: `${litRoot}/` },
+    ],
   },
   server: {
     port: 5174,

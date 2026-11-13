@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.5] — 2026-11-13
+
+### Fixed — QR generator Vercel deploy (lit resolve)
+
+- QR Vite config dedupes / aliases `lit` to k3ui `node_modules` (k3ux peer — not installed with `--omit=dev`)
+
 ## [1.2.4] — 2026-11-13
 
 ### Fixed — QR generator Vercel deploy
