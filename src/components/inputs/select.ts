@@ -1,23 +1,17 @@
 import { html, css, type PropertyValues } from 'lit';
 import { property, state, query } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
-import {
-  K3Element,
-  attachInternals,
-  setFormValue,
-  runOpenClose,
-  afterPaint,
-  waitForMotion,
-  attachOutsideDismiss,
-  type OutsideDismissController,
-} from '../../core/index.js';
+import { K3Element, attachInternals, setFormValue } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
 import { i18n } from '../../i18n/index.js';
+import K3Menu from '../containment/menu.js';
 import K3MenuItem from '../containment/menu-item.js';
 import { markMenuItemEdges } from '../containment/menu-edges.js';
 import type { TextFieldVariant } from './field-types.js';
 import K3TextField from './text-field.js';
 
+if (!customElements.get('k3-menu')) {
+  customElements.define('k3-menu', K3Menu);
+}
 if (!customElements.get('k3-menu-item')) {
   customElements.define('k3-menu-item', K3MenuItem);
 }
@@ -27,7 +21,10 @@ if (!customElements.get('k3-text-field')) {
 
 /**
  * M3 exposed dropdown / select — trigger is a real `k3-text-field`
- * (outlined · filled · standard) + floating menu of `k3-menu-item`.
+ * (outlined · filled · standard) + `k3-menu` of `k3-menu-item`.
+ *
+ * Opens like Noph Select: menu **match-width** flush with the field,
+ * elastic FastSpatial **scaleY** enter from the menu recipe.
  *
  * @see https://m3.material.io/components/menus/guidelines#exposed-dropdown-menu
  *
@@ -53,6 +50,12 @@ export class K3Select extends K3Element {
       }
       :host([disabled]) {
         pointer-events: none;
+      }
+
+      .dropdown {
+        display: block;
+        width: 100%;
+        max-width: none;
       }
 
       .trigger {
@@ -90,50 +93,6 @@ export class K3Select extends K3Element {
       :host([open]) .chevron {
         transform: rotate(180deg);
       }
-
-      .panel {
-        position: absolute;
-        z-index: 50;
-        inset-inline: 0;
-        top: calc(100% + 0.25rem); /* 4 */
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.125rem; /* 2 */
-        width: 100%;
-        min-width: 7rem;
-        max-width: min(17.5rem, 100%);
-        padding: 0.25rem; /* 4 */
-        background: var(--k3-sys-color-surface-container-low);
-        color: var(--k3-sys-color-on-surface);
-        border-radius: var(--k3-sys-shape-corner-large); /* 16 */
-        box-shadow: var(
-          --k3-sys-elevation-level2,
-          0 1px 2px rgb(0 0 0 / 0.3),
-          0 2px 6px 2px rgb(0 0 0 / 0.15)
-        );
-        opacity: 0;
-        pointer-events: none;
-        transform: scale(0.96);
-        transform-origin: top center;
-        transition:
-          opacity var(--k3-sys-motion-duration-short4)
-            var(--k3-sys-motion-easing-expressive-effects),
-          transform var(--k3-sys-motion-duration-spatial-fast)
-            var(--k3-sys-motion-easing-expressive-spatial);
-      }
-      .panel.open {
-        opacity: 1;
-        pointer-events: auto;
-        transform: none;
-      }
-
-      ::slotted(k3-menu-item) {
-        display: block;
-        width: 100%;
-        flex-shrink: 0;
-      }
     `,
   ];
 
@@ -151,9 +110,12 @@ export class K3Select extends K3Element {
   @property({ type: Boolean, reflect: true }) open = false;
 
   @state() private displayLabel = '';
-  @state() private visible = false;
 
+  @query('.dropdown') private menuEl!: K3Menu;
   @query('.trigger') private triggerEl!: K3TextField;
+
+  /** True while open is mirrored from menu lifecycle (skip host→menu echo). */
+  private _mirroringOpen = false;
 
   private optionItems(): K3MenuItem[] {
     return [...this.querySelectorAll<K3MenuItem>(':scope > k3-menu-item')].filter((i) => {
@@ -187,55 +149,41 @@ export class K3Select extends K3Element {
     markMenuItemEdges(this);
   }
 
+  /**
+   * Chevron follows `:host([open])` — set the reflected attribute in the same
+   * turn as open-start / close-start so rotation does not wait for menu motion.
+   */
+  private syncOpenUI(next: boolean): void {
+    this._mirroringOpen = true;
+    if (this.open !== next) this.open = next;
+    this.toggleAttribute('open', next);
+    queueMicrotask(() => {
+      this._mirroringOpen = false;
+    });
+  }
+
   async show(): Promise<boolean> {
-    if (this.disabled || this.visible) return true;
-    return runOpenClose(
-      this,
-      'open',
-      async () => {
-        this.syncSelection();
-        this.visible = true;
-        this.open = false;
-        await this.updateComplete;
-        await afterPaint();
-        this.open = true;
-        this.triggerEl?.focus();
-      },
-      { source: 'user' },
-    );
+    if (this.disabled) return false;
+    this.syncSelection();
+    const menu = this.menuEl;
+    if (!menu) return false;
+    menu.armDismissGuard();
+    this.syncOpenUI(true);
+    /* Focus stays on the field (Noph combobox model) while the menu opens. */
+    const ok = await menu.show('none');
+    this.syncOpenUI(menu.open);
+    this.triggerEl?.focus();
+    return ok;
   }
 
   async hide(source: 'user' | 'api' | 'escape' | 'auto' = 'api'): Promise<boolean> {
-    if (!this.visible) return true;
-    return runOpenClose(
-      this,
-      'close',
-      async () => {
-        this.open = false;
-        this.visible = false;
-        await this.updateComplete;
-        const panel = this.shadowRoot?.querySelector('.panel') as HTMLElement | null;
-        if (panel) await waitForMotion(panel);
-      },
-      { source },
-    );
+    const menu = this.menuEl;
+    if (!menu) return true;
+    this.syncOpenUI(false);
+    const ok = await menu.hide(source);
+    this.syncOpenUI(menu.open);
+    return ok;
   }
-
-  private toggle = (e?: Event): void => {
-    if (this.disabled) return;
-    e?.preventDefault();
-    void (this.visible ? this.hide('user') : this.show());
-  };
-
-  private onTriggerKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      void this.show();
-    } else if (e.key === 'Escape' && this.visible) {
-      e.preventDefault();
-      void this.hide('escape');
-    }
-  };
 
   private onItemSelect = (e: Event): void => {
     const ce = e as CustomEvent<{ value?: string }>;
@@ -245,40 +193,90 @@ export class K3Select extends K3Element {
     setFormValue(this.internals, this.value || null);
     this.syncSelection();
     if (next !== prev) this.emit('k3-change', { value: this.value });
-    void this.hide('user');
+    /* Menu close-on-select already hides — flip chevron immediately */
+    this.syncOpenUI(false);
   };
 
   /** Block text-field typing / clear while still allowing open. */
   private onFieldInput = (e: Event): void => {
     e.stopPropagation();
     e.preventDefault();
-    /* Keep displayed selection label */
     if (this.triggerEl) this.triggerEl.value = this.displayLabel;
   };
 
-  private _outsideDismiss: OutsideDismissController | null = null;
+  private onMenuOpenEnd = (): void => {
+    this.syncOpenUI(true);
+    this.syncSelection();
+  };
+
+  private onMenuCloseStart = (): void => {
+    this.syncOpenUI(false);
+  };
+
+  private onMenuCloseEnd = (): void => {
+    this.syncOpenUI(false);
+  };
+
+  /** Cancel menu open when disabled; sync chevron + selection before enter. */
+  private onMenuOpenStart = (e: Event): void => {
+    if (this.disabled) {
+      e.preventDefault();
+      return;
+    }
+    this.syncOpenUI(true);
+    this.syncSelection();
+  };
 
   override connectedCallback(): void {
     super.connectedCallback();
     setFormValue(this.internals, this.value || null);
     this.addEventListener('k3-select', this.onItemSelect as EventListener);
-    this._outsideDismiss = attachOutsideDismiss(this, {
-      isActive: () => this.visible,
-      onDismiss: () => void this.hide('user'),
-    });
     queueMicrotask(() => this.syncSelection());
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('k3-select', this.onItemSelect as EventListener);
-    this._outsideDismiss?.detach();
-    this._outsideDismiss = null;
+    this.unbindMenuLifecycle();
+  }
+
+  private bindMenuLifecycle(): void {
+    const menu = this.menuEl;
+    if (!menu) return;
+    menu.addEventListener('k3-open-start', this.onMenuOpenStart);
+    menu.addEventListener('k3-open-end', this.onMenuOpenEnd);
+    menu.addEventListener('k3-close-start', this.onMenuCloseStart);
+    menu.addEventListener('k3-close-end', this.onMenuCloseEnd);
+  }
+
+  private unbindMenuLifecycle(): void {
+    const menu = this.menuEl;
+    if (!menu) return;
+    menu.removeEventListener('k3-open-start', this.onMenuOpenStart);
+    menu.removeEventListener('k3-open-end', this.onMenuOpenEnd);
+    menu.removeEventListener('k3-close-start', this.onMenuCloseStart);
+    menu.removeEventListener('k3-close-end', this.onMenuCloseEnd);
+  }
+
+  private syncMenuA11y(): void {
+    const panel = this.menuEl?.shadowRoot?.querySelector<HTMLElement>('[part="menu"]');
+    if (!panel) return;
+    const name = this.label || i18n.t('select.placeholder');
+    panel.setAttribute('aria-label', name);
   }
 
   override firstUpdated(): void {
     this.syncSelection();
-    const slot = this.shadowRoot?.querySelector('slot:not([name])') as HTMLSlotElement | null;
+    this.bindMenuLifecycle();
+    this.syncMenuA11y();
+    const slot = this.shadowRoot?.querySelector(
+      '.dropdown > slot:not([name]), k3-menu > slot:not([name])',
+    ) as HTMLSlotElement | null;
+    /* Nested select→menu slot lives in select's shadow as child of k3-menu */
+    const menuSlot = this.shadowRoot?.querySelector('k3-menu > slot:not([name])') as
+      | HTMLSlotElement
+      | null;
+    menuSlot?.addEventListener('slotchange', () => this.syncSelection());
     slot?.addEventListener('slotchange', () => this.syncSelection());
   }
 
@@ -286,17 +284,31 @@ export class K3Select extends K3Element {
     super.updated(changed);
     /* Always re-sync — option labels may change with locale (data-i18n) */
     this.syncSelection();
+    this.syncMenuA11y();
     if (changed.has('value')) {
       setFormValue(this.internals, this.value || null);
     }
     if (changed.has('value') || changed.has('required')) this.syncValidity();
+    if (
+      changed.has('open') &&
+      !this._mirroringOpen &&
+      this.menuEl &&
+      this.open !== this.menuEl.open
+    ) {
+      /* Host API `el.open = …` — defer past this update. */
+      queueMicrotask(() => void (this.open ? this.show() : this.hide('api')));
+    }
   }
 
   /** `required` with no value → `valueMissing` (blocks native submit, `:invalid`). */
   private syncValidity(): void {
     if (typeof this.internals.setValidity !== 'function') return;
     if (this.required && !this.value) {
-      this.internals.setValidity({ valueMissing: true }, i18n.t('select.required', 'Please select an item in the list.'), this.triggerEl ?? undefined);
+      this.internals.setValidity(
+        { valueMissing: true },
+        i18n.t('select.required', 'Please select an item in the list.'),
+        this.triggerEl ?? undefined,
+      );
     } else {
       this.internals.setValidity({});
     }
@@ -326,45 +338,46 @@ export class K3Select extends K3Element {
       (!this.label ? i18n.t('select.placeholder') : '');
 
     return html`
-      <k3-text-field
-        class="trigger"
-        part="container"
-        no-form
-        readonly
-        .label=${this.label}
-        .value=${shown}
-        .placeholder=${ph}
-        .variant=${this.variant}
-        .error=${this.error}
-        .supportingText=${this.supportingText}
-        .disabled=${this.disabled}
-        .required=${this.required}
-        .passwordToggle=${false}
-        aria-haspopup="listbox"
-        aria-expanded=${this.open ? 'true' : 'false'}
-        @click=${this.toggle}
-        @keydown=${this.onTriggerKeydown}
-        @k3-input=${this.onFieldInput}
-        @k3-change=${this.onFieldInput}
+      <k3-menu
+        class="dropdown"
+        part="menu-host"
+        match-width
+        panel-role="listbox"
+        position="bottom-start"
+        close-on-select
       >
-        <span
-          class="chevron notranslate"
-          slot="trailing-icon"
-          translate="no"
-          lang="zxx"
-          data-k3-icon="arrow_drop_down"
-          aria-hidden="true"
-          part="trailing-icon"
-        ></span>
-      </k3-text-field>
-      <div
-        class=${classMap({ panel: true, open: this.open })}
-        part="menu"
-        role="listbox"
-        aria-label=${this.label || i18n.t('select.placeholder')}
-      >
+        <k3-text-field
+          class="trigger"
+          slot="trigger"
+          part="container"
+          no-form
+          readonly
+          .label=${this.label}
+          .value=${shown}
+          .placeholder=${ph}
+          .variant=${this.variant}
+          .error=${this.error}
+          .supportingText=${this.supportingText}
+          .disabled=${this.disabled}
+          .required=${this.required}
+          .passwordToggle=${false}
+          aria-haspopup="listbox"
+          aria-expanded=${this.open ? 'true' : 'false'}
+          @k3-input=${this.onFieldInput}
+          @k3-change=${this.onFieldInput}
+        >
+          <span
+            class="chevron notranslate"
+            slot="trailing-icon"
+            translate="no"
+            lang="zxx"
+            data-k3-icon="arrow_drop_down"
+            aria-hidden="true"
+            part="trailing-icon"
+          ></span>
+        </k3-text-field>
         <slot></slot>
-      </div>
+      </k3-menu>
     `;
   }
 }

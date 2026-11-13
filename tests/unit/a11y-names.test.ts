@@ -56,7 +56,9 @@ describe('ARIA structure', () => {
     const item = el.querySelector('k3-menu-item') as LitEl;
     await item.updateComplete;
     const inner = item.shadowRoot!.querySelector('[part="container"]')!;
-    expect(el.shadowRoot!.querySelector('[role="listbox"]')).not.toBeNull();
+    const menu = el.shadowRoot!.querySelector('k3-menu') as LitEl;
+    await menu.updateComplete;
+    expect(menu.shadowRoot!.querySelector('[role="listbox"]')).not.toBeNull();
     expect(inner.getAttribute('role')).toBe('option');
     expect(inner.hasAttribute('aria-checked')).toBe(false);
     expect(inner.getAttribute('aria-selected')).toMatch(/true|false/);

@@ -45,6 +45,27 @@ describe('fitMenuPanel', () => {
     vi.restoreAllMocks();
   });
 
+  it('matchWidth stretches the panel to the trigger width', () => {
+    Object.defineProperty(trigger, 'offsetWidth', { configurable: true, value: 240 });
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      top: 100,
+      bottom: 156,
+      left: 40,
+      right: 280,
+      width: 240,
+      height: 56,
+      x: 40,
+      y: 100,
+      toJSON: () => ({}),
+    });
+    fitMenuPanel(panel, trigger, 'bottom-start', false, { matchWidth: true });
+    expect(panel.style.width).toBe('240px');
+    expect(panel.style.minWidth).toBe('240px');
+    expect(panel.style.left).toBe('40px');
+    clearMenuPanelFit(panel);
+    expect(panel.style.width).toBe('');
+  });
+
   it('opens top-start toward content when near the start edge (LTR)', () => {
     const { left, top } = fitMenuPanel(panel, trigger, 'top-start', false);
     expect(panel.getAttribute('data-fitted')).toBe('');

@@ -249,6 +249,14 @@ function placeSide(
   return { top, left: Math.round(left) };
 }
 
+export type FitMenuPanelOptions = {
+  /**
+   * Stretch the panel to the trigger width (exposed dropdown / select).
+   * Matches Noph Select: menu flush with the field, elastic scaleY enter.
+   */
+  matchWidth?: boolean;
+};
+
 /**
  * Place a menu panel with `position:fixed`, flipping on viewport overflow.
  * Uses logical start/end so LTR and RTL stay correct.
@@ -259,8 +267,17 @@ export function fitMenuPanel(
   trigger: HTMLElement | DOMRectReadOnly,
   position: MenuPosition,
   rtl: boolean,
+  options: FitMenuPanelOptions = {},
 ): { top: number; left: number } {
   const tr = resolveFitRect(trigger);
+
+  if (options.matchWidth) {
+    const w = Math.max(1, Math.round(tr.width));
+    panel.style.width = `${w}px`;
+    panel.style.minWidth = `${w}px`;
+    panel.style.maxWidth = 'none';
+  }
+
   const { w: pw, h: ph } = measurePanel(panel);
   const vw = window.innerWidth;
   const vh = window.innerHeight;
@@ -299,6 +316,9 @@ export function clearMenuPanelFit(panel: HTMLElement): void {
   panel.style.right = '';
   panel.style.bottom = '';
   panel.style.maxHeight = '';
+  panel.style.width = '';
+  panel.style.minWidth = '';
+  panel.style.maxWidth = '';
   panel.style.insetInlineStart = '';
   panel.style.insetInlineEnd = '';
 }

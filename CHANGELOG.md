@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] — 2026-11-13
+
+### Fixed — Select chevron rotation
+
+- `k3-select` mirrors `open` on menu `open-start` / `close-start` (attribute + property in the same turn) so the field chevron rotates with the elastic menu instead of after motion ends
+- Select composes `k3-menu` with `match-width` (Noph-style full field width + FastSpatial scaleY)
+
 ## [0.2.0] — 2026-11-13
 
 ### Changed — Date / time picker open motion (Noph / dialog spring)

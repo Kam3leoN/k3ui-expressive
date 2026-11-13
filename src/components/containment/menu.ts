@@ -108,6 +108,13 @@ export class K3Menu extends K3Element {
   override density: MenuDensity = 0;
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: Boolean, attribute: 'close-on-select' }) closeOnSelect = true;
+  /**
+   * Stretch the panel to the trigger / positioningAnchor width (select field).
+   * Noph-style exposed dropdown: menu flush with the field + elastic scaleY.
+   */
+  @property({ type: Boolean, reflect: true, attribute: 'match-width' }) matchWidth = false;
+  /** Panel ARIA role — `listbox` when hosting a select. */
+  @property({ attribute: 'panel-role' }) panelRole: 'menu' | 'listbox' = 'menu';
   /** Join items into one continuous shape (0 gap) — single-surface menus. */
   @property({ type: Boolean, reflect: true }) connected = false;
   /**
@@ -209,10 +216,27 @@ export class K3Menu extends K3Element {
     );
   }
 
+  /**
+   * Light-DOM items, including those reprojected through a nested `<slot>`
+   * (e.g. `k3-select` → `k3-menu` → items).
+   */
+  private assignedRootElements(): HTMLElement[] {
+    const slot = this.shadowRoot?.querySelector('.list > slot') as HTMLSlotElement | null;
+    const assigned = slot?.assignedElements({ flatten: true }) ?? [];
+    if (assigned.length) {
+      return assigned.filter((el): el is HTMLElement => el instanceof HTMLElement);
+    }
+    return [...this.children].filter(
+      (c): c is HTMLElement => c instanceof HTMLElement && c.slot !== 'trigger',
+    );
+  }
+
   private rootActionableItems(): K3MenuItem[] {
-    return [...this.querySelectorAll<K3MenuItem>('k3-menu-item')].filter((i) => {
-      if (i.isGapSep || i.isDividerLine || i.disabled) return false;
-      return i.parentElement?.localName !== 'k3-menu-item';
+    return this.assignedRootElements().filter((el): el is K3MenuItem => {
+      if (el.localName !== 'k3-menu-item') return false;
+      const item = el as K3MenuItem;
+      if (item.isGapSep || item.isDividerLine || item.disabled) return false;
+      return item.parentElement?.localName !== 'k3-menu-item';
     });
   }
 
@@ -492,7 +516,9 @@ export class K3Menu extends K3Element {
     const panel = this.panelEl();
     if (!panel) return;
     void panel.offsetWidth;
-    fitMenuPanel(panel, this.resolveFitTrigger(), this.position, this.isRtl());
+    fitMenuPanel(panel, this.resolveFitTrigger(), this.position, this.isRtl(), {
+      matchWidth: this.matchWidth,
+    });
     this.openSubmenuItems().forEach((item) => item.repositionFlyout());
   };
 
@@ -518,6 +544,9 @@ export class K3Menu extends K3Element {
     if (panel) this._fitRo.observe(panel);
     if (this.positioningAnchor?.isConnected) this._fitRo.observe(this.positioningAnchor);
     if (this.positioningEdge?.isConnected) this._fitRo.observe(this.positioningEdge);
+    /* match-width: keep panel flush when the field / trigger resizes */
+    const trigger = this.triggerAnchor();
+    if (this.matchWidth && trigger?.isConnected) this._fitRo.observe(trigger);
   }
 
   private unbindFitListeners(): void {
@@ -716,7 +745,7 @@ export class K3Menu extends K3Element {
           [this.position]: true,
         })}
         part="menu"
-        role="menu"
+        role=${this.panelRole === 'listbox' ? 'listbox' : 'menu'}
         tabindex="-1"
       >
         <div class="list k3-scroll" part="list">
