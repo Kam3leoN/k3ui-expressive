@@ -122,11 +122,20 @@ export const buttonGroupStyles = css`
         var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1));
   }
 
-  /* Icon buttons — square paint + ≥48dp target; no width morph */
+  /* Icon buttons — default square stays fixed; narrow/wide morph like k3-button */
   :host([variant='standard']) ::slotted(k3-icon-button) {
     flex: 0 0 auto;
     align-self: center;
     overflow: visible;
+    transition:
+      width var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+      min-width var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+      max-width var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1)),
+      --k3-ib-w var(--k3-sys-motion-duration-spatial-fast, 350ms)
+        var(--k3-sys-motion-easing-effects, cubic-bezier(0.2, 0, 0, 1));
   }
 
   /* Snap-clear press widths without a one-frame flash */

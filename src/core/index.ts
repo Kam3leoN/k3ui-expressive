@@ -3,6 +3,20 @@ export { K3Element, type Density } from './k3-element.js';
 export { hasSlot, hasLightSlot, hasNamedSlot, slotHasContent } from './slots.js';
 export { LayerPortal } from './layer-portal.js';
 export {
+  FLOATING_CHROME_INSET_INLINE_END_VAR,
+  FLOATING_CHROME_INSET_INLINE_START_VAR,
+  FLOATING_CHROME_PEER_SELECTOR,
+  isBottomEndFloatingChrome,
+  isBottomFloatingChrome,
+  measureFloatingChromeInsetInlineEnd,
+  measureFloatingChromeInsetInlineStart,
+  syncFloatingChromeInsetInlineEnd,
+  syncFloatingChromeInsets,
+  observeFloatingChromeInset,
+  type FloatingChromeInsetObserver,
+  type FloatingChromeSide,
+} from './floating-chrome-inset.js';
+export {
   resolveCssLengthPx,
   rootRemPx,
   devicePixelRatioSafe,

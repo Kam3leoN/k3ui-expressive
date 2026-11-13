@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.2.7] — 2026-11-13
+
+### Added — On-demand components (`k3ui/lazy`) and custom packs
+
+- `k3ui/lazy` (`dist/lazy/`): same API as `k3ui`, split into a base (≈ 92 kB gzip vs ≈ 465 kB for the single file) and one chunk per component
+- `init({ components: 'auto' })` — default of `k3ui/lazy`: defines the k3 elements present in the page, then the ones added later (`registry.observe()`, `registry.registerPresent()`)
+- `k3ui/components/k3-*` entries (each imports the children it renders) and `k3ui/components.json` (file, dependencies, gzip size per tag)
+- `npm run build:pack -- select dialog` builds a single-file pack with the chosen components and their dependencies
+- Library strings only in `dist/lazy` and packs: the documentation site keys (`doc.*`, `playground.*`) are left out of the locale catalogs
+- Bundle budget: lazy base ≤ 105 kB gzip
+
+### Added — Floating chrome end / start insets
+
+- `--k3-floating-chrome-inset-inline-end` **and** `-start` (+ `measure` / `sync` / `observe`) so sticky chrome stops before FAB / extended / fab-menu / STT on **either** bottom corner (LTR + RTL)
+- Sticky audio inset morph uses `spatial-fast` (elastic when motion scheme is expressive)
+
+### Changed — Icon-button group press morph (Noph transport)
+
+- Standard `k3-button-group`: `k3-icon-button` with `width="narrow|wide"` joins Compose-style +15% press width morph (default square still fixed)
+- Press corner morph also runs in `selection="none"` groups (solo transport / playback)
+- Tip wrappers mirror morph widths so flex layout stays in sync
+- `src/index.ts` split: shared API in `src/base.ts` (no static component import); `dist/k3ui.js` exports are unchanged (+ `bootstrapGlobal`)
+
+### Fixed
+
+- `k3-select` registers `k3-menu` (rendered in its template, missing from `COMPONENT_DEPS` — `registry-deps` test was failing)
+
 ## [1.2.5] — 2026-11-13
 
 ### Fixed — QR generator Vercel deploy (lit resolve)

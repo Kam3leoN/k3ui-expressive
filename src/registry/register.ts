@@ -72,10 +72,94 @@ export async function registerWhen(
   return tags;
 }
 
+/** Known k3 tags used under `root` (light DOM, `root` included) that are not defined yet. */
+function pendingKnown(root: ParentNode): string[] {
+  const tags = new Set(pendingCustomElements(root));
+  const self = (root as Element).localName;
+  if (self?.includes('-') && !customElements.get(self)) tags.add(self);
+  return [...tags].filter(isKnown);
+}
+
+/**
+ * Define every catalog element used under `root` right now (with the elements
+ * they render — see deps.ts). Resolves with the tags it registered.
+ */
+export async function registerPresent(root: ParentNode = document): Promise<string[]> {
+  const tags = pendingKnown(root);
+  await registerAll(tags);
+  return tags;
+}
+
+export interface RegistryObserver {
+  /** Stop watching — elements already defined stay defined. */
+  disconnect(): void;
+  /** Resolves once the tags seen so far are defined. */
+  readonly ready: Promise<void>;
+}
+
+const observers = new WeakMap<Node, RegistryObserver>();
+
+/**
+ * On-demand registration: define the catalog elements present under `root`,
+ * then keep watching — any k3 element added later (router view, `innerHTML`,
+ * framework render…) is defined as it enters the DOM. One observer per root;
+ * calling it again returns the same handle. Shadow roots are not crossed:
+ * pass a `ShadowRoot` to watch your own component's tree.
+ *
+ * ```ts
+ * registry.observe();              // whole document — `init({ components: 'auto' })`
+ * registry.observe(el.shadowRoot); // light DOM of a host you own
+ * ```
+ */
+export function observe(root: ParentNode = document): RegistryObserver {
+  const existing = observers.get(root);
+  if (existing) return existing;
+
+  let ready: Promise<void> = Promise.resolve();
+  const load = (tags: string[]): void => {
+    if (!tags.length) return;
+    const run = registerAll(tags).catch((err: unknown) => {
+      debug.warn('registry', `on-demand load failed: ${String(err)}`);
+    });
+    ready = Promise.all([ready, run]).then(() => undefined);
+  };
+
+  load(pendingKnown(root));
+
+  const mo =
+    typeof MutationObserver === 'function'
+      ? new MutationObserver((records) => {
+          const tags = new Set<string>();
+          for (const record of records) {
+            for (const node of record.addedNodes) {
+              if (node.nodeType !== 1) continue;
+              for (const tag of pendingKnown(node as Element)) tags.add(tag);
+            }
+          }
+          load([...tags]);
+        })
+      : null;
+  mo?.observe(root, { childList: true, subtree: true });
+
+  const handle: RegistryObserver = {
+    disconnect() {
+      mo?.disconnect();
+      observers.delete(root);
+    },
+    get ready() {
+      return ready;
+    },
+  };
+  observers.set(root, handle);
+  return handle;
+}
+
 export const registry = {
   register,
   registerAll,
+  registerPresent,
   registerWhen,
+  observe,
   isKnown,
   isRegistered,
   get tags(): string[] {

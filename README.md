@@ -58,6 +58,8 @@ Manual bootstrap (skip auto-init):
 | --- | --- |
 | `npm run dev` | Playground |
 | `npm run build` | `dist/k3ui.js` + `dist/k3ui.css` + `tokens.json` + budget check |
+| `npm run build:lazy` | `dist/lazy/` — base + one chunk per component (part of `build`) |
+| `npm run build:pack -- select dialog` | Custom single-file pack with only these components (+ their children) |
 | `npm test` | Vitest |
 | `npm run test:e2e` | Playwright: smoke, dialog / sheet keyboard & ARIA, forms, perf budgets (`PW_CHROMIUM_PATH=…` to use a local Chromium, `K3UI_E2E_ALL_BROWSERS=1` for Firefox + WebKit) |
 | `npm run version:bump -- patch` | Bump version + CHANGELOG |
@@ -76,7 +78,7 @@ Manual bootstrap (skip auto-init):
 | `K.Dialog` / `.dialog` AutoInit | `<k3-dialog>` + `.show()` / `.hide()` |
 | `window.K3UI_OPTIONS` | `window.K3UI_OPTIONS` or `K3UI.init(options)` |
 | SCSS class `.btn` | `<k3-button variant="…">` |
-| Multi-chunk `dist/js` | Single `dist/k3ui.js` |
+| Multi-chunk `dist/js` | Single `dist/k3ui.js`, or on-demand chunks with `k3ui/lazy` |
 
 ## Overlays & keyboard
 
@@ -99,6 +101,56 @@ Importing a component module defines its tag (guarded, like Material Web). With 
 registry, dependencies come along: `K3UI.init({ components: ['k3-audio-player'] })` also
 defines its slider, buttons and progress (`src/registry/deps.ts`, kept in sync by
 `tests/unit/registry-deps.test.ts`).
+
+## On-demand loading
+
+`k3ui` is one file with every component. `k3ui/lazy` is the same API split in chunks: a
+base (init, theme, registry, i18n, core helpers — ≈ 92 kB gzip instead of ≈ 465 kB) and one
+chunk per component, fetched only when the page uses it.
+
+```html
+<link rel="stylesheet" href="k3ui/dist/k3ui.css" />
+<script type="module" src="k3ui/dist/lazy/k3ui.js"></script>
+
+<k3-select label="Country">…</k3-select>
+<!-- loads select + text-field + menu + menu-item, nothing else -->
+```
+
+```ts
+import { init } from 'k3ui/lazy';
+
+await init(); // components: 'auto' is the default of this entry
+```
+
+- `components: 'auto'` defines the k3 elements present in the document, then watches it:
+  an element added later (router view, `innerHTML`, framework render) is loaded as it
+  enters the DOM. It also works with the full bundle: `init({ components: 'auto' })`.
+- `K3UI.registry.observe(root)` does the same for a subtree or a shadow root you own
+  (`.disconnect()` to stop, `.ready` to await); `registry.registerPresent(root)` is the
+  one-shot version. An explicit list still works: `init({ components: ['k3-dialog'] })`.
+- Children a component renders always come along (`src/registry/deps.ts`).
+- With a bundler you can also import elements directly — each entry imports its children:
+  `import 'k3ui/components/k3-select';`
+- Exports that embed component code are only in the full bundle: the Material shapes
+  helpers, `K3Coverflow` / `K3CoverflowItem` and the snackbar constants. With `k3ui/lazy`
+  take the classes from their entry (`k3ui/components/k3-coverflow`).
+- `k3ui/components.json` lists every tag with its file, dependencies and gzip size.
+
+## Custom pack
+
+One self-contained file with the base and only the components you choose — dependencies
+are resolved for you (`k3-select` brings `k3-text-field`, `k3-menu` and `k3-menu-item`).
+Run it from a clone of this repository:
+
+```bash
+npm run build:pack -- --list                      # components and what they require
+npm run build:pack -- select dialog               # → dist/packs/k3ui.pack.js
+npm run build:pack -- select,dialog --name shop --out dist/packs
+```
+
+Use the pack in place of `dist/k3ui.js`, with the same `dist/k3ui.css`; `init()` registers
+everything the pack holds. `<name>.json` records the selection, the components that were
+added as dependencies and the gzip size.
 
 ## Lazy loading
 

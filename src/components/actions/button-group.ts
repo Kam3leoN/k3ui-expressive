@@ -58,8 +58,9 @@ type GroupChild = HTMLElement & {
  * Material 3 Expressive button group.
  *
  * Matches Android `MaterialButtonGroup` + Compose `ButtonGroup` /
- * `ButtonGroupDefaults` (standard gap + 15% press expand on `k3-button`;
- * connected 2dp joins, no size morph; icon buttons stay square).
+ * `ButtonGroupDefaults` (standard gap + 15% press expand on `k3-button` and
+ * narrow/wide `k3-icon-button`; connected 2dp joins, no size morph;
+ * default-width icon buttons stay square).
  *
  * @see https://github.com/material-components/material-components-android/blob/master/docs/components/ButtonGroup.md
  * @see https://m3.material.io/components/button-groups/guidelines
@@ -195,15 +196,33 @@ export class K3ButtonGroup extends K3Element {
 
   private setChildWidth(el: HTMLElement, w: number): void {
     const px = `${Math.max(0, w)}px`;
-    el.style.width = px;
-    el.style.minWidth = px;
-    el.style.maxWidth = px;
+    const apply = (node: HTMLElement) => {
+      node.style.width = px;
+      node.style.minWidth = px;
+      node.style.maxWidth = px;
+    };
+    apply(el);
+    /* Tip wrapper is the flex item — keep it in sync with the morphing child. */
+    const root = this.slotRootOf(el as GroupChild);
+    if (root !== el) apply(root);
+    /* Icon-button paint tracks --k3-ib-w; keep shell + face in sync on morph. */
+    if (el.localName === 'k3-icon-button') {
+      el.style.setProperty('--k3-ib-w', px);
+    }
   }
 
   private clearChildWidth(el: HTMLElement): void {
-    el.style.removeProperty('width');
-    el.style.removeProperty('min-width');
-    el.style.removeProperty('max-width');
+    const clear = (node: HTMLElement) => {
+      node.style.removeProperty('width');
+      node.style.removeProperty('min-width');
+      node.style.removeProperty('max-width');
+    };
+    clear(el);
+    const root = this.slotRootOf(el as GroupChild);
+    if (root !== el) clear(root);
+    if (el.localName === 'k3-icon-button') {
+      el.style.removeProperty('--k3-ib-w');
+    }
   }
 
   private clearPressWidths(immediate = true): void {
@@ -259,7 +278,7 @@ export class K3ButtonGroup extends K3Element {
   /**
    * Standard only — Compose `animateWidth`:
    * pressed shell +15%, neighbors only, capped by compressionLimit.
-   * `k3-icon-button` excluded (square paint).
+   * Default-width icon buttons excluded; narrow/wide participate (transport).
    */
   private applyPressLayout(): void {
     if (this.variant !== 'standard') {

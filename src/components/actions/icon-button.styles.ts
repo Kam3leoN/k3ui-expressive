@@ -52,7 +52,7 @@ export const iconButtonStyles = css`
     z-index: 4;
   }
 
-  /* Standard group — fixed hit/paint (no width morph) */
+  /* Standard group — fixed hit/paint; narrow/wide allow group width morph */
   :host([data-bg]:not([data-connected])) {
     flex-shrink: 0;
     align-self: center;
@@ -60,6 +60,14 @@ export const iconButtonStyles = css`
     height: var(--k3-ib-hit-h);
     min-width: var(--k3-ib-hit-w);
     min-height: var(--k3-ib-hit-h);
+  }
+  :host([data-bg]:not([data-connected])[width='narrow']),
+  :host([data-bg]:not([data-connected])[width='wide']) {
+    width: var(--k3-ib-w);
+    min-width: var(--k3-ib-w);
+    /* Hit target still ≥ paint for sm/xs via --k3-ib-hit-* when larger */
+    height: max(var(--k3-ib-h), var(--k3-ib-hit-h));
+    min-height: max(var(--k3-ib-h), var(--k3-ib-hit-h));
   }
 
   /*
@@ -221,8 +229,12 @@ export const iconButtonStyles = css`
   :host([shape='square'][selected]:not([data-connected])) {
     --k3-ib-radius: var(--k3-ib-radius-round);
   }
-  /* Press radius — skip in groups to avoid flash with select morph */
-  :host([data-pressed]:not([data-connected]):not([data-bg])) {
+  /*
+   * Press radius — skip selectable groups (select morph flash).
+   * Solo + selection=none groups (Noph transport) keep pressed corners.
+   */
+  :host([data-pressed]:not([data-connected]):not([data-bg])),
+  :host([data-pressed]:not([data-connected]):not([data-group-select])) {
     --k3-ib-radius: var(--k3-ib-radius-pressed);
   }
 

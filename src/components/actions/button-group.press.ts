@@ -11,11 +11,23 @@
 
 import { ButtonGroupSpecs } from './button-group.specs.js';
 
-/** Tag name that participates in width morph (`k3-icon-button` stays square). */
+/** Tag that always participates in width morph. */
 export const BUTTON_GROUP_WIDTH_MORPH_TAG = 'k3-button';
 
+/**
+ * Standard press width morph:
+ * - `k3-button` always
+ * - `k3-icon-button` only when `width` is `narrow` | `wide` (Noph transport;
+ *   default square paint stays fixed — see button-group.test)
+ */
 export function isButtonGroupWidthMorphable(el: Element): boolean {
-  return el.localName === BUTTON_GROUP_WIDTH_MORPH_TAG;
+  if (el.localName === BUTTON_GROUP_WIDTH_MORPH_TAG) return true;
+  if (el.localName !== 'k3-icon-button') return false;
+  const w =
+    (el as HTMLElement & { width?: string }).width ||
+    el.getAttribute('width') ||
+    'default';
+  return w === 'narrow' || w === 'wide';
 }
 
 /** Parse `12px` / `0.75rem` / bare number → CSS px (16px rem root). */

@@ -61,7 +61,13 @@ export interface InitOptions {
     scrollLock?: boolean;
   };
   debug?: boolean | { level?: DebugLevel };
-  components?: 'all' | string[];
+  /**
+   * Elements to define. `'all'` — the whole catalog (default of `k3ui`);
+   * `'auto'` — only the k3 elements present in the document, then any added
+   * later (default of `k3ui/lazy`); or an explicit list of tags. Children a
+   * component renders always come along.
+   */
+  components?: 'all' | 'auto' | string[];
   /** Disable haptic feedback globally (mobile vibrate) */
   haptic?: boolean;
 }
@@ -119,7 +125,7 @@ const SCHEMA: Schema = {
   interaction: { ripple: isBool },
   overlays: { scrollLock: isBool },
   debug: (v) => typeof v === 'boolean' || (typeof v === 'object' && v !== null),
-  components: (v) => v === 'all' || (Array.isArray(v) && v.every((t) => typeof t === 'string')),
+  components: (v) => v === 'all' || v === 'auto' || (Array.isArray(v) && v.every((t) => typeof t === 'string')),
   haptic: isBool,
 };
 
@@ -179,6 +185,13 @@ function mergeDeep<T extends Record<string, unknown>>(base: T, patch: Record<str
 
 
 let initialized = false;
+/** What the first `init()` registers when `components` is omitted. */
+let defaultComponents: 'all' | 'auto' = 'all';
+
+/** Entry-level default for `components` (`k3ui/lazy` sets `'auto'`). Call before `init()`. */
+export function setDefaultComponents(mode: 'all' | 'auto'): void {
+  defaultComponents = mode;
+}
 let lastOptions: InitOptions = {};
 /** Serializes `init()` calls — the auto-bootstrap and an app call often overlap. */
 let queue: Promise<unknown> = Promise.resolve();
@@ -230,7 +243,13 @@ async function runInit(input?: InitOptions): Promise<K3UIGlobal> {
 
   /* Let the browser breathe between the colour scheme and the component upgrades. */
   await yieldToMain();
-  await registry.registerAll(patch.components ?? (initialized ? [] : 'all'));
+  const components = patch.components ?? (initialized ? [] : defaultComponents);
+  if (components === 'auto') {
+    /* Elements already in the page are defined before init() resolves. */
+    if (typeof document !== 'undefined') await registry.observe(document).ready;
+  } else {
+    await registry.registerAll(components);
+  }
 
   if (patch.haptic !== undefined) {
     haptic.setEnabled(patch.haptic);

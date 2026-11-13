@@ -3,6 +3,10 @@ import { init } from '../src/bootstrap/init.js';
 import type { ColorSpecVersion } from '../src/theme/apply.js';
 import { registry } from '../src/registry/register.js';
 import { yieldToMain } from '../src/core/yield.js';
+import {
+  observeFloatingChromeInset,
+  syncFloatingChromeInsetInlineEnd,
+} from '../src/core/floating-chrome-inset.js';
 import { catalog as COMPONENT_CATALOG } from '../src/registry/catalog.js';
 import { buildDynamicPalettes } from '../src/theme/palettes.js';
 import {
@@ -831,6 +835,7 @@ function applyAdaptiveShell(): void {
     root.style.setProperty('--k3-nav-chrome-inset-block-end', '0px');
   }
   syncShellRailInlineSize();
+  syncShellFloatingChromeInset();
 
   /* Phone: only smartphone variant — undock demo sticky toolbar if pinned. */
   if (mode === 'bar') {
@@ -860,6 +865,11 @@ function syncShellRailInlineSize(): void {
   const rail = document.getElementById('nav-rail');
   const w = rail?.getBoundingClientRect().width ?? 0;
   root.style.setProperty('--k3-shell-rail-inline-size', `${Math.round(w)}px`);
+}
+
+/** Bottom-end FAB / STT → sticky audio `inset-inline-end`. */
+function syncShellFloatingChromeInset(): void {
+  syncFloatingChromeInsetInlineEnd();
 }
 
 type ShellNavItem = HTMLElement & {
@@ -3574,6 +3584,10 @@ async function boot(): Promise<void> {
         attributeFilter: ['size', 'expanded', 'layout', 'mode'],
       });
     }
+
+    /* FAB menu + scroll-to-top → sticky audio end inset */
+    observeFloatingChromeInset();
+    syncShellFloatingChromeInset();
 
     /* Outside dismiss / Escape — keep toggle state in sync */
     document.getElementById('shell-nav-menu')?.addEventListener('k3-close-end', () => {

@@ -430,4 +430,53 @@ describe('k3-button-group', () => {
     expect(items[0]!.style.width).toBe('');
     expect(items[2]!.style.width).toBe('');
   });
+
+  it('standard narrow/wide icon-button press morphs shell width (Noph transport)', async () => {
+    host.innerHTML = `
+      <k3-button-group variant="standard" selection="none" label="Playback">
+        <k3-icon-button variant="tonal" width="narrow" size="md" shape="round" label="Previous"></k3-icon-button>
+        <k3-icon-button variant="filled" width="wide" size="md" shape="round" label="Play"></k3-icon-button>
+        <k3-icon-button variant="tonal" width="narrow" size="md" shape="round" label="Next"></k3-icon-button>
+      </k3-button-group>
+    `;
+    const el = host.querySelector('k3-button-group') as HTMLElement & {
+      updateComplete: Promise<unknown>;
+    };
+    await el.updateComplete;
+    await Promise.resolve();
+
+    const items = [...el.querySelectorAll('k3-icon-button')] as HTMLElement[];
+    expect(items.every((i) => isButtonGroupWidthMorphable(i))).toBe(true);
+    expect(items.every((i) => !i.hasAttribute('data-group-select'))).toBe(true);
+
+    const widths = [48, 72, 48];
+    items.forEach((b, i) => {
+      const w = widths[i]!;
+      Object.defineProperty(b, 'getBoundingClientRect', {
+        configurable: true,
+        value: () =>
+          ({
+            width: w,
+            height: 56,
+            top: 0,
+            left: 0,
+            right: w,
+            bottom: 56,
+            x: 0,
+            y: 0,
+            toJSON: () => ({}),
+          }) as DOMRect,
+      });
+    });
+
+    const mid = items[1]!;
+    mid.setAttribute('data-pressed', '');
+    await Promise.resolve();
+
+    const perSide = (72 * ButtonGroupExpandedRatio) / 2;
+    expect(parseFloat(mid.style.width)).toBeCloseTo(72 + perSide * 2, 1);
+    expect(parseFloat(items[0]!.style.width)).toBeCloseTo(48 - perSide, 1);
+    expect(parseFloat(items[2]!.style.width)).toBeCloseTo(48 - perSide, 1);
+    expect(mid.style.getPropertyValue('--k3-ib-w')).toBe(mid.style.width);
+  });
 });

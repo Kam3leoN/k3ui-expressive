@@ -22,6 +22,6 @@
     },
     "types": ["vitest/globals", "node"]
   },
-  "include": ["src", "tests", "playground", "types", "vite.config.ts", "vitest.config.ts"],
+  "include": ["src", "tests", "playground", "types", "vite.config.ts", "vite.lazy.config.ts", "vitest.config.ts"],
   "exclude": ["dist", "node_modules"]
 }

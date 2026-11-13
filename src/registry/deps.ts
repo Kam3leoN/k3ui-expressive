@@ -30,7 +30,7 @@ export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
   'k3-mood-calendar': ['k3-button', 'k3-dialog', 'k3-shape-chip'],
   'k3-nav-drawer': ['k3-sheet'],
   'k3-quote': ['k3-avatar'],
-  'k3-select': ['k3-menu-item', 'k3-text-field'],
+  'k3-select': ['k3-menu', 'k3-menu-item', 'k3-text-field'],
   'k3-skeleton': ['k3-card'],
   'k3-split-button': ['k3-menu'],
   'k3-table': ['k3-chip'],

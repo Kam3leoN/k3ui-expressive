@@ -21,6 +21,8 @@ const LIMITS = {
   jsGzipKb: Number(process.env.K3UI_BUDGET_JS_KB ?? 625),
   /* Raised with layout helpers (display/flex/spacing/visibility) in k3ui.css */
   cssGzipKb: Number(process.env.K3UI_BUDGET_CSS_KB ?? 28),
+  /* dist/lazy/k3ui.js + the chunks it imports statically (no component) — measured ≈ 92 */
+  lazyBaseGzipKb: Number(process.env.K3UI_BUDGET_LAZY_BASE_KB ?? 105),
 };
 
 function gzipKb(file) {
@@ -41,7 +43,17 @@ console.log(`Budget: k3ui.js ${js.toFixed(1)} kB gzip (limit ${LIMITS.jsGzipKb})
 console.log(`Budget: k3ui.css ${css.toFixed(1)} kB gzip (limit ${LIMITS.cssGzipKb})`);
 if (syntaxKb) console.log(`Info:   k3ui-syntax.js ${syntaxKb.toFixed(1)} kB gzip (on demand)`);
 
-if (js > LIMITS.jsGzipKb || css > LIMITS.cssGzipKb) {
+
+/* On-demand build: what every page pays before its own components. */
+const lazyManifest = path.join(root, 'dist/lazy/components.json');
+if (!fs.existsSync(lazyManifest)) {
+  console.error('Missing dist/lazy/components.json — run npm run build:lazy');
+  process.exit(1);
+}
+const lazyBase = JSON.parse(fs.readFileSync(lazyManifest, 'utf8')).base.gzip / 1024;
+console.log(`Budget: lazy base ${lazyBase.toFixed(1)} kB gzip (limit ${LIMITS.lazyBaseGzipKb})`);
+
+if (js > LIMITS.jsGzipKb || css > LIMITS.cssGzipKb || lazyBase > LIMITS.lazyBaseGzipKb) {
   console.error('Bundle budget exceeded');
   process.exit(1);
 }
