@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.4] — 2026-11-13
+
+### Fixed — QR generator Vercel deploy
+
+- `apps/qr-generator/vercel.json` clones sibling `k3ux-expressive` before `npm ci` so `@k3ux` / `qr-code` resolve on Vercel (same pattern as the playground)
+
 ## [1.2.3] — 2026-11-13
 
 ### Fixed — Select variant demo alignment

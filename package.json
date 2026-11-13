@@ -1,6 +1,6 @@
 {
   "name": "k3ui",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "K3ui — Material 3 Expressive web components (Lit + TypeScript + SCSS + Tailwind)",
   "author": "Kam3leoN",
   "license": "MIT",

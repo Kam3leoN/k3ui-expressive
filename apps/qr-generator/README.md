@@ -39,7 +39,7 @@ Hosted separately from the playground docs:
 
 Vercel project **`k3ui-apps-qr-generator`** (Root Directory = `apps/qr-generator`, see `vercel.json` here):
 
-- Install: `cd ../.. && npm ci`
+- Install: clone sibling `k3ux-expressive` → `../k3ux`, then `npm ci` (+ `k3ux` deps) — Vite aliases `@k3ux` to that tree
 - Build: `cd ../.. && npm run build:qr`
 - Output: `dist`
 - `base: './'` so assets resolve on any path

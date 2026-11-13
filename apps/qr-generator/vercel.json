@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "cd ../.. && npm ci",
+  "installCommand": "cd ../.. && rm -rf ../k3ux && git clone --depth 1 https://github.com/Kam3leoN/k3ux-expressive.git ../k3ux && npm ci && npm --prefix ../k3ux install --omit=dev",
   "buildCommand": "cd ../.. && npm run build:qr",
   "outputDirectory": "dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
