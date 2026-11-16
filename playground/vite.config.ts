@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite';
-import { resolve } from 'node:path';
+import { defineConfig, type Plugin } from 'vite';
+import { extname, resolve, sep } from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { cpSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { build as esbuild } from 'esbuild';
 import { catalogGridHtml } from './catalog.js';
@@ -154,12 +154,105 @@ function deferInactivePages(html: string, build: boolean): string {
   return out.replace('</head>', `    <meta name="${PAGES_META}" content="${url}" />\n  </head>`);
 }
 
+/*
+ * Pack builder (pack.html): on-demand builds served next to the site as
+ * /k3ui-lazy/ and /k3ux-lazy/ — the page reads components.json and re-bundles
+ * chunks in the browser. `build:playground` builds both first.
+ */
+const LAZY_DIST = resolve(__dirname, '../dist/lazy');
+const K3UX_LAZY_DIST = resolve(__dirname, '../../k3ux/dist/lazy');
+const K3UI_CSS = resolve(__dirname, '../dist/k3ui.css');
+const K3UX_CSS = resolve(__dirname, '../../k3ux/dist/k3ux.css');
+const LAZY_MIME: Record<string, string> = {
+  '.js': 'text/javascript',
+  '.json': 'application/json',
+  '.css': 'text/css',
+};
+
+function serveLazyTree(mount: string, dist: string, hint: string): (req: import('http').IncomingMessage, res: import('http').ServerResponse) => void {
+  return (req, res) => {
+    const rel = decodeURIComponent((req.url ?? '/').split('?')[0]!).replace(/^\/+/, '');
+    const file = resolve(dist, rel);
+    const type = LAZY_MIME[extname(file)];
+    if (!type || !file.startsWith(dist + sep) || !existsSync(file)) {
+      res.statusCode = 404;
+      res.end(`Not found — ${hint}`);
+      return;
+    }
+    res.setHeader('Content-Type', type);
+    res.end(readFileSync(file));
+  };
+}
+
+function packBuilderAssets(): Plugin {
+  return {
+    name: 'k3-pack-builder-assets',
+    configureServer(server) {
+      server.middlewares.use(
+        '/k3ui-lazy',
+        serveLazyTree('/k3ui-lazy', LAZY_DIST, 'run `npm run build:lazy`'),
+      );
+      server.middlewares.use(
+        '/k3ux-lazy',
+        serveLazyTree('/k3ux-lazy', K3UX_LAZY_DIST, 'run `npm run build:lazy` in k3ux'),
+      );
+      /* Built stylesheets for pack embed (minify + inject into .full.js / .custom.js). */
+      server.middlewares.use('/k3ui-pack/k3ui.css', (_req, res) => {
+        if (!existsSync(K3UI_CSS)) {
+          res.statusCode = 404;
+          res.end('Not found — run `npm run build` (dist/k3ui.css)');
+          return;
+        }
+        res.setHeader('Content-Type', 'text/css');
+        res.end(readFileSync(K3UI_CSS));
+      });
+      server.middlewares.use('/k3ux-pack/k3ux.css', (_req, res) => {
+        if (!existsSync(K3UX_CSS)) {
+          res.statusCode = 404;
+          res.end('Not found — run `npm run build` in k3ux (dist/k3ux.css)');
+          return;
+        }
+        res.setHeader('Content-Type', 'text/css');
+        res.end(readFileSync(K3UX_CSS));
+      });
+    },
+    writeBundle(options) {
+      if (!options.dir) return;
+      if (!existsSync(resolve(LAZY_DIST, 'components.json'))) {
+        this.error('dist/lazy is missing — run `npm run build:lazy` before the playground build');
+      }
+      if (!existsSync(resolve(K3UX_LAZY_DIST, 'components.json'))) {
+        this.error(
+          'k3ux/dist/lazy is missing — run `npm run build:lazy` in the sibling k3ux package',
+        );
+      }
+      cpSync(LAZY_DIST, resolve(options.dir, 'k3ui-lazy'), {
+        recursive: true,
+        filter: (src) => !/\.(map|d\.ts)$/.test(src),
+      });
+      cpSync(K3UX_LAZY_DIST, resolve(options.dir, 'k3ux-lazy'), {
+        recursive: true,
+        filter: (src) => !/\.(map|d\.ts)$/.test(src),
+      });
+      if (existsSync(K3UI_CSS)) {
+        mkdirSync(resolve(options.dir, 'k3ui-pack'), { recursive: true });
+        cpSync(K3UI_CSS, resolve(options.dir, 'k3ui-pack/k3ui.css'));
+      }
+      if (existsSync(K3UX_CSS)) {
+        mkdirSync(resolve(options.dir, 'k3ux-pack'), { recursive: true });
+        cpSync(K3UX_CSS, resolve(options.dir, 'k3ux-pack/k3ux.css'));
+      }
+    },
+  };
+}
+
 export default defineConfig({
   root: resolve(__dirname),
   publicDir: resolve(__dirname, 'public'),
   plugins: [
     tailwindcss(),
     lighthouseLive(),
+    packBuilderAssets(),
     {
       name: 'k3-lh-html',
       configureServer(server) {
@@ -178,6 +271,8 @@ export default defineConfig({
       transformIndexHtml: {
         order: 'post',
         async handler(html, ctx) {
+          /* Doc shell only — pack.html is a plain standalone page. */
+          if (!/(^|\/)index\.html$/.test(ctx.filename.replace(/\\/g, '/'))) return html;
           const bundle = ctx.bundle;
           const prepaint = await prepaintTheme();
           /* Dev must also inject prepaint — otherwise first paint keeps the static
@@ -236,6 +331,8 @@ export default defineConfig({
       },
     ],
   },
+  /* Pack builder: pre-bundling would break the URL of Rollup's .wasm parser. */
+  optimizeDeps: { exclude: ['@rollup/browser'] },
   server: {
     port: 5173,
     strictPort: true /* fail if busy — avoid drifting to 5174/5177 */,
@@ -263,6 +360,10 @@ export default defineConfig({
       },
     },
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        pack: resolve(__dirname, 'pack.html'),
+      },
       output: {
         manualChunks(id) {
           if (id.includes('material-color-utilities')) return 'mcu';

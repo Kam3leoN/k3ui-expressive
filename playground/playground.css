@@ -858,6 +858,25 @@ k3-top-app-bar.shell-appbar {
   max-width: min(28rem, 100%);
   margin-inline: auto;
 }
+/* Cross-pack search chips — compact pack badge in suggestions */
+.doc-search-product-chip {
+  font-family: var(--k3-ref-typeface-plain, inherit);
+  font-size: var(--k3-sys-typescale-label-small-size, 0.6875rem) !important;
+  font-weight: var(--k3-sys-typescale-label-small-emphasized-weight, 600);
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  min-height: 1.5rem !important;
+  padding-inline: 0.5rem !important;
+}
+/* Light-DOM scrollport for appbar suggestions (wheel + edge scrollbar). */
+.doc-search-suggestions {
+  max-height: min(calc(70vh - 1rem), 23rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  --k3-scroll-track-inset: var(--k3-sys-shape-corner-large, 1rem);
+}
 /* App bar — locale split + settings */
 .shell-split {
   flex-shrink: 0;
@@ -2933,6 +2952,27 @@ html[data-k3-color-mode='dark'] .demo-frame {
   border-radius: var(--k3-sys-shape-corner-large, 1rem);
   background: var(--k3-sys-color-surface-container-low);
   border: 1px solid var(--k3-sys-color-outline-variant);
+}
+.qs-card--pack {
+  background: var(--k3-sys-color-primary-container);
+  color: var(--k3-sys-color-on-primary-container);
+  border-color: transparent;
+}
+.qs-card--pack .qs-card-head p {
+  color: inherit;
+  opacity: 0.85;
+}
+.qs-card--pack .qs-card-icon {
+  background: var(--k3-sys-color-primary);
+  color: var(--k3-sys-color-on-primary);
+}
+.qs-card--pack .qs-pack-cta {
+  align-self: flex-start;
+  text-decoration: none;
+  color: inherit;
+}
+.qs-card--pack .qs-pack-cta k3-button {
+  pointer-events: none;
 }
 .qs-card-head {
   display: flex;

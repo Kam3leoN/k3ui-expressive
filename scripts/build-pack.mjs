@@ -8,13 +8,15 @@
  *   npm run build:pack -- --list
  *
  * Output: <out>/<name>.js (+ .map) and <name>.json (what the pack holds).
- * Use it in place of dist/k3ui.js, with the same dist/k3ui.css.
+ * Use it in place of dist/k3ui.js — CSS is densified + injected (shared
+ * `pack-minify.mjs`, same as the playground builder).
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { pathToFileURL } from 'node:url';
-import { closure, normalizeTag, readCatalog, readDeps, root } from './registry-graph.mjs';
+import { densifyPackJs, embedCssIntoPack } from './pack-minify.mjs';
+import { PACK_BUILDER_URL, closure, normalizeTag, readCatalog, readDeps, root } from './registry-graph.mjs';
 
 /** `argv` (without node + script) → options. Throws on bad input. */
 export function parseArgs(argv) {
@@ -44,8 +46,10 @@ export async function buildPack({ tags, name = 'k3ui.pack', out = 'dist/packs' }
   const pack = resolvePack(tags);
   if (!pack.tags.length) throw new Error('No component selected — pass tags or use --list');
   const { build } = await import('vite');
-  const { filterCatalog, skipStylesheet, stripDocLocales } = await import('./build-plugins.mjs');
+  const { filterCatalog, packHeader, skipStylesheet, stripDocLocales } = await import('./build-plugins.mjs');
   const outDir = path.resolve(root, out);
+  const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
+  const header = packHeader({ name, version, components: pack.tags, builder: PACK_BUILDER_URL });
   await build({
     configFile: false,
     root,
@@ -57,15 +61,21 @@ export async function buildPack({ tags, name = 'k3ui.pack', out = 'dist/packs' }
       outDir,
       emptyOutDir: false,
       lib: { entry: path.join(root, 'src/pack.ts'), formats: ['es'], fileName: () => `${name}.js` },
-      rollupOptions: { output: { inlineDynamicImports: true } },
+      rollupOptions: { output: { inlineDynamicImports: true, ...header } },
       sourcemap: true,
       minify: 'esbuild',
       target: 'es2022',
     },
   });
   const file = path.join(outDir, `${name}.js`);
-  const gzip = zlib.gzipSync(fs.readFileSync(file)).length;
-  const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
+  const cssPath = path.join(root, 'dist/k3ui.css');
+  if (!fs.existsSync(cssPath)) {
+    throw new Error(`Missing ${path.relative(root, cssPath)} — run npm run build first`);
+  }
+  /* esbuild already minified JS — densify templates, inject CSS, one-line. */
+  const code = embedCssIntoPack(densifyPackJs(fs.readFileSync(file, 'utf8')), fs.readFileSync(cssPath, 'utf8'));
+  fs.writeFileSync(file, code);
+  const gzip = zlib.gzipSync(code).length;
   const manifest = { name, version, file: `${name}.js`, gzip, ...pack };
   fs.writeFileSync(path.join(outDir, `${name}.json`), `${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;

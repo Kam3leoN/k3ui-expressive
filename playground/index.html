@@ -471,6 +471,11 @@
           <div id="sponsors-root" class="sponsors-root"></div>
         </article>
 
+        <!-- PACK BUILDER (shell page — same rail / app bar as the rest of the docs) -->
+        <article class="comp-page" data-page="pack" id="page-pack" hidden>
+          <div class="pack" id="pack-app"></div>
+        </article>
+
         <!-- QUICK START -->
         <article class="comp-page" data-page="quick-start" id="page-quick-start" hidden>
           <header class="section-head">
@@ -496,6 +501,22 @@
           </header>
 
           <div class="qs-grid k3-layout-grid" data-doc-product="k3ui">
+            <section class="qs-card qs-card--pack" style="grid-column: span 12">
+              <header class="qs-card-head">
+                <span class="ms qs-card-icon notranslate" translate="no" lang="zxx" data-k3-icon="inventory_2" aria-hidden="true"></span>
+                <div>
+                  <h2 data-i18n="doc.quick-start.pack.title">Pack Builder</h2>
+                  <p data-i18n="doc.quick-start.pack.blurb">
+                    One file — AllInOne or a custom selection. Download and drop it into your app.
+                  </p>
+                </div>
+              </header>
+              <a class="qs-pack-cta" href="#/pack"
+                ><k3-button variant="filled" size="md"
+                  ><span data-i18n="doc.quick-start.pack.cta">Open Pack Builder</span></k3-button
+                ></a
+              >
+            </section>
             <section class="qs-card" style="grid-column: span 12">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon" data-k3-icon="cloud_download" aria-hidden="true"></span>
@@ -606,6 +627,22 @@ import 'k3ui/k3ui.css';
           </div>
 
           <div class="qs-grid k3-layout-grid" data-doc-product="k3ux" hidden>
+            <section class="qs-card qs-card--pack" style="grid-column: span 12">
+              <header class="qs-card-head">
+                <span class="ms qs-card-icon notranslate" translate="no" lang="zxx" data-k3-icon="inventory_2" aria-hidden="true"></span>
+                <div>
+                  <h2 data-i18n="doc.quick-start.pack.title">Pack Builder</h2>
+                  <p data-i18n="doc.quick-start.pack.blurb">
+                    One file — AllInOne or a custom selection. Download and drop it into your app.
+                  </p>
+                </div>
+              </header>
+              <a class="qs-pack-cta" href="#/pack"
+                ><k3-button variant="filled" size="md"
+                  ><span data-i18n="doc.quick-start.pack.cta">Open Pack Builder</span></k3-button
+                ></a
+              >
+            </section>
             <section class="qs-card" style="grid-column: span 12">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon" data-k3-icon="inventory_2" aria-hidden="true"></span>
@@ -8508,6 +8545,46 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
           </div>
         </article>
 
+        <!-- KBD -->
+        <article class="comp-page" data-page="kbd" id="page-kbd" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
+            <h1 data-i18n="doc.kbd.title">Kbd</h1>
+            <p data-i18n="doc.kbd.blurb">
+              Keycaps for shortcuts — single keys or Ctrl+K chords.
+            </p>
+            <p class="doc-intro" data-i18n="doc.kbd.intro">
+              k3-kbd renders Material-style keycaps for documenting or displaying keyboard
+              shortcuts. Pass keys="Ctrl+K" for a chord, or slot a single label.
+            </p>
+          </header>
+          <section class="doc-section">
+            <h2 data-i18n="doc.section.examples">Examples</h2>
+          </section>
+          <div class="demo-block">
+            <div class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3" data-demo-enhance="off">
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-kbd keys="Ctrl+K"></k3-kbd>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">1</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-kbd>Esc</k3-kbd>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">2</span>
+              </div>
+              <div class="demo-case">
+                <div class="demo-case-stage">
+                  <k3-kbd keys="Shift+Enter" size="lg"></k3-kbd>
+                </div>
+                <span class="demo-case-num" aria-hidden="true">3</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
         <!-- AVATAR -->
         <article class="comp-page" data-page="avatar" id="page-avatar" hidden>
           <header class="section-head">
@@ -9854,6 +9931,47 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </p>
           </div>
 </article>
+
+        <!-- COMMAND PALETTE -->
+        <article class="comp-page" data-page="command-palette" id="page-command-palette" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.command-palette.title">Command palette</h1>
+            <p data-i18n="doc.command-palette.blurb">
+              Searchable action list — Ctrl+K · emphasized rows · kbd shortcuts.
+            </p>
+            <p class="doc-intro" data-i18n="doc.command-palette.intro">
+              k3-command-palette opens a k3-dialog with search in the headline and emphasized list
+              items in the body. Arrow keys move, Enter selects, Escape / scrim closes. Playground:
+              Ctrl/Cmd+K.
+            </p>
+          </header>
+          <section class="doc-section">
+            <h2 data-i18n="doc.section.examples">Examples</h2>
+          </section>
+          <div
+            class="surface row wrap"
+            style="gap: var(--k3-sys-spacing-space300); margin-block-start: var(--k3-sys-spacing-space300)"
+          >
+            <k3-button id="demo-command-palette-open" variant="filled"
+              >Open palette · <k3-kbd keys="Ctrl+K" size="sm"></k3-kbd
+            ></k3-button>
+          </div>
+          <k3-command-palette id="demo-command-palette" placeholder="Jump to…">
+            <k3-list-item value="list" interactive emphasized lines="two">
+              <span slot="leading" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="list" aria-hidden="true"></span>
+              <span slot="headline">Lists</span>
+              <span slot="supporting">Emphasized M3 Expressive rows</span>
+              <k3-kbd slot="trailing" keys="G L" size="sm"></k3-kbd>
+            </k3-list-item>
+            <k3-list-item value="kbd" interactive emphasized lines="two">
+              <span slot="leading" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="keyboard" aria-hidden="true"></span>
+              <span slot="headline">Kbd</span>
+              <span slot="supporting">Keycap chords</span>
+              <k3-kbd slot="trailing" keys="G K" size="sm"></k3-kbd>
+            </k3-list-item>
+          </k3-command-palette>
+        </article>
 
         <!-- APP BAR -->
         <article class="comp-page" data-page="app-bar" id="page-app-bar" hidden>
@@ -12994,6 +13112,242 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </k3-dialog>
         </article>
 
+        <!-- ANIMATION: SPARKLE MOUSE (pointer trail) -->
+        <article class="comp-page" data-page="sparkle-mouse" id="page-sparkle-mouse" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.sparkle-mouse.title">Sparkle mouse</h1>
+            <p data-i18n="doc.sparkle-mouse.blurb">
+              Four-point stars that follow the pointer — twinkle, drift and fade.
+            </p>
+            <p class="doc-intro" data-i18n="doc.sparkle-mouse.intro">
+              k3-sparkle-mouse scatters sparkles along the pointer path. Tune intensity (0–100 %),
+              colors (theme roles or CSS), size, spread and gravity. Starts on connect; honor reduced
+              motion by default. Use burst(x, y) for a click celebration.
+            </p>
+          </header>
+          <k3-sparkle-mouse
+            id="demo-sparkle-mouse"
+            intensity="40"
+            colors="primary, secondary, tertiary"
+          ></k3-sparkle-mouse>
+          <section class="doc-section">
+            <h2 data-i18n="doc.sparkle-mouse.section.trail">Pointer trail</h2>
+            <p data-i18n="doc.sparkle-mouse.section.trail.blurb">
+              Move the cursor over the page. Pause, clear, or open Options to pick 1–5 colours
+              (roles, hex, or any CSS).
+            </p>
+          </section>
+          <div
+            class="surface row wrap"
+            style="gap: var(--k3-sys-spacing-space300); margin-block-start: var(--k3-sys-spacing-space300)"
+          >
+            <k3-button
+              id="sparkle-toggle"
+              variant="filled"
+              data-sparkle-action="toggle"
+              data-i18n="doc.sparkle-mouse.action.stop"
+              >Stop</k3-button
+            >
+            <k3-button
+              variant="outlined"
+              data-sparkle-action="clear"
+              data-i18n="doc.sparkle-mouse.action.clear"
+              >Clear</k3-button
+            >
+            <k3-button
+              variant="tonal"
+              data-sparkle-action="burst"
+              data-i18n="doc.sparkle-mouse.action.burst"
+              >Burst</k3-button
+            >
+            <k3-button
+              id="sparkle-options"
+              variant="tonal"
+              data-sparkle-action="options"
+              data-i18n="doc.sparkle-mouse.action.options"
+              >Options</k3-button
+            >
+          </div>
+          <k3-dialog id="sparkle-options-dialog" variant="basic">
+            <span slot="headline" data-i18n="doc.sparkle-mouse.dialog.title">Sparkle options</span>
+            <div
+              class="stack k3-scroll"
+              style="
+                gap: var(--k3-sys-spacing-space300);
+                max-block-size: min(70vh, 32rem);
+                padding-inline-end: var(--k3-sys-spacing-space100);
+                --k3-scroll-track-inset: var(--k3-sys-shape-corner-large, 1rem);
+              "
+            >
+              <div class="settings-row settings-row--switch">
+                <span class="settings-label" data-i18n="doc.sparkle-mouse.knob.shell"
+                  >Shell trail</span
+                >
+                <k3-switch
+                  id="sparkle-shell-switch"
+                  aria-label="Shell sparkle trail"
+                  data-i18n-aria-label="doc.sparkle-mouse.knob.shell"
+                ></k3-switch>
+              </div>
+              <p
+                class="doc-intro"
+                style="margin: 0"
+                data-i18n="doc.sparkle-mouse.knob.shell.hint"
+              >
+                When on, sparkles follow the pointer on every page except this one (same as
+                Settings → Sparkle).
+              </p>
+              <k3-slider
+                id="sparkle-intensity"
+                label="Intensity · 40"
+                min="0"
+                max="100"
+                step="1"
+                value="40"
+                value-indicator
+              ></k3-slider>
+              <k3-slider
+                id="sparkle-color-count"
+                label="Colours · 3"
+                min="1"
+                max="5"
+                step="1"
+                value="3"
+                value-indicator
+              ></k3-slider>
+              <div
+                id="sparkle-color-rows"
+                class="stack"
+                style="gap: var(--k3-sys-spacing-space200)"
+              >
+                <label
+                  class="row wrap items-center sparkle-color-row"
+                  data-sparkle-color-index="0"
+                  style="gap: var(--k3-sys-spacing-space200)"
+                >
+                  <span data-i18n="doc.sparkle-mouse.knob.color">Color</span>
+                  <span aria-hidden="true">1</span>
+                  <input
+                    id="sparkle-color-0"
+                    type="color"
+                    value="#6750a4"
+                    aria-label="Sparkle color 1 swatch"
+                    style="width: 2.5rem; height: 2rem; border: none; background: transparent; cursor: pointer"
+                  />
+                  <k3-text-field
+                    id="sparkle-color-hex-0"
+                    value="primary"
+                    style="flex: 1; min-inline-size: 10rem"
+                    aria-label="Sparkle color 1"
+                  ></k3-text-field>
+                </label>
+                <label
+                  class="row wrap items-center sparkle-color-row"
+                  data-sparkle-color-index="1"
+                  style="gap: var(--k3-sys-spacing-space200)"
+                >
+                  <span data-i18n="doc.sparkle-mouse.knob.color">Color</span>
+                  <span aria-hidden="true">2</span>
+                  <input
+                    id="sparkle-color-1"
+                    type="color"
+                    value="#625b71"
+                    aria-label="Sparkle color 2 swatch"
+                    style="width: 2.5rem; height: 2rem; border: none; background: transparent; cursor: pointer"
+                  />
+                  <k3-text-field
+                    id="sparkle-color-hex-1"
+                    value="secondary"
+                    style="flex: 1; min-inline-size: 10rem"
+                    aria-label="Sparkle color 2"
+                  ></k3-text-field>
+                </label>
+                <label
+                  class="row wrap items-center sparkle-color-row"
+                  data-sparkle-color-index="2"
+                  style="gap: var(--k3-sys-spacing-space200)"
+                >
+                  <span data-i18n="doc.sparkle-mouse.knob.color">Color</span>
+                  <span aria-hidden="true">3</span>
+                  <input
+                    id="sparkle-color-2"
+                    type="color"
+                    value="#7d5260"
+                    aria-label="Sparkle color 3 swatch"
+                    style="width: 2.5rem; height: 2rem; border: none; background: transparent; cursor: pointer"
+                  />
+                  <k3-text-field
+                    id="sparkle-color-hex-2"
+                    value="tertiary"
+                    style="flex: 1; min-inline-size: 10rem"
+                    aria-label="Sparkle color 3"
+                  ></k3-text-field>
+                </label>
+                <label
+                  class="row wrap items-center sparkle-color-row"
+                  data-sparkle-color-index="3"
+                  hidden
+                  style="gap: var(--k3-sys-spacing-space200)"
+                >
+                  <span data-i18n="doc.sparkle-mouse.knob.color">Color</span>
+                  <span aria-hidden="true">4</span>
+                  <input
+                    id="sparkle-color-3"
+                    type="color"
+                    value="#b3261e"
+                    aria-label="Sparkle color 4 swatch"
+                    style="width: 2.5rem; height: 2rem; border: none; background: transparent; cursor: pointer"
+                  />
+                  <k3-text-field
+                    id="sparkle-color-hex-3"
+                    value="error"
+                    style="flex: 1; min-inline-size: 10rem"
+                    aria-label="Sparkle color 4"
+                  ></k3-text-field>
+                </label>
+                <label
+                  class="row wrap items-center sparkle-color-row"
+                  data-sparkle-color-index="4"
+                  hidden
+                  style="gap: var(--k3-sys-spacing-space200)"
+                >
+                  <span data-i18n="doc.sparkle-mouse.knob.color">Color</span>
+                  <span aria-hidden="true">5</span>
+                  <input
+                    id="sparkle-color-4"
+                    type="color"
+                    value="#79747e"
+                    aria-label="Sparkle color 5 swatch"
+                    style="width: 2.5rem; height: 2rem; border: none; background: transparent; cursor: pointer"
+                  />
+                  <k3-text-field
+                    id="sparkle-color-hex-4"
+                    value="outline"
+                    style="flex: 1; min-inline-size: 10rem"
+                    aria-label="Sparkle color 5"
+                  ></k3-text-field>
+                </label>
+              </div>
+              <p
+                class="doc-intro"
+                style="margin: 0"
+                data-i18n="doc.sparkle-mouse.knob.color.hint"
+              >
+                Any value: theme role (primary), hex, rgb(), or CSS color. The swatch updates when the
+                text resolves to a colour.
+              </p>
+            </div>
+            <k3-button
+              slot="actions"
+              variant="filled"
+              id="sparkle-options-done"
+              data-i18n="doc.sparkle-mouse.dialog.done"
+              >Done</k3-button
+            >
+          </k3-dialog>
+        </article>
+
         <!-- ANIMATION: VOICE RING (color spectrum — independent engine) -->
         <article class="comp-page" data-page="voice-ring" id="page-voice-ring" hidden>
           <header class="section-head">
@@ -14126,6 +14480,85 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </div>
 
 </article>
+
+        <!-- NAVIGATION: TOC -->
+        <article class="comp-page" data-page="toc" id="page-toc" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
+            <h1 data-i18n="doc.toc.title">Table of contents</h1>
+            <p data-i18n="doc.toc.blurb">
+              On this page — sticky rail · scroll-spy · nested levels · Pack-aligned layout.
+            </p>
+            <p class="doc-intro" data-i18n="doc.toc.intro">
+              A sticky “On this page” rail for long docs. Pass section links as JSON (optional level
+              1–3), pin with sticky, and set scroll-root so the spy and jump share the same
+              scrollport. Pair with .k3-toc-layout so content keeps one extra column (9+3 / 6+2).
+            </p>
+          </header>
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.toc.option.items">items / sticky / scroll-root</h3>
+              <p data-i18n="doc.toc.option.items.desc">
+                JSON links with optional level; sticky pin; scrollport selector.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-1"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <div class="k3-toc-layout" id="toc-demo-layout">
+                      <div class="k3-toc-layout__content k3-scroll" style="max-block-size: 18rem">
+                        <div class="toc-demo-copy" style="padding: 0.5rem 0.75rem">
+                          <h3 id="toc-demo-examples">Examples</h3>
+                          <p>
+                            Sticky rail mirrors the Pack side column — content keeps the wider
+                            track.
+                          </p>
+                          <h3 id="toc-demo-states">States</h3>
+                          <p>Scroll to watch the active entry update via IntersectionObserver.</p>
+                          <h4 id="toc-demo-nested">Nested level</h4>
+                          <p>Level 2+ entries indent under their parent section.</p>
+                          <h3 id="toc-demo-section-layout">Layout</h3>
+                          <p>Nine columns for content, three for the TOC on a 12-column grid.</p>
+                        </div>
+                      </div>
+                      <k3-toc
+                        class="k3-toc-layout__toc"
+                        id="demo-toc"
+                        sticky
+                        scroll-root="#toc-demo-layout .k3-toc-layout__content"
+                        items='[{"text":"Examples","href":"#toc-demo-examples"},{"text":"States","href":"#toc-demo-states"},{"text":"Nested level","href":"#toc-demo-nested","level":2},{"text":"Layout","href":"#toc-demo-section-layout"}]'
+                      ></k3-toc>
+                    </div>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.toc.option.layout">layout grid</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.toc.states.blurb">
+              Active entry uses aria-current=location; empty items show a quiet placeholder.
+            </p>
+          </div>
+        </article>
 
         <!-- NAVIGATION: PAGINATION -->
         <article class="comp-page" data-page="pagination" id="page-pagination" hidden>
@@ -16153,12 +16586,27 @@ K3UI.theme.apply({ seed: '#6750A4', mode: 'auto', variant: 'expressive' });
       <div id="shell-nav-sheet-body" class="shell-nav-sheet-body"></div>
     </k3-sheet>
 
+    <!-- Shell command palette — Ctrl/Cmd+K -->
+    <k3-command-palette
+      id="shell-command-palette"
+      data-i18n-placeholder="playground.command.placeholder"
+    ></k3-command-palette>
+
     <!-- Shell snowfall (settings toggle) — never auto-start; independent from #demo-snow -->
     <k3-snow
       id="shell-snow"
       snowflake-count="120"
       disable-for-reduced-motion
     ></k3-snow>
+
+    <!-- Shell sparkle trail (settings toggle) — independent from #demo-sparkle-mouse -->
+    <k3-sparkle-mouse
+      id="shell-sparkle-mouse"
+      disabled
+      intensity="40"
+      colors="primary, secondary, tertiary"
+      disable-for-reduced-motion
+    ></k3-sparkle-mouse>
 
     <!-- Settings side sheet — m3e-style colorimetry + contrast -->
     <k3-sheet
@@ -16456,6 +16904,16 @@ K3UI.theme.apply({ seed: '#6750A4', mode: 'auto', variant: 'expressive' });
                   id="settings-snow"
                   aria-label="Snow"
                   data-i18n-aria-label="playground.ctrl.snow"
+                ></k3-switch>
+              </div>
+              <div class="settings-row settings-row--switch">
+                <span class="settings-label" data-i18n="playground.ctrl.sparkle"
+                  >Sparkle</span
+                >
+                <k3-switch
+                  id="settings-sparkle"
+                  aria-label="Sparkle"
+                  data-i18n-aria-label="playground.ctrl.sparkle"
                 ></k3-switch>
               </div>
             </div>

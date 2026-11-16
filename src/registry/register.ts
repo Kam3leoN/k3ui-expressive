@@ -1,6 +1,7 @@
 import { catalog } from './catalog.js';
 import { COMPONENT_DEPS } from './deps.js';
 import { debug } from '../debug/logger.js';
+import { inPack, missingComponents, packInfo, reportMissing } from './missing.js';
 import {
   pendingCustomElements,
   whenTriggered,
@@ -27,8 +28,17 @@ export async function register(tag: string, seen: Set<string> = new Set()): Prom
     debug.warn('registry', `unknown tag: ${tag}`);
     return;
   }
+  /* Part of K3UI but left out of this pack — tell the developer, never throw. */
+  if (!inPack(tag)) {
+    reportMissing(tag);
+    return;
+  }
   const mod = await def.load();
   const ctor = mod.default;
+  if (!ctor) {
+    reportMissing(tag);
+    return;
+  }
   if (!customElements.get(tag)) {
     customElements.define(tag, ctor);
   }
@@ -37,7 +47,8 @@ export async function register(tag: string, seen: Set<string> = new Set()): Prom
 }
 
 export async function registerAll(tags: 'all' | string[] = 'all'): Promise<void> {
-  const list = tags === 'all' ? catalog.map((c) => c.tag) : tags;
+  /* `'all'` = everything this build holds; a pack simply holds less. */
+  const list = tags === 'all' ? catalog.map((c) => c.tag).filter(isKnown) : tags;
   await Promise.all(list.map((t) => register(t)));
 }
 
@@ -45,9 +56,19 @@ export function isRegistered(tag: string): boolean {
   return registered.has(tag) || !!customElements.get(tag);
 }
 
-/** `true` when the catalog knows how to load `tag`. */
+/** `true` when this build can load `tag` (in the catalog — and in the pack, if it is one). */
 export function isKnown(tag: string): boolean {
-  return catalog.some((c) => c.tag === tag);
+  return catalog.some((c) => c.tag === tag) && inPack(tag);
+}
+
+/** `true` when `tag` is a K3UI element this build was made without (custom pack). */
+export function isMissing(tag: string): boolean {
+  return catalog.some((c) => c.tag === tag) && !isKnown(tag);
+}
+
+/** `true` for a custom pack: some K3UI elements are not in this file. */
+export function isPartial(): boolean {
+  return !!packInfo();
 }
 
 /**
@@ -77,7 +98,12 @@ function pendingKnown(root: ParentNode): string[] {
   const tags = new Set(pendingCustomElements(root));
   const self = (root as Element).localName;
   if (self?.includes('-') && !customElements.get(self)) tags.add(self);
-  return [...tags].filter(isKnown);
+  const known: string[] = [];
+  for (const tag of tags) {
+    if (isKnown(tag)) known.push(tag);
+    else if (isMissing(tag)) reportMissing(tag);
+  }
+  return known;
 }
 
 /**
@@ -161,6 +187,12 @@ export const registry = {
   registerWhen,
   observe,
   isKnown,
+  isMissing,
+  isPartial,
+  /** K3UI elements used on the page that this pack does not hold. */
+  get missing(): string[] {
+    return missingComponents();
+  },
   isRegistered,
   get tags(): string[] {
     return [...registered];

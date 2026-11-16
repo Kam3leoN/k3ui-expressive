@@ -705,6 +705,22 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     a11y: 'doc.tooltip.a11y',
     versions: 'doc.tooltip.versions.blurb',
   },
+  kbd: {
+    theming: { na: 'Pending gabarit migration' },
+    keyboard: { na: 'Pending gabarit migration' },
+    focus: { na: 'Pending gabarit migration' },
+    motion: { na: 'Pending gabarit migration' },
+    a11y: { na: 'Pending gabarit migration' },
+    versions: { na: 'Pending gabarit migration' },
+  },
+  'command-palette': {
+    theming: { na: 'Pending gabarit migration' },
+    keyboard: { na: 'Pending gabarit migration' },
+    focus: { na: 'Pending gabarit migration' },
+    motion: { na: 'Pending gabarit migration' },
+    a11y: { na: 'Pending gabarit migration' },
+    versions: { na: 'Pending gabarit migration' },
+  },
   'badge': {
     theming: [
       ['dot / large', '6dp · label', 'Size modes'],
@@ -758,6 +774,14 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     versions: { na: "Pending gabarit migration" },
   },
   firework: {
+    theming: { na: "Pending gabarit migration" },
+    keyboard: { na: "Pending gabarit migration" },
+    focus: { na: "Pending gabarit migration" },
+    motion: { na: "Pending gabarit migration" },
+    a11y: { na: "Pending gabarit migration" },
+    versions: { na: "Pending gabarit migration" },
+  },
+  'sparkle-mouse': {
     theming: { na: "Pending gabarit migration" },
     keyboard: { na: "Pending gabarit migration" },
     focus: { na: "Pending gabarit migration" },
@@ -1074,6 +1098,19 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     motion: { na: 'Static trail — no host motion API' },
     a11y: 'doc.breadcrumb.a11y',
     versions: { na: 'Single trail — variant/separator are options' },
+  },
+  toc: {
+    theming: [
+      ['sticky', 'boolean', 'Pin to scrollport top'],
+      ['scroll-root', 'selector', 'Scrollport for spy + jump'],
+    ],
+    keyboard: [
+      ['Tab / Enter', 'Activate a TOC link'],
+    ],
+    focus: 'doc.toc.focus',
+    motion: { na: 'Scroll jump only — no host motion API' },
+    a11y: 'doc.toc.a11y',
+    versions: { na: 'Single sticky rail — layout via .k3-toc-layout' },
   },
   'app-bar': {
     theming: [

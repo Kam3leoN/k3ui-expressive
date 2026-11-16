@@ -12,6 +12,7 @@ import {
   type ThemeOptions,
 } from '../theme/apply.js';
 import { registry } from '../registry/register.js';
+import { setMissingComponentsMode, type MissingComponentsMode } from '../registry/missing.js';
 import { haptic } from '../core/haptic.js';
 import { dnd } from '../core/dnd.js';
 import { gestures, defineGestureElements } from '../core/gestures/index.js';
@@ -68,6 +69,14 @@ export interface InitOptions {
    * component renders always come along.
    */
   components?: 'all' | 'auto' | string[];
+  /**
+   * Custom packs only — what happens when the page uses a K3UI element the
+   * pack was built without. `'auto'` (default): banner + outline on
+   * development hosts, `console.error` elsewhere. `'overlay'` shows the
+   * banner everywhere, `'console'` never, `'silent'` only fires the
+   * `k3-missing-component` event.
+   */
+  missingComponents?: MissingComponentsMode;
   /** Disable haptic feedback globally (mobile vibrate) */
   haptic?: boolean;
 }
@@ -126,6 +135,7 @@ const SCHEMA: Schema = {
   overlays: { scrollLock: isBool },
   debug: (v) => typeof v === 'boolean' || (typeof v === 'object' && v !== null),
   components: (v) => v === 'all' || v === 'auto' || (Array.isArray(v) && v.every((t) => typeof t === 'string')),
+  missingComponents: oneOf('auto', 'overlay', 'console', 'silent'),
   haptic: isBool,
 };
 
@@ -243,12 +253,16 @@ async function runInit(input?: InitOptions): Promise<K3UIGlobal> {
 
   /* Let the browser breathe between the colour scheme and the component upgrades. */
   await yieldToMain();
+  if (patch.missingComponents) setMissingComponentsMode(patch.missingComponents);
+
   const components = patch.components ?? (initialized ? [] : defaultComponents);
   if (components === 'auto') {
     /* Elements already in the page are defined before init() resolves. */
     if (typeof document !== 'undefined') await registry.observe(document).ready;
   } else {
     await registry.registerAll(components);
+    /* Custom pack: keep an eye on the page for elements it was built without. */
+    if (!initialized && registry.isPartial() && typeof document !== 'undefined') registry.observe(document);
   }
 
   if (patch.haptic !== undefined) {

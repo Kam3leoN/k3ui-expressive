@@ -948,6 +948,46 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['k3-firework-launch', '{ type, … }', 'Manual launch / burst / sequence'],
     ],
   },
+  'sparkle-mouse': {
+    properties: [
+      ['intensity', 'number', '20', 'Trail density 0–100 %'],
+      [
+        'colors',
+        'string[]',
+        'blue-violet palette',
+        'Comma list / JSON / theme roles (primary…)',
+      ],
+      ['size-min / size-max', 'number', '12 / 28', 'Sparkle tip-to-tip size px'],
+      ['duration', 'number', '1100', 'Mean life ms'],
+      ['spread', 'number', '36', 'Scatter radius around pointer path'],
+      ['gravity', 'number', '0', 'Downward pull px/s² (negative = rise)'],
+      ['touch', 'boolean', 'false', 'Also follow touch pointers'],
+      ['disabled', 'boolean', 'false', 'Pause emission'],
+      [
+        'use-host-canvas',
+        'boolean',
+        'false',
+        'Clip to host box vs fullscreen overlay',
+      ],
+      [
+        'disable-for-reduced-motion',
+        'boolean',
+        'true',
+        'Skip when prefers-reduced-motion',
+      ],
+    ],
+    methods: [
+      ['start / stop', '() => void', 'Follow pointer · pause'],
+      ['clear', '() => void', 'Remove live sparkles'],
+      ['burst', '(x, y, count?) => number', 'Spawn at viewport point'],
+      ['getEngine', '() => SparkleEngine', 'Shared canvas engine'],
+    ],
+    events: [
+      ['k3-sparkle-mouse-start', '—', 'Pointer follow began'],
+      ['k3-sparkle-mouse-stop', '—', 'Pointer follow stopped'],
+    ],
+    'css-parts': [['canvas', 'Host canvas when use-host-canvas']],
+  },
   'voice-ring': {
     properties: [
       ['size', 'number', '240', 'CSS / canvas size in px'],
@@ -1257,6 +1297,22 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['collapse-after', 'number', 'null', 'Collapse middle crumbs'],
     ],
     events: [['k3-select', '{ item, index }', 'Crumb activated']],
+  },
+  toc: {
+    properties: [
+      ['items', 'TocItem[]', '[]', 'Section links JSON'],
+      ['sticky', 'boolean', 'true', 'Pin to scrollport top'],
+      ['scroll-root', 'string', "''", 'Scrollport selector'],
+      ['label', 'string', "''", 'Eyebrow (i18n toc.label)'],
+      ['aria-label', 'string', "''", 'Nav landmark name'],
+    ],
+    events: [['k3-select', '{ item, index }', 'Entry activated']],
+    'css-parts': [
+      ['container', 'Surface panel'],
+      ['label', 'Eyebrow'],
+      ['list', 'Scrollable link list'],
+      ['item', 'Each anchor'],
+    ],
   },
   pagination: {
     properties: [
@@ -1907,6 +1963,46 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['actions', 'Rich action buttons (k3-button)'],
     ],
   },
+  kbd: {
+    properties: [
+      ['keys', 'string', "''", 'Chord (`Ctrl+K`) or single key — else default slot'],
+      ['size', "'sm'|'md'|'lg'", 'md', 'Keycap scale'],
+    ],
+    methods: [],
+    events: [],
+    slots: [['(default)', 'Single key label when `keys` is empty']],
+    'css-parts': [
+      ['chord', 'Wrapper for the key row'],
+      ['key', 'Each `<kbd>` keycap'],
+      ['sep', 'Plus separator between keys'],
+    ],
+  },
+  'command-palette': {
+    properties: [
+      ['open', 'boolean', 'false', 'Mirrors underlying k3-dialog open'],
+      ['placeholder', 'string', "''", 'Search field placeholder'],
+      ['empty-text', 'string', "''", 'Empty-state copy'],
+      ['items', 'CommandPaletteItem[]', 'null', 'JS-driven rows (rebuilds light DOM)'],
+    ],
+    methods: [
+      ['show', '() => Promise<boolean>', 'Open dialog + focus search'],
+      ['hide', '(source?) => Promise<boolean>', 'Close dialog'],
+    ],
+    events: [
+      ['k3-command-select', '{ value, item? }', 'Row chosen'],
+      ['k3-command-close', '{ source }', 'Dialog closed'],
+    ],
+    slots: [['(default)', '`k3-list-item` rows (+ optional group labels)']],
+    'css-parts': [
+      ['search', 'Search row (dialog headline)'],
+      ['input', 'Search input'],
+      ['results', 'Results mount in dialog body'],
+      ['empty', 'No-match message'],
+    ],
+    theming: [
+      ['--k3-command-palette-max', '40rem', 'Forwarded to dialog as --k3-dialog-max-width'],
+    ],
+  },
   badge: {
     properties: [
       ['value', 'string | number', "''", 'Count / label (large)'],
@@ -1964,6 +2060,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['accordion', 'boolean', 'false', 'Exclusive expand'],
       ['embedded', 'boolean', 'false', 'Nested under expandable header'],
       ['elevated', 'boolean', 'false', 'Elevated surface'],
+      ['emphasized', 'boolean', 'false', 'Title-medium emphasized typography (syncs to items)'],
       ['sortable', 'boolean', 'false', 'Drag reorder'],
       ['dismissible', 'boolean', 'false', 'Swipe dismiss + a11y menu'],
       ['label', 'string', "''", 'Accessible name'],

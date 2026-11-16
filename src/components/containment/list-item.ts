@@ -51,6 +51,8 @@ export class K3ListItem extends K3Element {
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) selected = false;
   @property({ type: Boolean, reflect: true }) interactive = false;
+  /** Emphasized typography (M3 Expressive) — also inherited from parent `k3-list[emphasized]`. */
+  @property({ type: Boolean, reflect: true }) emphasized = false;
   @property({ type: Boolean, reflect: true }) dragged = false;
   @property({ type: Boolean, reflect: true }) dismissible = false;
   @property({ type: Boolean, reflect: true }) expandable = false;

@@ -3,7 +3,8 @@
  *   k3ui.js                 base (init, theme, registry, i18n, core helpers)
  *   components/k3-*.js      one entry per element; imports what it renders
  *   chunks/*.js             shared code, loaded once
- *   components.json         tag → file / deps / sizes (pack configurators)
+ *   pack.js                 entry re-bundled by the pack builder page
+ *   components.json         tag → files / deps / sizes (pack builder)
  *   k3ui.d.ts               types of dist/k3ui.d.ts minus the full-bundle extras
  * The single-file dist/k3ui.js (vite.config.ts) is unchanged.
  */
@@ -68,7 +69,7 @@ function chunkOf(
     walk(ENTRY_ID);
   }
   const file = id.replace(/\\/g, '/');
-  if (file === ENTRY_ID) return undefined;
+  if (file === ENTRY_ID || file.endsWith('/src/pack.ts')) return undefined;
   if (baseModules.has(file)) return 'base';
   if (file.includes('/src/shapes/') || file.includes('/material-shapes-ts/')) return 'shapes';
   if (file.includes('/.temp/lazy-entries/')) return undefined;
@@ -83,14 +84,17 @@ function componentsManifest(): Plugin {
     /* After the files are written: sizes and imports are read from the real output. */
     writeBundle(options, bundle) {
       const outDir = options.dir!;
-      const chunks = new Map<string, { imports: string[]; gzip: number }>();
+      const chunks = new Map<string, { imports: string[]; gzip: number; size: number }>();
+      /** Source module → file that holds it (target of the catalog's dynamic import). */
+      const chunkOfModule = new Map<string, string>();
       for (const item of Object.values(bundle)) {
         if (item.type !== 'chunk') continue;
         const code = readFileSync(resolve(outDir, item.fileName), 'utf8');
         const imports = [...code.matchAll(/(?:from|import)\s*["'](\.{1,2}\/[^"']+)["']/g)].map((m) =>
           posix.join(posix.dirname(item.fileName), m[1]!),
         );
-        chunks.set(item.fileName, { imports, gzip: gzipSync(code).length });
+        chunks.set(item.fileName, { imports, gzip: gzipSync(code).length, size: Buffer.byteLength(code) });
+        for (const id of Object.keys(item.modules)) chunkOfModule.set(id.replace(/\\/g, '/'), item.fileName);
       }
       const reach = (file: string, seen = new Set<string>()): Set<string> => {
         if (seen.has(file) || !chunks.has(file)) return seen;
@@ -101,14 +105,25 @@ function componentsManifest(): Plugin {
       const size = (files: Iterable<string>): number =>
         [...files].reduce((sum, f) => sum + chunks.get(f)!.gzip, 0);
       const base = reach('k3ui.js');
+      const own = new Map(
+        catalog.map((c) => [c.tag, chunkOfModule.get(sourceFile(c).replace(/\\/g, '/'))!]),
+      );
+      const componentChunks = new Set(own.values());
       const components = Object.fromEntries(
-        catalog.map(({ tag }) => {
+        catalog.map((c) => {
+          const { tag } = c;
           const file = `components/${tag}.js`;
-          const extra = [...reach(file)].filter((f) => !base.has(f));
+          const extra = [...reach(file)].filter((f) => !base.has(f) && f !== file);
           return [
             tag,
             {
               file,
+              /** Folder under src/components — the family shown by the pack builder. */
+              group: c.file.split('/')[0],
+              /** Chunk with the element's own code. */
+              chunk: own.get(tag),
+              /** Shared helper chunks it needs (not the base, not another element). */
+              shared: extra.filter((f) => !componentChunks.has(f)),
               /** Elements it renders (direct) and everything a pack must include. */
               deps: deps[tag] ?? [],
               requires: closure([tag], catalog, deps).filter((t) => t !== tag),
@@ -118,6 +133,13 @@ function componentsManifest(): Plugin {
           ];
         }),
       );
+      const files = Object.fromEntries(
+        [...chunks]
+          .filter(([f]) => f.startsWith('chunks/'))
+          .map(([f, c]) => [f, { gzip: c.gzip, size: c.size }]),
+      );
+      const version = (JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf8')) as { version: string })
+        .version;
       /* Local declarations win over `export *`: the omitted values type as `never`. */
       writeFileSync(
         resolve(outDir, 'k3ui.d.ts'),
@@ -130,7 +152,16 @@ function componentsManifest(): Plugin {
       );
       writeFileSync(
         resolve(outDir, 'components.json'),
-        `${JSON.stringify({ base: { file: 'k3ui.js', gzip: size(base) }, components }, null, 2)}\n`,
+        `${JSON.stringify(
+          {
+            version,
+            base: { file: 'k3ui.js', pack: 'pack.js', gzip: size(base), files: [...base].filter((f) => f !== 'k3ui.js') },
+            components,
+            files,
+          },
+          null,
+          2,
+        )}\n`,
       );
     },
   };
@@ -154,6 +185,8 @@ export default defineConfig({
     lib: {
       entry: {
         k3ui: LAZY_ENTRY,
+        /* Entry the pack builder page re-bundles (default `components: 'all'`). */
+        pack: resolve(__dirname, 'src/pack.ts'),
         ...Object.fromEntries(catalog.map(({ tag }) => [`components/${tag}`, resolve(ENTRY_DIR, `${tag}.ts`)])),
       },
       formats: ['es'],

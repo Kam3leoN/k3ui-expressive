@@ -60,6 +60,7 @@ Manual bootstrap (skip auto-init):
 | `npm run build` | `dist/k3ui.js` + `dist/k3ui.css` + `tokens.json` + budget check |
 | `npm run build:lazy` | `dist/lazy/` — base + one chunk per component (part of `build`) |
 | `npm run build:pack -- select dialog` | Custom single-file pack with only these components (+ their children) |
+| `npm run dev` → `/pack.html` | Pack builder page (needs `npm run build:lazy` once) |
 | `npm test` | Vitest |
 | `npm run test:e2e` | Playwright: smoke, dialog / sheet keyboard & ARIA, forms, perf budgets (`PW_CHROMIUM_PATH=…` to use a local Chromium, `K3UI_E2E_ALL_BROWSERS=1` for Firefox + WebKit) |
 | `npm run version:bump -- patch` | Bump version + CHANGELOG |
@@ -138,9 +139,17 @@ await init(); // components: 'auto' is the default of this entry
 
 ## Custom pack
 
-One self-contained file with the base and only the components you choose — dependencies
+One self-contained file with the core and only the components you choose — dependencies
 are resolved for you (`k3-select` brings `k3-text-field`, `k3-menu` and `k3-menu-item`).
-Run it from a clone of this repository:
+
+**Pack builder page** — `pack.html` on the documentation site
+(<https://k3ui-expressive.vercel.app/pack.html>): tick the components (the core is always
+in), each row shows its gzip size, the total updates as you go, and *Download* assembles
+`k3ui.pack.js` in the browser. The selection lives in the URL
+(`pack.html#components=select+dialog`) so it can be shared or reopened later; the same link
+is written at the top of the pack.
+
+**From a clone** — same result on the command line:
 
 ```bash
 npm run build:pack -- --list                      # components and what they require
@@ -149,8 +158,23 @@ npm run build:pack -- select,dialog --name shop --out dist/packs
 ```
 
 Use the pack in place of `dist/k3ui.js`, with the same `dist/k3ui.css`; `init()` registers
-everything the pack holds. `<name>.json` records the selection, the components that were
-added as dependencies and the gzip size.
+everything the pack holds.
+
+### Missing component guard
+
+A pack knows what it holds (`globalThis.K3UI_PACK`). When the page uses a K3UI element it
+was built without, the element is not left blank in silence:
+
+- `console.error` with the link that reopens the builder — the pack's components and the
+  missing ones already ticked;
+- a `k3-missing-component` event on `document` (`detail: { tag, missing, rebuildUrl }`) for
+  your error tracker; `K3UI.registry.missing` lists them;
+- on development hosts (localhost, private LAN, `*.local` / `*.test`, `file:`) a banner on
+  the page and a dashed outline on the elements.
+
+`init({ missingComponents: 'auto' | 'overlay' | 'console' | 'silent' })` — `auto` is the
+default; `overlay` shows the banner in production too. If you would rather never rebuild,
+use `k3ui/lazy`: it fetches whatever the page needs.
 
 ## Lazy loading
 

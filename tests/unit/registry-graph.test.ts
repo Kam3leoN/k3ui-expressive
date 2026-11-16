@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { catalog } from '../../src/registry/catalog.js';
 import { COMPONENT_DEPS } from '../../src/registry/deps.js';
 import { parseArgs, resolvePack } from '../../scripts/build-pack.mjs';
-import { filterCatalog, stripDocLocales } from '../../scripts/build-plugins.mjs';
-import { closure, normalizeTag, readCatalog, readDeps } from '../../scripts/registry-graph.mjs';
+import { filterCatalog, packHeader, stripDocLocales } from '../../scripts/build-plugins.mjs';
+import { PACK_BUILDER_URL, closure, normalizeTag, readCatalog, readDeps } from '../../scripts/registry-graph.mjs';
+import { PACK_BUILDER_URL as RUNTIME_BUILDER_URL } from '../../src/registry/missing.js';
 
 type Hook = (this: unknown, code: string, id: string) => { code: string } | string | null;
 const call = (hook: unknown, ...args: [string, string?]): ReturnType<Hook> =>
@@ -65,15 +66,31 @@ describe('custom pack builder', () => {
     expect(pack.tags).toHaveLength(7);
   });
 
-  it('filterCatalog keeps only the selected loaders', () => {
+  it('filterCatalog keeps every tag but only the selected loaders', () => {
     const plugin = filterCatalog(['k3-select', 'k3-text-field']);
     const out = call(plugin.load, '/repo/src/registry/catalog.ts') as string;
-    expect(out.match(/tag: '/g)).toHaveLength(2);
+    expect(out.match(/tag: '/g)).toHaveLength(catalog.length);
+    expect(out.match(/import\(/g)).toHaveLength(2);
     expect(out).toContain("import('../components/inputs/select.js')");
-    expect(out).not.toContain('dialog');
+    expect(out).toContain("{ tag: 'k3-dialog', load: excluded }");
+    expect(out).not.toContain('containment/dialog');
     expect(call(plugin.load, '/repo/src/registry/register.ts')).toBeNull();
     /* Windows paths */
     expect(call(plugin.load, 'D:\\K3ui\\src\\registry\\catalog.ts')).toContain('k3-select');
+  });
+
+  it('packHeader records the selection and the rebuild link', () => {
+    const { banner, intro } = packHeader({
+      name: 'shop',
+      version: '1.2.7',
+      components: ['k3-select', 'k3-menu'],
+      builder: PACK_BUILDER_URL,
+    });
+    expect(banner).toContain('components=select+menu');
+    expect(banner).toContain('#/pack');
+    expect(intro).toMatch(/^globalThis\.K3UI_PACK=\{.*"components":\["k3-select","k3-menu"\].*\};$/);
+    /* Same builder page for the CLI and the runtime guard */
+    expect(PACK_BUILDER_URL).toBe(RUNTIME_BUILDER_URL);
   });
 
   it('stripDocLocales drops documentation strings only', () => {

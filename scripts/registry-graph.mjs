@@ -8,6 +8,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+/** Pack builder page — same value as PACK_BUILDER_URL in src/registry/missing.ts (checked by tests). */
+export const PACK_BUILDER_URL = 'https://k3ui-expressive.vercel.app/';
+
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /**

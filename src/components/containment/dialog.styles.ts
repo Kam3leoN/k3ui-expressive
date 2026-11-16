@@ -58,7 +58,8 @@ export const dialogStyles: CSSResultGroup = [
         left: 50%;
         right: auto;
         top: 50%;
-        width: min(35rem, calc(100vw - 3rem)); /* max 560 · 24dp*2 inset */
+        /* --k3-dialog-max-width: override from host (e.g. command palette 40rem) */
+        width: min(var(--k3-dialog-max-width, 35rem), calc(100vw - 3rem)); /* max 560 · 24dp*2 inset */
         min-width: min(17.5rem, calc(100vw - 3rem)); /* min 280 */
         max-height: min(80vh, 40rem);
         border-radius: var(--k3-sys-shape-corner-extra-large); /* 28dp */

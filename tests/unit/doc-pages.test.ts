@@ -67,6 +67,7 @@ const PAGE_TAGS: Record<string, string[]> = {
   table: ['k3-table'],
   sheet: ['k3-sheet'],
   breadcrumb: ['k3-breadcrumb'],
+  toc: ['k3-toc'],
   'app-bar': ['k3-top-app-bar'],
   'footer-bar': ['k3-footer-bar'],
   tabs: ['k3-tabs'],
@@ -145,6 +146,7 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'table' &&
     id !== 'sheet' &&
     id !== 'breadcrumb' &&
+    id !== 'toc' &&
     id !== 'app-bar' &&
     id !== 'footer-bar' &&
     id !== 'tabs' &&

@@ -10,11 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Clone sibling k3ux
+        run: |
+          git clone --depth 1 https://github.com/Kam3leoN/k3ux-expressive.git ../k3ux
+          ln -sfn "$(pwd)" ../K3ui
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm --prefix ../k3ux ci
       - run: npm run lint
       - run: npm test
       - run: npm run build
@@ -25,12 +30,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Clone sibling k3ux
+        run: |
+          git clone --depth 1 https://github.com/Kam3leoN/k3ux-expressive.git ../k3ux
+          ln -sfn "$(pwd)" ../K3ui
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm --prefix ../k3ux ci
       - run: npx playwright install --with-deps chromium
+      # pack-builder (+ k3ux) reads the on-demand builds
+      - run: npm run build:lazy
+      - run: npm --prefix ../k3ux run build:lazy
       # Keyboard / ARIA / forms / performance / memory / stress / visual / mobile (Chromium)
       - run: npm run test:e2e
         env:
@@ -43,12 +56,19 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+      - name: Clone sibling k3ux
+        run: |
+          git clone --depth 1 https://github.com/Kam3leoN/k3ux-expressive.git ../k3ux
+          ln -sfn "$(pwd)" ../K3ui
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm --prefix ../k3ux ci
       - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run build:lazy
+      - run: npm --prefix ../k3ux run build:lazy
       - run: npm run test:e2e
         env:
           CI: '1'

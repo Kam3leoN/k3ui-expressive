@@ -507,6 +507,13 @@ export const listItemStyles = css`
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  /* M3 Expressive / emphasized — title-medium emphasized weight */
+  :host([emphasized]) .headline {
+    font-size: var(--k3-sys-typescale-title-medium-size, 1rem);
+    font-weight: var(--k3-sys-typescale-title-medium-emphasized-weight, 600);
+    line-height: var(--k3-sys-typescale-title-medium-line-height, 1.5rem);
+    letter-spacing: var(--k3-sys-typescale-title-medium-tracking, 0.01rem);
+  }
   :host([selected]) .headline {
     color: inherit;
   }
@@ -518,6 +525,9 @@ export const listItemStyles = css`
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
     overflow: hidden;
+  }
+  :host([emphasized]) .supporting {
+    font-weight: var(--k3-sys-typescale-body-medium-emphasized-weight, 500);
   }
   :host([lines='three']) .supporting,
   :host([data-lines='three']) .supporting {
@@ -558,8 +568,14 @@ export const listItemStyles = css`
     white-space: nowrap;
     font-size: var(--k3-sys-typescale-label-small-size, 0.6875rem);
   }
-  ::slotted([slot='trailing']),
-  ::slotted([slot='end']) {
+  /*
+   * Icon font only for icon trailing — not k3-kbd / chips / text
+   * (Material Symbols on Latin labels → wide caps + false underlines).
+   */
+  ::slotted([slot='trailing'].ms),
+  ::slotted([slot='trailing'][data-k3-icon]),
+  ::slotted([slot='end'].ms),
+  ::slotted([slot='end'][data-k3-icon]) {
     font-family: var(
       --k3-sys-icon-font-family,
       'Material Symbols Rounded',
@@ -568,6 +584,11 @@ export const listItemStyles = css`
     font-size: 1.5rem;
     line-height: 1;
     display: inline-flex;
+  }
+  ::slotted([slot='trailing']),
+  ::slotted([slot='end']) {
+    display: inline-flex;
+    line-height: 1;
   }
   ::slotted([slot='meta']) {
     font-family: inherit;

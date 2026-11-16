@@ -59,6 +59,7 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-alert', load: () => import('../components/feedback/alert.js') },
   { tag: 'k3-tooltip', load: () => import('../components/feedback/tooltip.js') },
   { tag: 'k3-badge', load: () => import('../components/feedback/badge.js') },
+  { tag: 'k3-kbd', load: () => import('../components/feedback/kbd.js') },
   // UX extras (countdown, marquee, sound-fx, chart, audio, qr, …) → package `k3ux`
   // containment
   { tag: 'k3-divider', load: () => import('../components/containment/divider.js') },
@@ -70,6 +71,10 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-menu-group', load: () => import('../components/containment/menu-group.js') },
   { tag: 'k3-list', load: () => import('../components/containment/list.js') },
   { tag: 'k3-list-item', load: () => import('../components/containment/list-item.js') },
+  {
+    tag: 'k3-command-palette',
+    load: () => import('../components/containment/command-palette.js'),
+  },
   { tag: 'k3-sheet', load: () => import('../components/containment/sheet.js') },
   { tag: 'k3-bottom-sheet', load: () => import('../components/containment/bottom-sheet.js') },
   { tag: 'k3-side-sheet', load: () => import('../components/containment/side-sheet.js') },
@@ -102,6 +107,7 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-toolbar', load: () => import('../components/navigation/toolbar.js') },
   { tag: 'k3-doc-nav', load: () => import('../components/navigation/doc-nav.js') },
   { tag: 'k3-breadcrumb', load: () => import('../components/navigation/breadcrumb.js') },
+  { tag: 'k3-toc', load: () => import('../components/navigation/toc.js') },
   { tag: 'k3-pagination', load: () => import('../components/navigation/pagination.js') },
   {
     tag: 'k3-pagination-alpha',

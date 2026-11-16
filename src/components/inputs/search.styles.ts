@@ -164,17 +164,37 @@ export const searchStyles = css`
     top: calc(100% + 0.25rem);
     z-index: 30;
     box-sizing: border-box;
-    padding: 0.5rem 0;
-    border-radius: var(--k3-sys-shape-corner-large);
+    padding: 0.5rem;
+    border-radius: var(--k3-sys-shape-corner-extra-large, 1.75rem);
     background: var(--k3-sys-color-surface-container);
     box-shadow: var(--k3-sys-elevation-level2);
     opacity: 0;
     pointer-events: none;
+    /* Scroll lives on the slotted host (light DOM) — wheel over list items
+       often misses a shadow scrollport across the slot boundary. */
+    max-height: min(70vh, 24rem);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     transition: opacity var(--k3-sys-motion-duration-short4)
       var(--k3-sys-motion-easing-expressive-effects);
+  }
+  .panel.empty {
+    display: none;
   }
   .panel.open {
     opacity: 1;
     pointer-events: auto;
+  }
+  /* Slotted suggestions root fills the panel and owns overflow. */
+  .panel ::slotted(*) {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: min(calc(70vh - 1rem), 23rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 `;

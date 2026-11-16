@@ -8,6 +8,7 @@ export interface NavDestination {
   /**
    * Direct page hash (`#/quick-start`) — navigates on click.
    * Empty → opens the secondary components/styles menu.
+   * Pack Builder is reached from Démarrage, not the rail.
    */
   href: string;
 }
@@ -91,11 +92,13 @@ export const COMPONENT_ITEM_ICONS: Record<string, string> = {
   dialog: 'chat',
   tooltip: 'help',
   badge: 'notifications',
+  kbd: 'keyboard',
   countdown: 'timer',
   marquee: 'view_list',
   confetti: 'celebration',
   snow: 'rainy',
   firework: 'local_fire_department',
+  'sparkle-mouse': 'flare',
   'voice-ring': 'mic',
   'sound-fx': 'volume_up',
   'audio-player': 'library_music',
@@ -119,11 +122,13 @@ export const COMPONENT_ITEM_ICONS: Record<string, string> = {
   'card-scratch': 'content_cut',
   menu: 'menu',
   list: 'list',
+  'command-palette': 'keyboard',
   'iso-filter': 'filter_alt',
   masonry: 'widgets',
   table: 'grid_on',
   sheet: 'upload',
   breadcrumb: 'more_horiz',
+  toc: 'menu_book',
   'app-bar': 'menu',
   'footer-bar': 'menu',
   tabs: 'view_column',
@@ -222,12 +227,16 @@ export const NAV_DESTINATIONS: NavDestination[] = [
 /** Rail destinations for the active docs pack (k3ui UI vs k3ux UX). */
 export function navDestinationsForProduct(product: 'k3ui' | 'k3ux'): NavDestination[] {
   if (product === 'k3ux') {
-    /* UX pack: components + animations + resources (Material Symbols). */
+    /* UX: Démarrage (Pack CTA lives there) + components + animations + resources. */
     return NAV_DESTINATIONS.filter(
-      (d) => d.id === 'components' || d.id === 'animations' || d.id === 'resources',
+      (d) =>
+        d.id === 'quick-start' ||
+        d.id === 'components' ||
+        d.id === 'animations' ||
+        d.id === 'resources',
     );
   }
-  /* UI pack: no animations / resources (those live on k3ux). */
+  /* UI: no animations / resources (those live on k3ux). Pack is via Démarrage. */
   return NAV_DESTINATIONS.filter((d) => d.id !== 'animations' && d.id !== 'resources');
 }
 
@@ -240,7 +249,8 @@ export function destinationForPage(
   categoryOf: (id: string) => string | undefined,
 ): NavDestination | null {
   if (pageId === 'home') return null;
-  if (pageId === 'quick-start') {
+  if (pageId === 'quick-start' || pageId === 'pack') {
+    /* Pack is reached from Démarrage — keep that rail item active. */
     return NAV_DESTINATIONS.find((d) => d.id === 'quick-start') ?? null;
   }
   /* Legacy Color hashes share the Styles destination */

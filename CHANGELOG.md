@@ -1,5 +1,29 @@
 # Changelog
 
+## [Unreleased]
+
+### Added — Command palette & kbd
+
+- `k3-kbd` — Material-style keycaps for chords (`Ctrl+K`, `Alt+H`, …)
+- `k3-command-palette` — searchable actions/nav hosted in `k3-dialog` (search headline + emphasized list)
+- Playground shell: **Ctrl/Cmd+K** opens the palette; **Alt+H** → home; **Ctrl/Cmd+,** → settings
+- Cross-pack catalog search (k3ui ↔ k3ux) with product switch from suggestions
+
+### Added — Pack builder page and missing-component guard
+
+- Pack builder as a **shell page** (`#/pack`, same nav-rail / app bar): checkboxes, gzip sizes, live total, download `k3ui.pack.js` from the on-demand build; shareable `?components=select+dialog#/pack` (legacy `pack.html` redirects)
+- Same page for **K3ux** (product switch or `?product=k3ux`): catalog from `k3ux/dist/lazy`, download `k3ux.pack.js` (peers `k3ui` / `lit` / `chart.js` stay external)
+- Packs describe themselves (`globalThis.K3UI_PACK` + banner with the rebuild link); the CLI (`build:pack`) writes the same header
+- Guard: a K3UI element used on the page but absent from the pack is reported — `console.error` with the rebuild link, `k3-missing-component` event, `registry.missing`; banner + outline on development hosts. `init({ missingComponents: 'auto' | 'overlay' | 'console' | 'silent' })`
+- `registry.isMissing()` / `registry.isPartial()`; `dist/lazy/pack.js` entry and richer `components.json` (version, group, own chunk, shared chunks, per-file sizes)
+
+### Changed
+
+- `build:playground` runs `build:lazy` first and publishes it as `/k3ui-lazy/` for the pack builder
+- CLI packs keep every tag in the catalog (loaders of the excluded ones are stubs) so the guard can name what is missing
+- `k3-list-item` trailing icon font only on `.ms` / `[data-k3-icon]` (keeps `k3-kbd` on the plain typeface)
+- `k3-search` suggestions: light-DOM scroll + non-passive wheel; dialog `--k3-dialog-max-width` for wider palette
+
 ## [1.2.7] — 2026-11-13
 
 ### Added — On-demand components (`k3ui/lazy`) and custom packs

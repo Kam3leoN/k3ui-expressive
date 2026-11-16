@@ -170,6 +170,52 @@
   }
 
   /*
+   * TOC layout — content favored by one column vs half / 8+4:
+   *   12 cols → content 9 · toc 3
+   *   8 cols  → content 6 · toc 2
+   *   4 cols  → stack full width
+   */
+  .k3-toc-layout {
+    display: grid;
+    grid-template-columns: repeat(var(--k3-layout-columns), minmax(0, 1fr));
+    gap: var(--k3-layout-gutter);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    align-items: start;
+  }
+
+  .k3-toc-layout__content,
+  .k3-toc-layout__toc {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .k3-toc-layout__content {
+    grid-column-end: span
+      max(1, calc(var(--k3-layout-columns) - var(--k3-toc-rail-span, 3)));
+  }
+
+  .k3-toc-layout__toc {
+    grid-column-end: span var(--k3-toc-rail-span, 3);
+  }
+
+  @media (min-width: 600px) and (max-width: 904px) {
+    .k3-toc-layout {
+      --k3-toc-rail-span: 2;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .k3-toc-layout__content,
+    .k3-toc-layout__toc {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /*
    * Absolute column start (1-indexed, from the inline-start edge).
    * Pair with .k3-col-span-* — e.g. `.k3-col-start-7.k3-col-span-6`.
    */

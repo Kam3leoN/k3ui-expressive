@@ -57,6 +57,8 @@ export class K3List extends K3Element {
    */
   @property({ type: Boolean, reflect: true }) embedded = false;
   @property({ type: Boolean, reflect: true }) elevated = false;
+  /** Emphasized typography on child items (M3 Expressive title weights). */
+  @property({ type: Boolean, reflect: true }) emphasized = false;
   @property({ type: Boolean, reflect: true }) sortable = false;
   @property({ type: Boolean, reflect: true }) dismissible = false;
   @property() label = '';
@@ -150,6 +152,8 @@ export class K3List extends K3Element {
       /* Selection mode + hide indicator */
       if (item.selection !== this.selection) item.selection = this.selection;
       item.hideSelectionIndicator = this.hideSelectionIndicator;
+      /* Parent emphasized → child typography (M3 Expressive). */
+      if (this.emphasized) item.emphasized = true;
 
       if (
         (this.selection === 'single' ||

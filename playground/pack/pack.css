@@ -1,0 +1,303 @@
+/* Pack builder page — layout only; colours, type and shapes come from the K3UI tokens. */
+.pack {
+  box-sizing: border-box;
+  max-inline-size: 72rem;
+  margin-inline: auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.pack-visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.pack-back {
+  color: var(--k3-sys-color-primary);
+  font: var(--k3-sys-typescale-label-large-weight, 500) var(--k3-sys-typescale-label-large-size, 0.875rem) / 1.4
+    var(--k3-ref-typeface-plain);
+  text-decoration: none;
+}
+.pack-back:hover {
+  text-decoration: underline;
+}
+
+.pack-head h1 {
+  margin: 0.75rem 0 0.5rem;
+  font-family: var(--k3-ref-typeface-brand);
+  font-size: var(--k3-sys-typescale-display-small-size, 2.25rem);
+  line-height: var(--k3-sys-typescale-display-small-line-height, 2.75rem);
+  font-weight: var(--k3-sys-typescale-display-small-weight, 400);
+}
+
+.pack-intro {
+  max-inline-size: 44rem;
+  margin: 0 0 1.5rem;
+  color: var(--k3-sys-color-on-surface-variant);
+  font-size: var(--k3-sys-typescale-body-large-size, 1rem);
+  line-height: var(--k3-sys-typescale-body-large-line-height, 1.5rem);
+}
+
+.pack-status {
+  padding: 1rem 1.25rem;
+  border-radius: var(--k3-sys-shape-corner-large, 1rem);
+  background: var(--k3-sys-color-surface-container);
+}
+.pack-status[data-error] {
+  background: var(--k3-sys-color-error-container);
+  color: var(--k3-sys-color-on-error-container);
+}
+
+/* Content + sticky rail — same 9+3 / 6+2 recipe as `.k3-toc-layout`. */
+.pack-layout {
+  /* tracks / gap from `.k3-toc-layout` token helper */
+  align-items: start;
+}
+.pack-layout[hidden],
+.pack-usage[hidden],
+.pack-status[hidden] {
+  display: none;
+}
+
+.pack-group {
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.5rem 0.75rem;
+  border: 0;
+  border-radius: var(--k3-sys-shape-corner-large, 1rem);
+  background: var(--k3-sys-color-surface-container-low);
+}
+.pack-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem 0.25rem;
+}
+.pack-group-head h3 {
+  margin: 0;
+  font-family: var(--k3-ref-typeface-brand);
+  font-size: var(--k3-sys-typescale-title-medium-size, 1rem);
+  line-height: var(--k3-sys-typescale-title-medium-line-height, 1.5rem);
+  font-weight: var(--k3-sys-typescale-title-medium-weight, 500);
+}
+
+.pack-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pack-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding-inline: 0.25rem 0.75rem;
+  border-radius: var(--k3-sys-shape-corner-medium, 0.75rem);
+}
+.pack-row:hover {
+  background: var(--k3-sys-color-surface-container);
+}
+/* The whole row toggles, not just the box and its label. */
+.pack-row k3-checkbox {
+  display: block;
+  min-inline-size: 0;
+}
+.pack-row k3-checkbox::part(container) {
+  inline-size: 100%;
+  justify-content: flex-start;
+  text-align: start;
+}
+.pack-tag {
+  font-family: var(--k3-ref-typeface-code, ui-monospace, monospace);
+  font-size: 0.875rem;
+}
+.pack-note {
+  margin-inline-start: 0.5rem;
+  color: var(--k3-sys-color-on-surface-variant);
+  font-size: 0.75rem;
+}
+.pack-row[data-locked] .pack-note {
+  color: var(--k3-sys-color-primary);
+}
+.pack-size {
+  color: var(--k3-sys-color-on-surface-variant);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.pack-row[data-included] .pack-size {
+  color: var(--k3-sys-color-on-surface);
+  font-weight: 600;
+}
+
+.pack-side {
+  position: sticky;
+  inset-block-start: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pack-product-switch {
+  display: flex;
+  justify-content: stretch;
+  width: 100%;
+}
+.pack-product-switch k3-button-group {
+  display: block;
+  width: 100%;
+}
+.pack-product-switch k3-button-group::part(container) {
+  width: 100%;
+}
+.pack-product-switch k3-button {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  justify-content: center;
+}
+
+.pack-summary {
+  padding: 1.25rem;
+  border-radius: var(--k3-sys-shape-corner-extra-large, 1.75rem);
+  background: var(--k3-sys-color-surface-container-high);
+}
+.pack-summary--full {
+  background: var(--k3-sys-color-primary-container);
+  color: var(--k3-sys-color-on-primary-container);
+}
+.pack-summary-kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.pack-summary h2 {
+  margin: 0 0 0.35rem;
+  font-family: var(--k3-ref-typeface-brand);
+  font-size: var(--k3-sys-typescale-title-large-size, 1.375rem);
+  line-height: var(--k3-sys-typescale-title-large-line-height, 1.75rem);
+  font-weight: var(--k3-sys-typescale-title-large-weight, 400);
+}
+.pack-summary-blurb {
+  margin: 0 0 0.85rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  opacity: 0.85;
+}
+.pack-totals {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem 1rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 0;
+  border-block: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  font-size: 0.875rem;
+}
+.pack-totals dt {
+  opacity: 0.8;
+}
+.pack-totals dd {
+  margin: 0;
+  text-align: end;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.pack-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+.pack-actions k3-button {
+  width: 100%;
+  justify-content: center;
+}
+#pack-reset::part(container) {
+  color: var(--k3-sys-color-error);
+  box-shadow: inset 0 0 0 1px var(--k3-sys-color-error);
+}
+#pack-reset[disabled]::part(container) {
+  color: color-mix(in srgb, var(--k3-sys-color-error) 38%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--k3-sys-color-error) 38%, transparent);
+}
+.pack-feedback {
+  min-block-size: 1.25rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+}
+
+.pack-usage {
+  max-inline-size: 48rem;
+  margin-block-start: 2rem;
+}
+.pack-usage h2,
+.pack-usage h3 {
+  font-family: var(--k3-ref-typeface-brand);
+  font-weight: 500;
+}
+.pack-code {
+  overflow-x: auto;
+  margin: 0.75rem 0 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--k3-sys-shape-corner-large, 1rem);
+  background: var(--k3-sys-color-surface-container-highest);
+  font-family: var(--k3-ref-typeface-code, ui-monospace, monospace);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 52rem) {
+  /* Stack earlier than the default toc-layout phone break — more room to tick. */
+  .pack-layout .k3-toc-layout__content,
+  .pack-layout .pack-list,
+  .pack-layout .k3-toc-layout__toc,
+  .pack-layout .pack-side {
+    grid-column: 1 / -1;
+  }
+  /* Side column (switch + summary) pinned to the bottom edge while ticking. */
+  .pack-side {
+    position: sticky;
+    inset-block: auto 0.5rem;
+    order: 2;
+  }
+  .pack-summary-blurb,
+  .pack-summary-kicker,
+  #pack-copy-cli,
+  #pack-copy-link {
+    display: none;
+  }
+  .pack-summary {
+    padding: 0.75rem 1rem;
+    box-shadow: var(--k3-sys-elevation-level3, 0 4px 12px rgb(0 0 0 / 0.2));
+  }
+  .pack-summary h2 {
+    font-size: 1rem;
+    margin-bottom: 0.35rem;
+  }
+  .pack-totals {
+    margin-bottom: 0.5rem;
+    padding-block: 0.35rem;
+    font-size: 0.75rem;
+  }
+  .pack-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .pack-actions k3-button {
+    width: auto;
+    flex: 1 1 auto;
+  }
+  .pack-feedback {
+    min-block-size: 0;
+    margin-block-start: 0.5rem;
+  }
+  .pack-feedback:empty {
+    display: none;
+  }
+}

@@ -329,6 +329,12 @@ export {
   type WhenTriggeredOptions,
 } from './core/lazy.js';
 export { registerWhen, isKnown, type RegistryObserver } from './registry/register.js';
+export {
+  PACK_BUILDER_URL,
+  type MissingComponentDetail,
+  type MissingComponentsMode,
+  type PackInfo,
+} from './registry/missing.js';
 import { syntax } from './syntax/index.js';
 export {
   syntax,

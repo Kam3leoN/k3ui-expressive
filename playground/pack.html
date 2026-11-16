@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>K3ui · Pack</title>
+    <script>
+      /* Legacy entry — builder now lives in the docs shell at #/pack. */
+      (function () {
+        var u = new URL(location.href);
+        var components = u.searchParams.get('components');
+        if (!components && /components=/i.test(u.hash)) {
+          components = new URLSearchParams(u.hash.replace(/^#/, '')).get('components');
+        }
+        var next = new URL('/', u.origin);
+        if (u.searchParams.get('product') === 'k3ux') next.searchParams.set('product', 'k3ux');
+        if (components) next.searchParams.set('components', components);
+        next.hash = '#/pack';
+        location.replace(next.pathname + next.search + next.hash);
+      })();
+    </script>
+  </head>
+  <body>
+    <p><a href="/#/pack">Pack builder</a></p>
+  </body>
+</html>

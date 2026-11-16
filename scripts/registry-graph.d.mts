@@ -4,6 +4,7 @@ export interface CatalogEntry {
   file: string;
 }
 export declare const root: string;
+export declare const PACK_BUILDER_URL: string;
 export declare const LAZY_OMITTED_EXPORTS: readonly string[];
 export declare function readCatalog(): CatalogEntry[];
 export declare function readDeps(): Record<string, string[]>;

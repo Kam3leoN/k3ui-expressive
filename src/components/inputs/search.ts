@@ -30,8 +30,11 @@ export class K3Search extends K3Element {
   @state() private open = false;
   @state() private focused = false;
   @state() private hasTrailing = false;
+  @state() private hasSuggestions = false;
 
   @query('.control') private controlEl!: HTMLInputElement;
+
+  private blurCloseTimer = 0;
 
   private get showClear(): boolean {
     return this.clearable && !!this.value && !this.disabled;
@@ -39,6 +42,8 @@ export class K3Search extends K3Element {
 
   private syncSlots = (): void => {
     this.hasTrailing = hasNamedSlot(this, 'trailing');
+    this.hasSuggestions = hasNamedSlot(this, 'suggestions');
+    if (!this.hasSuggestions && this.open) this.closeSuggestions();
   };
 
   private syncHostState(): void {
@@ -60,7 +65,38 @@ export class K3Search extends K3Element {
       'slotchange',
       this.syncSlots,
     );
+    this.shadowRoot
+      ?.querySelector('slot[name="suggestions"]')
+      ?.addEventListener('slotchange', this.syncSlots);
+    /* Non-passive — must preventDefault so shell-scroll does not steal the wheel. */
+    this.shadowRoot?.querySelector('.panel')?.addEventListener(
+      'wheel',
+      this.onSuggestionsWheel as EventListener,
+      { passive: false },
+    );
     this.syncHostState();
+  }
+
+  override disconnectedCallback(): void {
+    window.clearTimeout(this.blurCloseTimer);
+    super.disconnectedCallback();
+  }
+
+  /** Open the suggestions panel (no-op if the slot is empty). */
+  openSuggestions(): void {
+    this.syncSlots();
+    if (!this.hasSuggestions || this.disabled) return;
+    void runOpenClose(this, 'open', async () => {
+      this.open = true;
+    }, { source: 'api' });
+  }
+
+  /** Close the suggestions panel. */
+  closeSuggestions(): void {
+    if (!this.open) return;
+    void runOpenClose(this, 'close', async () => {
+      this.open = false;
+    }, { source: 'api' });
   }
 
   override updated(changed: PropertyValues): void {
@@ -81,24 +117,42 @@ export class K3Search extends K3Element {
   }
 
   private onFocus = (): void => {
+    window.clearTimeout(this.blurCloseTimer);
     this.focused = true;
+    if (this.hasSuggestions && this.value.trim()) this.openSuggestions();
   };
 
   private onBlur = (): void => {
     this.focused = false;
+    /* Delay so a click inside suggestions can fire first. */
+    window.clearTimeout(this.blurCloseTimer);
+    this.blurCloseTimer = window.setTimeout(() => this.closeSuggestions(), 150);
   };
 
   private onInput = (e: Event): void => {
     const v = (e.target as HTMLInputElement).value;
     this.value = v;
     this.emit('k3-input', { value: v });
-    void runOpenClose(this, 'open', async () => {
-      this.open = true;
-    }, { source: 'user' });
+    this.syncSlots();
+    if (this.hasSuggestions && v.trim()) this.openSuggestions();
+    else this.closeSuggestions();
   };
 
   private onChange = (): void => {
     this.emit('k3-change', { value: this.value });
+  };
+
+  private onKeyDown = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      if (this.open) {
+        e.preventDefault();
+        this.closeSuggestions();
+      }
+      return;
+    }
+    if (e.key === 'ArrowDown' && this.hasSuggestions) {
+      this.openSuggestions();
+    }
   };
 
   private clearValue = (e: Event): void => {
@@ -109,7 +163,43 @@ export class K3Search extends K3Element {
     this.emit('k3-input', { value: '' });
     this.emit('k3-change', { value: '' });
     this.emit('k3-clear');
+    this.closeSuggestions();
     queueMicrotask(() => this.controlEl?.focus());
+  };
+
+  /** Keep focus in the field when clicking a suggestion row. */
+  private onSuggestionsMouseDown = (e: MouseEvent): void => {
+    e.preventDefault();
+  };
+
+  /**
+   * Wheel over slotted list items must scroll the suggestions host — not
+   * `.shell-scroll` behind the overlay (shadow scrollports + slots are flaky).
+   */
+  private onSuggestionsWheel = (e: WheelEvent): void => {
+    const path = e.composedPath();
+    const scrollHost = path.find(
+      (n): n is HTMLElement =>
+        n instanceof HTMLElement &&
+        (n.slot === 'suggestions' || n.id === 'doc-search-suggestions'),
+    );
+    const el =
+      scrollHost ??
+      (
+        this.shadowRoot?.querySelector('.panel > slot') as HTMLSlotElement | null
+      )?.assignedElements()[0];
+    if (!(el instanceof HTMLElement)) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    if (scrollHeight <= clientHeight + 1) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    const delta =
+      e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * clientHeight : e.deltaY;
+    el.scrollTop += delta;
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   override render() {
@@ -133,6 +223,7 @@ export class K3Search extends K3Element {
           aria-label=${ph}
           @input=${this.onInput}
           @change=${this.onChange}
+          @keydown=${this.onKeyDown}
           @focus=${this.onFocus}
           @blur=${this.onBlur}
         />
@@ -160,8 +251,16 @@ export class K3Search extends K3Element {
         </span>
       </div>
 
-      <div class=${classMap({ panel: true, open: this.open })} part="suggestions">
-        <slot name="suggestions"></slot>
+      <div
+        class=${classMap({
+          panel: true,
+          open: this.open && this.hasSuggestions,
+          empty: !this.hasSuggestions,
+        })}
+        part="suggestions"
+        @mousedown=${this.onSuggestionsMouseDown}
+      >
+        <slot name="suggestions" @slotchange=${this.syncSlots}></slot>
       </div>
     `;
   }

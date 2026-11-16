@@ -25,6 +25,7 @@ export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
   'k3-lazy': ['k3-loading-indicator', 'k3-skeleton'],
   'k3-list': ['k3-menu', 'k3-menu-item'],
   'k3-list-item': ['k3-checkbox', 'k3-radio', 'k3-switch'],
+  'k3-command-palette': ['k3-dialog', 'k3-kbd', 'k3-list-item'],
   'k3-menu': ['k3-menu-item'],
   'k3-menu-group': ['k3-menu-item'],
   'k3-mood-calendar': ['k3-button', 'k3-dialog', 'k3-shape-chip'],

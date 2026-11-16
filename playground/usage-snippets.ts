@@ -550,6 +550,30 @@ document.getElementById("dlg")?.show?.();`,
     html: `<k3-badge value="3">${MS('notifications')}</k3-badge>`,
     css: defaultCss,
   },
+  kbd: {
+    components: ['k3-kbd'],
+    html: `<k3-kbd keys="Ctrl+K"></k3-kbd>
+<k3-kbd>Esc</k3-kbd>
+<k3-kbd keys="⌘+⇧+P" size="sm"></k3-kbd>`,
+  },
+  'command-palette': {
+    components: ['k3-command-palette', 'k3-dialog', 'k3-list-item', 'k3-kbd', 'k3-button'],
+    html: `<k3-command-palette id="palette" placeholder="Jump to…">
+  <k3-list-item value="buttons" interactive emphasized>
+    <span slot="headline">Buttons</span>
+    <k3-kbd slot="trailing" keys="G B" size="sm"></k3-kbd>
+  </k3-list-item>
+</k3-command-palette>
+<k3-button variant="filled" onclick="document.getElementById('palette').show()">
+  Open · Ctrl+K
+</k3-button>`,
+    jsExtra: `const palette = document.getElementById('palette');
+palette.items = [
+  { value: 'home', label: 'Home', icon: 'home', shortcut: 'Alt+H', group: 'Actions' },
+  { value: 'list', label: 'Lists', icon: 'list', group: 'Containment' },
+];
+palette.addEventListener('k3-command-select', (e) => console.log(e.detail.value));`,
+  },
   avatar: {
     components: ['k3-avatar'],
     html: `<k3-avatar label="Ada Lovelace"></k3-avatar>
@@ -965,6 +989,29 @@ fw.playSequence([{ count: 2 }, { count: 3 }, { finale: true }]);
 import { getFireworkSoundSourcesWithFallback } from 'k3ux';
 // Base64 + remote + local fallbacks (same as K3ui v1)`,
   },
+  'sparkle-mouse': {
+    components: ['k3-sparkle-mouse', 'k3-button'],
+    html: `<k3-sparkle-mouse id="sparkles" intensity="40" colors="primary, secondary, tertiary"></k3-sparkle-mouse>
+<k3-button variant="filled" onclick="const s=document.getElementById('sparkles'); s.isRunning ? s.stop() : s.start()">
+  Stop / Start
+</k3-button>
+<k3-button variant="outlined" onclick="document.getElementById('sparkles').clear()">
+  Clear
+</k3-button>
+<k3-button variant="tonal" onclick="document.getElementById('sparkles').burst(innerWidth/2, innerHeight/2, 24)">
+  Burst
+</k3-button>`,
+    jsExtra: `const el = document.getElementById('sparkles');
+el.intensity = 60;
+/* 1–5 colours — theme roles, hex, rgb(), or any CSS */
+el.colors = ['primary', 'secondary', 'tertiary'];
+el.colors = ['primary', '#ffd54f', 'rgb(240 98 146)', 'error', 'outline'];
+el.gravity = -40; // rise
+
+import { SparkleEngine } from 'k3ux';
+const engine = new SparkleEngine(null, { intensity: 40 });
+engine.start();`,
+  },
   'voice-ring': {
     components: ['k3-voice-ring', 'k3-button'],
     html: `<k3-voice-ring id="vr" size="240" state="listening" auto-start></k3-voice-ring>
@@ -1256,6 +1303,18 @@ qr.addEventListener("k3-download", (e) => {
   variant="tonal"
   items='[{"text":"Home","href":"/","icon":"home"},{"text":"Components","href":"/components"},{"text":"Bubble","current":true}]'
 ></k3-breadcrumb>`,
+  },
+  toc: {
+    components: ['k3-toc'],
+    html: `<div class="k3-toc-layout">
+  <div class="k3-toc-layout__content">…</div>
+  <k3-toc
+    class="k3-toc-layout__toc"
+    sticky
+    scroll-root=".shell-scroll"
+    items='[{"text":"Examples","href":"#examples"},{"text":"States","href":"#states","level":2}]'
+  ></k3-toc>
+</div>`,
   },
   pagination: {
     components: ['k3-pagination'],

@@ -41,6 +41,8 @@ import {
 } from '../src/tokens/meta.js';
 import {
   catalogGridHtml,
+  catalogSearchHits,
+  catalogEntryProduct,
   componentsInCategory,
   orderedComponents,
   neighborComponents,
@@ -49,8 +51,10 @@ import {
   resolvePageId,
   getDocProduct,
   setDocProduct,
+  DOC_COMPONENTS,
   type DocProduct,
 } from './catalog.js';
+import { bindChords } from '../src/core/keyboard.js';
 import {
   NAV_DESTINATIONS,
   navDestinationsForProduct,
@@ -160,6 +164,8 @@ let themeMode: ColorMode = (() => {
 let animationsOn = docStore.get<boolean>(DocKeys.uiAnimations, true);
 /** Shell snowfall (settings) — never drives #demo-snow on the Snow page. */
 let shellSnowOn = docStore.get<boolean>(DocKeys.uiSnow, false) === true;
+/** Shell sparkle trail (settings) — never drives #demo-sparkle-mouse on its page. */
+let shellSparkleOn = docStore.get<boolean>(DocKeys.uiSparkle, false) === true;
 /** M3 motion scheme — Expressive (spring) default · Standard (utilitarian). */
 /** Material color spec — 2025 (M3 Expressive) or 2021 (legacy hues). */
 let colorSpec: ColorSpecVersion = (() => {
@@ -295,7 +301,7 @@ function sheetLabel(key: string): HTMLElement {
 
 function currentPageId(): string {
   const hash = location.hash.replace(/^#\/?/, '') || 'home';
-  const raw = hash === '' ? 'home' : hash;
+  const raw = (hash === '' ? 'home' : hash).split('?')[0] || 'home';
   return raw === 'home' ? 'home' : resolvePageId(raw);
 }
 
@@ -616,6 +622,16 @@ function syncSettingsSheet(): void {
     | null;
   if (snowSw) snowSw.selected = shellSnowOn;
 
+  const sparkleSw = document.getElementById('settings-sparkle') as
+    | (HTMLElement & { selected?: boolean })
+    | null;
+  if (sparkleSw) sparkleSw.selected = shellSparkleOn;
+
+  const sparkleOptSw = document.getElementById('sparkle-shell-switch') as
+    | (HTMLElement & { selected?: boolean })
+    | null;
+  if (sparkleOptSw) sparkleOptSw.selected = shellSparkleOn;
+
   const grid = document.getElementById('settings-grid') as
     | (HTMLElement & { selected?: boolean })
     | null;
@@ -681,6 +697,7 @@ function applyAnimationsPreference(): void {
   docStore.set(DocKeys.uiAnimations, animationsOn);
   syncMotionControls();
   void applyShellSnow();
+  void applyShellSparkle();
 }
 
 type ShellSnowHost = HTMLElement & {
@@ -755,6 +772,109 @@ async function applyShellSnow(
   if (!onSnowDemoPage) {
     teardownSnowHost(demoSnowEl());
     purgeSnowLibCanvases();
+  }
+}
+
+type ShellSparkleHost = HTMLElement & {
+  start?: () => void;
+  stop?: () => void;
+  clear?: () => void;
+  intensity?: number;
+  colors?: string[];
+  disabled?: boolean;
+  isRunning?: boolean;
+  disableForReducedMotion?: boolean;
+};
+
+function shellSparkleEl(): ShellSparkleHost | null {
+  return document.getElementById('shell-sparkle-mouse') as ShellSparkleHost | null;
+}
+
+/** Demo-only host on the Sparkle mouse page — never the shell overlay. */
+function demoSparkleEl(): ShellSparkleHost | null {
+  return document.getElementById('demo-sparkle-mouse') as ShellSparkleHost | null;
+}
+
+function teardownSparkleHost(host: ShellSparkleHost | null, opts?: { disable?: boolean }): void {
+  if (!host) return;
+  host.stop?.();
+  host.clear?.();
+  if (opts?.disable) host.disabled = true;
+}
+
+/** Remove leftover fullscreen sparkle canvases (orphans from races / old sessions). */
+function purgeSparkleLibCanvases(): void {
+  document
+    .querySelectorAll('canvas[data-k3-sparkle-mouse="lib"]')
+    .forEach((node) => node.remove());
+}
+
+/** True only when the Sparkle mouse article is the visible page. */
+function isSparkleDemoPageActive(): boolean {
+  if (articlePageId(currentPageId()) !== 'sparkle-mouse') return false;
+  const page = document.getElementById('page-sparkle-mouse');
+  return !!page && !page.hidden;
+}
+
+/** Clear page demo sparkles when leaving the Sparkle mouse article. */
+function pauseDemoSparkle(): void {
+  teardownSparkleHost(demoSparkleEl());
+  if (!shellSparkleOn || !animationsOn) purgeSparkleLibCanvases();
+}
+
+/** Restart `#demo-sparkle-mouse` when returning to its page. */
+async function ensureDemoSparkleRunning(): Promise<void> {
+  if (!isSparkleDemoPageActive()) return;
+  await ensureK3ux();
+  await customElements.whenDefined('k3-sparkle-mouse');
+  if (!isSparkleDemoPageActive()) return;
+  const host = demoSparkleEl();
+  if (!host) return;
+  host.disabled = false;
+  host.disableForReducedMotion = false;
+  if (!host.isRunning) host.start?.();
+  const btn = document.getElementById('sparkle-toggle');
+  if (btn) {
+    btn.textContent = t('doc.sparkle-mouse.action.stop');
+    btn.setAttribute('data-i18n', 'doc.sparkle-mouse.action.stop');
+  }
+}
+
+/**
+ * Settings sparkle → `#shell-sparkle-mouse` on every page except Sparkle mouse.
+ * Never drives `#demo-sparkle-mouse`. When off (or on its page), shell is torn down.
+ */
+async function applyShellSparkle(
+  pageId: string = articlePageId(currentPageId()),
+): Promise<void> {
+  shellSparkleOn = shellSparkleOn === true;
+  docStore.set(DocKeys.uiSparkle, shellSparkleOn);
+  const onSparkleDemoPage = articlePageId(pageId) === 'sparkle-mouse';
+  const want = shellSparkleOn && animationsOn && !onSparkleDemoPage;
+  if (want) await ensureK3ux();
+  const host = shellSparkleEl();
+  if (want) {
+    if (!host) return;
+    await customElements.whenDefined('k3-sparkle-mouse');
+    host.disableForReducedMotion = false;
+    host.disabled = false;
+    if (!host.colors?.length) host.colors = ['primary', 'secondary', 'tertiary'];
+    if (host.intensity == null) host.intensity = 40;
+    host.start?.();
+    return;
+  }
+  teardownSparkleHost(host, { disable: true });
+  if (!onSparkleDemoPage) {
+    teardownSparkleHost(demoSparkleEl());
+    purgeSparkleLibCanvases();
+  }
+}
+
+/** Keep settings + Options switches in sync with `shellSparkleOn`. */
+function syncSparkleShellSwitches(): void {
+  for (const id of ['settings-sparkle', 'sparkle-shell-switch']) {
+    const sw = document.getElementById(id) as (HTMLElement & { selected?: boolean }) | null;
+    if (sw) sw.selected = shellSparkleOn;
   }
 }
 
@@ -1774,6 +1894,7 @@ const K3UX_PAGES = new Set([
   'confetti',
   'snow',
   'firework',
+  'sparkle-mouse',
   'voice-ring',
   'text-bounce',
   'text-scramble',
@@ -1853,12 +1974,24 @@ function syncProductSwitchButtons(product: DocProduct): void {
   });
 }
 
+/** Keep `?product=` in sync so Pack / deep links follow the home switch (not a stale k3ux). */
+function syncProductInUrl(product: DocProduct): void {
+  const url = new URL(location.href);
+  if (product === 'k3ux') url.searchParams.set('product', 'k3ux');
+  else url.searchParams.delete('product');
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  if (`${location.pathname}${location.search}${location.hash}` !== next) {
+    history.replaceState(null, '', next);
+  }
+}
+
 function applyDocProduct(product: DocProduct, opts?: { navigateHome?: boolean }): void {
   const prev = getDocProduct();
   const changed = prev !== product;
   setDocProduct(product);
   docStore.set(DocKeys.docProduct, product);
   document.documentElement.dataset.k3DocProduct = product;
+  syncProductInUrl(product);
   document.querySelectorAll<HTMLElement>('[data-doc-product]').forEach((el) => {
     el.hidden = el.dataset.docProduct !== product;
   });
@@ -1872,6 +2005,7 @@ function applyDocProduct(product: DocProduct, opts?: { navigateHome?: boolean })
     buildCatalogGrid();
     buildPrimaryNav();
     buildNavMenu();
+    if (currentPageId() === 'pack') void ensurePackPageMounted(true);
   } else {
     /* First paint / same pack — still sync switch chrome. */
     buildPrimaryNav();
@@ -1909,7 +2043,10 @@ function wireProductSwitch(): void {
 function buildCatalogGrid(filter = ''): void {
   const grid = document.getElementById('catalog-grid');
   if (!grid) return;
-  const html = catalogGridHtml(t, filter, t('playground.search.placeholder'));
+  const emptyHint = filter.trim()
+    ? t('playground.search.empty')
+    : t('playground.search.placeholder');
+  const html = catalogGridHtml(t, filter, emptyHint);
   if (html === catalogHtml) return;
   /* Build-time prerender (default locale): keep those nodes — they are the LCP. */
   if (catalogHtml === null && !filter.trim() && grid.dataset.prerendered === window.K3UI?.i18n.locale) {
@@ -1918,6 +2055,116 @@ function buildCatalogGrid(filter = ''): void {
   }
   catalogHtml = html;
   grid.innerHTML = html;
+}
+
+/** Fill `#doc-search` suggestions — both packs, with k3ui/k3ux chips + auto switch. */
+async function updateDocSearchSuggestions(query: string): Promise<void> {
+  const search = document.getElementById('doc-search') as
+    | (HTMLElement & {
+        openSuggestions?: () => void;
+        closeSuggestions?: () => void;
+      })
+    | null;
+  if (!search) return;
+
+  const clearSuggestions = (): void => {
+    search.querySelectorAll('[slot="suggestions"]').forEach((n) => n.remove());
+    search.closeSuggestions?.();
+  };
+
+  const q = query.trim();
+  if (!q) {
+    clearSuggestions();
+    return;
+  }
+
+  await registry.registerAll(['k3-list', 'k3-list-item', 'k3-chip']);
+  const hits = catalogSearchHits(t, q, 12, 'all');
+  if (!hits.length) {
+    clearSuggestions();
+    return;
+  }
+
+  let host = document.getElementById('doc-search-suggestions');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'doc-search-suggestions';
+    host.slot = 'suggestions';
+    host.className = 'k3-scroll doc-search-suggestions';
+    host.style.setProperty(
+      '--k3-scroll-track-inset',
+      'var(--k3-sys-shape-corner-large, 1rem)',
+    );
+    search.append(host);
+  }
+
+  const list = document.createElement('k3-list');
+  list.setAttribute('variant', 'segmented');
+  list.setAttribute('emphasized', '');
+  list.setAttribute('selection', 'single');
+  list.setAttribute('hide-selection-indicator', '');
+
+  const active = getDocProduct();
+  for (const c of hits) {
+    const pack = catalogEntryProduct(c);
+    const item = document.createElement('k3-list-item');
+    item.setAttribute('interactive', '');
+    item.setAttribute('emphasized', '');
+    item.setAttribute('lines', 'two');
+    item.setAttribute('value', c.id);
+    item.setAttribute('data-nav', c.id);
+    item.setAttribute('data-product', pack);
+
+    const iconName = iconForComponent(c.id, c.category) || 'widgets';
+    const icon = document.createElement('span');
+    icon.slot = 'leading';
+    icon.className = 'ms notranslate';
+    icon.setAttribute('translate', 'no');
+    icon.setAttribute('lang', 'zxx');
+    icon.setAttribute('data-k3-icon', iconName);
+    icon.setAttribute('aria-hidden', 'true');
+    item.append(icon);
+
+    const headline = document.createElement('span');
+    headline.slot = 'headline';
+    headline.textContent = t(c.titleKey);
+    item.append(headline);
+
+    const supporting = document.createElement('span');
+    supporting.slot = 'supporting';
+    supporting.textContent = t(c.blurbKey);
+    item.append(supporting);
+
+    const chip = document.createElement('k3-chip');
+    chip.slot = 'trailing';
+    chip.setAttribute('variant', 'suggestion');
+    if (pack === active) chip.setAttribute('selected', '');
+    chip.setAttribute('data-product-chip', pack);
+    chip.classList.add('doc-search-product-chip');
+    chip.textContent = pack === 'k3ux' ? 'k3ux' : 'k3ui';
+    chip.setAttribute('aria-label', pack === 'k3ux' ? 'K3ux' : 'K3ui');
+    /* Chip is decorative — row click handles navigation / pack switch. */
+    chip.style.pointerEvents = 'none';
+    item.append(chip);
+
+    item.addEventListener('k3-click', () => {
+      clearSuggestions();
+      const input = search as HTMLElement & { value?: string };
+      if (input) input.value = '';
+      /* Switch pack first so nav / catalog match the target page. */
+      if (pack !== getDocProduct()) {
+        if (pack === 'k3ux') void ensureK3ux();
+        applyDocProduct(pack);
+      }
+      location.hash = `#/${c.id}`;
+      buildCatalogGrid('');
+    });
+
+    list.append(item);
+  }
+
+  host.replaceChildren(list);
+  search.openSuggestions?.();
 }
 
 /** Shell FAB menu — open GitHub repo / profile in a new tab. */
@@ -2012,6 +2259,9 @@ function showPage(id: string): void {
   /* Demo snow only on Snow page; shell snow is suppressed there (settings switch ignored). */
   if (resolvedId !== 'snow') pauseDemoSnow();
   void applyShellSnow(resolvedId);
+  /* Demo sparkle only on Sparkle mouse page; shell trail suppressed there. */
+  if (resolvedId !== 'sparkle-mouse') pauseDemoSparkle();
+  void applyShellSparkle(resolvedId);
   const ambient = document.getElementById('home-ambient');
   if (ambient) ambient.hidden = resolvedId !== 'home';
   buildPrimaryNav();
@@ -2069,12 +2319,21 @@ function syncDocNav(pageId: string): void {
     return;
   }
 
+  if (pageId === 'pack') {
+    docNav.previousHref = '#/quick-start';
+    docNav.previousTitle = t('doc.quick-start.title');
+    const first = orderedComponents()[0];
+    docNav.nextHref = first ? `#/${first.id}` : '';
+    docNav.nextTitle = first ? t(first.titleKey) : '';
+    return;
+  }
+
   if (pageId === 'quick-start') {
     const first = orderedComponents()[0];
     docNav.previousHref = '#/';
     docNav.previousTitle = t('doc.catalog.title');
-    docNav.nextHref = first ? `#/${first.id}` : '';
-    docNav.nextTitle = first ? t(first.titleKey) : '';
+    docNav.nextHref = '#/pack';
+    docNav.nextTitle = t('doc.nav.pack');
     return;
   }
 
@@ -3014,12 +3273,39 @@ async function ensureDocTables(pageId?: string): Promise<void> {
     }
     return;
   }
-  if (id === 'quick-start') return;
+  if (id === 'quick-start' || id === 'pack') return;
   const page = document.querySelector<HTMLElement>(`.comp-page[data-page="${id}"]`);
   if (!page) return;
   await Promise.all([registry.register('k3-table'), registry.register('k3-codeblock')]);
   mountDocPage(page, id);
   applyPlaygroundI18n();
+}
+
+/** Pack builder lives in the shell — mount / remount when product changes. */
+let packPageDisposer: (() => void) | null = null;
+let packPageProduct: DocProduct | null = null;
+
+async function ensurePackPageMounted(force = false): Promise<void> {
+  const root = document.getElementById('pack-app');
+  if (!root) return;
+  const product = getDocProduct();
+  if (!force && packPageDisposer && packPageProduct === product) return;
+  packPageDisposer?.();
+  packPageDisposer = null;
+  packPageProduct = product;
+  await registry.registerAll(['k3-checkbox', 'k3-button', 'k3-button-group']);
+  const { mountPackBuilder } = await import('./pack/mount.js');
+  const locale = document.documentElement.lang?.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+  packPageDisposer = await mountPackBuilder(root, {
+    product,
+    embedded: true,
+    locale,
+    onProductChange: (next) => {
+      if (next === getDocProduct()) return;
+      applyDocProduct(next);
+      if (next === 'k3ux') void ensureK3ux();
+    },
+  });
 }
 
 function readCssColorVar(cssVar: string): string {
@@ -3273,8 +3559,15 @@ async function boot(): Promise<void> {
     applyAdaptiveShell();
     containerOn = docStore.get(DocKeys.uiContainer, true);
     applyContainerLayout();
+    const qProduct = new URLSearchParams(location.search).get('product');
     const savedProduct = docStore.get<DocProduct>(DocKeys.docProduct, 'k3ui');
-    applyDocProduct(savedProduct === 'k3ux' ? 'k3ux' : 'k3ui');
+    const bootProduct: DocProduct =
+      qProduct === 'k3ux' || qProduct === 'k3ui'
+        ? qProduct
+        : savedProduct === 'k3ux'
+          ? 'k3ux'
+          : 'k3ui';
+    applyDocProduct(bootProduct);
     if (getDocProduct() === 'k3ux') void ensureK3ux();
     wireProductSwitch();
     buildPrimaryNav();
@@ -3283,11 +3576,18 @@ async function boot(): Promise<void> {
     await yieldToMain();
     buildCatalogGrid();
     void mountHomeAmbient();
-    document.querySelectorAll<HTMLElement>('[data-nav="quick-start"]').forEach((btn) => {
-      if (btn.dataset.wiredNav) return;
+    /* CTA buttons only — not `.app[data-nav=rail|bar]` shell chrome.
+       Listen to `k3-click` (composed) — plain `click` can miss the host. */
+    document.querySelectorAll<HTMLElement>('k3-button[data-nav]').forEach((btn) => {
+      const target = btn.dataset.nav?.trim();
+      if (!target || btn.dataset.wiredNav) return;
       btn.dataset.wiredNav = '1';
-      btn.addEventListener('click', () => {
-        void navigateDocPage('quick-start', ensurePageComponents);
+      btn.addEventListener('k3-click', () => {
+        if (location.hash !== `#/${target}`) {
+          location.hash = `#/${target}`;
+          return;
+        }
+        void navigateDocPage(target, ensurePageComponents);
       });
     });
     rebuildGridOverlay();
@@ -3336,6 +3636,12 @@ async function boot(): Promise<void> {
       /* Load k3ux module when visiting a UX page (even before scanning tags). */
       if (K3UX_PAGES.has(articleId) || getDocProduct() === 'k3ux') {
         await ensureK3ux();
+      }
+      if (articleId === 'pack') {
+        /* Trust the shell product (home switch / docStore) — do not let a stale
+           `?product=k3ux` from a previous Pack visit override K3ui. */
+        await ensurePackPageMounted();
+        return;
       }
       const tags = collectPageK3Tags(page);
       /* k3ui + k3ux: only tags present on this page, so demos work without refresh. */
@@ -3396,7 +3702,9 @@ async function boot(): Promise<void> {
       if (articleId === 'confetti') wireConfettiDemo();
       if (articleId === 'snow') wireSnowDemo();
       if (articleId === 'firework') wireFireworkDemo();
+      if (articleId === 'sparkle-mouse') wireSparkleMouseDemo();
       if (articleId === 'voice-ring') wireVoiceRingDemo();
+      if (articleId === 'command-palette') wireCommandPaletteDemo();
       if (articleId === 'index-list') wireIndexListDemo();
       if (articleId === 'card-holo') {
         /* Sibling package source (playground alias also maps k3ux/holo-effects.css). */
@@ -3769,8 +4077,10 @@ async function boot(): Promise<void> {
   wireShellChrome();
   await yieldToMain();
   wireDemoPages();
-  /* Demo wiring must never leave snow running when the settings toggle is off. */
-  void applyShellSnow(articlePageId(currentPageId()));
+  /* Demo wiring must never leave snow / sparkle running when the settings toggle is off. */
+  const bootPage = articlePageId(currentPageId());
+  void applyShellSnow(bootPage);
+  void applyShellSparkle(bootPage);
 }
 
 /** App-bar chrome — locale + settings sheet (theme / motion / layout / seed). */
@@ -3900,6 +4210,17 @@ function wireShellChrome(): void {
     });
   });
 
+  document.getElementById('settings-sparkle')?.addEventListener('k3-change', (e) => {
+    const selected = (e as CustomEvent<{ selected?: boolean }>).detail?.selected;
+    if (typeof selected !== 'boolean') return;
+    shellSparkleOn = selected;
+    void applyShellSparkle().then(() => {
+      syncSparkleShellSwitches();
+      syncSettingsSheet();
+      flashToggle('playground.ctrl.sparkle', selected);
+    });
+  });
+
   document.getElementById('settings-container')?.addEventListener('k3-change', (e) => {
     if (!matchMedia(MQ_BODY_CONTAINER).matches) return;
     const selected = (e as CustomEvent<{ selected?: boolean }>).detail?.selected;
@@ -3974,6 +4295,7 @@ function wireShellChrome(): void {
   if (docSearch) docSearch.placeholder = t('playground.search.placeholder');
   docSearch?.addEventListener('k3-input', ((e: CustomEvent<{ value: string }>) => {
     const q = e.detail?.value ?? '';
+    void updateDocSearchSuggestions(q);
     if (currentPageId() !== 'home') {
       location.hash = '#/';
       window.setTimeout(() => buildCatalogGrid(q), 0);
@@ -3981,6 +4303,135 @@ function wireShellChrome(): void {
     }
     buildCatalogGrid(q);
   }) as EventListener);
+  docSearch?.addEventListener('k3-clear', () => {
+    void updateDocSearchSuggestions('');
+    buildCatalogGrid('');
+  });
+
+  wireCommandPalette();
+}
+
+/** Ctrl/Cmd+K command palette — jump to any catalog page + shell actions. */
+function wireCommandPalette(): void {
+  const palette = document.getElementById('shell-command-palette') as
+    | (HTMLElement & {
+        show?: () => Promise<boolean>;
+        hide?: () => Promise<boolean>;
+        items?: Array<{
+          value: string;
+          label: string;
+          supporting?: string;
+          icon?: string;
+          shortcut?: string;
+          group?: string;
+          keywords?: string;
+        }>;
+      })
+    | null;
+  if (!palette || palette.dataset.wired === '1') return;
+  palette.dataset.wired = '1';
+
+  const rebuildItems = (): void => {
+    const items: NonNullable<(typeof palette)['items']> = [
+      {
+        value: 'action:home',
+        label: t('playground.command.home'),
+        supporting: t('playground.command.home.blurb'),
+        icon: 'home',
+        shortcut: 'Alt+H',
+        group: t('playground.command.group.actions'),
+      },
+      {
+        value: 'action:settings',
+        label: t('playground.command.settings'),
+        supporting: t('playground.command.settings.blurb'),
+        icon: 'settings',
+        shortcut: 'Ctrl+,',
+        group: t('playground.command.group.actions'),
+      },
+      {
+        value: 'action:theme',
+        label: t('playground.command.theme'),
+        supporting: t('playground.command.theme.blurb'),
+        icon: 'dark_mode',
+        group: t('playground.command.group.actions'),
+      },
+    ];
+    /* Both packs — label pack in supporting so filter finds k3ux from k3ui. */
+    for (const c of DOC_COMPONENTS) {
+      if (c.category === 'Styles' || c.category === 'Resources') continue;
+      const pack = catalogEntryProduct(c);
+      items.push({
+        value: `nav:${pack}:${c.id}`,
+        label: t(c.titleKey),
+        supporting: `${t(c.blurbKey)} · ${pack}`,
+        icon: iconForComponent(c.id, c.category) || 'widgets',
+        group: `${c.category} · ${pack}`,
+        keywords: `${c.id} ${pack}`,
+      });
+    }
+    palette.items = items;
+  };
+
+  const goHome = (): void => {
+    void palette.hide?.();
+    location.hash = '#/';
+  };
+
+  const goSettings = (): void => {
+    void palette.hide?.();
+    void openSettingsSheet();
+  };
+
+  palette.addEventListener('k3-command-select', ((e: CustomEvent<{ value?: string }>) => {
+    const value = e.detail?.value ?? '';
+    if (value === 'action:home') {
+      goHome();
+      return;
+    }
+    if (value === 'action:settings') {
+      goSettings();
+      return;
+    }
+    if (value === 'action:theme') {
+      setThemeMode(themeMode === 'dark' ? 'light' : 'dark');
+      return;
+    }
+    /* nav:k3ui:card | nav:k3ux:card-holo */
+    const nav = /^nav:(k3ui|k3ux):(.+)$/.exec(value);
+    if (nav) {
+      const pack = nav[1] as DocProduct;
+      const id = nav[2]!;
+      if (pack !== getDocProduct()) {
+        if (pack === 'k3ux') void ensureK3ux();
+        applyDocProduct(pack);
+      }
+      location.hash = `#/${id}`;
+    }
+  }) as EventListener);
+
+  void registry.registerAll(['k3-command-palette', 'k3-dialog', 'k3-kbd', 'k3-list-item']).then(() => {
+    rebuildItems();
+  });
+
+  bindChords(
+    document,
+    {
+      'control+k': () => {
+        rebuildItems();
+        void palette.show?.();
+      },
+      'meta+k': () => {
+        rebuildItems();
+        void palette.show?.();
+      },
+      /* Same chords as palette rows (Accueil / Réglages) */
+      'alt+h': goHome,
+      'control+,': goSettings,
+      'meta+,': goSettings,
+    },
+    { ignoreFields: false, preventDefault: true },
+  );
 }
 
 /** npm / pnpm toggle on Quick Start install card. */
@@ -4862,6 +5313,23 @@ function wireTextScrambleDemo(): void {
   }) as EventListener);
 }
 
+/** Demo page — open local `k3-command-palette`. */
+function wireCommandPaletteDemo(): void {
+  const page = document.getElementById('page-command-palette');
+  if (!page || page.dataset.cmdWired) return;
+  page.dataset.cmdWired = '1';
+  const palette = document.getElementById('demo-command-palette') as
+    | (HTMLElement & { show?: () => Promise<boolean> })
+    | null;
+  document.getElementById('demo-command-palette-open')?.addEventListener('k3-click', () => {
+    void palette?.show?.();
+  });
+  palette?.addEventListener('k3-command-select', ((e: CustomEvent<{ value?: string }>) => {
+    const value = e.detail?.value;
+    if (value) location.hash = `#/${value}`;
+  }) as EventListener);
+}
+
 /** Confetti playground — preset buttons → `k3-confetti#demo-confetti`. */
 function wireConfettiDemo(): void {
   const page = document.getElementById('page-confetti');
@@ -4882,6 +5350,262 @@ function wireConfettiDemo(): void {
     if (typeof host.presetFire === 'function') host.presetFire(preset);
     else if (typeof host.fire === 'function') host.fire();
   }) as EventListener);
+}
+
+type SparkleMouseHost = HTMLElement & {
+  start?: () => void;
+  stop?: () => void;
+  clear?: () => void;
+  burst?: (x: number, y: number, count?: number) => number;
+  intensity?: number;
+  colors?: string[];
+  isRunning?: boolean;
+};
+
+type SparkleFieldEl = HTMLElement & { value?: string };
+type SparkleSliderEl = HTMLElement & { value?: number; label?: string };
+type SparkleDialogEl = HTMLElement & {
+  show?: () => Promise<boolean>;
+  hide?: () => Promise<boolean>;
+};
+
+/** Slot defaults when raising the colour count (1–5). */
+const SPARKLE_COLOR_DEFAULTS = [
+  'primary',
+  'secondary',
+  'tertiary',
+  'error',
+  'outline',
+] as const;
+
+/** Resolve a freeform colour (role / CSS) to `#rrggbb` for the native swatch. */
+function sparkleSwatchHex(raw: string, el: Element | null): string {
+  const value = raw.trim();
+  if (!value) return '#6750a4';
+  if (/^#[0-9a-fA-F]{6}$/.test(value)) return value.toLowerCase();
+  if (/^#[0-9a-fA-F]{3}$/.test(value)) {
+    const r = value[1]!;
+    const g = value[2]!;
+    const b = value[3]!;
+    return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+  const style = el && typeof getComputedStyle === 'function' ? getComputedStyle(el) : null;
+  const viaVar = /^var\(\s*(--[\w-]+)\s*(?:,\s*(.+))?\)$/.exec(value);
+  if (viaVar) {
+    const resolved = style?.getPropertyValue(viaVar[1]!).trim() || viaVar[2]?.trim() || '';
+    return sparkleSwatchHex(resolved, el);
+  }
+  if (/^[a-z][a-z0-9-]*$/.test(value)) {
+    const token = style?.getPropertyValue(`--k3-sys-color-${value}`).trim() ?? '';
+    if (token) return sparkleSwatchHex(token, el);
+  }
+  /* Probe canvas / DOM for named CSS colours and functions. */
+  try {
+    const probe = document.createElement('span');
+    probe.style.color = value;
+    (el ?? document.documentElement).append(probe);
+    const computed = getComputedStyle(probe).color;
+    probe.remove();
+    const m = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(computed);
+    if (m) {
+      const hex = (n: string) => Number(n).toString(16).padStart(2, '0');
+      return `#${hex(m[1]!)}${hex(m[2]!)}${hex(m[3]!)}`;
+    }
+  } catch {
+    /* keep fallback */
+  }
+  return '#6750a4';
+}
+
+/** Sparkle-mouse playground — trail + Options (1–5 freeform colours + shell switch). */
+function wireSparkleMouseDemo(): void {
+  const page = document.getElementById('page-sparkle-mouse');
+  if (!page) return;
+
+  /* Re-enter: listeners already bound — restart demo when Sparkle is visible. */
+  if (page.dataset.sparkleWired) {
+    if (isSparkleDemoPageActive()) void ensureDemoSparkleRunning();
+    syncSparkleShellSwitches();
+    return;
+  }
+  page.dataset.sparkleWired = '1';
+
+  /* Always #demo-sparkle-mouse — never #shell-sparkle-mouse (settings overlay). */
+  const host = () => document.getElementById('demo-sparkle-mouse') as SparkleMouseHost | null;
+  const toggleBtn = document.getElementById('sparkle-toggle');
+  const dialog = () =>
+    document.getElementById('sparkle-options-dialog') as SparkleDialogEl | null;
+  const intensity = document.getElementById('sparkle-intensity') as SparkleSliderEl | null;
+  const colorCount = document.getElementById('sparkle-color-count') as SparkleSliderEl | null;
+
+  const syncToggle = () => {
+    const el = host();
+    const running = !!el?.isRunning;
+    if (toggleBtn) {
+      toggleBtn.textContent = running
+        ? t('doc.sparkle-mouse.action.stop')
+        : t('doc.sparkle-mouse.action.start');
+      toggleBtn.setAttribute(
+        'data-i18n',
+        running ? 'doc.sparkle-mouse.action.stop' : 'doc.sparkle-mouse.action.start',
+      );
+    }
+  };
+
+  const readColorSlot = (index: number): string => {
+    const field = document.getElementById(`sparkle-color-hex-${index}`) as SparkleFieldEl | null;
+    const raw = (field?.value ?? '').trim();
+    return raw || SPARKLE_COLOR_DEFAULTS[index] || 'primary';
+  };
+
+  const syncSwatchFromField = (index: number): void => {
+    const field = document.getElementById(`sparkle-color-hex-${index}`) as SparkleFieldEl | null;
+    const swatch = document.getElementById(`sparkle-color-${index}`) as HTMLInputElement | null;
+    if (!field || !swatch) return;
+    swatch.value = sparkleSwatchHex(field.value || SPARKLE_COLOR_DEFAULTS[index] || 'primary', host());
+  };
+
+  const syncColorRowsVisibility = (): void => {
+    const n = Math.min(5, Math.max(1, Math.round(Number(colorCount?.value ?? 3))));
+    if (colorCount) {
+      colorCount.value = n;
+      colorCount.label = `${t('doc.sparkle-mouse.knob.color-count')} · ${n}`;
+    }
+    page.querySelectorAll<HTMLElement>('.sparkle-color-row').forEach((row) => {
+      const idx = Number(row.dataset.sparkleColorIndex ?? -1);
+      const show = idx >= 0 && idx < n;
+      row.hidden = !show;
+      if (show) {
+        const field = document.getElementById(`sparkle-color-hex-${idx}`) as SparkleFieldEl | null;
+        if (field && !(field.value || '').trim()) {
+          field.value = SPARKLE_COLOR_DEFAULTS[idx] ?? 'primary';
+        }
+        syncSwatchFromField(idx);
+      }
+    });
+  };
+
+  const applySparkleOptions = (): void => {
+    const n = Math.min(5, Math.max(1, Math.round(Number(colorCount?.value ?? 3))));
+    const colors: string[] = [];
+    for (let i = 0; i < n; i++) colors.push(readColorSlot(i));
+    const intensityVal =
+      intensity?.value != null ? Number(intensity.value) : undefined;
+    if (intensity && intensityVal != null) {
+      intensity.label = `${t('doc.sparkle-mouse.knob.intensity')} · ${Math.round(intensityVal)}`;
+    }
+    const demo = host();
+    if (demo) {
+      if (intensityVal != null) demo.intensity = intensityVal;
+      demo.colors = colors;
+    }
+    /* Shell trail mirrors Options so the playground-wide effect matches. */
+    const shell = shellSparkleEl();
+    if (shell) {
+      if (intensityVal != null) shell.intensity = intensityVal;
+      shell.colors = colors;
+    }
+  };
+
+  page.addEventListener('k3-click', ((e: Event) => {
+    const path = e.composedPath() as EventTarget[];
+    const btn = path.find(
+      (n): n is HTMLElement =>
+        n instanceof HTMLElement && n.hasAttribute('data-sparkle-action'),
+    );
+    if (!btn) return;
+    const action = btn.getAttribute('data-sparkle-action');
+    const el = host();
+    if (!action) return;
+    if (action === 'options') {
+      syncSparkleShellSwitches();
+      syncColorRowsVisibility();
+      for (let i = 0; i < 5; i++) syncSwatchFromField(i);
+      void dialog()?.show?.();
+      return;
+    }
+    if (!el) return;
+    if (action === 'toggle') {
+      if (el.isRunning) el.stop?.();
+      else el.start?.();
+      syncToggle();
+      return;
+    }
+    if (action === 'clear') {
+      el.clear?.();
+      return;
+    }
+    if (action === 'burst') {
+      const rect = page.getBoundingClientRect();
+      el.burst?.(rect.left + rect.width / 2, rect.top + rect.height / 2, 24);
+    }
+  }) as EventListener);
+
+  intensity?.addEventListener('k3-change', () => {
+    applySparkleOptions();
+  });
+
+  colorCount?.addEventListener('k3-change', () => {
+    syncColorRowsVisibility();
+    applySparkleOptions();
+  });
+
+  for (let i = 0; i < 5; i++) {
+    const idx = i;
+    const field = document.getElementById(`sparkle-color-hex-${idx}`) as SparkleFieldEl | null;
+    const swatch = document.getElementById(`sparkle-color-${idx}`) as HTMLInputElement | null;
+    swatch?.addEventListener('input', () => {
+      if (field && swatch.value) field.value = swatch.value;
+      applySparkleOptions();
+    });
+    field?.addEventListener('k3-change', () => {
+      syncSwatchFromField(idx);
+      applySparkleOptions();
+    });
+    field?.addEventListener('k3-input', () => {
+      syncSwatchFromField(idx);
+      applySparkleOptions();
+    });
+  }
+
+  document.getElementById('sparkle-shell-switch')?.addEventListener('k3-change', (e) => {
+    const selected = (e as CustomEvent<{ selected?: boolean }>).detail?.selected;
+    if (typeof selected !== 'boolean') return;
+    shellSparkleOn = selected;
+    void applyShellSparkle().then(() => {
+      syncSparkleShellSwitches();
+      syncSettingsSheet();
+      void showFlash(
+        t('playground.settings.flash.toggle', {
+          label: t('playground.ctrl.sparkle'),
+          state: t(selected ? 'playground.settings.flash.on' : 'playground.settings.flash.off'),
+        }),
+      );
+    });
+  });
+
+  document.getElementById('sparkle-options-done')?.addEventListener('k3-click', () => {
+    applySparkleOptions();
+    void dialog()?.hide?.();
+  });
+
+  syncSparkleShellSwitches();
+  syncColorRowsVisibility();
+  applySparkleOptions();
+
+  void (async () => {
+    const el = host();
+    if (!el) return;
+    await customElements.whenDefined('k3-sparkle-mouse');
+    await (el as HTMLElement & { updateComplete?: Promise<unknown> }).updateComplete;
+    if (!isSparkleDemoPageActive()) {
+      teardownSparkleHost(el);
+      return;
+    }
+    el.disabled = false;
+    if (!el.isRunning) el.start?.();
+    syncToggle();
+  })();
 }
 
 type SnowHost = HTMLElement & {

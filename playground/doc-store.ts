@@ -73,6 +73,8 @@ export const DocKeys = {
   uiAnimations: 'ui.animations',
   /** Shell-wide snowfall overlay (independent from Snow demo page). */
   uiSnow: 'ui.snow',
+  /** Shell-wide sparkle-mouse trail (independent from Sparkle mouse demo page). */
+  uiSparkle: 'ui.sparkle',
   /** Docs pack: k3ui (UI) or k3ux (UX animations) */
   docProduct: 'doc.product',
 } as const;

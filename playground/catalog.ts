@@ -406,6 +406,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.badge.blurb',
   },
   {
+    id: 'kbd',
+    category: 'Feedback',
+    title: 'Kbd',
+    titleKey: 'doc.kbd.title',
+    blurbKey: 'doc.kbd.blurb',
+  },
+  {
     id: 'countdown',
     category: 'Feedback',
     title: 'Countdown',
@@ -452,6 +459,14 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Firework',
     titleKey: 'doc.firework.title',
     blurbKey: 'doc.firework.blurb',
+    product: 'k3ux',
+  },
+  {
+    id: 'sparkle-mouse',
+    category: 'Animation',
+    title: 'Sparkle mouse',
+    titleKey: 'doc.sparkle-mouse.title',
+    blurbKey: 'doc.sparkle-mouse.blurb',
     product: 'k3ux',
   },
   {
@@ -624,6 +639,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.list.blurb',
   },
   {
+    id: 'command-palette',
+    category: 'Containment',
+    title: 'Command palette',
+    titleKey: 'doc.command-palette.title',
+    blurbKey: 'doc.command-palette.blurb',
+  },
+  {
     id: 'iso-filter',
     category: 'Containment',
     title: 'Iso filter',
@@ -660,6 +682,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Breadcrumb',
     titleKey: 'doc.breadcrumb.title',
     blurbKey: 'doc.breadcrumb.blurb',
+  },
+  {
+    id: 'toc',
+    category: 'Navigation',
+    title: 'Table of contents',
+    titleKey: 'doc.toc.title',
+    blurbKey: 'doc.toc.blurb',
   },
   {
     id: 'app-bar',
@@ -925,21 +954,117 @@ export function neighborComponents(id: string): {
   };
 }
 
+/** Fold accents + case for catalog search (`Cartes` ↔ `cartes` ↔ `carte`). */
+export function normalizeCatalogQuery(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .trim();
+}
+
+/** Light FR/EN plural stem so `cartes` hits `carte holographique`. */
+export function stemCatalogQuery(value: string): string {
+  const q = normalizeCatalogQuery(value);
+  /* Strip a trailing plural `s` / `x` (cartes → carte), keep stems intact. */
+  if (q.length > 3 && (q.endsWith('s') || q.endsWith('x')) && !q.endsWith('ss')) {
+    return q.slice(0, -1);
+  }
+  return q;
+}
+
+/** Extra keywords per family id prefix — nav labels + common aliases. */
+const CATALOG_KEYWORDS: Record<string, readonly string[]> = {
+  card: ['cartes', 'carte', 'cards', 'card'],
+  'card-holo': ['cartes', 'carte', 'cards', 'card', 'holo', 'holographique'],
+  'card-lenticular': ['cartes', 'carte', 'cards', 'card', 'lenticular', 'lenticulaire'],
+  'card-scratch': ['cartes', 'carte', 'cards', 'card', 'scratch', 'gratter'],
+  buttons: ['boutons', 'bouton', 'button'],
+  fab: ['fab', 'floating'],
+  list: ['listes', 'liste', 'lists'],
+  dialog: ['dialogue', 'modal'],
+  sheet: ['panneau', 'drawer'],
+  snackbar: ['toast'],
+  tooltip: ['infobulle'],
+  search: ['recherche'],
+  kbd: ['clavier', 'keyboard', 'shortcut', 'raccourci'],
+  'command-palette': ['palette', 'commande', 'command', 'raccourcis', 'shortcuts'],
+};
+
+/** True when a catalog entry matches the user query (accent/plural tolerant). */
+export function catalogEntryMatches(
+  c: DocComponent,
+  category: string,
+  filter: string,
+  t: (key: string) => string,
+): boolean {
+  const q = normalizeCatalogQuery(filter);
+  if (!q) return true;
+  const stem = stemCatalogQuery(q);
+  const family = c.id.split('-')[0] ?? c.id;
+  const keywords = CATALOG_KEYWORDS[family] ?? CATALOG_KEYWORDS[c.id] ?? [];
+  const hay = normalizeCatalogQuery(
+    [
+      c.id,
+      c.title,
+      family,
+      category,
+      t(c.titleKey),
+      t(c.blurbKey),
+      ...keywords,
+    ].join(' '),
+  );
+  return hay.includes(q) || hay.includes(stem);
+}
+
+export type CatalogSearchScope = 'active' | 'all';
+
+/**
+ * Flat matches for appbar suggestions / command palette.
+ * `scope: 'all'` searches both k3ui and k3ux (active pack first).
+ */
+export function catalogSearchHits(
+  t: (key: string) => string,
+  filter: string,
+  limit = 12,
+  scope: CatalogSearchScope = 'all',
+): DocComponent[] {
+  const q = filter.trim();
+  if (!q) return [];
+  const active = getDocProduct();
+  const pool =
+    scope === 'all'
+      ? DOC_COMPONENTS.filter((c) => c.category !== 'Styles' && c.category !== 'Resources')
+      : orderedComponents();
+
+  const matched = pool.filter((c) => catalogEntryMatches(c, c.category, q, t));
+  matched.sort((a, b) => {
+    const ap = (a.product ?? 'k3ui') === active ? 0 : 1;
+    const bp = (b.product ?? 'k3ui') === active ? 0 : 1;
+    if (ap !== bp) return ap - bp;
+    const cat = a.category.localeCompare(b.category);
+    if (cat !== 0) return cat;
+    return compareDocTitle(a, b);
+  });
+  return matched.slice(0, limit);
+}
+
+/** Pack label for a catalog entry (`k3ui` | `k3ux`). */
+export function catalogEntryProduct(c: DocComponent): DocProduct {
+  return c.product ?? 'k3ui';
+}
+
 /**
  * Home catalog cards markup — shared by the app (search / locale changes) and
  * the build, which prerenders the default locale so the cards are in the first
  * frame (they are the LCP element on wide screens).
  */
 export function catalogGridHtml(t: (key: string) => string, filter = '', emptyHint = ''): string {
-  const q = filter.trim().toLowerCase();
+  const q = filter.trim();
   const blocks: string[] = [];
   for (const [cat, comps] of componentsByCategory()) {
     const visible = q
-      ? comps.filter((c) => {
-        const title = t(c.titleKey).toLowerCase();
-        const blurb = t(c.blurbKey).toLowerCase();
-        return title.includes(q) || blurb.includes(q) || c.id.includes(q) || cat.toLowerCase().includes(q);
-      })
+      ? comps.filter((c) => catalogEntryMatches(c, cat, q, t))
       : comps;
     if (!visible.length) continue;
     blocks.push(`<section class="catalog-cat">

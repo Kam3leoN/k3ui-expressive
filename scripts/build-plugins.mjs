@@ -40,7 +40,10 @@ export function skipStylesheet() {
   };
 }
 
-/** Replace the registry catalog with the given tags only (custom packs). */
+/**
+ * Custom packs: the catalog keeps every tag (the registry can then say
+ * "k3-select is not in your pack") but only the selected ones carry code.
+ */
 export function filterCatalog(tags) {
   const keep = new Set(tags);
   return {
@@ -48,10 +51,38 @@ export function filterCatalog(tags) {
     enforce: 'pre',
     load(id) {
       if (!/\/src\/registry\/catalog\.ts$/.test(norm(id))) return null;
-      const rows = readCatalog()
-        .filter((c) => keep.has(c.tag))
-        .map((c) => `  { tag: '${c.tag}', load: () => import('../components/${c.file}.js') },`);
-      return `export const catalog = [\n${rows.join('\n')}\n];\nexport const allTags = catalog.map((c) => c.tag);\n`;
+      const rows = readCatalog().map((c) =>
+        keep.has(c.tag)
+          ? `  { tag: '${c.tag}', load: () => import('../components/${c.file}.js') },`
+          : `  { tag: '${c.tag}', load: excluded },`,
+      );
+      return (
+        `const excluded = () => Promise.resolve({ default: null });\n` +
+        `export const catalog = [\n${rows.join('\n')}\n];\nexport const allTags = catalog.map((c) => c.tag);\n`
+      );
     },
+  };
+}
+
+/** AiO / custom / generic — same rule as playground/pack/model.ts. */
+export function packKindLabel(name) {
+  if (/\.full$/i.test(name)) return 'AiO pack';
+  if (/\.custom$/i.test(name)) return 'custom pack';
+  return 'pack';
+}
+
+/** Banner + `globalThis.K3UI_PACK` — how a pack describes itself to the registry. */
+export function packHeader({ name, version, components, builder }) {
+  const info = { name, version, components, builder };
+  const root = String(builder).split('#')[0] || 'https://k3ui-expressive.vercel.app/';
+  const tags = components.map((t) => t.slice(3)).join('+');
+  const url = `${root}${root.includes('?') ? '&' : '?'}components=${tags}#/pack`.replace(
+    '?&',
+    '?',
+  );
+  const kind = packKindLabel(name);
+  return {
+    banner: `/*! K3UI ${version} — ${kind} "${name}" (${components.length} components) ${url} */`,
+    intro: `globalThis.K3UI_PACK=${JSON.stringify(info)};`,
   };
 }
