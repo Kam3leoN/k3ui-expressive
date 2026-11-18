@@ -39,4 +39,7 @@ export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
   'k3-time-picker': ['k3-button', 'k3-icon-button', 'k3-text-field', 'k3-time-picker-dial', 'k3-time-picker-toggle'],
   'k3-time-picker-toggle': ['k3-icon-button', 'k3-time-picker'],
   'k3-toolbar': ['k3-fab', 'k3-icon-button'],
+  'k3-stepper': ['k3-step'],
+  'k3-accordion': ['k3-expansion-panel'],
+  'k3-tree': ['k3-tree-item'],
 };

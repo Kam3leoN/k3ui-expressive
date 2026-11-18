@@ -1275,6 +1275,45 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     a11y: 'doc.scroll-to-top.a11y',
     versions: { na: 'Single FAB control — variant/progress are options' },
   },
+  stepper: {
+    theming: [
+      ['orientation', 'horizontal|vertical', 'Header layout'],
+      ['states', 'completed · optional · error', 'Per k3-step'],
+    ],
+    keyboard: [
+      ['Arrows', 'Move between step tabs'],
+      ['Home / End', 'First / last step'],
+    ],
+    focus: 'doc.stepper.focus',
+    motion: { na: 'Instant step panel swap' },
+    a11y: 'doc.stepper.a11y',
+    versions: 'doc.stepper.versions.blurb',
+  },
+  tree: {
+    theming: { na: 'surface-container host · row selection tint' },
+    keyboard: [
+      ['↑ / ↓', 'Previous / next visible row'],
+      ['← / →', 'Collapse or parent / expand or child'],
+      ['Home / End', 'First / last visible'],
+      ['*', 'Expand all siblings'],
+      ['Typeahead', 'Jump to next matching label'],
+    ],
+    focus: 'doc.tree.focus',
+    motion: { na: 'Chevron rotate only' },
+    a11y: 'doc.tree.a11y',
+    versions: 'doc.tree.versions.blurb',
+  },
+  'expansion-panel': {
+    theming: [
+      ['toggle-position', 'start|end', 'Chevron side'],
+      ['surface', 'surface-container', 'Panel chrome'],
+    ],
+    keyboard: [['Header', 'Button toggles open']],
+    focus: 'doc.expansion-panel.focus',
+    motion: [['expand', 'grid 0fr→1fr', 'Shared expandCollapseStyles']],
+    a11y: 'doc.expansion-panel.a11y',
+    versions: 'doc.expansion-panel.versions.blurb',
+  },
   'toolbar': {
     theming: [
       ['variant', 'docked|floating', 'Strip vs pill'],

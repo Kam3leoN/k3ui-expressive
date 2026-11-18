@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Added — Stepper (`k3-stepper` / `k3-step`)
+
+- Horizontal and vertical headers, linear mode, step states (completed · optional · error · disabled), supporting slot, `next()` / `previous()` / `reset()`, `selected-index`, `k3-change`
+- WAI-ARIA tablist / tab / tabpanel — arrows, Home, End
+- Playground page, catalog, registry, unit tests
+
+### Added — Tree (`k3-tree` / `k3-tree-item`)
+
+- Nested items, expanded / selected, selection `none` | `single` | `multiple`, leading and trailing slots
+- Cancelable `k3-expand-start` on lazy expand; tree keyboard (arrows, Home, End, `*`, typeahead); `aria-level`, `aria-setsize`, `aria-posinset`
+- Playground page, catalog, registry, unit tests
+
+### Added — Expansion panel (`k3-expansion-panel` / `k3-accordion`)
+
+- Slots header / supporting / content / actions; `open`, `disabled`, `toggle-position`, `hide-toggle`
+- `k3-accordion` exclusive unless `multi`; lifecycle `k3-expand-start/end` · `k3-collapse-start/end` via `emitLifecycle`
+- Reuses `expand-collapse.styles.ts`; playground page, catalog, registry, unit tests
+
 ### Added — List (`k3-list` / `k3-list-item`)
 
 - `multi` (promotes `none` / `single` to `multiple`), read-only `value` (`null` · string · string[]); `k3-select-start` (cancelable) and `k3-select-end` around each selection change

@@ -2151,7 +2151,9 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['leading', "''|'icon'|'avatar'|'image'|'video'", "''", 'On k3-list-item — detected from the slot when empty'],
       ['lines', "'one'|'two'|'three'|'auto'", 'auto', 'On k3-list-item'],
       ['href', 'string', "''", 'On k3-list-item — action row (link)'],
-      ['target · rel · download', 'string', "''", 'On k3-list-item — with href'],
+      ['target', 'string', "''", 'On k3-list-item — with href'],
+      ['rel', 'string', "''", 'On k3-list-item — with href'],
+      ['download', 'string', "''", 'On k3-list-item — with href'],
     ],
     events: [
       ['k3-select-start', '{ item, value, selected }', 'Cancelable — before a selection change'],
@@ -2231,6 +2233,51 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
     ],
     events: [['k3-change', '{ index }', 'Selection']],
     slots: [['(default)', 'k3-nav-item children']],
+  },
+  stepper: {
+    properties: [
+      ['orientation', "'horizontal'|'vertical'", 'horizontal', 'Header layout'],
+      ['linear', 'boolean', 'false', 'Block future steps until prior complete'],
+      ['selected-index', 'number', '0', 'Active step index'],
+      ['label', 'string', "''", 'aria-label on tab list'],
+    ],
+    methods: [
+      ['next()', 'void', 'Advance when linear allows'],
+      ['previous()', 'void', 'Previous step'],
+      ['reset()', 'void', 'First step'],
+    ],
+    events: [['k3-change', '{ index: number }', 'Active step changed']],
+    slots: [['(default)', '`k3-step` children (label · supporting · completed · error)']],
+  },
+  tree: {
+    properties: [
+      ['selection', "'none'|'single'|'multiple'", 'none', 'Selection mode'],
+      ['label', 'string', "''", 'aria-label on tree'],
+    ],
+    methods: [['expandAll()', 'void', 'Expand every node']],
+    events: [['k3-change', '{ values, item }', 'Selection changed']],
+    slots: [['(default)', '`k3-tree-item` roots (nested items · lazy expand)']],
+  },
+  'expansion-panel': {
+    properties: [
+      ['open', 'boolean', 'false', 'Expanded state'],
+      ['disabled', 'boolean', 'false', 'No toggle'],
+      ['toggle-position', "'start'|'end'", 'start', 'Chevron side'],
+      ['hide-toggle', 'boolean', 'false', 'Hide chevron'],
+    ],
+    events: [
+      ['k3-expand-start', 'cancelable', 'Before open'],
+      ['k3-expand-end', '—', 'After open motion'],
+      ['k3-collapse-start', 'cancelable', 'Before close'],
+      ['k3-collapse-end', '—', 'After close motion'],
+    ],
+    slots: [
+      ['header', 'Title'],
+      ['supporting', 'Subtitle'],
+      ['content', 'Body (alias default)'],
+      ['actions', 'Trailing header actions'],
+    ],
+    options: { na: 'Wrap in k3-accordion for exclusive open (multi attr)' },
   },
   toolbar: {
     properties: [

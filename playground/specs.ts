@@ -619,6 +619,24 @@ export const COMPONENT_SPECS: Record<string, SpecRow[]> = {
     { token: 'indicator', value: 'vertical 56×32 · horizontal 56dp icon+label' },
     { token: 'motion', value: 'scaleX spatial-default · state-layer hover' },
   ],
+  stepper: [
+    { token: 'orientation', value: 'horizontal · vertical' },
+    { token: 'linear', value: 'block skips until prior steps complete' },
+    { token: 'states', value: 'completed · optional · error · disabled (per step)' },
+    { token: 'pattern', value: 'tablist · tab · tabpanel' },
+  ],
+  tree: [
+    { token: 'selection', value: 'none · single · multiple' },
+    { token: 'pattern', value: 'tree · treeitem · group' },
+    { token: 'aria', value: 'aria-level · aria-setsize · aria-posinset' },
+    { token: 'lazy', value: 'cancelable k3-expand-start on item' },
+  ],
+  'expansion-panel': [
+    { token: 'toggle-position', value: 'start · end' },
+    { token: 'accordion', value: 'k3-accordion exclusive unless multi' },
+    { token: 'lifecycle', value: 'k3-expand-start/end · k3-collapse-start/end' },
+    { token: 'motion', value: 'expandCollapseStyles grid' },
+  ],
   toolbar: [
     { token: 'variant', value: 'docked · floating (M3E — replaces bottom app bar)' },
     { token: 'shape', value: 'full (pill) · rounded (Extra large 28dp · Meet)' },

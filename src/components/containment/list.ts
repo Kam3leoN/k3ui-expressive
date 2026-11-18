@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property, state, query } from 'lit/decorators.js';
 import {
   K3Element,
+  type Density,
   emitLifecycle,
   edgeScrollbarStyles,
   handleFocusNavKey,
@@ -54,6 +55,10 @@ const LEADING_RESERVE_ORDER = ['video', 'image', 'avatar', 'icon'] as const;
  */
 export class K3List extends K3Element {
   static override styles = [hostReset, edgeScrollbarStyles, listStyles];
+
+  /** Row density (−1…−3 or compact) — see `--k3-list-density-scale`. */
+  @property({ reflect: true })
+  override density: Density = 'default';
 
   /** Visual style — segmented is M3 Expressive default. */
   @property({ reflect: true }) variant: ListVariant = 'segmented';

@@ -72,6 +72,9 @@ const PAGE_TAGS: Record<string, string[]> = {
   'app-bar': ['k3-top-app-bar'],
   'footer-bar': ['k3-footer-bar'],
   tabs: ['k3-tabs'],
+  stepper: ['k3-stepper', 'k3-step'],
+  tree: ['k3-tree', 'k3-tree-item'],
+  'expansion-panel': ['k3-expansion-panel', 'k3-accordion'],
   'navigation-bar': ['k3-nav-bar', 'k3-nav-item'],
   'navigation-rail': ['k3-nav-rail', 'k3-nav-item'],
   'index-list': ['k3-index-list'],
@@ -152,6 +155,9 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'app-bar' &&
     id !== 'footer-bar' &&
     id !== 'tabs' &&
+    id !== 'stepper' &&
+    id !== 'tree' &&
+    id !== 'expansion-panel' &&
     id !== 'navigation-bar' &&
     id !== 'navigation-rail' &&
     id !== 'index-list' &&

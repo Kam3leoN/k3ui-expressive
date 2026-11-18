@@ -780,6 +780,46 @@ tags.addEventListener('k3-change', () => console.log(tags.value));`,
   next-label="FAB"
 ></k3-doc-nav>`,
   },
+  stepper: {
+    components: ['k3-stepper', 'k3-step'],
+    html: `<k3-stepper orientation="horizontal" linear label="Checkout">
+  <k3-step label="Cart" completed>
+    <p>Review your cart.</p>
+  </k3-step>
+  <k3-step label="Shipping">
+    <span slot="supporting">Required</span>
+    <p>Enter your address.</p>
+  </k3-step>
+  <k3-step label="Pay" optional>
+    <p>Payment method.</p>
+  </k3-step>
+</k3-stepper>`,
+  },
+  tree: {
+    components: ['k3-tree', 'k3-tree-item'],
+    html: `<k3-tree selection="single" label="Files">
+  <k3-tree-item label="src" value="src" expanded>
+    <k3-tree-item label="components" value="components" expanded>
+      <k3-tree-item label="tree.ts" value="tree.ts"></k3-tree-item>
+    </k3-tree-item>
+  </k3-tree-item>
+  <k3-tree-item label="README.md" value="readme"></k3-tree-item>
+</k3-tree>`,
+  },
+  'expansion-panel': {
+    components: ['k3-accordion', 'k3-expansion-panel'],
+    html: `<k3-accordion>
+  <k3-expansion-panel>
+    <span slot="header">Section 1</span>
+    <span slot="supporting">Details</span>
+    <p slot="content">First panel body.</p>
+  </k3-expansion-panel>
+  <k3-expansion-panel>
+    <span slot="header">Section 2</span>
+    <p slot="content">Exclusive when multi is off.</p>
+  </k3-expansion-panel>
+</k3-accordion>`,
+  },
   toolbar: {
     components: [
       'k3-toolbar',

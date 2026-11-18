@@ -73,6 +73,13 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-list', load: () => import('../components/containment/list.js') },
   { tag: 'k3-list-item', load: () => import('../components/containment/list-item.js') },
   {
+    tag: 'k3-expansion-panel',
+    load: () => import('../components/containment/expansion-panel.js'),
+  },
+  { tag: 'k3-accordion', load: () => import('../components/containment/accordion.js') },
+  { tag: 'k3-tree', load: () => import('../components/containment/tree.js') },
+  { tag: 'k3-tree-item', load: () => import('../components/containment/tree-item.js') },
+  {
     tag: 'k3-command-palette',
     load: () => import('../components/containment/command-palette.js'),
   },
@@ -105,6 +112,8 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-nav-rail', load: () => import('../components/navigation/nav-rail.js') },
   { tag: 'k3-nav-drawer', load: () => import('../components/navigation/nav-drawer.js') },
   { tag: 'k3-tabs', load: () => import('../components/navigation/tabs.js') },
+  { tag: 'k3-stepper', load: () => import('../components/navigation/stepper.js') },
+  { tag: 'k3-step', load: () => import('../components/navigation/step.js') },
   { tag: 'k3-toolbar', load: () => import('../components/navigation/toolbar.js') },
   { tag: 'k3-doc-nav', load: () => import('../components/navigation/doc-nav.js') },
   { tag: 'k3-breadcrumb', load: () => import('../components/navigation/breadcrumb.js') },

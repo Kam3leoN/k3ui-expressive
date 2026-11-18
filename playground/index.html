@@ -15181,6 +15181,150 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </div>
         </article>
 
+        <!-- NAVIGATION: STEPPER -->
+        <article class="comp-page" data-page="stepper" id="page-stepper" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
+            <h1 data-i18n="doc.stepper.title">Stepper</h1>
+            <p data-i18n="doc.stepper.blurb">Horizontal or vertical steps — linear mode · tab pattern.</p>
+            <p class="doc-intro" data-i18n="doc.stepper.intro">
+              Guides users through a sequence with `k3-step` children. Use linear to block skipping
+              ahead until prior steps are completed. Headers use tablist/tab; panels use tabpanel.
+            </p>
+          </header>
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-stepper id="demo-stepper-h" orientation="horizontal" linear label="Checkout">
+                      <k3-step label="Cart" completed><p>Review items.</p></k3-step>
+                      <k3-step label="Shipping"><span slot="supporting">Required</span><p>Address.</p></k3-step>
+                      <k3-step label="Pay" optional><p>Payment.</p></k3-step>
+                    </k3-stepper>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-stepper id="demo-stepper-v" orientation="vertical" label="Onboarding">
+                      <k3-step label="Welcome" completed><p>Intro.</p></k3-step>
+                      <k3-step label="Profile"><p>Your name.</p></k3-step>
+                    </k3-stepper>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.stepper.states.blurb">completed · optional · error · disabled on each step.</p>
+          </div>
+        </article>
+
+        <!-- CONTAINMENT: TREE -->
+        <article class="comp-page" data-page="tree" id="page-tree" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.tree.title">Tree</h1>
+            <p data-i18n="doc.tree.blurb">Nested tree view — expand · select · typeahead.</p>
+            <p class="doc-intro" data-i18n="doc.tree.intro">
+              Hierarchical lists with full WAI-ARIA tree keyboard support. Nest `k3-tree-item`
+              elements; set selection on the host. Lazy expands fire cancelable `k3-expand-start`.
+            </p>
+          </header>
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-tree id="demo-tree" selection="single" label="Project">
+                      <k3-tree-item label="src" value="src" expanded>
+                        <k3-tree-item label="navigation" value="nav" expanded>
+                          <k3-tree-item label="stepper.ts" value="stepper"></k3-tree-item>
+                        </k3-tree-item>
+                        <k3-tree-item label="containment" value="containment">
+                          <k3-tree-item label="tree.ts" value="tree"></k3-tree-item>
+                        </k3-tree-item>
+                      </k3-tree-item>
+                      <k3-tree-item label="README.md" value="readme"></k3-tree-item>
+                    </k3-tree>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.tree.states.blurb">expanded · selected · disabled per item.</p>
+          </div>
+        </article>
+
+        <!-- CONTAINMENT: EXPANSION PANEL -->
+        <article class="comp-page" data-page="expansion-panel" id="page-expansion-panel" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
+            <h1 data-i18n="doc.expansion-panel.title">Expansion panel</h1>
+            <p data-i18n="doc.expansion-panel.blurb">Accordion panels — lifecycle expand/collapse.</p>
+            <p class="doc-intro" data-i18n="doc.expansion-panel.intro">
+              Expandable sections with header, supporting, content, and actions slots. Group in
+              `k3-accordion` for exclusive open (default) or set `multi` for several open panels.
+            </p>
+          </header>
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases" data-demo-enhance="off">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-accordion id="demo-accordion">
+                      <k3-expansion-panel open>
+                        <span slot="header">Day 1</span>
+                        <span slot="supporting">Agenda</span>
+                        <p slot="content">Kick-off and goals.</p>
+                      </k3-expansion-panel>
+                      <k3-expansion-panel>
+                        <span slot="header">Day 2</span>
+                        <p slot="content">Workshops.</p>
+                      </k3-expansion-panel>
+                    </k3-accordion>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface stack gap-md">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.states">States</h2>
+            </header>
+            <p data-i18n="doc.expansion-panel.states.blurb">open · disabled · toggle-position start|end.</p>
+          </div>
+        </article>
+
         <!-- NAVIGATION: SCROLL TO TOP -->
         <article class="comp-page" data-page="scroll-to-top" id="page-scroll-to-top" hidden>
           <header class="section-head">

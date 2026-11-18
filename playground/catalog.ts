@@ -646,6 +646,20 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.list.blurb',
   },
   {
+    id: 'tree',
+    category: 'Containment',
+    title: 'Tree',
+    titleKey: 'doc.tree.title',
+    blurbKey: 'doc.tree.blurb',
+  },
+  {
+    id: 'expansion-panel',
+    category: 'Containment',
+    title: 'Expansion panel',
+    titleKey: 'doc.expansion-panel.title',
+    blurbKey: 'doc.expansion-panel.blurb',
+  },
+  {
     id: 'command-palette',
     category: 'Containment',
     title: 'Command palette',
@@ -717,6 +731,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     title: 'Tabs',
     titleKey: 'doc.tabs.title',
     blurbKey: 'doc.tabs.blurb',
+  },
+  {
+    id: 'stepper',
+    category: 'Navigation',
+    title: 'Stepper',
+    titleKey: 'doc.stepper.title',
+    blurbKey: 'doc.stepper.blurb',
   },
   {
     id: 'navigation-bar',
