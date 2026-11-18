@@ -18,6 +18,8 @@ import {
 
 export type PackLocale = 'fr' | 'en';
 
+const k3uxSibling = import.meta.env.VITE_K3UX_SIBLING === '1';
+
 export interface MountPackOptions {
   product: PackProduct;
   /** Inside the docs shell — no back link; URL is `?components=#/pack`. */
@@ -155,7 +157,11 @@ function renderShell(root: HTMLElement, embedded: boolean, product: PackProduct)
           label="K3ui / K3ux"
         >
           <k3-button variant="tonal" value="k3ui" data-product-switch="k3ui"${product === 'k3ui' ? ' selected' : ''}>K3ui</k3-button>
-          <k3-button variant="tonal" value="k3ux" data-product-switch="k3ux"${product === 'k3ux' ? ' selected' : ''}>K3ux</k3-button>
+          ${
+            k3uxSibling
+              ? `<k3-button variant="tonal" value="k3ux" data-product-switch="k3ux"${product === 'k3ux' ? ' selected' : ''}>K3ux</k3-button>`
+              : ''
+          }
         </k3-button-group>
       </div>`
     : '';
@@ -534,6 +540,7 @@ export async function mountPackBuilder(
   if (packSwitch && onProductChange) {
     const apply = (next: string | undefined): void => {
       if (next !== 'k3ui' && next !== 'k3ux') return;
+      if (next === 'k3ux' && !k3uxSibling) return;
       if (next === product) return;
       onProductChange(next);
     };

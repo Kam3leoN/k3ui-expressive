@@ -113,9 +113,24 @@ import { wireSnackbarDemo } from './snackbar-demo.js';
 import { destroyPlaygroundLiveBanner, wireBannerDemo } from './banner-demo.js';
 import type { K3NavItem } from '../src/components/navigation/nav-item.js';
 import type { DocComponent } from './catalog.js';
-/* Engine only — avoid pulling the full k3ux catalog on first paint. */
-import { getSoundFx } from '../../k3ux/src/core/sound-fx.js';
 import { canHoverOpen } from '../src/components/containment/menu.types.js';
+
+const k3uxSibling = import.meta.env.VITE_K3UX_SIBLING === '1';
+
+type SoundFxCtl = { isMuted: () => boolean; setMuted: (m: boolean) => void };
+const noopSoundFx: SoundFxCtl = { isMuted: () => true, setMuted: () => {} };
+let soundFxCtl: SoundFxCtl = noopSoundFx;
+
+async function primeSoundFx(): Promise<void> {
+  if (!k3uxSibling) return;
+  await ensureK3ux();
+  try {
+    const mod = (await import('k3ux')) as { getSoundFx?: () => SoundFxCtl };
+    if (mod.getSoundFx) soundFxCtl = mod.getSoundFx();
+  } catch {
+    /* ensureK3ux already warned once */
+  }
+}
 
 /**
  * Shell-critical custom elements — enough for first paint (home + chrome).
@@ -915,7 +930,7 @@ const MUSIC_MUTE_KEY = 'k3-music-muted';
 
 /** Interaction SFX on (Audio true) — inverse of SFX mute. */
 function isAudioEnabled(): boolean {
-  return !getSoundFx().isMuted();
+  return !soundFxCtl.isMuted();
 }
 
 /** Music player on (Music true) — inverse of music mute storage. */
@@ -930,7 +945,7 @@ function isMusicEnabled(): boolean {
 
 /** Enable / mute interaction Sound FX (settings Audio). */
 function setAudioEnabled(on: boolean): void {
-  getSoundFx().setMuted(!on);
+  soundFxCtl.setMuted(!on);
   document.querySelectorAll('k3-sound-fx').forEach((el) => {
     const host = el as HTMLElement & { setMuted?: (m: boolean) => void };
     host.setMuted?.(!on);
@@ -1952,6 +1967,7 @@ const K3UX_PAGES = new Set([
 ]);
 
 let k3uxReady: Promise<void> | null = null;
+let k3uxLoadWarned = false;
 
 type K3uxRegistry = {
   isKnown: (tag: string) => boolean;
@@ -1960,11 +1976,31 @@ type K3uxRegistry = {
 
 /** Load companion UX package once — MANUAL so we register page tags on demand. */
 function ensureK3ux(): Promise<void> {
+  if (!k3uxSibling) return Promise.resolve();
   k3uxReady ??= (async () => {
-    (window as Window & { K3UX_MANUAL?: boolean }).K3UX_MANUAL = true;
-    await import('k3ux');
+    try {
+      (window as Window & { K3UX_MANUAL?: boolean }).K3UX_MANUAL = true;
+      await import('k3ux');
+    } catch {
+      if (!k3uxLoadWarned) {
+        k3uxLoadWarned = true;
+        console.warn(
+          '[k3ui] K3ux companion unavailable — clone ../k3ux beside k3ui for UX demos and pack.',
+        );
+      }
+    }
   })();
   return k3uxReady;
+}
+
+function hideK3uxProductChrome(): void {
+  document.querySelectorAll<HTMLElement>('[data-product-switch="k3ux"]').forEach((el) => {
+    el.hidden = true;
+    el.setAttribute('aria-hidden', 'true');
+  });
+  document.querySelectorAll<HTMLElement>('[data-doc-product="k3ux"]').forEach((el) => {
+    el.hidden = true;
+  });
 }
 
 function k3uxRegistry(): K3uxRegistry | null {
@@ -2029,8 +2065,7 @@ function applyDocProduct(product: DocProduct, opts?: { navigateHome?: boolean })
     el.hidden = el.dataset.docProduct !== product;
   });
   syncProductSwitchButtons(product);
-  const title = document.getElementById('home-hero-title');
-  if (title) title.textContent = product === 'k3ux' ? 'K3ux' : 'K3ui';
+  /* Title uses [data-doc-product] spans — do not wipe children with textContent. */
   if (changed) {
     catalogHtml = null;
     const grid = document.getElementById('catalog-grid');
@@ -2060,6 +2095,7 @@ function wireProductSwitch(): void {
   const group = document.getElementById('product-switch');
   const apply = (next: DocProduct | undefined): void => {
     if (!next || (next !== 'k3ui' && next !== 'k3ux') || next === getDocProduct()) return;
+    if (next === 'k3ux' && !k3uxSibling) return;
     applyDocProduct(next, { navigateHome: true });
     if (next === 'k3ux') void ensureK3ux();
   };
@@ -3635,8 +3671,11 @@ async function boot(): Promise<void> {
     registerMessages('fr', playgroundDocFr as Record<string, string>);
 
     cacheAppliedTheme();
+    const verLabel = `v${api.version}`;
     const ver = document.getElementById('ver');
-    if (ver) ver.textContent = `v${api.version}`;
+    if (ver) ver.textContent = verLabel;
+    const heroVer = document.querySelector('#home-hero-ver span:not([data-k3-icon])');
+    if (heroVer) heroVer.textContent = verLabel;
     /* Boot in short tasks: each step's component renders stay in its own task. */
     await yieldToMain();
     /* Hero morph ASAP — CSS d keyframes must start on first home paint. */
@@ -3648,14 +3687,19 @@ async function boot(): Promise<void> {
     applyContainerLayout();
     const qProduct = new URLSearchParams(location.search).get('product');
     const savedProduct = docStore.get<DocProduct>(DocKeys.docProduct, 'k3ui');
-    const bootProduct: DocProduct =
-      qProduct === 'k3ux' || qProduct === 'k3ui'
-        ? qProduct
-        : savedProduct === 'k3ux'
-          ? 'k3ux'
-          : 'k3ui';
+    if (!k3uxSibling) hideK3uxProductChrome();
+    const bootProduct: DocProduct = (() => {
+      const want =
+        qProduct === 'k3ux' || qProduct === 'k3ui'
+          ? qProduct
+          : savedProduct === 'k3ux'
+            ? 'k3ux'
+            : 'k3ui';
+      return k3uxSibling ? want : 'k3ui';
+    })();
     applyDocProduct(bootProduct);
     if (getDocProduct() === 'k3ux') void ensureK3ux();
+    void primeSoundFx();
     wireProductSwitch();
     buildPrimaryNav();
     await yieldToMain();
@@ -3794,8 +3838,7 @@ async function boot(): Promise<void> {
       if (articleId === 'command-palette') wireCommandPaletteDemo();
       if (articleId === 'index-list') wireIndexListDemo();
       if (articleId === 'card-holo') {
-        /* Sibling package source (playground alias also maps k3ux/holo-effects.css). */
-        await import('../../k3ux/addons/holo-effects/holo-effects.scss');
+        if (k3uxSibling) await import('k3ux/holo-effects.css');
         wireHoloCardDemo();
       }
       if (articleId === 'card-scratch') wireScratchCardDemo();

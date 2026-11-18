@@ -103,7 +103,10 @@ test('home product switch is honored when opening Pack via Démarrage (not stuck
   );
 });
 
+const hasK3uxLazy = existsSync(resolve(process.cwd(), '../k3ux/dist/lazy/components.json'));
+
 test('pack-side switch toggles catalog without leaving the page', async ({ page }) => {
+  test.skip(!hasK3uxLazy, 'k3ux/dist/lazy missing — sibling k3ux optional');
   await page.goto('/?product=k3ui#/pack');
   await expect(page.locator('#pack-layout')).toBeVisible({ timeout: 30_000 });
   await page.locator('#pack-product-switch [data-product-switch="k3ux"]').click();

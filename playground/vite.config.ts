@@ -13,6 +13,17 @@ import {
   THEME_STORE_KEYS,
   THEME_STORE_PREFIX,
 } from './theme-defaults.js';
+import {
+  HAS_K3UX,
+  K3UX_CSS,
+  K3UX_HOLO_SCSS,
+  K3UX_LAZY_DIST,
+} from '../scripts/k3ux-sibling.mjs';
+
+const K3UX_ENTRY = HAS_K3UX
+  ? resolve(__dirname, '../../k3ux/src/index.ts')
+  : resolve(__dirname, 'stubs/k3ux-peer-stub.ts');
+const K3UX_HOLO = HAS_K3UX ? K3UX_HOLO_SCSS : resolve(__dirname, 'stubs/k3ux-empty.scss');
 
 /* Default playground locale — static HTML ships its strings so the first paint
    is final (no English → French swap after boot, which delayed LCP). */
@@ -163,9 +174,7 @@ function deferInactivePages(html: string, build: boolean): string {
  * chunks in the browser. `build:playground` builds both first.
  */
 const LAZY_DIST = resolve(__dirname, '../dist/lazy');
-const K3UX_LAZY_DIST = resolve(__dirname, '../../k3ux/dist/lazy');
 const K3UI_CSS = resolve(__dirname, '../dist/k3ui.css');
-const K3UX_CSS = resolve(__dirname, '../../k3ux/dist/k3ux.css');
 const LAZY_MIME: Record<string, string> = {
   '.js': 'text/javascript',
   '.json': 'application/json',
@@ -195,10 +204,12 @@ function packBuilderAssets(): Plugin {
         '/k3ui-lazy',
         serveLazyTree('/k3ui-lazy', LAZY_DIST, 'run `npm run build:lazy`'),
       );
-      server.middlewares.use(
-        '/k3ux-lazy',
-        serveLazyTree('/k3ux-lazy', K3UX_LAZY_DIST, 'run `npm run build:lazy` in k3ux'),
-      );
+      if (HAS_K3UX) {
+        server.middlewares.use(
+          '/k3ux-lazy',
+          serveLazyTree('/k3ux-lazy', K3UX_LAZY_DIST, 'run `npm run build:lazy` in k3ux'),
+        );
+      }
       /* Built stylesheets for pack embed (minify + inject into .full.js / .custom.js). */
       server.middlewares.use('/k3ui-pack/k3ui.css', (_req, res) => {
         if (!existsSync(K3UI_CSS)) {
@@ -209,31 +220,35 @@ function packBuilderAssets(): Plugin {
         res.setHeader('Content-Type', 'text/css');
         res.end(readFileSync(K3UI_CSS));
       });
-      server.middlewares.use('/k3ux-pack/k3ux.css', (_req, res) => {
-        if (!existsSync(K3UX_CSS)) {
-          res.statusCode = 404;
-          res.end('Not found — run `npm run build` in k3ux (dist/k3ux.css)');
-          return;
-        }
-        res.setHeader('Content-Type', 'text/css');
-        res.end(readFileSync(K3UX_CSS));
-      });
+      if (HAS_K3UX) {
+        server.middlewares.use('/k3ux-pack/k3ux.css', (_req, res) => {
+          if (!existsSync(K3UX_CSS)) {
+            res.statusCode = 404;
+            res.end('Not found — run `npm run build` in k3ux (dist/k3ux.css)');
+            return;
+          }
+          res.setHeader('Content-Type', 'text/css');
+          res.end(readFileSync(K3UX_CSS));
+        });
+      }
     },
     writeBundle(options) {
       if (!options.dir) return;
       if (!existsSync(resolve(LAZY_DIST, 'components.json'))) {
         this.error('dist/lazy is missing — run `npm run build:lazy` before the playground build');
       }
-      if (!existsSync(resolve(K3UX_LAZY_DIST, 'components.json'))) {
-        this.error(
-          'k3ux/dist/lazy is missing — run `npm run build:lazy` in the sibling k3ux package',
-        );
+      if (HAS_K3UX) {
+        if (!existsSync(resolve(K3UX_LAZY_DIST, 'components.json'))) {
+          this.error(
+            'k3ux/dist/lazy is missing — run `npm run build:lazy` in the sibling k3ux package',
+          );
+        }
+        cpSync(K3UX_LAZY_DIST, resolve(options.dir, 'k3ux-lazy'), {
+          recursive: true,
+          filter: (src) => !/\.(map|d\.ts)$/.test(src),
+        });
       }
       cpSync(LAZY_DIST, resolve(options.dir, 'k3ui-lazy'), {
-        recursive: true,
-        filter: (src) => !/\.(map|d\.ts)$/.test(src),
-      });
-      cpSync(K3UX_LAZY_DIST, resolve(options.dir, 'k3ux-lazy'), {
         recursive: true,
         filter: (src) => !/\.(map|d\.ts)$/.test(src),
       });
@@ -250,6 +265,9 @@ function packBuilderAssets(): Plugin {
 }
 
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_K3UX_SIBLING': JSON.stringify(HAS_K3UX ? '1' : '0'),
+  },
   root: resolve(__dirname),
   publicDir: resolve(__dirname, 'public'),
   plugins: [
@@ -311,11 +329,11 @@ export default defineConfig({
       {
         /* Exact package entry — do not swallow k3ux/holo-effects.css */
         find: /^k3ux$/,
-        replacement: resolve(__dirname, '../../k3ux/src/index.ts'),
+        replacement: K3UX_ENTRY,
       },
       {
         find: 'k3ux/holo-effects.css',
-        replacement: resolve(__dirname, '../../k3ux/addons/holo-effects/holo-effects.scss'),
+        replacement: K3UX_HOLO,
       },
       {
         /* Peer import from k3ux sources — never the built dist (bundled Lit). */

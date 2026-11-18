@@ -1,4 +1,8 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const hasK3ux = existsSync(resolve(process.cwd(), '../k3ux/src/index.ts'));
 import { i18n } from '@k3ui/i18n/index.js';
 import en from '../src/i18n/en.json';
 import fr from '../src/i18n/fr.json';
@@ -16,7 +20,7 @@ const settle = async (el: K3QrGenerator): Promise<void> => {
   await el.updateComplete;
 };
 
-describe('k3-qr-generator', () => {
+describe.skipIf(!hasK3ux)('k3-qr-generator', () => {
   let el: K3QrGenerator;
 
   beforeAll(() => {

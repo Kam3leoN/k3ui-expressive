@@ -1,10 +1,20 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
+import { HAS_K3UX, K3UX_SRC } from '../../scripts/k3ux-sibling.mjs';
 
 const root = resolve(__dirname);
 const k3src = resolve(__dirname, '../../src');
-const k3uxSrc = resolve(__dirname, '../../../k3ux/src');
 const litRoot = resolve(__dirname, '../../node_modules/lit');
+
+const k3uxAliases = HAS_K3UX
+  ? [
+      { find: '@k3ux', replacement: K3UX_SRC },
+      { find: /^k3ux$/, replacement: resolve(K3UX_SRC, 'index.ts') },
+    ]
+  : [];
+
+const fsAllow = [resolve(__dirname, '../..')];
+if (HAS_K3UX) fsAllow.push(resolve(__dirname, '../../../k3ux'));
 
 export default defineConfig({
   root,
@@ -14,11 +24,10 @@ export default defineConfig({
     dedupe: ['lit', 'lit-html', 'lit-element', '@lit/reactive-element'],
     alias: [
       { find: '@k3ui', replacement: k3src },
-      { find: '@k3ux', replacement: k3uxSrc },
+      ...k3uxAliases,
       { find: /^k3ui$/, replacement: resolve(__dirname, '../../src/index.ts') },
-      { find: /^k3ux$/, replacement: resolve(__dirname, '../../../k3ux/src/index.ts') },
       { find: /^lit$/, replacement: litRoot },
-      /* Trailing `/` required: resolve() drops it on Windows → litdecorators.js */
+      /* Trailing `/` required: resolve() on Windows drops trailing `/` → lit/decorators.js */
       { find: /^lit\//, replacement: `${litRoot}/` },
     ],
   },
@@ -28,7 +37,7 @@ export default defineConfig({
     open: false,
     host: true,
     fs: {
-      allow: [resolve(__dirname, '../..'), resolve(__dirname, '../../../k3ux')],
+      allow: fsAllow,
     },
   },
   preview: {
