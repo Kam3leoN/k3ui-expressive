@@ -517,7 +517,7 @@
                 ></a
               >
             </section>
-            <section class="qs-card" style="grid-column: span 12">
+            <section class="qs-section" style="grid-column: span 12">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon" data-k3-icon="cloud_download" aria-hidden="true"></span>
                 <div>
@@ -530,10 +530,10 @@
               <k3-codeblock language="html" code="<link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/k3ui/k3ui.css&quot; />
 <script type=&quot;module&quot; src=&quot;https://cdn.jsdelivr.net/npm/k3ui/+esm&quot;></script>
 
-<k3-button variant=&quot;filled&quot;>Click me</k3-button>" class="qs-code" ></k3-codeblock>
+<k3-button variant=&quot;filled&quot;>Click me</k3-button>"></k3-codeblock>
             </section>
 
-            <section class="qs-card" style="grid-column: span 12">
+            <section class="qs-section" style="grid-column: span 12">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon" data-k3-icon="inventory_2" aria-hidden="true"></span>
                 <div>
@@ -543,22 +543,20 @@
                   </p>
                 </div>
               </header>
-              <div class="qs-tabs" role="tablist" aria-label="Package manager">
-                <button type="button" class="qs-tab is-active" data-qs-tab="npm">npm</button>
-                <button type="button" class="qs-tab" data-qs-tab="pnpm">pnpm</button>
-              </div>
-              <k3-codeblock language="js" code="npm install k3ui" data-qs-panel="npm" class="qs-code" ></k3-codeblock>
-              <k3-codeblock language="js" code="pnpm add k3ui" data-qs-panel="pnpm" hidden class="qs-code" ></k3-codeblock>
+              <k3-codeblock>
+                <pre data-label="NPM"><code class="language-bash">npm install k3ui</code></pre>
+                <pre data-label="PNPM"><code class="language-bash">pnpm add k3ui</code></pre>
+              </k3-codeblock>
               <k3-codeblock language="js" code="import { K3UI } from 'k3ui';
 import 'k3ui/k3ui.css';
 
 await K3UI.init({
   locale: 'en',
   theme: { seed: '#6750A4', mode: 'auto', motion: 'expressive' },
-});" class="qs-code" ></k3-codeblock>
+});"></k3-codeblock>
             </section>
 
-            <section class="qs-card" style="grid-column: span 4">
+            <section class="qs-section" style="grid-column: span 4">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon" data-k3-icon="code" aria-hidden="true"></span>
                 <div>
@@ -577,10 +575,10 @@ import 'k3ui/k3ui.css';
   template: `<k3-button variant=&quot;filled&quot;>Angular</k3-button>`,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class AppComponent {}" class="qs-code" ></k3-codeblock>
+export class AppComponent {}"></k3-codeblock>
             </section>
 
-            <section class="qs-card" style="grid-column: span 4">
+            <section class="qs-section" style="grid-column: span 4">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon" data-k3-icon="code" aria-hidden="true"></span>
                 <div>
@@ -600,10 +598,10 @@ export default function App() {
       React
     </k3-button>
   );
-}" class="qs-code" ></k3-codeblock>
+}"></k3-codeblock>
             </section>
 
-            <section class="qs-card" style="grid-column: span 4">
+            <section class="qs-section" style="grid-column: span 4">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon" data-k3-icon="code" aria-hidden="true"></span>
                 <div>
@@ -622,7 +620,7 @@ import 'k3ui/k3ui.css';
   <k3-button variant=&quot;filled&quot; @click=&quot;() => {}&quot;>
     Vue
   </k3-button>
-</template>" class="qs-code" ></k3-codeblock>
+</template>"></k3-codeblock>
             </section>
           </div>
 
@@ -643,7 +641,7 @@ import 'k3ui/k3ui.css';
                 ></a
               >
             </section>
-            <section class="qs-card" style="grid-column: span 12">
+            <section class="qs-section" style="grid-column: span 12">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon" data-k3-icon="inventory_2" aria-hidden="true"></span>
                 <div>
@@ -653,12 +651,10 @@ import 'k3ui/k3ui.css';
                   </p>
                 </div>
               </header>
-              <div class="qs-tabs" role="tablist" aria-label="Package manager">
-                <button type="button" class="qs-tab is-active" data-qs-tab="npm-ux">npm</button>
-                <button type="button" class="qs-tab" data-qs-tab="pnpm-ux">pnpm</button>
-              </div>
-              <k3-codeblock language="js" code="npm install k3ui k3ux" data-qs-panel="npm-ux" class="qs-code" ></k3-codeblock>
-              <k3-codeblock language="js" code="pnpm add k3ui k3ux" data-qs-panel="pnpm-ux" hidden class="qs-code" ></k3-codeblock>
+              <k3-codeblock>
+                <pre data-label="NPM"><code class="language-bash">npm install k3ui k3ux</code></pre>
+                <pre data-label="PNPM"><code class="language-bash">pnpm add k3ui k3ux</code></pre>
+              </k3-codeblock>
               <k3-codeblock language="js" code="import 'k3ui';
 import 'k3ui/k3ui.css';
 import 'k3ux';
@@ -666,7 +662,7 @@ import 'k3ux';
 import 'k3ux/holo-effects.css';
 
 <k3-text-bounce text=&quot;HELLO&quot; loop></k3-text-bounce>
-<k3-confetti id=&quot;celebrate&quot;></k3-confetti>" class="qs-code" ></k3-codeblock>
+<k3-confetti id=&quot;celebrate&quot;></k3-confetti>"></k3-codeblock>
             </section>
             <section class="qs-card" style="grid-column: span 12">
               <header class="qs-card-head">
@@ -7920,10 +7916,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
             <h1 data-i18n="doc.snackbar.title">Snackbar</h1>
             <p data-i18n="doc.snackbar.blurb">
-              Expressive or standard · icon, avatar, brand mark · loading · bottom or top edge · stack of 3 with queue · swipe to dismiss.
+              Expressive or standard · icon, avatar, brand mark · loading · bottom or top edge · consecutive queue · swipe to dismiss.
             </p>
             <p class="doc-intro" data-i18n="doc.snackbar.intro">
-              Snackbars confirm brief outcomes on a screen edge. In expressive mode (default) an icon button rises from the edge, its icon scales in, then it stretches from the center into a pill; standard mode is the M3 bar. Keep copy short, offer at most one action, and pick short, long, or indefinite duration with care. Turn on the stack to show up to three at once — the rest wait in line.
+              Snackbars confirm brief outcomes on a screen edge. In expressive mode (default) an icon button rises from the edge, its icon scales in, then it stretches from the center into a pill; standard mode is the M3 bar. Keep copy short, offer at most one action, and pick short, long, or indefinite duration with care. Material 3 shows only one snackbar at a time — extras wait in a FIFO queue.
             </p>
           </header>
           <div class="surface surface-flush stack gap-lg" data-doc-examples>
@@ -8013,15 +8009,12 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </div>
 
             <header class="section-head sub">
-              <h3 data-i18n="doc.snackbar.option.stack">Stack — snackbarQueue.setStack(3)</h3>
-              <p data-i18n="doc.snackbar.option.stack.desc">
-                Up to three visible in vertical perspective, the oldest in front; the others wait in line. Only the front counts down, arrivals come out from behind it, and when it leaves the stack moves forward.
+              <h3 data-i18n="doc.snackbar.option.queue">Queue — consecutive (M3)</h3>
+              <p data-i18n="doc.snackbar.option.queue.desc">
+                Material 3 allows only one snackbar at a time. Extra messages wait in a FIFO queue and appear one after another — never stacked.
               </p>
             </header>
             <div class="row wrap gap-sm items-center">
-              <k3-switch id="snack-stack-toggle">
-                <span data-i18n="doc.snackbar.stack.toggle">Stack up to 3</span>
-              </k3-switch>
               <k3-button id="btn-snack-burst" variant="filled">
                 <span data-i18n="doc.snackbar.open.burst">Send 5 messages</span>
               </k3-button>
@@ -8105,9 +8098,9 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </k3-snackbar>
             <k3-snackbar
               id="snack-twoline"
-              mode="standard"
               duration="long"
               dismissible
+              icon="info"
               queue-behavior="replace"
             >
               <span data-i18n="doc.snackbar.demo.twoline"
@@ -8273,6 +8266,128 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                   <span data-i18n="doc.alert.demo.action">Undo</span>
                 </k3-button>
               </k3-alert>
+            </div>
+          </div>
+        </article>
+
+        <!-- BANNER -->
+        <article class="comp-page" data-page="banner" id="page-banner" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
+            <h1 data-i18n="doc.banner.title">Banner</h1>
+            <p data-i18n="doc.banner.blurb">
+              Full-bleed strip above sticky app bars — promo · alert · optional marquee.
+            </p>
+            <p class="doc-intro" data-i18n="doc.banner.intro">
+              Banners pin a short message above the top app bar. Use them for promos, maintenance,
+              or status that must stay visible while the rest of the screen scrolls. Fixed position
+              publishes --k3-banner-offset so sticky app bars sit below the strip. Content is
+              free-form — plain text, an action, or an optional k3-marquee ticker from k3ux.
+            </p>
+          </header>
+
+          <div class="stack gap-sm" style="margin-block-end: var(--k3-sys-spacing-space300, 1.5rem)">
+            <k3-button id="btn-banner-live" variant="filled">
+              <span data-i18n="doc.banner.live.show">View live banner</span>
+            </k3-button>
+            <p class="doc-intro" data-i18n="doc.banner.live.blurb">
+              Opens a real fixed banner above the docs shell. Dismiss (×) or leave this page to
+              remove it — then you can show it again.
+            </p>
+          </div>
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.banner.option.variant">variant</h3>
+              <p data-i18n="doc.banner.option.variant.desc">
+                Primary · secondary · tertiary · semantic tones · inverse.
+              </p>
+            </header>
+            <div class="stack gap-sm">
+              <k3-banner position="static" variant="primary">
+                <span data-i18n="doc.banner.demo.promo"
+                  >Summer sale — 20% off with code K3UI.</span
+                >
+              </k3-banner>
+              <k3-banner position="static" variant="warning">
+                <span data-i18n="doc.banner.demo.warning"
+                  >Scheduled maintenance tonight · 22:00–23:00 UTC.</span
+                >
+              </k3-banner>
+              <k3-banner position="static" variant="info">
+                <span data-i18n="doc.banner.demo.info"
+                  >New docs are live — explore Feedback → Banner.</span
+                >
+              </k3-banner>
+              <k3-banner position="static" variant="inverse">
+                <span data-i18n="doc.banner.demo.promo"
+                  >Summer sale — 20% off with code K3UI.</span
+                >
+              </k3-banner>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.banner.option.dismissible">dismissible / action / marquee</h3>
+              <p data-i18n="doc.banner.option.dismissible.desc">
+                Optional close control, trailing action, and optional k3-marquee in the default
+                slot.
+              </p>
+            </header>
+            <div class="stack gap-sm">
+              <k3-banner
+                id="banner-demo-dismiss"
+                position="static"
+                variant="primary"
+                dismissible
+              >
+                <span data-i18n="doc.banner.demo.promo"
+                  >Summer sale — 20% off with code K3UI.</span
+                >
+                <k3-button slot="action" variant="text" size="sm">
+                  <span data-i18n="doc.banner.demo.action">Shop</span>
+                </k3-button>
+              </k3-banner>
+              <k3-button id="btn-banner-demo-reset" variant="outlined" hidden>
+                <span data-i18n="doc.banner.demo.reset">Reset banner</span>
+              </k3-button>
+              <k3-banner position="static" variant="inverse" hide-icon>
+                <k3-marquee speed="60" pause-on-hover variant="plain">
+                  <span data-i18n="doc.banner.demo.marquee"
+                    >Breaking · New release · Optional k3-marquee inside the band ·
+                  </span>
+                </k3-marquee>
+              </k3-banner>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.banner.option.color">Forced color</h3>
+              <p data-i18n="doc.banner.option.color.desc">
+                Exceptional flash fills — color + optional color-on (auto ink on #rrggbb).
+              </p>
+            </header>
+            <div class="stack gap-sm">
+              <k3-banner
+                id="banner-demo-flash"
+                position="static"
+                color="#cc0000"
+                color-on="#ffffff"
+                dismissible
+                icon="celebration"
+              >
+                <span data-i18n="doc.banner.demo.flash"
+                  >Flash sale — ends tonight. Not a theme role.</span
+                >
+                <k3-button slot="action" variant="text" size="sm">
+                  <span data-i18n="doc.banner.demo.action">Shop</span>
+                </k3-button>
+              </k3-banner>
+              <k3-button id="btn-banner-flash-reset" variant="outlined" hidden>
+                <span data-i18n="doc.banner.demo.reset">Reset banner</span>
+              </k3-button>
             </div>
           </div>
         </article>

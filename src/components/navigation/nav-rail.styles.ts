@@ -18,6 +18,9 @@ export const navRailStyles: CSSResultGroup = css`
   :host {
     display: block;
     height: 100%;
+    /* Under fixed k3-banner — sticky hosts sit below; tall hosts retract */
+    top: var(--k3-banner-offset, 0px);
+    max-height: calc(100dvh - var(--k3-banner-offset, 0px));
     width: var(--k3-nav-rail-width);
     --k3-nav-rail-compact: 6.5rem; /* 104 — fits “Containment” @ 12px */
     --k3-nav-rail-width: var(--k3-nav-rail-compact);

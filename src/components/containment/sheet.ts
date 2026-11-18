@@ -77,7 +77,8 @@ export class K3Sheet extends K3Element {
       }
       .backdrop {
         position: fixed;
-        inset: 0;
+        /* Leave the fixed banner band clear (pushed / retracted with --k3-banner-offset) */
+        inset: var(--k3-banner-offset, 0px) 0 0 0;
         background: rgb(0 0 0 / 0.32);
         opacity: 0;
         pointer-events: none;
@@ -133,7 +134,10 @@ export class K3Sheet extends K3Element {
         width: min(100%, var(--k3-sheet-max-width));
         max-width: var(--k3-sheet-max-width);
         margin-inline: auto;
-        max-height: min(90dvh, calc(100dvh - var(--k3-sheet-margin-wide)));
+        max-height: min(
+          90dvh,
+          calc(100dvh - var(--k3-sheet-margin-wide) - var(--k3-banner-offset, 0px))
+        );
         padding: 0 1.5rem max(1.5rem, env(safe-area-inset-bottom));
         border-radius: var(--k3-sys-shape-corner-extra-large)
           var(--k3-sys-shape-corner-extra-large) 0 0;
@@ -145,7 +149,7 @@ export class K3Sheet extends K3Element {
         width: 100%;
         max-width: none;
         margin-inline: 0;
-        max-height: 90dvh;
+        max-height: calc(90dvh - var(--k3-banner-offset, 0px));
       }
       /* Drag handle — 32×4 bar · 22dp pad → 48dp accessible target (M3) */
       .sheet.bottom .handle {
@@ -187,7 +191,8 @@ export class K3Sheet extends K3Element {
       /* Side sheet — standard: square; modal: round corners facing the page (M3E) */
       .sheet.side {
         --k3-sheet-pad-inline: 1.5rem; /* 24dp — both edges, always */
-        inset-block: 0;
+        inset-block-start: var(--k3-banner-offset, 0px);
+        inset-block-end: 0;
         width: min(22rem, 100vw);
         padding-block: 1.5rem max(1.5rem, env(safe-area-inset-bottom));
         padding-inline: var(--k3-sheet-pad-inline);

@@ -88,6 +88,60 @@ describe('k3-codeblock', () => {
     expect(el.shadowRoot!.querySelector('code')?.textContent).toContain('.a{}');
   });
 
+  it('uses NPM / PNPM labels with code icon for package-manager samples', async () => {
+    host.innerHTML = `<k3-codeblock>
+      <pre data-label="NPM"><code class="language-bash">npm install k3ui</code></pre>
+      <pre data-label="PNPM"><code class="language-bash">pnpm add k3ui</code></pre>
+    </k3-codeblock>`;
+    const el = host.querySelector('k3-codeblock') as K3CodeBlock;
+    await el.updateComplete;
+    await el.updateComplete;
+
+    const tabs = el.shadowRoot!.querySelector('k3-tabs') as HTMLElement & {
+      labels?: string;
+      customIcons?: string[];
+    };
+    expect(tabs?.labels).toBe('NPM,PNPM');
+    expect(tabs?.customIcons?.[0]).toBe('code');
+    expect(tabs?.customIcons?.[1]).toBe('code');
+    expect(el.shadowRoot!.querySelector('code')?.textContent).toContain('npm install k3ui');
+    /* Short line — no phantom horizontal edge scrollbar */
+    expect(el.shadowRoot!.querySelector('.code')?.classList.contains('k3-scroll--x')).toBe(
+      false,
+    );
+
+    el.index = 1;
+    await el.updateComplete;
+    await el.updateComplete;
+    expect(el.shadowRoot!.querySelector('code')?.textContent).toContain('pnpm add k3ui');
+  });
+
+  it('keeps host / chrome overflow visible for tooltips', async () => {
+    const { codeblockStyles } = await import(
+      '../../src/components/containment/codeblock.styles.js'
+    );
+    const { edgeScrollbarStyles } = await import('../../src/core/scrollbar.js');
+    const cssText = codeblockStyles.map((s) => s.cssText ?? String(s)).join('\n');
+    const scrollCss = edgeScrollbarStyles.cssText ?? String(edgeScrollbarStyles);
+    expect(cssText).toMatch(/:host\s*\{[^}]*overflow:\s*visible/s);
+    expect(cssText).toMatch(/\.chrome\s*\{[^}]*overflow:\s*visible/s);
+    expect(scrollCss).toMatch(/\.k3-scroll\.k3-scroll--x::-webkit-scrollbar/);
+
+    const el = document.createElement('k3-codeblock') as K3CodeBlock;
+    el.language = 'bash';
+    el.label = 'NPM';
+    el.code = 'npm install k3ui';
+    host.appendChild(el);
+    await el.updateComplete;
+    await el.updateComplete;
+
+    const hostOverflow = getComputedStyle(el).overflow;
+    expect(hostOverflow).not.toBe('hidden');
+    expect(hostOverflow).not.toBe('auto');
+    expect(el.shadowRoot!.querySelector('.chrome')).toBeTruthy();
+    expect(el.shadowRoot!.querySelectorAll('k3-tooltip').length).toBeGreaterThan(0);
+  });
+
   it('shows Show code chip when collapsible content overflows', async () => {
     const lines = Array.from({ length: 24 }, (_, i) => `line ${i + 1};`).join('\n');
     const el = document.createElement('k3-codeblock') as K3CodeBlock;

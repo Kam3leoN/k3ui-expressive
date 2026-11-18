@@ -1,10 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   SNACKBAR_DURATION_MS,
   SNACKBAR_STACK_ACTION_DP,
   resolveSnackbarDuration,
   snackbarShouldStack,
 } from '../../src/components/feedback/snackbar.js';
+import {
+  snackbarQueue,
+  SNACKBAR_STACK_MAX,
+  type SnackbarQueueTarget,
+} from '../../src/components/feedback/snackbar-queue.js';
 
 describe('resolveSnackbarDuration', () => {
   it('defaults to short without action', () => {
@@ -46,10 +51,6 @@ describe('snackbarShouldStack', () => {
   });
 });
 
-/* ── Stack mode (snackbarQueue.setStack) ───────────────────── */
-
-import { snackbarQueue, type SnackbarQueueTarget } from '../../src/components/feedback/snackbar-queue.js';
-
 /** Fake snackbar: opens / closes on demand and emits the lifecycle events. */
 class FakeSnack extends EventTarget implements SnackbarQueueTarget {
   stackDepth: number | null = null;
@@ -60,7 +61,6 @@ class FakeSnack extends EventTarget implements SnackbarQueueTarget {
     this.dispatchEvent(new Event('k3-open-start'));
     return true;
   };
-  /** Simulates the end of the intro (fully stretched). */
   finishOpen(): void {
     this.dispatchEvent(new Event('k3-open-end'));
   }
@@ -71,8 +71,8 @@ class FakeSnack extends EventTarget implements SnackbarQueueTarget {
   };
 }
 
-describe('snackbarQueue stack mode', () => {
-  it('shows one at a time by default', async () => {
+describe('snackbarQueue (M3 one-at-a-time)', () => {
+  it('shows one at a time and queues the rest', async () => {
     snackbarQueue.setStack(1);
     const a = new FakeSnack();
     const b = new FakeSnack();
@@ -89,37 +89,14 @@ describe('snackbarQueue stack mode', () => {
     await b.hide();
   });
 
-  it('stacks up to 3 (oldest in front), queues the rest, waits for the intro', async () => {
+  it('clamps setStack to 1 (Material 3 — no multi-visible stack)', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     snackbarQueue.setStack(3);
-    const snacks = Array.from({ length: 4 }, () => new FakeSnack());
-    snacks.forEach((s) => void snackbarQueue.request(s));
-    await Promise.resolve();
-
-    /* Front intro running → the others wait */
-    expect(snacks.map((s) => s.opened)).toEqual([true, false, false, false]);
-    snacks[0]!.finishOpen();
-    expect(snacks.map((s) => s.opened)).toEqual([true, true, true, false]);
-    expect(snacks.slice(0, 3).map((s) => s.stackDepth)).toEqual([0, 1, 2]);
-    snacks[1]!.finishOpen();
-    snacks[2]!.finishOpen();
-
-    /* Front leaves: slide exit (others remain), stack moves forward, 4th enters behind */
-    await snacks[0]!.hide();
-    expect(snacks[0]!.stackSlideExit).toBe(false); /* reset once removed */
-    expect(snacks.slice(1).map((s) => s.stackDepth)).toEqual([0, 1, 2]);
-    expect(snacks[3]!.opened).toBe(true);
-
-    for (const s of snacks.slice(1)) {
-      s.finishOpen();
-      await s.hide();
-    }
-    snackbarQueue.setStack(1);
-  });
-
-  it('clamps the stack size to 1–3', () => {
-    snackbarQueue.setStack(10);
-    expect(snackbarQueue.stack).toBe(3);
+    expect(snackbarQueue.stack).toBe(1);
+    expect(SNACKBAR_STACK_MAX).toBe(1);
+    expect(warn).toHaveBeenCalled();
     snackbarQueue.setStack(0);
     expect(snackbarQueue.stack).toBe(1);
+    warn.mockRestore();
   });
 });

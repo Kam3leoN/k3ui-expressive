@@ -42,29 +42,44 @@ interface VisibleEntry extends QueueEntry {
   cleanup: () => void;
 }
 
-/** Most snackbars visible at once in stack mode. */
-export const SNACKBAR_STACK_MAX = 3;
+/**
+ * Max visible snackbars. M3 guidelines: only one at a time
+ * (“Don’t stack snackbars on top of one another”). Kept at 1.
+ * @see https://m3.material.io/components/snackbar/guidelines
+ */
+export const SNACKBAR_STACK_MAX = 1;
 
 /**
- * Global snackbar queue — one visible snackbar at a time (M3), or a stack of
- * up to 3 in vertical perspective (`setStack(3)`). FIFO: the oldest is in
- * front; only the front counts down. While the front plays its intro the
- * next ones wait, then come out from behind it.
+ * Global snackbar queue — **one visible at a time** (Material 3).
+ * FIFO: the rest wait their turn. A snackbar with updated info may
+ * `replace` the current one; `bypass` skips the queue.
  * `queue` waits · `replace` dismisses what is shown · `bypass` skips the queue.
  */
 class SnackbarQueue {
   private max = 1;
   private visible: VisibleEntry[] = [];
   private pending: QueueEntry[] = [];
+  private warnedStack = false;
 
-  /** Snackbars visible at once (1 = M3 one-at-a-time). */
+  /** Always 1 — M3 one-at-a-time. */
   get stack(): number {
     return this.max;
   }
 
-  /** Stack mode: 1 (default, M3) to 3 visible at once; the rest wait in line. */
+  /**
+   * M3 allows only one snackbar on screen. Values &gt; 1 are ignored
+   * (legacy no-op) and log a one-shot warning in development.
+   */
   setStack(count: number): void {
-    this.max = Math.min(SNACKBAR_STACK_MAX, Math.max(1, Math.round(count) || 1));
+    const next = Math.min(SNACKBAR_STACK_MAX, Math.max(1, Math.round(count) || 1));
+    if (count > 1 && !this.warnedStack) {
+      this.warnedStack = true;
+      console.warn(
+        '[k3-snackbar] snackbarQueue.setStack(%d) ignored — Material 3 allows only one snackbar at a time. Messages are queued consecutively.',
+        count,
+      );
+    }
+    this.max = next;
     this.sync();
     this.pump();
   }

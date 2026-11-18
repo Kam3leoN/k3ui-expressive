@@ -418,7 +418,7 @@ export const COMPONENT_SPECS: Record<string, SpecRow[]> = {
     { token: 'edge', value: 'bottom (default) · top — enter and leave through it' },
     { token: 'duration', value: 'short 4s · long 10s · indefinite' },
     { token: 'queue', value: 'one-at-a-time · replace / bypass' },
-    { token: 'stack', value: 'setStack(3) · FIFO · peek 12 dp · scale −5% · opacity −0.3 per row' },
+    { token: 'queue', value: 'M3 one-at-a-time · FIFO consecutive · setStack(>1) no-op' },
     { token: 'timer', value: 'front only · paused on hover / focus / loading' },
     { token: 'loading', value: 'k3-loading-indicator shape morph' },
     { token: 'swipe.dismiss', value: 'touch / pen · follows finger · ≥48 dp or fling' },

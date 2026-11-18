@@ -209,7 +209,15 @@ export const snackbarStyles = css`
       translate 200ms ${EMPHASIZED_ACCELERATE},
       opacity 150ms linear 50ms;
   }
-  /* Label alone (no supporting line): up to 2 lines (68 dp) */
+  /*
+   * Two-line anatomy (M3 68 dp) — wrap band for the *expanded* bar only.
+   * Never raise min-height during the expressive circle (icon / entering)
+   * or the intro becomes a tall narrow pill instead of a perfect round.
+   */
+  .bar.two-line:not(.stacked) {
+    --_expanded-width: min(22.5rem, 100%, var(--_max)); /* ~360 dp wrap band */
+  }
+  .bar.two-line:not(.stacked) .label,
   .bar[data-mode='standard'] .text:not(.has-supporting) .label {
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -217,8 +225,10 @@ export const snackbarStyles = css`
     line-clamp: 2;
     white-space: normal;
     overflow-wrap: anywhere;
+    text-overflow: ellipsis;
   }
-  .bar[data-mode='standard'].two-line:not(.stacked) {
+  .bar[data-mode='standard'].two-line:not(.stacked),
+  .bar[data-mode='standard']:has(.text.has-supporting):not(.stacked) {
     min-height: 4.25rem; /* 68 dp */
   }
 
@@ -241,9 +251,17 @@ export const snackbarStyles = css`
   }
 
   /* ── Expressive mode ───────────────────────────────────── */
+  /*
+   * Height is locked to the circle diameter for the whole lifecycle —
+   * only width stretches on expand (no post-appear height jump / fat padding).
+   */
   .bar[data-mode='expressive'] {
     width: var(--k3-snackbar-icon-button);
     height: var(--k3-snackbar-icon-button);
+    min-height: var(--k3-snackbar-icon-button);
+    max-height: var(--k3-snackbar-icon-button);
+    aspect-ratio: 1;
+    box-sizing: border-box;
     /* Leading icon stays centered while width = circle diameter */
     padding: 0 0.5rem 0 calc((var(--k3-snackbar-icon-button) - var(--k3-snackbar-icon-size)) / 2);
     opacity: 0;
@@ -260,6 +278,12 @@ export const snackbarStyles = css`
       (var(--k3-snackbar-icon-button) - var(--k3-snackbar-avatar-size)) / 2
     );
   }
+  /* Perfect circle while rising — lock square before the stretch */
+  .bar[data-mode='expressive'][data-phase='entering'],
+  .bar[data-mode='expressive'][data-phase='icon'] {
+    width: var(--k3-snackbar-icon-button);
+    aspect-ratio: 1;
+  }
   /* The circle rises from the edge (or drops from the top) while growing */
   .bar[data-mode='expressive'][data-phase='icon'],
   .bar[data-mode='expressive'][data-phase='expanded'],
@@ -268,8 +292,16 @@ export const snackbarStyles = css`
     transform: scale(1);
     translate: 0 0;
   }
+  /* Width-only stretch — height stays the circle size */
   .bar[data-mode='expressive'][data-phase='expanded'] {
     width: var(--_expanded-width);
+    aspect-ratio: auto;
+    align-items: center;
+  }
+  /* Collapse → width back to the circle (height never left it) */
+  .bar[data-mode='expressive'][data-phase='collapsing'] {
+    width: var(--k3-snackbar-icon-button);
+    aspect-ratio: 1;
   }
   /* …and leaves through the edge it came from */
   .bar[data-mode='expressive'][data-phase='leaving'] {
@@ -327,9 +359,10 @@ export const snackbarStyles = css`
     transform: scale(0.6);
   }
 
-  /* Text and actions show once stretched */
+  /* Text and actions show once stretched — no block padding (height = circle) */
   .bar[data-mode='expressive'] .text {
     padding-block: 0;
+    gap: 0.0625rem; /* 1 dp between label and supporting */
   }
   .bar[data-mode='expressive'] .text,
   .bar[data-mode='expressive'] .trailing {
@@ -346,6 +379,9 @@ export const snackbarStyles = css`
   /* ── Content ───────────────────────────────────────────── */
   .leading {
     flex: none;
+    display: inline-grid;
+    place-items: center;
+    align-self: center;
     transform-origin: center;
   }
 
@@ -390,18 +426,41 @@ export const snackbarStyles = css`
     border-radius: 50%;
     object-fit: cover;
   }
+  /* 48 dp avatar in 56 dp bar → 4 dp inset each side, no extra chrome */
+  .bar[data-mode='expressive'] .avatar {
+    width: var(--k3-snackbar-avatar-size);
+    height: var(--k3-snackbar-avatar-size);
+  }
 
+  /*
+   * Loader — same outer box as the indicator (32 dp), grid-centered in the
+   * bar so it shares the optical center of a 28 dp icon (no baseline drift).
+   */
   .loader {
+    --_loader: 2rem; /* 32 dp — integer px @100/125/150 %, slightly > 28 dp icon */
     display: grid;
     place-items: center;
-    width: var(--k3-snackbar-icon-size);
-    height: var(--k3-snackbar-icon-size);
+    align-self: center;
+    width: var(--_loader);
+    height: var(--_loader);
+    margin: 0;
+    overflow: visible;
+    line-height: 0;
   }
   .loader k3-loading-indicator {
-    --k3-loading-size: calc(var(--k3-snackbar-icon-size) / 0.79166);
-    /* The indicator paints with primary — follow the snackbar action role */
+    --k3-loading-size: var(--_loader);
     --k3-sys-color-primary: var(--k3-snackbar-loader-color, var(--_action));
-    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--_loader);
+    height: var(--_loader);
+    margin: 0;
+    line-height: 0;
+    vertical-align: unset;
+  }
+  /* Keep the 32 dp loader optically centered in the 56 dp circle */
+  .bar[data-mode='expressive'][data-leading='loading'] {
+    padding-inline-start: calc((var(--k3-snackbar-icon-button) - 2rem) / 2);
   }
 
   /* End of loading: the icon pops in with the fast spatial spring */
@@ -445,8 +504,7 @@ export const snackbarStyles = css`
     padding-inline-start: var(--k3-snackbar-avatar-gap);
   }
 
-  .label,
-  .supporting {
+  .label {
     margin: 0;
     min-width: 0;
     overflow: hidden;
@@ -457,7 +515,19 @@ export const snackbarStyles = css`
     display: inline !important;
   }
   .supporting {
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     opacity: 0.8;
+    font-size: var(--k3-sys-typescale-body-small-size, 0.75rem);
+    line-height: var(--k3-sys-typescale-body-small-line-height, 1rem);
+  }
+  /* Standard bar only — expressive keeps height locked to the circle */
+  .bar[data-mode='standard'] .text.has-supporting {
+    padding-block: 0.5rem;
+    gap: 0.125rem;
   }
 
   .trailing {

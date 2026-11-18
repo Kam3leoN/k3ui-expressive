@@ -499,8 +499,8 @@ await K3UI.registry.registerWhen(document.querySelector("#comments"), "visible")
     jsExtra: `
 await window.K3UI.snackbar.show({ message: "Saved", icon: "check_circle", duration: 2000 });
 
-// Stack: up to 3 visible, the rest wait in line
-window.K3UI.snackbar.queue.setStack(3);
+// M3: one visible at a time — extras wait in the FIFO queue
+await window.K3UI.snackbar.show({ message: "Next…", queue: "queue" });
 
 // Loading → done
 await window.K3UI.snackbar.show({
@@ -536,6 +536,30 @@ await window.K3UI.snackbar.show({
   <span slot="icon" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="bolt" aria-hidden="true"></span>
   Keyboard shortcuts speed up your workflow.
 </k3-alert>`,
+  },
+  banner: {
+    components: ['k3-banner', 'k3-button', 'k3-top-app-bar', 'k3-marquee'],
+    html: `<!-- Fixed — sits above sticky app bars, pushes layout via --k3-banner-offset -->
+<k3-banner variant="primary" dismissible>
+  Summer sale — 20% off this week.
+  <k3-button slot="action" variant="text" size="sm">Shop</k3-button>
+</k3-banner>
+<k3-top-app-bar sticky size="small">Inbox</k3-top-app-bar>
+
+<!-- Optional ticker (k3ux) inside the band -->
+<k3-banner variant="inverse" hide-icon>
+  <k3-marquee speed="60" pause-on-hover>
+    <span>Breaking · </span><span>New release · </span><span>Read more</span>
+  </k3-marquee>
+</k3-banner>
+
+<!-- In-flow demo (no viewport pin) -->
+<k3-banner position="static" variant="warning">Maintenance window tonight.</k3-banner>
+
+<!-- Exception flash — bypass theme -->
+<k3-banner color="#cc0000" color-on="#ffffff" dismissible>
+  Flash sale — ends tonight.
+</k3-banner>`,
   },
   dialog: {
     components: ['k3-dialog', 'k3-button'],

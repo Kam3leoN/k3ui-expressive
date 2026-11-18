@@ -35,7 +35,8 @@ export class K3TopAppBar extends K3Element {
       }
       :host([sticky]) {
         position: sticky;
-        top: 0;
+        /* Sit below stacked k3-banner[position=fixed] strips */
+        top: var(--k3-banner-offset, 0px);
       }
       .bar {
         display: grid;

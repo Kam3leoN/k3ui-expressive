@@ -89,6 +89,7 @@ export const COMPONENT_ITEM_ICONS: Record<string, string> = {
   lazy: 'schedule',
   snackbar: 'info',
   alert: 'warning',
+  banner: 'notifications',
   dialog: 'chat',
   tooltip: 'help',
   badge: 'notifications',

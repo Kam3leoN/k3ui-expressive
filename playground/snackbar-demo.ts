@@ -1,11 +1,10 @@
 /**
  * Snackbar doc page — interactive examples (mode, variant, leading content,
- * loading, edge, stack + queue). The duration / action / dismissible examples
- * keep the static `<k3-snackbar>` hosts of index.html.
+ * loading, edge, consecutive queue). The duration / action / dismissible
+ * examples keep the static `<k3-snackbar>` hosts of index.html.
  */
 import {
   showSnackbar,
-  snackbarQueue,
   type ShowSnackbarOptions,
 } from '../src/components/feedback/snackbar-queue.js';
 
@@ -24,9 +23,9 @@ type SnackEl = HTMLElement & {
   hide: (source?: 'user' | 'api' | 'auto') => Promise<boolean>;
 };
 
-/** One at a time → replace the current one; stack on → queue behind. */
+/** Demo clicks replace the current snackbar (M3 one-at-a-time). */
 function show(options: ShowSnackbarOptions): void {
-  void showSnackbar({ queue: snackbarQueue.stack > 1 ? 'queue' : 'replace', ...options });
+  void showSnackbar({ queue: 'replace', ...options });
 }
 
 function on(id: string, handler: () => void): void {
@@ -113,24 +112,24 @@ export function wireSnackbarDemo(): void {
     show({ message: t('doc.snackbar.demo.top'), icon: 'info', edge: 'top' }),
   );
 
-  /* stack + queue */
-  const stackToggle = document.getElementById('snack-stack-toggle') as
-    | (HTMLElement & { selected: boolean })
-    | null;
-  stackToggle?.addEventListener('k3-change', () => {
-    snackbarQueue.setStack(stackToggle.selected ? 3 : 1);
-  });
+  /*
+   * Consecutive queue (M3: one visible at a time — never stacked).
+   * Burst enqueues five messages; each waits for the previous to finish.
+   */
   on('btn-snack-burst', () => {
     const burst: ShowSnackbarOptions[] = [
-      { message: t('doc.snackbar.demo.welcome'), supportingText: t('doc.snackbar.demo.level'), avatar: DEMO_AVATAR },
+      {
+        message: t('doc.snackbar.demo.welcome'),
+        supportingText: t('doc.snackbar.demo.level'),
+        avatar: DEMO_AVATAR,
+      },
       { message: t('doc.snackbar.demo.archived'), icon: 'archive' },
       { message: t('doc.snackbar.demo.wifi'), icon: 'wifi' },
       { message: t('doc.snackbar.demo.sent'), icon: 'send' },
       { message: t('doc.snackbar.demo.copied'), icon: 'content_copy' },
     ];
-    burst.forEach((options, i) => {
-      /* Fixed duration so the line moves on its own */
-      window.setTimeout(() => void showSnackbar({ queue: 'queue', duration: 4000, ...options }), i * 140);
+    burst.forEach((options) => {
+      void showSnackbar({ queue: 'queue', duration: 2500, ...options });
     });
   });
 

@@ -1912,7 +1912,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
         'queue-behavior',
         "'queue'|'replace'|'bypass'",
         'queue',
-        'One-at-a-time queue (M3) or stack — snackbarQueue.setStack(1–3)',
+        'One-at-a-time queue (M3) — consecutive messages wait their turn',
       ],
       ['chrome-inset', 'boolean', 'true', 'Nudge above FAB / bottom bar'],
     ],
@@ -1920,7 +1920,11 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['show', '() => Promise<boolean>', 'Open via queue (settles after the close)'],
       ['showNow', '() => Promise<boolean>', 'Open immediately (no queue)'],
       ['hide', "(source?) => Promise<boolean>", 'Close'],
-      ['snackbarQueue.setStack', '(count: 1 | 2 | 3) => void', 'Stack mode — up to 3 visible, the rest queued'],
+      [
+        'snackbarQueue.setStack',
+        '(count: number) => void',
+        'No-op for count > 1 (M3: one visible snackbar only)',
+      ],
     ],
     events: [
       ['k3-open-start / k3-open-end', 'LifecycleDetail', 'Open (end = fully stretched)'],
@@ -1970,6 +1974,49 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['icon', 'Leading icon override'],
       ['label', 'Heading override'],
       ['action', 'Trailing action (button, link, …)'],
+    ],
+  },
+  banner: {
+    properties: [
+      [
+        'variant',
+        "'primary'|'secondary'|'tertiary'|'error'|'warning'|'info'|'success'|'inverse'",
+        'primary',
+        'Full-bleed tone',
+      ],
+      [
+        'position',
+        "'fixed'|'static'",
+        'fixed',
+        'Viewport pin + layout push · static for in-flow demos',
+      ],
+      ['dismissible', 'boolean', 'false', 'Trailing close control'],
+      ['color', 'string', '—', 'Forced fill (hex/CSS) — bypasses theme'],
+      ['color-on', 'string', 'auto', 'Forced ink · auto WCAG on #rrggbb'],
+      ['icon', 'string', 'variant default', 'Material Symbol ligature (empty hides)'],
+      ['hide-icon', 'boolean', 'false', 'Hide leading icon entirely'],
+    ],
+    methods: [
+      ['dismiss', '() => void', 'Animated leave + emit k3-dismiss'],
+      ['leave', '(opts?: { remove? }) => Promise<void>', 'Slide out · optional DOM remove'],
+      ['playEnter', '() => Promise<void>', 'Slide in from top + grow spacer'],
+      ['show', '() => void', 'Reveal again (replays enter when fixed)'],
+    ],
+    events: [
+      ['k3-dismiss', '—', 'Leave finished / dismiss activated'],
+      ['k3-enter', '—', 'Enter animation finished'],
+    ],
+    slots: [
+      ['(default)', 'Message — text or optional k3-marquee (k3ux)'],
+      ['icon', 'Leading icon override'],
+      ['action', 'Trailing action (button, link, …)'],
+    ],
+    'css-parts': [
+      ['surface', 'Full-bleed strip · 64dp (same as small app bar)'],
+      ['icon', 'Leading Material Symbol'],
+      ['body', 'Message slot'],
+      ['actions', 'Action + dismiss row'],
+      ['dismiss', 'Close control (40dp)'],
     ],
   },
   tooltip: {

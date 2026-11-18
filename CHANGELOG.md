@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added — Banner (`k3-banner`)
+
+- Full-bleed strip above sticky app bars — variants, `position` fixed/static, dismissible, optional action / marquee
+- Publishes `--k3-banner-offset` so sticky app bars, nav rails, and sheets retract under the strip
+- Enter/leave like a top sheet (`scaleY` + spacer push); forced `color` / `color-on` for flash fills
+- Playground: live banner demo, dismiss reset buttons, init failures surface as a fixed error banner
+
 ### Changed — Snackbar: M3 Expressive redesign
 
 - `k3-snackbar` now defaults to `mode="expressive"`: an icon button rises from the screen edge, its icon scales in, then it stretches from the center into a full-radius pill (M3E springs as exact CSS `linear()`); it closes back into the circle and leaves through the edge. `mode="standard"` keeps the M3 bar (slides in at full width); `data-k3-motion="standard"` and the stacked long-action layout always use it
@@ -15,9 +22,15 @@
 - Leading content: `icon`, `icon-path`, `avatar`, slot `icon`; `brand-icon` shows a brand mark in the circle at opening only; `supporting-text` second line; `hide-icon` for the standard bar
 - `loading` — `k3-loading-indicator` shape morph in place of the icon; the timer waits, then the icon pops in (registry dep `k3-snackbar` → `k3-loading-indicator`)
 - Swipe to dismiss follows the finger (touch / pen, toward the edge or sideways, ≥ 48 dp or fling) and springs back otherwise; Escape dismisses when focus is inside
-- Stack mode — `snackbarQueue.setStack(1–3)`: up to 3 visible in vertical perspective (FIFO, oldest in front, peek 12 dp · scale −5 % · opacity −0.3 per row); only the front counts down; arrivals wait for the front intro then come out from behind it; the front slides out while others wait; the rest stays queued
 - `showSnackbar()` options: `mode`, `variant`, `edge`, `icon`, `iconPath`, `avatar`, `brandIcon`, `supportingText`, `hideIcon`, `loading`, `onCreate(el)`
-- Playground snackbar page: mode, variant, leading content, loading, edge and stack examples
+- Playground snackbar page: mode, variant, leading content, loading, edge and consecutive queue examples
+
+### Fixed — Snackbar layout & M3 queue
+
+- Loading indicator sized to the icon box and vertically centered (no overflow hang)
+- Two-line label wraps at ~360 dp (68 dp height) instead of hugging one endless line; supporting-text gets proper 2-line padding
+- Expressive expanded height grows for avatar / supporting / two-line while keeping leading centered
+- **Stack removed for M3 compliance** — guidelines: “Only one snackbar may be displayed at a time” / “Don’t stack snackbars”. `setStack(>1)` is a no-op with a one-shot warning; messages stay in a FIFO consecutive queue
 
 ### Added — Command palette & kbd
 

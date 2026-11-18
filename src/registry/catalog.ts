@@ -57,6 +57,7 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-lazy', load: () => import('../components/feedback/lazy.js') },
   { tag: 'k3-snackbar', load: () => import('../components/feedback/snackbar.js') },
   { tag: 'k3-alert', load: () => import('../components/feedback/alert.js') },
+  { tag: 'k3-banner', load: () => import('../components/feedback/banner.js') },
   { tag: 'k3-tooltip', load: () => import('../components/feedback/tooltip.js') },
   { tag: 'k3-badge', load: () => import('../components/feedback/badge.js') },
   { tag: 'k3-kbd', load: () => import('../components/feedback/kbd.js') },

@@ -385,6 +385,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.alert.blurb',
   },
   {
+    id: 'banner',
+    category: 'Feedback',
+    title: 'Banner',
+    titleKey: 'doc.banner.title',
+    blurbKey: 'doc.banner.blurb',
+  },
+  {
     id: 'dialog',
     category: 'Feedback',
     title: 'Dialog',

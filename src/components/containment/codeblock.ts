@@ -45,7 +45,7 @@ type CodeSample = {
 export class K3CodeBlock extends K3Element {
   static override styles = [hostReset, ...codeblockStyles];
 
-  @property() label = CodeBlockSpecs.defaultLabel;
+  @property() label: string = CodeBlockSpecs.defaultLabel;
   @property() language: string = CodeBlockSpecs.defaultLanguage;
   /**
    * Truncate tall samples behind a fade + Show / Hide code chip.
@@ -78,10 +78,13 @@ export class K3CodeBlock extends K3Element {
   @state() private sourceText = '';
   /** True when natural content height exceeds `collapsedHeight`. */
   @state() private overflows = false;
+  /** True when a line is wider than the panel — enables `k3-scroll--x`. */
+  @state() private overflowsX = false;
 
   /** Cancels in-flight panel height springs on rapid tab switches. */
   private panelAnimGen = 0;
   private measureRaf = 0;
+  private resizeObserver: ResizeObserver | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -117,6 +120,17 @@ export class K3CodeBlock extends K3Element {
   override firstUpdated(): void {
     this.rebuildSamples();
     this.applySample(Math.min(Math.max(0, this.index), Math.max(0, this.samples.length - 1)));
+    const code = this.renderRoot?.querySelector('.code');
+    if (code && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.scheduleMeasureOverflow());
+      this.resizeObserver.observe(code);
+    }
+  }
+
+  override disconnectedCallback(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    super.disconnectedCallback();
   }
 
   private collectSlottedSamples(): CodeSample[] {
@@ -276,14 +290,27 @@ export class K3CodeBlock extends K3Element {
     });
   }
 
-  /** Detect whether the sample is taller than the collapsed preview. */
+  /**
+   * Detect vertical collapse need + whether a horizontal edge scrollbar is
+   * required. Always applying `k3-scroll--x` paints a phantom H-track in
+   * Chromium once `::-webkit-scrollbar { height }` is set.
+   */
   private async measureOverflow(): Promise<void> {
+    await this.updateComplete;
+    const scroller = this.renderRoot?.querySelector<HTMLElement>('.code');
+    const pre = scroller?.querySelector<HTMLElement>('pre');
+    if (scroller) {
+      /*
+       * Measure without --x so a custom H-scrollbar cannot inflate scrollWidth.
+       * Compare pre’s max-content width to the scroller’s client box.
+       */
+      const nextX = (pre?.scrollWidth ?? 0) > scroller.clientWidth + 1;
+      if (nextX !== this.overflowsX) this.overflowsX = nextX;
+    }
     if (!this.collapsible) {
       if (this.overflows) this.overflows = false;
       return;
     }
-    await this.updateComplete;
-    const pre = this.renderRoot?.querySelector<HTMLElement>('.code pre');
     if (!pre) return;
     /*
      * Prefer layout height; fall back to a line estimate so headless /
@@ -546,7 +573,10 @@ export class K3CodeBlock extends K3Element {
           style=${`--k3-codeblock-collapsed:${this.collapsedHeight}px`}
         >
           <div class=${panelClass} part="panel">
-            <div class="code k3-scroll k3-scroll--x" part="content">
+            <div
+              class=${this.overflowsX ? 'code k3-scroll k3-scroll--x' : 'code k3-scroll'}
+              part="content"
+            >
               <pre><code class=${this.languageClass()}>${unsafeHTML(
                 this.highlighted,
               )}</code></pre>

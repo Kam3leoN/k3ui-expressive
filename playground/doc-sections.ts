@@ -644,24 +644,22 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
       ['variant', 'inverse|emphasized|tonal|error', 'Container role (inverse = M3)'],
       ['shape', 'corner full', 'Circle → pill (stacked long action: extra-large)'],
       ['--k3-snackbar-icon-size · -avatar-size · -brand-size', '28 · 48 · 44 dp', 'Leading content'],
-      ['--k3-snackbar-stack-peek · -opacity-step', '12 dp · 0.3', 'Stack perspective'],
       ['position · edge', 'center|start|end · bottom|top', 'Placement'],
       ['chrome-inset', 'boolean', 'Nudge above FAB / bottom bar'],
     ],
     keyboard: [
       ['Escape', 'Dismiss when focus is inside'],
-      ['Tab', 'Action and dismiss controls (front snackbar only)'],
+      ['Tab', 'Action and dismiss controls'],
     ],
     focus: 'doc.snackbar.focus',
     motion: [
       ['Expressive open', 'Circle rises from the edge · icon scales in · stretch from center', 'M3E springs as CSS linear()'],
-      ['Close', 'Back to the circle, out through the edge · slide when a stack waits', 'Emphasized accelerate'],
-      ['Stack', 'Rows move forward when the front leaves', 'Spatial default spring'],
+      ['Close', 'Back to the circle, out through the edge', 'Emphasized accelerate'],
       ['Swipe', 'Follows the finger · fling ≥ 48 dp dismisses', 'Touch / pen'],
       ['Reduced motion', 'Fades only', 'OS or data-k3-reduce-motion'],
     ],
     a11y: 'doc.snackbar.a11y',
-    versions: { na: 'One component — mode, variant and stack are options' },
+    versions: { na: 'One component — mode / variant are options; M3 queue is one-at-a-time' },
   },
   'alert': {
     theming: [
@@ -677,6 +675,27 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     motion: { na: 'Static callout — no host enter/exit motion' },
     a11y: 'doc.alert.a11y',
     versions: { na: 'Single callout layout — variants/shapes are options' },
+  },
+  'banner': {
+    theming: [
+      ['variant', 'primary…inverse', 'Full-bleed container colours'],
+      ['color / color-on', 'CSS color', 'Forced fill + ink (exception flash)'],
+      ['position', 'fixed|static', 'Viewport pin vs in-flow demo'],
+      ['--k3-banner-offset', 'px on :root', 'Pushes app bars · retracts rails · insets sheets'],
+      ['--k3-banner-min-height', '64dp', 'Same as small top app bar (12+40+12)'],
+      ['--k3-banner-pad-block', '12dp', 'Padding above / below action + dismiss'],
+    ],
+    keyboard: [
+      ['Enter / Space', 'Activate dismiss when dismissible'],
+      ['Tab', 'Action slot + dismiss control'],
+    ],
+    focus: 'doc.banner.focus',
+    motion: [
+      ['Enter (fixed)', 'scaleY top sheet + spacer height', 'Expressive spatial-fast · push decelerate'],
+      ['Exit (fixed)', 'scaleY collapse + short4 accelerate', 'No top-edge gap · spacer shrinks'],
+    ],
+    a11y: 'doc.banner.a11y',
+    versions: { na: 'One strip — variants / position / dismiss are options' },
   },
   'dialog': {
     theming: [

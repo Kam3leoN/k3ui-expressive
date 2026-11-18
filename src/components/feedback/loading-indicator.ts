@@ -64,28 +64,37 @@ export class K3LoadingIndicator extends K3Element {
         height: 100%;
         display: grid;
         place-items: center;
+        line-height: 0;
       }
       svg {
         width: 79.166%; /* 38/48 active indicator */
         height: 79.166%;
         display: block;
         overflow: visible;
+        /* Crisp edges when scaled / rotated (avoids fuzzy morph outlines) */
+        shape-rendering: geometricPrecision;
+        text-rendering: geometricPrecision;
       }
       .spin,
       .kick {
         transform-box: fill-box;
         transform-origin: center;
+        backface-visibility: hidden;
       }
       /* Background revolution on the compositor — no per-frame Lit render. */
       .spin {
         animation: k3-loading-spin var(--k3-loading-spin-duration, ${SPIN_MS}ms) linear infinite;
+        will-change: transform;
       }
       :host([data-paused]) .spin {
         animation-play-state: paused;
       }
       @keyframes k3-loading-spin {
+        from {
+          transform: translateZ(0) rotate(0deg);
+        }
         to {
-          transform: rotate(360deg);
+          transform: translateZ(0) rotate(360deg);
         }
       }
       :host-context([data-k3-reduce-motion]) .spin {
@@ -93,6 +102,9 @@ export class K3LoadingIndicator extends K3Element {
       }
       path {
         fill: var(--k3-sys-color-primary);
+        /* Soften stair-steps on curved morph silhouettes */
+        paint-order: fill;
+        stroke: none;
       }
       :host([contained]) path {
         fill: var(--k3-sys-color-on-primary-container);
@@ -201,7 +213,13 @@ export class K3LoadingIndicator extends K3Element {
   override render() {
     return html`
       <div class="box" part="container">
-        <svg viewBox="0 0 1 1" role="status" aria-label=${i18n.t('loading.label')} part="shape">
+        <svg
+          viewBox="0 0 1 1"
+          role="status"
+          aria-label=${i18n.t('loading.label')}
+          part="shape"
+          shape-rendering="geometricPrecision"
+        >
           <g class="spin">
             <g
               class="kick"

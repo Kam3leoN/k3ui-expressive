@@ -24,6 +24,10 @@
 
 .k3-scroll::-webkit-scrollbar {
   width: var(--k3-scroll-size);
+  /* height only with --x — otherwise Chromium paints a phantom H-track */
+  height: 0;
+}
+.k3-scroll.k3-scroll--x::-webkit-scrollbar {
   height: var(--k3-scroll-size);
 }
 .k3-scroll::-webkit-scrollbar-button {

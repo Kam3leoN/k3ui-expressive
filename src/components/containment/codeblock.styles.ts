@@ -10,6 +10,7 @@ export const codeblockStyles = [
   css`
     :host {
       display: block;
+      overflow: visible; /* copy/download tips — never clip */
       font-family: var(
         --k3-ref-typeface-code,
         'JetBrains Mono',
@@ -85,6 +86,7 @@ export const codeblockStyles = [
       flex-direction: column;
       gap: 2px; /* 2dp between header and code panel */
       width: 100%;
+      overflow: visible;
     }
 
     .chrome {
@@ -93,6 +95,9 @@ export const codeblockStyles = [
       justify-content: space-between;
       gap: var(--k3-sys-spacing-space100, 0.5rem);
       min-height: 2.5rem;
+      position: relative;
+      z-index: 1; /* tip hosts above the dark panel */
+      overflow: visible;
       /* Outer top = panel radius · inner bottom (facing the code) = 4dp */
       border-radius: var(--k3-codeblock-radius, 1rem) var(--k3-codeblock-radius, 1rem) 4px 4px;
       background: var(
@@ -151,6 +156,7 @@ export const codeblockStyles = [
       align-items: center;
       align-self: center;
       gap: var(--k3-sys-spacing-space50, 0.25rem);
+      overflow: visible;
       color: var(--k3-sys-color-on-surface-variant);
     }
 
@@ -162,6 +168,7 @@ export const codeblockStyles = [
     /* Wraps the code panel + optional Show/Hide chip on the bottom edge */
     .panel-wrap {
       position: relative;
+      z-index: 0;
       width: 100%;
     }
 
@@ -279,6 +286,10 @@ export const codeblockStyles = [
     pre {
       margin: 0;
       padding: 1.25em 1.5em;
+      box-sizing: border-box;
+      /* Grow with long lines; never force a phantom H-scrollbar on short ones */
+      width: max-content;
+      min-width: 100%;
       overflow: visible;
       font-size: 0.875rem;
       line-height: 1.375;

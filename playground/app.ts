@@ -105,6 +105,7 @@ import {
 } from './locale-flags.js';
 import { armNavActive, navItemFromEvent } from '../src/components/navigation/nav-selection.js';
 import { wireSnackbarDemo } from './snackbar-demo.js';
+import { destroyPlaygroundLiveBanner, wireBannerDemo } from './banner-demo.js';
 import type { K3NavItem } from '../src/components/navigation/nav-item.js';
 import type { DocComponent } from './catalog.js';
 /* Engine only — avoid pulling the full k3ux catalog on first paint. */
@@ -2257,6 +2258,8 @@ function showPage(id: string): void {
     }
   }
   const resolvedId = articleId === 'home' || !found ? 'home' : articleId;
+  /* Live banner demo — destroy when leaving the Banner doc page. */
+  if (resolvedId !== 'banner') void destroyPlaygroundLiveBanner();
   /* Demo snow only on Snow page; shell snow is suppressed there (settings switch ignored). */
   if (resolvedId !== 'snow') pauseDemoSnow();
   void applyShellSnow(resolvedId);
@@ -2330,7 +2333,6 @@ function syncDocNav(pageId: string): void {
   }
 
   if (pageId === 'quick-start') {
-    const first = orderedComponents()[0];
     docNav.previousHref = '#/';
     docNav.previousTitle = t('doc.catalog.title');
     docNav.nextHref = '#/pack';
@@ -3523,6 +3525,45 @@ async function stampDocPages(firstPageId?: string): Promise<void> {
   }
 }
 
+/**
+ * Show init failures as a fixed k3-banner (error flash). Falls back to a
+ * plain strip if the banner module itself failed to load.
+ */
+async function showBootErrorBanner(
+  err: unknown,
+  host: HTMLElement | null,
+): Promise<void> {
+  if (!host) return;
+  const message = `K3ui init failed: ${err instanceof Error ? err.message : String(err)}`;
+  host.hidden = false;
+  host.replaceChildren();
+  host.classList.remove('boot-error-fallback');
+
+  try {
+    await import('../src/components/feedback/banner.js');
+    await customElements.whenDefined('k3-banner');
+    const banner = document.createElement('k3-banner') as HTMLElement & {
+      position: string;
+      color: string;
+      colorOn: string;
+      dismissible: boolean;
+      icon: string;
+    };
+    banner.setAttribute('data-boot-error', '');
+    banner.position = 'fixed';
+    banner.color = '#b3261e';
+    banner.colorOn = '#ffffff';
+    banner.dismissible = true;
+    banner.icon = 'error';
+    banner.textContent = message;
+    host.append(banner);
+  } catch (bannerErr) {
+    console.error(bannerErr);
+    host.classList.add('boot-error-fallback');
+    host.textContent = message;
+  }
+}
+
 async function boot(): Promise<void> {
   const app = document.querySelector('.app');
   const errBox = document.getElementById('boot-error');
@@ -3993,15 +4034,13 @@ async function boot(): Promise<void> {
     document.documentElement.removeAttribute('data-k3-deeplink');
     document.documentElement.removeAttribute('data-k3-booting');
     setDocPageLoading(false);
-    if (errBox) {
-      errBox.hidden = false;
-      errBox.textContent = `K3ui init failed: ${err instanceof Error ? err.message : String(err)}`;
-    }
+    await showBootErrorBanner(err, errBox);
     return;
   }
   await yieldToMain();
 
   wireSnackbarDemo();
+  wireBannerDemo();
 
   type DialogEl = HTMLElement & {
     show: () => Promise<boolean>;
@@ -4407,7 +4446,10 @@ function wireCommandPalette(): void {
   );
 }
 
-/** npm / pnpm toggle on Quick Start install card. */
+/**
+ * Legacy npm / pnpm pill toggle (if any remain). Install samples now use
+ * native `k3-codeblock` multi-tabs (NPM · PNPM) — no `.qs-tabs` needed.
+ */
 function wireQuickStartTabs(): void {
   document.querySelectorAll<HTMLElement>('.qs-tabs').forEach((tabs) => {
     const card = tabs.closest('.qs-card');
