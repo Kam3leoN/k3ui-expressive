@@ -495,9 +495,22 @@ await K3UI.registry.registerWhen(document.querySelector("#comments"), "visible")
   snackbar: {
     components: ['k3-snackbar'],
     html: `<!-- Host once, then show via API -->
-<k3-snackbar id="toast" duration="2000" dismissible></k3-snackbar>`,
+<k3-snackbar id="toast" icon="check_circle" duration="2000" dismissible>Saved</k3-snackbar>`,
     jsExtra: `
-await window.K3UI.snackbar.show({ message: "Saved", duration: 2000 });`,
+await window.K3UI.snackbar.show({ message: "Saved", icon: "check_circle", duration: 2000 });
+
+// Stack: up to 3 visible, the rest wait in line
+window.K3UI.snackbar.queue.setStack(3);
+
+// Loading → done
+await window.K3UI.snackbar.show({
+  message: "Uploading…",
+  loading: true,
+  onCreate: (el) => upload().then(() => {
+    el.textContent = "Uploaded";
+    el.loading = false;
+  }),
+});`,
   },
   alert: {
     components: ['k3-alert', 'k3-button'],

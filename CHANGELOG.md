@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### Changed — Snackbar: M3 Expressive redesign
+
+- `k3-snackbar` now defaults to `mode="expressive"`: an icon button rises from the screen edge, its icon scales in, then it stretches from the center into a full-radius pill (M3E springs as exact CSS `linear()`); it closes back into the circle and leaves through the edge. `mode="standard"` keeps the M3 bar (slides in at full width); `data-k3-motion="standard"` and the stacked long-action layout always use it
+- Wide windows (≥ 600 dp) hug the content (measured before the stretch, max 600 dp); compact windows stay full width
+- Built-in icons render as SVG (`SNACKBAR_ICONS`) — pixel centered on iOS / WebKit; other names keep the ligature font
+- Close button glyph is now an SVG; every shape is full radius (stacked long action: extra-large corners)
+
+### Added — Snackbar
+
+- `variant` (`inverse` · `emphasized` · `tonal` · `error`), `edge` (`bottom` · `top` — enter and leave through that edge)
+- Leading content: `icon`, `icon-path`, `avatar`, slot `icon`; `brand-icon` shows a brand mark in the circle at opening only; `supporting-text` second line; `hide-icon` for the standard bar
+- `loading` — `k3-loading-indicator` shape morph in place of the icon; the timer waits, then the icon pops in (registry dep `k3-snackbar` → `k3-loading-indicator`)
+- Swipe to dismiss follows the finger (touch / pen, toward the edge or sideways, ≥ 48 dp or fling) and springs back otherwise; Escape dismisses when focus is inside
+- Stack mode — `snackbarQueue.setStack(1–3)`: up to 3 visible in vertical perspective (FIFO, oldest in front, peek 12 dp · scale −5 % · opacity −0.3 per row); only the front counts down; arrivals wait for the front intro then come out from behind it; the front slides out while others wait; the rest stays queued
+- `showSnackbar()` options: `mode`, `variant`, `edge`, `icon`, `iconPath`, `avatar`, `brandIcon`, `supportingText`, `hideIcon`, `loading`, `onCreate(el)`
+- Playground snackbar page: mode, variant, leading content, loading, edge and stack examples
+
 ### Added — Command palette & kbd
 
 - `k3-kbd` — Material-style keycaps for chords (`Ctrl+K`, `Alt+H`, …)

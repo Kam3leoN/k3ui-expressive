@@ -63,7 +63,8 @@ describe('components used simultaneously', () => {
     snack.remove();
     expect(document.getElementById('c-btn')).toBeNull();
     expect(document.getElementById('c-snack')).toBeNull();
-  });
+    /* show() settles after the close: 4 s + expressive intro / exit (~1.4 s) */
+  }, 10_000);
 
   it('overlay stack scrollLock toggles under concurrent overlays', async () => {
     const prev = overlayStack.scrollLock;

@@ -21,6 +21,9 @@ export {
   SNACKBAR_STACK_ACTION_DP,
   type SnackbarDuration,
   type SnackbarPosition,
+  type SnackbarEdge,
+  type SnackbarMode,
+  type SnackbarVariant,
 } from './components/feedback/snackbar.js';
 export {
   K3Coverflow,

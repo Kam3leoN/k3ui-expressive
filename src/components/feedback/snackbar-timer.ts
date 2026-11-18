@@ -24,6 +24,27 @@ export class PauseableTimeout {
     this.deadline = 0;
   }
 
+  /**
+   * Arm later: keep the full `ms` without running (snackbar held behind a
+   * stack or while loading). `resume()` starts it.
+   */
+  prime(ms: number): void {
+    this.clear();
+    if (ms <= 0) return;
+    this.remainingMs = ms;
+    this.paused = true;
+  }
+
+  /** True while counting down. */
+  get running(): boolean {
+    return this.timer !== undefined;
+  }
+
+  /** Remaining time once paused / primed (ms). */
+  get remaining(): number {
+    return this.remainingMs;
+  }
+
   pause(): void {
     if (!this.timer || this.paused) return;
     clearTimeout(this.timer);
@@ -32,9 +53,11 @@ export class PauseableTimeout {
     this.paused = true;
   }
 
-  resume(): void {
+  /** Resume a paused / primed timer, never with less than `minMs` left. */
+  resume(minMs = 0): void {
     if (!this.paused) return;
     this.paused = false;
+    this.remainingMs = Math.max(this.remainingMs, minMs);
     this.arm();
   }
 

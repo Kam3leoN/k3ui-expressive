@@ -641,20 +641,27 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
   },
   'snackbar': {
     theming: [
-      ['inverse surface', 'sys inverse', 'Bar chrome (M3)'],
-      ['position', 'center|start|end|auto', 'Bottom edge placement'],
+      ['variant', 'inverse|emphasized|tonal|error', 'Container role (inverse = M3)'],
+      ['shape', 'corner full', 'Circle → pill (stacked long action: extra-large)'],
+      ['--k3-snackbar-icon-size · -avatar-size · -brand-size', '28 · 48 · 44 dp', 'Leading content'],
+      ['--k3-snackbar-stack-peek · -opacity-step', '12 dp · 0.3', 'Stack perspective'],
+      ['position · edge', 'center|start|end · bottom|top', 'Placement'],
       ['chrome-inset', 'boolean', 'Nudge above FAB / bottom bar'],
     ],
     keyboard: [
-      ['Escape', 'Dismiss when open (if dismissible / action path)'],
-      ['Tab', 'Action and dismiss controls'],
+      ['Escape', 'Dismiss when focus is inside'],
+      ['Tab', 'Action and dismiss controls (front snackbar only)'],
     ],
     focus: 'doc.snackbar.focus',
     motion: [
-      ['Open / close', 'Slide + fade via runOpenClose', 'Respects reduced motion'],
+      ['Expressive open', 'Circle rises from the edge · icon scales in · stretch from center', 'M3E springs as CSS linear()'],
+      ['Close', 'Back to the circle, out through the edge · slide when a stack waits', 'Emphasized accelerate'],
+      ['Stack', 'Rows move forward when the front leaves', 'Spatial default spring'],
+      ['Swipe', 'Follows the finger · fling ≥ 48 dp dismisses', 'Touch / pen'],
+      ['Reduced motion', 'Fades only', 'OS or data-k3-reduce-motion'],
     ],
     a11y: 'doc.snackbar.a11y',
-    versions: { na: 'Single bottom bar — queue behaviors are options' },
+    versions: { na: 'One component — mode, variant and stack are options' },
   },
   'alert': {
     theming: [

@@ -104,6 +104,7 @@ import {
   type PlaygroundLocale,
 } from './locale-flags.js';
 import { armNavActive, navItemFromEvent } from '../src/components/navigation/nav-selection.js';
+import { wireSnackbarDemo } from './snackbar-demo.js';
 import type { K3NavItem } from '../src/components/navigation/nav-item.js';
 import type { DocComponent } from './catalog.js';
 /* Engine only — avoid pulling the full k3ux catalog on first paint. */
@@ -4000,35 +4001,7 @@ async function boot(): Promise<void> {
   }
   await yieldToMain();
 
-  type SnackEl = HTMLElement & {
-    show: () => Promise<boolean>;
-    hide: (source?: 'user' | 'api' | 'auto') => Promise<boolean>;
-  };
-  const snackIds = ['snack', 'snack-action', 'snack-dismiss', 'snack-twoline', 'snack-stacked'] as const;
-  const showSnack = (id: (typeof snackIds)[number]): void => {
-    const el = document.getElementById(id) as SnackEl | null;
-    void el?.show();
-  };
-  document.getElementById('btn-snack')?.addEventListener('click', () => showSnack('snack'));
-  document.getElementById('btn-snack-action')?.addEventListener('click', () => showSnack('snack-action'));
-  document
-    .getElementById('btn-snack-dismiss')
-    ?.addEventListener('click', () => showSnack('snack-dismiss'));
-  document
-    .getElementById('btn-snack-twoline')
-    ?.addEventListener('click', () => showSnack('snack-twoline'));
-  document
-    .getElementById('btn-snack-stacked')
-    ?.addEventListener('click', () => showSnack('snack-stacked'));
-  document.getElementById('btn-snack-api')?.addEventListener('click', () => {
-    void window.K3UI?.snackbar.show({
-      message: 'Queued via K3UI.snackbar.show()',
-      action: 'Undo',
-      dismissible: true,
-      duration: 'short',
-      queue: 'replace',
-    });
-  });
+  wireSnackbarDemo();
 
   type DialogEl = HTMLElement & {
     show: () => Promise<boolean>;

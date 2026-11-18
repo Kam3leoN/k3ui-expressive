@@ -7920,16 +7920,113 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
             <h1 data-i18n="doc.snackbar.title">Snackbar</h1>
             <p data-i18n="doc.snackbar.blurb">
-              1–2 lines · optional action · optional trailing close — inverse surface (M3 / Android).
+              Expressive or standard · icon, avatar, brand mark · loading · bottom or top edge · stack of 3 with queue · swipe to dismiss.
             </p>
             <p class="doc-intro" data-i18n="doc.snackbar.intro">
-              Snackbars confirm brief outcomes at the bottom of the screen. Keep copy to one or two lines, offer at most one action, and choose short, long, or indefinite duration with care. Use the inverse surface so the message stays readable over any page chrome.
+              Snackbars confirm brief outcomes on a screen edge. In expressive mode (default) an icon button rises from the edge, its icon scales in, then it stretches from the center into a pill; standard mode is the M3 bar. Keep copy short, offer at most one action, and pick short, long, or indefinite duration with care. Turn on the stack to show up to three at once — the rest wait in line.
             </p>
           </header>
           <div class="surface surface-flush stack gap-lg" data-doc-examples>
             <header class="section-head sub">
               <h2 data-i18n="doc.section.examples">Examples</h2>
             </header>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.snackbar.option.mode">mode</h3>
+              <p data-i18n="doc.snackbar.option.mode.desc">
+                expressive (default): the circle rises from the edge, the icon scales in, then it stretches from the center · standard: the M3 bar slides in at full width. On touch, swipe it toward the edge or sideways to dismiss.
+              </p>
+            </header>
+            <div class="row wrap gap-sm">
+              <k3-button id="btn-snack-expressive" variant="filled">
+                <span data-i18n="doc.snackbar.open.expressive">Expressive</span>
+              </k3-button>
+              <k3-button id="btn-snack-standard" variant="tonal">
+                <span data-i18n="doc.snackbar.open.standard">Standard</span>
+              </k3-button>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.snackbar.option.variant">variant</h3>
+              <p data-i18n="doc.snackbar.option.variant.desc">
+                inverse (M3 spec, default) · emphasized (primary) · tonal (primary container) · error.
+              </p>
+            </header>
+            <div class="row wrap gap-sm">
+              <k3-button id="btn-snack-inverse" variant="outlined">
+                <span data-i18n="doc.snackbar.open.inverse">Inverse</span>
+              </k3-button>
+              <k3-button id="btn-snack-emphasized" variant="outlined">
+                <span data-i18n="doc.snackbar.open.emphasized">Emphasized</span>
+              </k3-button>
+              <k3-button id="btn-snack-tonal" variant="outlined">
+                <span data-i18n="doc.snackbar.open.tonal">Tonal</span>
+              </k3-button>
+              <k3-button id="btn-snack-error" variant="outlined">
+                <span data-i18n="doc.snackbar.open.error">Error</span>
+              </k3-button>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.snackbar.option.leading">icon / avatar / brand-icon / supporting-text</h3>
+              <p data-i18n="doc.snackbar.option.leading.desc">
+                Built-in icons render as SVG (pixel centered on every engine). avatar replaces the icon; brand-icon shows a brand mark in the circle at opening only; supporting-text adds a quieter second line.
+              </p>
+            </header>
+            <div class="row wrap gap-sm">
+              <k3-button id="btn-snack-icon" variant="tonal">
+                <span data-i18n="doc.snackbar.open.icon">Icon</span>
+              </k3-button>
+              <k3-button id="btn-snack-avatar" variant="tonal">
+                <span data-i18n="doc.snackbar.open.avatar">Avatar + 2 lines</span>
+              </k3-button>
+              <k3-button id="btn-snack-brand" variant="tonal">
+                <span data-i18n="doc.snackbar.open.brand">Brand mark</span>
+              </k3-button>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.snackbar.option.loading">loading</h3>
+              <p data-i18n="doc.snackbar.option.loading.desc">
+                M3 Expressive loading indicator in place of the icon; the timer waits. Set loading back to false: the icon pops in and the timer starts.
+              </p>
+            </header>
+            <div class="row wrap gap-sm">
+              <k3-button id="btn-snack-loading" variant="filled">
+                <span data-i18n="doc.snackbar.open.loading">Upload</span>
+              </k3-button>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.snackbar.option.edge">edge</h3>
+              <p data-i18n="doc.snackbar.option.edge.desc">
+                bottom (default): enters from and leaves through the bottom of the screen · top: from and through the top.
+              </p>
+            </header>
+            <div class="row wrap gap-sm">
+              <k3-button id="btn-snack-bottom" variant="outlined">
+                <span data-i18n="doc.snackbar.open.bottom">Bottom</span>
+              </k3-button>
+              <k3-button id="btn-snack-top" variant="outlined">
+                <span data-i18n="doc.snackbar.open.top">Top</span>
+              </k3-button>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.snackbar.option.stack">Stack — snackbarQueue.setStack(3)</h3>
+              <p data-i18n="doc.snackbar.option.stack.desc">
+                Up to three visible in vertical perspective, the oldest in front; the others wait in line. Only the front counts down, arrivals come out from behind it, and when it leaves the stack moves forward.
+              </p>
+            </header>
+            <div class="row wrap gap-sm items-center">
+              <k3-switch id="snack-stack-toggle">
+                <span data-i18n="doc.snackbar.stack.toggle">Stack up to 3</span>
+              </k3-switch>
+              <k3-button id="btn-snack-burst" variant="filled">
+                <span data-i18n="doc.snackbar.open.burst">Send 5 messages</span>
+              </k3-button>
+            </div>
+
             <header class="section-head sub">
               <h3 data-i18n="doc.snackbar.option.duration">duration / action / dismissible</h3>
               <p data-i18n="doc.snackbar.option.duration.desc">
@@ -7991,6 +8088,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               id="snack-action"
               duration="long"
               action="Undo"
+              icon="archive"
               queue-behavior="replace"
             >
               <span data-i18n="doc.snackbar.demo.archived">Photo archived</span>
@@ -8000,12 +8098,14 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               duration="indefinite"
               dismissible
               action="Undo"
+              icon="delete"
               queue-behavior="replace"
             >
               <span data-i18n="doc.snackbar.demo.deleted">Photo deleted</span>
             </k3-snackbar>
             <k3-snackbar
               id="snack-twoline"
+              mode="standard"
               duration="long"
               dismissible
               queue-behavior="replace"
