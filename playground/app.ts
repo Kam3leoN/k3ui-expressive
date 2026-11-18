@@ -1,5 +1,8 @@
 /* Playground app — booted by main.ts after the first paint. */
 import { init } from '../src/bootstrap/init.js';
+import { registerMessages } from '../src/i18n/index.js';
+import playgroundDocEn from './i18n/en.json';
+import playgroundDocFr from './i18n/fr.json';
 import type { ColorSpecVersion } from '../src/theme/apply.js';
 import { registry } from '../src/registry/register.js';
 import { yieldToMain } from '../src/core/yield.js';
@@ -486,6 +489,7 @@ function applyPlaygroundI18n(): void {
   buildNavMenu();
   buildCatalogGrid();
   fillScrollbarDemo();
+  void import('./home-stats/mount.js').then((m) => m.syncHomeStatsI18n());
   const page = articlePageId(currentPageId());
   syncDocNav(page);
   if (page === 'color-roles') renderColorRoles();
@@ -2386,27 +2390,37 @@ async function fillShapes(): Promise<void> {
   ).join('');
 }
 
-/** Pale Material expressive shapes behind the home hero (m3.material.io vibe). */
+/**
+ * Soft blurred Material orbs behind the home hero (Trainable ambient recipe):
+ * float translate + spin rotate + blur(48px). Shapes: VerySunny · Clover8Leaf ·
+ * Pentagon · Cookie9Sided.
+ */
 async function mountHomeAmbient(): Promise<void> {
   const host = document.getElementById('home-ambient');
   if (!host || host.childElementCount) return;
   const { MATERIAL_SHAPE_SVG } = await import('../src/shapes/index.js');
   const slots = [
-    { name: 'SoftBurst', slot: 'a' },
-    { name: 'Cookie9Sided', slot: 'b' },
-    { name: 'Pill', slot: 'c' },
-    { name: 'Puffy', slot: 'd' },
+    { name: 'VerySunny', slot: 'a' },
+    { name: 'Clover8Leaf', slot: 'b' },
+    { name: 'Pentagon', slot: 'c' },
+    { name: 'Cookie9Sided', slot: 'd' },
   ] as const;
   host.replaceChildren(
     ...slots.map(({ name, slot }) => {
+      const orb = document.createElement('div');
+      orb.className = `home-ambient__orb home-ambient__orb--${slot}`;
+      const spin = document.createElement('div');
+      spin.className = 'home-ambient__spin';
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('class', `home-ambient__shape home-ambient__shape--${slot}`);
+      svg.setAttribute('class', 'home-ambient__shape');
       svg.setAttribute('viewBox', '0 0 1 1');
       svg.setAttribute('aria-hidden', 'true');
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', MATERIAL_SHAPE_SVG[name]);
       svg.append(path);
-      return svg;
+      spin.append(svg);
+      orb.append(spin);
+      return orb;
     }),
   );
 }
@@ -3617,6 +3631,9 @@ async function boot(): Promise<void> {
       components: [...SHELL_COMPONENTS],
     });
 
+    registerMessages('en', playgroundDocEn as Record<string, string>);
+    registerMessages('fr', playgroundDocFr as Record<string, string>);
+
     cacheAppliedTheme();
     const ver = document.getElementById('ver');
     if (ver) ver.textContent = `v${api.version}`;
@@ -3624,6 +3641,7 @@ async function boot(): Promise<void> {
     await yieldToMain();
     /* Hero morph ASAP — CSS d keyframes must start on first home paint. */
     void import('./hero-morph/mount.js').then((m) => m.mountHomeHeroMorph());
+    void import('./home-stats/mount.js').then((m) => m.mountHomeStats());
 
     applyAdaptiveShell();
     containerOn = docStore.get(DocKeys.uiContainer, true);

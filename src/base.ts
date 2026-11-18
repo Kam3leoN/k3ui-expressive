@@ -69,7 +69,7 @@ export {
 export { VERSION } from './version.js';
 export { init, getInitOptions, type InitOptions, type K3UIGlobal } from './bootstrap/init.js';
 export { debug } from './debug/logger.js';
-export { i18n } from './i18n/index.js';
+export { i18n, registerMessages } from './i18n/index.js';
 export {
   themeApi as theme,
   themeCssVars,

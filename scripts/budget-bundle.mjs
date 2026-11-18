@@ -6,6 +6,32 @@ import { fileURLToPath } from 'node:url';
 
 /* Repository root, wherever the clone lives (was hard-coded to D:/K3ui). */
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+/** Fail the build if bundled library locales still ship doc-site strings. */
+function assertNoDocKeysInLibLocales() {
+  const localesDir = path.join(root, 'src/i18n/locales');
+  let bad = [];
+  for (const file of ['en.json', 'fr.json']) {
+    const filePath = path.join(localesDir, file);
+    if (!fs.existsSync(filePath)) continue;
+    const dict = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    bad = bad.concat(
+      Object.keys(dict)
+        .filter((key) => key.startsWith('doc.'))
+        .map((key) => `${file}: ${key}`),
+    );
+  }
+  if (bad.length) {
+    console.error('Library locale JSON must not contain doc.* keys:');
+    for (const line of bad.slice(0, 20)) console.error(`  ${line}`);
+    if (bad.length > 20) console.error(`  … and ${bad.length - 20} more`);
+    process.exit(1);
+  }
+  console.log('Budget: library locales have no doc.* keys');
+}
+
+assertNoDocKeysInLibLocales();
+
 const jsPath = path.join(root, 'dist/k3ui.js');
 const cssPath = path.join(root, 'dist/k3ui.css');
 
@@ -66,3 +92,53 @@ for (const f of ['k3ui.js', 'k3ui.css', 'tokens.json']) {
   }
 }
 console.log('Budget OK — dist artefacts present');
+
+/**
+ * Per-component brotli ceilings (post phase 1). Measured via scripts/bench-components.mjs.
+ * Warn when docs/bench/latest.json is present; hard fail only with K3UI_BUDGET_BENCH=1.
+ */
+const BENCH_BROTLI_LIMITS = {
+  'text-field': 26624,
+  dialog: 26624,
+  'date-picker': 36864,
+  index: 250 * 1024,
+};
+
+function checkBenchBrotliBudgets() {
+  const benchPath = path.join(root, 'docs/bench/latest.json');
+  const enforce = process.env.K3UI_BUDGET_BENCH === '1';
+  if (!fs.existsSync(benchPath)) {
+    if (enforce) {
+      console.error('K3UI_BUDGET_BENCH=1 but docs/bench/latest.json is missing — run bench first');
+      process.exit(1);
+    }
+    return;
+  }
+  const report = JSON.parse(fs.readFileSync(benchPath, 'utf8'));
+  const bundles = report.bundles ?? {};
+  const over = [];
+  for (const [name, limit] of Object.entries(BENCH_BROTLI_LIMITS)) {
+    const brotli = bundles[name]?.brotli;
+    if (typeof brotli !== 'number') continue;
+    if (brotli > limit) {
+      over.push({ name, brotli, limit });
+    }
+  }
+  if (!over.length) {
+    console.log('Bench: component brotli within phase-1 targets');
+    return;
+  }
+  const lines = over.map(
+    ({ name, brotli, limit }) =>
+      `${name} ${brotli} B brotli (limit ${limit}) — shrink after phase 1`,
+  );
+  if (enforce) {
+    console.error('Component brotli budget exceeded (K3UI_BUDGET_BENCH=1):');
+    for (const line of lines) console.error(`  ${line}`);
+    process.exit(1);
+  }
+  console.warn('Bench note (soft): component brotli above phase-1 targets:');
+  for (const line of lines) console.warn(`  ${line}`);
+}
+
+checkBenchBrotliBudgets();

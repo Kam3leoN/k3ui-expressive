@@ -91,6 +91,29 @@ function detectLocale(): LocaleCode {
 const own = (dict: Dict, key: string): string | undefined =>
   Object.hasOwn(dict, key) ? dict[key] : undefined;
 
+/**
+ * Merge runtime message entries into a bundled locale catalog (demos, doc site,
+ * app overlays). Unknown BCP 47 tags are ignored. Dispatches `k3-locale-change`
+ * so `data-i18n` and other listeners refresh when `document` is available.
+ */
+export function registerMessages(locale: LocaleCode | string, dict: Record<string, string>): void {
+  const code = normalizeLocale(locale);
+  if (!code) {
+    debug.warn('i18n', `registerMessages: no catalog for locale "${String(locale)}"`);
+    return;
+  }
+  Object.assign(catalogs[code], dict);
+  if (typeof document !== 'undefined') {
+    document.dispatchEvent(
+      new CustomEvent('k3-locale-change', {
+        bubbles: true,
+        detail: { locale: current },
+      }),
+    );
+  }
+  debug.info('i18n', `registerMessages locale=${code} keys=${Object.keys(dict).length}`);
+}
+
 export const i18n = {
   get locale(): LocaleCode {
     return current;
@@ -156,5 +179,9 @@ export const i18n = {
       const dict = partial[loc];
       if (dict) Object.assign(catalogs[loc], dict);
     }
+  },
+  /** @see registerMessages */
+  registerMessages(locale: LocaleCode | string, dict: Record<string, string>): void {
+    registerMessages(locale, dict);
   },
 };

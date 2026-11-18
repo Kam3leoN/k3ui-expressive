@@ -98,10 +98,18 @@ async function prepaintTheme(): Promise<string> {
   return `    <style>html[data-k3-prepaint]{${css}}</style>\n    <script>${script}</script>\n`;
 }
 
-function prerenderI18n(html: string): string {
-  const dict = JSON.parse(
-    readFileSync(resolve(__dirname, `../src/i18n/locales/${DEFAULT_LOCALE}.json`), 'utf8'),
+function loadPlaygroundLocaleDict(loc: string): Record<string, string> {
+  const lib = JSON.parse(
+    readFileSync(resolve(__dirname, `../src/i18n/locales/${loc}.json`), 'utf8'),
   ) as Record<string, string>;
+  const docPath = resolve(__dirname, `i18n/${loc}.json`);
+  if (!existsSync(docPath)) return lib;
+  const doc = JSON.parse(readFileSync(docPath, 'utf8')) as Record<string, string>;
+  return { ...lib, ...doc };
+}
+
+function prerenderI18n(html: string): string {
+  const dict = loadPlaygroundLocaleDict(DEFAULT_LOCALE);
   /* Leaf elements only — same rule as applyPlaygroundI18n() (no element children) */
   return html.replace(
     /(<([a-z0-9-]+)\b[^>]*\sdata-i18n="([^"]+)"[^>]*>)([^<]*)(<\/\2>)/g,
@@ -112,13 +120,8 @@ function prerenderI18n(html: string): string {
 
 /** Home catalog cards in the default locale — same markup the app builds. */
 function prerenderCatalog(html: string): string {
-  const dict = (loc: string): Record<string, string> =>
-    JSON.parse(readFileSync(resolve(__dirname, `../src/i18n/locales/${loc}.json`), 'utf8')) as Record<
-      string,
-      string
-    >;
-  const main = dict(DEFAULT_LOCALE);
-  const en = dict('en');
+  const main = loadPlaygroundLocaleDict(DEFAULT_LOCALE);
+  const en = loadPlaygroundLocaleDict('en');
   /* Same lookup order as i18n.t(): locale → English → key */
   const t = (key: string): string =>
     (Object.hasOwn(main, key) ? main[key] : Object.hasOwn(en, key) ? en[key] : key) ?? key;

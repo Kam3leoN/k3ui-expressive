@@ -1,7 +1,14 @@
-import { describe, expect, it, afterEach } from 'vitest';
-import { i18n } from '../../src/i18n/index.js';
+import { describe, expect, it, afterEach, beforeAll } from 'vitest';
+import { i18n, registerMessages } from '../../src/i18n/index.js';
+import playgroundDocEn from '../../playground/i18n/en.json';
+import playgroundDocFr from '../../playground/i18n/fr.json';
 
 describe('i18n.enUs', () => {
+  beforeAll(() => {
+    registerMessages('en', playgroundDocEn as Record<string, string>);
+    registerMessages('fr', playgroundDocFr as Record<string, string>);
+  });
+
   afterEach(() => {
     i18n.setLocale('en');
   });
