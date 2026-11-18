@@ -38,7 +38,18 @@ export class K3TextField extends K3Element {
   // ── Public API ──────────────────────────────────────────────────────────
   @property() label = '';
   @property() name = '';
-  @property() value = '';
+  private _value = '';
+  @property()
+  get value(): string {
+    return this._value;
+  }
+  set value(v: string) {
+    const next = v == null ? '' : String(v);
+    if (next === this._value) return;
+    const old = this._value;
+    this._value = next;
+    this.requestUpdate('value', old);
+  }
   @property() placeholder = '';
   @property() type: TextFieldType = 'text';
   @property({ reflect: true }) variant: TextFieldVariant = 'filled';
@@ -78,7 +89,8 @@ export class K3TextField extends K3Element {
 
   private labelAnimation?: Animation;
   private prevFloated: boolean | undefined;
-  private pendingKeyframes: Keyframe[] | undefined;
+  private pendingFloatTo: boolean | undefined;
+  private labelMeasureRaf = 0;
   private labelAnimGen = 0;
 
   // ── Derived ─────────────────────────────────────────────────────────────
@@ -252,15 +264,41 @@ export class K3TextField extends K3Element {
 
   // ── Label float (Material Web WAAPI) ────────────────────────────────────
   /**
-   * Measure rest↔float in willUpdate (DOM still on previous float layout),
-   * play after paint. Gen token: prior cancel must not clear `animating`
-   * (that hid the descent).
+   * Label float: arm direction before render; measure in one rAF after paint
+   * (avoids sync layout in willUpdate). Gen token: prior cancel must not clear
+   * `animating` (that hid the descent).
    */
   private armFloatAnimation(toFloating: boolean): void {
-    const frames = this.measureLabelKeyframes(toFloating);
-    if (!frames.length) return;
-    this.pendingKeyframes = frames;
+    this.pendingFloatTo = toFloating;
     this.animating = true;
+  }
+
+  private cancelPendingLabelMeasure(): void {
+    const waiting = this.pendingFloatTo !== undefined || this.labelMeasureRaf !== 0;
+    if (this.labelMeasureRaf) {
+      cancelAnimationFrame(this.labelMeasureRaf);
+      this.labelMeasureRaf = 0;
+    }
+    this.pendingFloatTo = undefined;
+    if (waiting && !this.labelAnimation) {
+      this.animating = false;
+      this.syncHostState();
+    }
+  }
+
+  private scheduleLabelFloatMeasure(): void {
+    if (this.pendingFloatTo === undefined) return;
+    const to = this.pendingFloatTo;
+    this.pendingFloatTo = undefined;
+    this.labelMeasureRaf = requestAnimationFrame(() => {
+      this.labelMeasureRaf = 0;
+      const frames = this.measureLabelKeyframes(to);
+      if (frames.length) this.playLabelAnimation(frames);
+      else {
+        this.animating = false;
+        this.syncHostState();
+      }
+    });
   }
 
   private playLabelAnimation(keyframes: Keyframe[]): void {
@@ -304,6 +342,7 @@ export class K3TextField extends K3Element {
 
   /** Rest↔float keyframes from live geometry (Material Web). */
   private measureLabelKeyframes(toFloating: boolean): Keyframe[] {
+    if (this.isStandard || !this.label) return [];
     const floating = this.floatingLabelEl;
     const resting = this.restingLabelEl;
     if (!floating || !resting) return [];
@@ -373,7 +412,45 @@ export class K3TextField extends K3Element {
   override disconnectedCallback(): void {
     this.labelAnimGen++;
     this.labelAnimation?.cancel();
+    this.cancelPendingLabelMeasure();
     super.disconnectedCallback();
+  }
+
+  private valueChangedFloated(prev: string | undefined): boolean {
+    const was =
+      this.focused ||
+      !!prev ||
+      (this.isStandard ? false : TEMPORAL_FIELD_TYPES.has(this.type));
+    const next = this.floated;
+    return was !== next;
+  }
+
+  private needsSlotsRefreshForValue(prev: string | undefined): boolean {
+    if (!this.clearable) return false;
+    const wasEmpty = !prev;
+    const isEmpty = !this.value;
+    return wasEmpty !== isEmpty;
+  }
+
+  /** Skip Lit render when only the inner control + form state must change. */
+  private tryValueOnlyFastPath(changed: PropertyValues): boolean {
+    if (!this.hasUpdated) return false;
+    if (!changed.has('value') || changed.size !== 1) return false;
+    if (this.multiline || this.showCounter) return false;
+    if (this.needsSlotsRefreshForValue(changed.get('value') as string | undefined)) return false;
+    if (this.valueChangedFloated(changed.get('value') as string | undefined)) return false;
+
+    const control = this.controlEl;
+    if (control && control.value !== this.value) control.value = this.value;
+    this.writeFormValue(this.noForm ? null : this.value || null);
+    this.syncValidity();
+    this.toggleAttribute('data-populated', !!this.value);
+    return true;
+  }
+
+  protected override shouldUpdate(changed: PropertyValues): boolean {
+    if (this.tryValueOnlyFastPath(changed)) return false;
+    return super.shouldUpdate(changed);
   }
 
   override firstUpdated(): void {
@@ -399,6 +476,8 @@ export class K3TextField extends K3Element {
     const next = this.floated;
     if (was !== undefined && was !== next) {
       this.armFloatAnimation(next);
+    } else if (this.pendingFloatTo !== undefined || this.labelMeasureRaf) {
+      this.cancelPendingLabelMeasure();
     }
     this.prevFloated = next;
   }
@@ -410,7 +489,8 @@ export class K3TextField extends K3Element {
       changed.has('type') ||
       changed.has('passwordToggle') ||
       changed.has('clearable') ||
-      changed.has('value');
+      (changed.has('value') &&
+        this.needsSlotsRefreshForValue(changed.get('value') as string | undefined));
     if (slotsDirty) this.syncSlots();
 
     if (
@@ -432,13 +512,20 @@ export class K3TextField extends K3Element {
     if (changed.has('value') || changed.has('noForm')) {
       this.writeFormValue(this.noForm ? null : this.value || null);
     }
-    /* Inner control is rendered — its constraints are current now. */
-    this.syncValidity();
-    if (this.pendingKeyframes) {
-      const frames = this.pendingKeyframes;
-      this.pendingKeyframes = undefined;
-      this.playLabelAnimation(frames);
+    if (
+      changed.has('value') ||
+      changed.has('required') ||
+      changed.has('pattern') ||
+      changed.has('type') ||
+      changed.has('disabled') ||
+      changed.has('readonly') ||
+      changed.has('maxLength') ||
+      changed.has('error') ||
+      changed.has('noForm')
+    ) {
+      this.syncValidity();
     }
+    this.scheduleLabelFloatMeasure();
   }
 
   /** Focus the inner control. */
