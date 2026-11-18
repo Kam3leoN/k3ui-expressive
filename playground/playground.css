@@ -1691,28 +1691,16 @@ k3-avatar [slot='badge'].ms {
   fill: currentColor;
 }
 .home-hero-morph__shape--back {
-  color: color-mix(
-    in srgb,
-    var(--k3-sys-color-tertiary) 55%,
-    var(--k3-sys-color-surface-container)
-  );
-  opacity: 0.85;
+  color: var(--k3-sys-color-tertiary);
+  opacity: 0.92;
   --home-hero-morph-turn: 150s;
 }
 .home-hero-morph__shape--mid {
-  color: color-mix(
-    in srgb,
-    var(--k3-sys-color-primary) 45%,
-    var(--k3-sys-color-surface-container)
-  );
+  color: var(--k3-sys-color-primary);
   --home-hero-morph-turn: 110s;
 }
 .home-hero-morph__shape--front {
-  color: color-mix(
-    in srgb,
-    var(--k3-sys-color-secondary) 40%,
-    var(--k3-sys-color-surface-container)
-  );
+  color: var(--k3-sys-color-secondary-container);
   --home-hero-morph-turn: 90s;
 }
 .home-hero-morph__still {
@@ -1723,7 +1711,7 @@ k3-avatar [slot='badge'].ms {
   inset: 0;
   display: grid;
   place-items: center;
-  color: var(--k3-sys-color-on-primary);
+  color: var(--k3-sys-color-on-secondary-container);
   pointer-events: none;
 }
 .home-hero-morph__k {
@@ -1733,9 +1721,7 @@ k3-avatar [slot='badge'].ms {
   letter-spacing: -0.04em;
   line-height: 1;
   user-select: none;
-  color: var(--k3-sys-color-on-primary);
-  mix-blend-mode: normal;
-  text-shadow: 0 1px 0 color-mix(in srgb, var(--k3-sys-color-on-surface) 12%, transparent);
+  color: var(--k3-sys-color-on-secondary-container);
 }
 @keyframes home-hero-morph-turn {
   to {

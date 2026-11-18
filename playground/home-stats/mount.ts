@@ -1,9 +1,10 @@
 /**
  * Home stats banner — Trainable-style Material shape counters
- * (VerySunny · Cookie4Sided · Pill · SoftBurst).
+ * with continuous random morph (VerySunny · Cookie4Sided · Pill · SoftBurst…).
  */
 import { catalog as k3uiCatalog } from '../../src/registry/catalog.js';
 import {
+  MATERIAL_SHAPE_NAMES,
   MATERIAL_SHAPE_SVG,
   animateMaterialShapeMorph,
   type MaterialShapeName,
@@ -14,15 +15,15 @@ export type HomeStatTone = 'primary' | 'tertiary' | 'secondary' | 'container';
 export type HomeStatDef = {
   id: string;
   shape: MaterialShapeName;
-  morph: MaterialShapeName;
   tone: HomeStatTone;
   value: string;
   valueClass?: 'home-stat__value--text' | 'home-stat__value--stack';
   labelKey: string;
 };
 
-const MORPH_MS = 800;
-const HOLD_MS = 2200;
+const MORPH_MS = 900;
+/** Short pause so the path reads, then morph again — continuous loop. */
+const HOLD_MS = 380;
 
 function t(key: string): string {
   return window.K3UI?.i18n.t(key) ?? key;
@@ -68,7 +69,6 @@ export function buildHomeStatDefs(counts: { k3ui: number; k3ux: number }): HomeS
     {
       id: 'k3ui',
       shape: 'VerySunny',
-      morph: 'Sunny',
       tone: 'primary',
       value: String(counts.k3ui),
       labelKey: 'playground.home.stats.k3ui',
@@ -76,7 +76,6 @@ export function buildHomeStatDefs(counts: { k3ui: number; k3ux: number }): HomeS
     {
       id: 'k3ux',
       shape: 'Cookie4Sided',
-      morph: 'Flower',
       tone: 'tertiary',
       value: String(counts.k3ux),
       labelKey: 'playground.home.stats.k3ux',
@@ -84,7 +83,6 @@ export function buildHomeStatDefs(counts: { k3ui: number; k3ux: number }): HomeS
     {
       id: 'oss',
       shape: 'Pill',
-      morph: 'Pentagon',
       tone: 'secondary',
       value: t('playground.home.stats.openSource'),
       valueClass: 'home-stat__value--text',
@@ -93,13 +91,27 @@ export function buildHomeStatDefs(counts: { k3ui: number; k3ux: number }): HomeS
     {
       id: 'free',
       shape: 'SoftBurst',
-      morph: 'Cookie9Sided',
       tone: 'container',
       value: t('playground.home.stats.free'),
       valueClass: 'home-stat__value--stack',
       labelKey: 'playground.home.stats.freeLabel',
     },
   ];
+}
+
+/** Pick a random catalog shape different from `exclude`. */
+export function pickRandomShape(exclude: MaterialShapeName): MaterialShapeName {
+  const pool = MATERIAL_SHAPE_NAMES;
+  if (pool.length < 2) return exclude;
+  let next = pool[Math.floor(Math.random() * pool.length)]!;
+  for (let i = 0; i < 8 && next === exclude; i++) {
+    next = pool[Math.floor(Math.random() * pool.length)]!;
+  }
+  if (next === exclude) {
+    const idx = pool.indexOf(exclude);
+    next = pool[(idx + 1) % pool.length]!;
+  }
+  return next;
 }
 
 function shapeMarkup(name: MaterialShapeName): string {
@@ -117,7 +129,7 @@ function statMarkup(def: HomeStatDef): string {
           .join('')
       : escapeHtml(def.value);
   return `<div class="home-stat" data-stat="${escapeHtml(def.id)}">
-  <div class="home-stat__shape home-stat__shape--${def.tone}" data-shape="${def.shape}" data-morph="${def.morph}">
+  <div class="home-stat__shape home-stat__shape--${def.tone}" data-shape="${def.shape}">
     ${shapeMarkup(def.shape)}
     <span class="${valueClass}">${valueHtml}</span>
   </div>
@@ -134,61 +146,55 @@ function prefersReducedMotion(): boolean {
 
 function wireMorph(host: HTMLElement): () => void {
   if (prefersReducedMotion()) return () => undefined;
-  const shapes = [...host.querySelectorAll('.home-stat__shape')];
-  const controllers = [];
-  let cancelled = false;
-  let timer = 0;
 
-  const runCycle = async () => {
-    if (cancelled || prefersReducedMotion()) return;
-    for (const el of shapes) {
-      if (cancelled) return;
-      const from = el.dataset.shape;
-      const to = el.dataset.morph;
-      const path = el.querySelector('.home-stat__path');
-      if (!from || !to || !path) continue;
+  const shapes = [...host.querySelectorAll<HTMLElement>('.home-stat__shape')];
+  const controllers: AbortController[] = [];
+  const timers: number[] = [];
+  let cancelled = false;
+
+  const wait = (ms: number): Promise<void> =>
+    new Promise((resolve) => {
+      const id = window.setTimeout(resolve, ms);
+      timers.push(id);
+    });
+
+  const runShape = async (el: HTMLElement, staggerMs: number): Promise<void> => {
+    await wait(staggerMs);
+    let current = (el.dataset.shape as MaterialShapeName | undefined) ?? 'Circle';
+    while (!cancelled && !prefersReducedMotion()) {
+      const path = el.querySelector<SVGPathElement>('.home-stat__path');
+      if (!path) return;
+      const to = pickRandomShape(current);
       const go = new AbortController();
       controllers.push(go);
       await animateMaterialShapeMorph({
-        from,
+        from: current,
         to,
         duration: MORPH_MS,
         signal: go.signal,
         onFrame: (d) => path.setAttribute('d', d),
       });
-      if (cancelled) return;
-      await new Promise((r) => {
-        timer = window.setTimeout(r, HOLD_MS / 2);
-      });
-      if (cancelled) return;
-      const back = new AbortController();
-      controllers.push(back);
-      await animateMaterialShapeMorph({
-        from: to,
-        to: from,
-        duration: MORPH_MS,
-        signal: back.signal,
-        onFrame: (d) => path.setAttribute('d', d),
-      });
-      if (cancelled) return;
-      await new Promise((r) => {
-        timer = window.setTimeout(r, HOLD_MS);
-      });
+      if (cancelled || go.signal.aborted) return;
+      current = to;
+      el.dataset.shape = to;
+      await wait(HOLD_MS);
     }
-    if (!cancelled) void runCycle();
   };
 
-  timer = window.setTimeout(() => void runCycle(), 1200);
+  shapes.forEach((el, i) => {
+    void runShape(el, 180 + i * 280);
+  });
+
   return () => {
     cancelled = true;
-    window.clearTimeout(timer);
+    for (const id of timers) window.clearTimeout(id);
     for (const c of controllers) c.abort();
   };
 }
 
-let stopMorph = null;
+let stopMorph: (() => void) | null = null;
 
-export async function mountHomeStats() {
+export async function mountHomeStats(): Promise<void> {
   const host = document.getElementById('home-stats');
   if (!host) return;
   stopMorph?.();
@@ -211,14 +217,14 @@ export async function mountHomeStats() {
     ...defs.map((def) => {
       const wrap = document.createElement('div');
       wrap.innerHTML = statMarkup(def);
-      return wrap.firstElementChild;
+      return wrap.firstElementChild as HTMLElement;
     }),
   );
   host.classList.add('home-stats--ready');
   stopMorph = wireMorph(host);
 }
 
-export function syncHomeStatsI18n() {
+export function syncHomeStatsI18n(): void {
   const host = document.getElementById('home-stats');
   if (!host?.classList.contains('home-stats--ready')) return;
   const counts = {

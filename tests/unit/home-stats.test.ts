@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { catalog as k3uiCatalog } from '../../src/registry/catalog.js';
 import { catalog as k3uxCatalog } from '../../../k3ux/src/registry/catalog.js';
+import { MATERIAL_SHAPE_NAMES } from '../../src/shapes/index.js';
 import {
   buildHomeStatDefs,
   mountHomeStats,
+  pickRandomShape,
   resolveHomeStatCounts,
   syncHomeStatsI18n,
 } from '../../playground/home-stats/mount.js';
@@ -29,6 +31,14 @@ describe('home-stats', () => {
       'Pill',
       'SoftBurst',
     ]);
+  });
+
+  it('pickRandomShape never returns the excluded shape', () => {
+    for (const name of MATERIAL_SHAPE_NAMES.slice(0, 8)) {
+      for (let i = 0; i < 20; i++) {
+        expect(pickRandomShape(name)).not.toBe(name);
+      }
+    }
   });
 
   it('mountHomeStats injects four shape stats', async () => {
