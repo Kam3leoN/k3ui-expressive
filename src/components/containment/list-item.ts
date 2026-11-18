@@ -8,7 +8,7 @@ import {
   focusRingStyles,
   emitLifecycle,
   waitForMotion,
-  hasNamedSlot,
+  hasLightSlot,
   attachDrag,
   type DragController,
 } from '../../core/index.js';
@@ -130,10 +130,12 @@ export class K3ListItem extends K3Element {
   @state() private hasMetaSlot = false;
   @state() private hasExpand = false;
   @state() private hasTrailingControl = false;
+  @state() private hasDefaultSlot = false;
   @state() private leadingType: ListItemContentType = undefined;
   @state() private trailingType: ListItemContentType = undefined;
   @state() private focusVisible = false;
 
+  private lightDomObserver: MutationObserver | null = null;
   private dismissDrag: DragController | null = null;
   private longPressTimer: number | null = null;
   private longPressOrigin: { x: number; y: number } | null = null;
@@ -147,16 +149,21 @@ export class K3ListItem extends K3Element {
   }
 
   private syncSlots = (): void => {
-    this.hasLeading = LEADING_SLOTS.some((n) => hasNamedSlot(this, n));
-    this.hasOverline = hasNamedSlot(this, 'overline');
+    this.hasLeading = LEADING_SLOTS.some((n) => hasLightSlot(this, n));
+    this.hasOverline = hasLightSlot(this, 'overline');
     this.hasSupporting =
-      hasNamedSlot(this, 'supporting') || hasNamedSlot(this, 'supporting-text');
-    this.hasTrailing = TRAILING_SLOTS.some((n) => hasNamedSlot(this, n));
-    this.hasMetaSlot = hasNamedSlot(this, 'meta');
+      hasLightSlot(this, 'supporting') || hasLightSlot(this, 'supporting-text');
+    this.hasTrailing = TRAILING_SLOTS.some((n) => hasLightSlot(this, n));
+    this.hasMetaSlot = hasLightSlot(this, 'meta');
+    this.hasDefaultSlot = [...this.children].some((c) => {
+      if (!(c instanceof HTMLElement)) return false;
+      const slot = c.getAttribute('slot');
+      return slot === null || slot === '';
+    });
     this.hasExpand =
-      hasNamedSlot(this, 'expand') ||
-      hasNamedSlot(this, 'content') ||
-      hasNamedSlot(this, 'items');
+      hasLightSlot(this, 'expand') ||
+      hasLightSlot(this, 'content') ||
+      hasLightSlot(this, 'items');
     if (this.hasExpand && !this.expandable) this.expandable = true;
 
     const trailing = this.slotted(TRAILING_SLOTS);
@@ -168,6 +175,17 @@ export class K3ListItem extends K3Element {
     if (prevLeading !== this.leadingType) this.notifyParentList();
     this.syncExpandMode();
   };
+
+  private bindLightDomObserver(): void {
+    this.lightDomObserver?.disconnect();
+    this.lightDomObserver = new MutationObserver(() => this.syncSlots());
+    this.lightDomObserver.observe(this, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['slot'],
+    });
+  }
 
   /** Parent `k3-list` re-measures leading alignment (direct children only). */
   private notifyParentList(): void {
@@ -514,6 +532,7 @@ export class K3ListItem extends K3Element {
   override connectedCallback(): void {
     super.connectedCallback();
     this.syncSlots();
+    this.bindLightDomObserver();
     this.addEventListener('contextmenu', this.onContextMenu);
   }
 
@@ -589,6 +608,8 @@ export class K3ListItem extends K3Element {
     this.clearLongPress();
     this.dismissDrag?.destroy();
     this.dismissDrag = null;
+    this.lightDomObserver?.disconnect();
+    this.lightDomObserver = null;
     this.removeEventListener('contextmenu', this.onContextMenu);
     super.disconnectedCallback();
   }
@@ -623,6 +644,115 @@ export class K3ListItem extends K3Element {
       aria-labelledby="content"
       aria-disabled=${this.disabled ? 'true' : nothing}
     ></a>`;
+  }
+
+  /** Empty leading column for sibling alignment (parent `data-leading-reserve`). */
+  private wantsLeadingSpacer(): boolean {
+    const list = this.closest('k3-list');
+    return !!list?.hasAttribute('data-leading-reserve');
+  }
+
+  private slotIf(name: string): typeof nothing | ReturnType<typeof html> {
+    return hasLightSlot(this, name) ? html`<slot name=${name}></slot>` : nothing;
+  }
+
+  private renderLeading(leadingSel: boolean, hasLeadingCol: boolean) {
+    const show = hasLeadingCol || this.wantsLeadingSpacer();
+    if (!show) return nothing;
+    return html`<span
+      class=${classMap({ leading: true, has: hasLeadingCol })}
+      part="leading"
+    >
+      ${leadingSel ? this.renderSelIndicator() : nothing}
+      ${this.slotIf('leading')}
+      ${this.slotIf('start')}
+      ${this.slotIf('icon')}
+      ${this.slotIf('leading-icon')}
+    </span>`;
+  }
+
+  private renderOverline() {
+    if (!this.hasOverline) return nothing;
+    return html`<span class="overline has" part="overline">${this.slotIf('overline')}</span>`;
+  }
+
+  private renderHeadline() {
+    const showHeadlineSlot = hasLightSlot(this, 'headline');
+    if (!showHeadlineSlot && !this.hasDefaultSlot) return nothing;
+    return html`<span class="headline" part="headline">
+      ${showHeadlineSlot ? html`<slot name="headline"></slot>` : nothing}
+      ${this.hasDefaultSlot ? html`<slot></slot>` : nothing}
+    </span>`;
+  }
+
+  private renderSupporting() {
+    if (!this.hasSupporting) return nothing;
+    return html`<span class="supporting has" part="supporting">
+      ${this.slotIf('supporting')}
+      ${this.slotIf('supporting-text')}
+    </span>`;
+  }
+
+  private renderToggle() {
+    if (!this.expandable) return nothing;
+    return html`<span
+      class=${classMap({ toggle: true, has: true, open: this.expanded })}
+      part="toggle"
+      aria-hidden="true"
+    >
+      <slot name="toggle-icon"
+        ><span
+          class=${classMap({ chevron: true, has: true, open: this.expanded })}
+          part="chevron"
+          >expand_more</span
+        ></slot
+      >
+    </span>`;
+  }
+
+  private renderTrailing(trailingSel: boolean, hasTrailingCol: boolean) {
+    if (!hasTrailingCol) return nothing;
+    return html`<span
+      class=${classMap({
+        trailing: true,
+        has: true,
+        'sel-replaces': trailingSel,
+      })}
+      part="trailing"
+    >
+      ${this.meta
+        ? html`<span class="meta" part="meta">${this.meta}</span>`
+        : nothing}
+      ${this.hasMetaSlot ? this.slotIf('meta') : nothing}
+      ${this.slotIf('trailing-supporting-text')}
+      ${this.slotIf('trailing')}
+      ${this.slotIf('end')}
+      ${this.slotIf('trailing-icon')}
+      ${trailingSel ? this.renderSelIndicator() : nothing}
+      ${this.renderToggle()}
+    </span>`;
+  }
+
+  private renderExpandSection() {
+    const show = this.expandable || this.hasExpand || this.expanded;
+    if (!show) return nothing;
+    return html`<div
+      class=${classMap({
+        expand: true,
+        has: this.expandable || this.hasExpand,
+        open: this.expanded,
+      })}
+      part="expand"
+      id="expand"
+    >
+      <div class="expand-inner">
+        <div class="expand-body">
+          ${this.slotIf('expand')}
+          ${this.slotIf('content')}
+          ${this.slotIf('items')}
+        </div>
+      </div>
+    </div>`;
   }
 
   override render() {
@@ -682,88 +812,15 @@ export class K3ListItem extends K3Element {
         @focusout=${this.onFocusOut}
       >
         ${this.renderLink()}
-        <span
-          class=${classMap({ leading: true, has: hasLeadingCol })}
-          part="leading"
-        >
-          ${leadingSel ? this.renderSelIndicator() : nothing}
-          <slot name="leading" @slotchange=${this.syncSlots}></slot>
-          <slot name="start" @slotchange=${this.syncSlots}></slot>
-          <slot name="icon" @slotchange=${this.syncSlots}></slot>
-          <slot name="leading-icon" @slotchange=${this.syncSlots}></slot>
-        </span>
+        ${this.renderLeading(leadingSel, hasLeadingCol)}
         <span class="content" part="content" id="content">
-          <span
-            class=${classMap({ overline: true, has: this.hasOverline })}
-            part="overline"
-          >
-            <slot name="overline" @slotchange=${this.syncSlots}></slot>
-          </span>
-          <span class="headline" part="headline">
-            <slot name="headline" @slotchange=${this.syncSlots}></slot>
-            <slot></slot>
-          </span>
-          <span
-            class=${classMap({ supporting: true, has: this.hasSupporting })}
-            part="supporting"
-          >
-            <slot name="supporting" @slotchange=${this.syncSlots}></slot>
-            <slot name="supporting-text" @slotchange=${this.syncSlots}></slot>
-          </span>
+          ${this.renderOverline()}
+          ${this.renderHeadline()}
+          ${this.renderSupporting()}
         </span>
-        <span
-          class=${classMap({
-            trailing: true,
-            has: hasTrailingCol,
-            'sel-replaces': trailingSel,
-          })}
-          part="trailing"
-        >
-          ${this.meta
-            ? html`<span class="meta" part="meta">${this.meta}</span>`
-            : nothing}
-          <slot name="meta" @slotchange=${this.syncSlots}></slot>
-          <slot name="trailing-supporting-text" @slotchange=${this.syncSlots}></slot>
-          <slot name="trailing" @slotchange=${this.syncSlots}></slot>
-          <slot name="end" @slotchange=${this.syncSlots}></slot>
-          <slot name="trailing-icon" @slotchange=${this.syncSlots}></slot>
-          ${trailingSel ? this.renderSelIndicator() : nothing}
-          <span
-            class=${classMap({ toggle: true, has: this.expandable, open: this.expanded })}
-            part="toggle"
-            aria-hidden="true"
-          >
-            <slot name="toggle-icon"
-              ><span
-                class=${classMap({
-                  chevron: true,
-                  has: this.expandable,
-                  open: this.expanded,
-                })}
-                part="chevron"
-                >expand_more</span
-              ></slot
-            >
-          </span>
-        </span>
+        ${this.renderTrailing(trailingSel, hasTrailingCol)}
       </div>
-      <div
-        class=${classMap({
-          expand: true,
-          has: this.expandable || this.hasExpand,
-          open: this.expanded,
-        })}
-        part="expand"
-        id="expand"
-      >
-        <div class="expand-inner">
-          <div class="expand-body">
-            <slot name="expand" @slotchange=${this.syncSlots}></slot>
-            <slot name="content" @slotchange=${this.syncSlots}></slot>
-            <slot name="items" @slotchange=${this.syncSlots}></slot>
-          </div>
-        </div>
-      </div>
+      ${this.renderExpandSection()}
     `;
   }
 }
