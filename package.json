@@ -41,12 +41,8 @@
   ],
   "sideEffects": [
     "**/*.css",
-    "./dist/k3ui.css",
-    "./dist/fonts/**",
-    "./dist/k3ui.js",
-    "./dist/lazy/k3ui.js",
-    "./dist/lazy/components/**",
-    "./dist/k3ui-syntax.js"
+    "**/*.scss",
+    "./dist/**/*.js"
   ],
   "publishConfig": {
     "access": "public"
