@@ -276,7 +276,7 @@ export default defineConfig({
           const bundle = ctx.bundle;
           const prepaint = await prepaintTheme();
           /* Dev must also inject prepaint — otherwise first paint keeps the static
-             #fef7ff SCSS fallback (rose) until JS applies expressive #fff7ff. */
+             SCSS / static fallbacks until JS applies indigo tonalspot. */
           if (!bundle) {
             return deferInactivePages(html, false).replace('</head>', `${prepaint}  </head>`);
           }

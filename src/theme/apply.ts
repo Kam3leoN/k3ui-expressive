@@ -304,9 +304,9 @@ export function themeCssVars(
   } = {},
 ): Record<string, string> {
   return { ...schemeToCssVars(
-    options.seed ?? '#6750A4',
+    options.seed ?? '#3F51B5',
     options.dark ?? false,
-    options.variant ?? 'expressive',
+    options.variant ?? 'tonalspot',
     options.contrast ?? 'default',
     options.specVersion ?? DEFAULT_COLOR_SPEC,
   ) };
@@ -372,10 +372,10 @@ export const themeApi = {
     const merged: ThemeOptions = { ...lastOptions, ...rest };
     if (isDocument) lastOptions = merged;
 
-    const seed = merged.seed ?? '#6750A4';
+    const seed = merged.seed ?? '#3F51B5';
     const mode = merged.mode ?? 'auto';
     const motion = merged.motion ?? 'expressive';
-    const variant = merged.variant ?? 'expressive';
+    const variant = merged.variant ?? 'tonalspot';
     const contrastPref = merged.contrast ?? 'default';
     const contrast = resolveContrast(contrastPref);
     const spec = merged.specVersion ?? DEFAULT_COLOR_SPEC;
@@ -427,9 +427,9 @@ export const themeApi = {
     const merged: ThemeOptions = { ...lastOptions, ...rest };
     const contrast = resolveContrast(merged.contrast ?? 'default');
     const args: SchemeArgs = [
-      merged.seed ?? '#6750A4',
+      merged.seed ?? '#3F51B5',
       resolveMode(merged.mode ?? 'auto') === 'dark',
-      merged.variant ?? 'expressive',
+      merged.variant ?? 'tonalspot',
       contrast,
       merged.specVersion ?? DEFAULT_COLOR_SPEC,
     ];

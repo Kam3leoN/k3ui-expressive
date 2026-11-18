@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property, state, query } from 'lit/decorators.js';
 import {
   K3Element,
+  emitLifecycle,
   edgeScrollbarStyles,
   handleFocusNavKey,
   runWhenConnected,
@@ -24,12 +25,24 @@ if (!customElements.get('k3-menu-item')) customElements.define('k3-menu-item', K
 export type ListVariant = 'standard' | 'segmented';
 export type ListSelection = 'none' | 'single' | 'multiple' | 'switch';
 
+/** Leading media priority for alignment reservation (widest first). */
+const LEADING_RESERVE_ORDER = ['video', 'image', 'avatar', 'icon'] as const;
+
 /**
  * M3 / M3 Expressive List — groups `k3-list-item`.
  *
  * Variants: `standard` · `segmented` (default, M3E gaps + shape morph).
- * Selection: `none` · `single` (radio) · `multiple` (checkbox) · `switch`.
- * `hide-selection-indicator` keeps selected surface without control chrome.
+ * Selection: `none` · `single` (radio) · `multiple` (checkbox) · `switch`;
+ * `multi` turns `none` / `single` into `multiple`.
+ * `hide-selection-indicator` keeps selected surface without control chrome
+ * (the indicator otherwise replaces non-control trailing content).
+ * Lifecycle: `k3-select-start` (cancelable) → `k3-select` / `k3-change` →
+ * `k3-select-end`. `value` = selected value(s) (`null` · string · string[]).
+ * Dividers: `k3-divider` / `hr` children — standard only, `inset` honoured.
+ * Leading alignment: rows without leading content reserve the width of the
+ * leading media used by siblings (icon · avatar · image · video).
+ * Density: `density="-1…-3"` or `--k3-list-density-scale` (4 dp per step).
+ * Action rows: `k3-list-item href` (+ `target` · `rel` · `download`).
  * Expand (Google M3E): `k3-list-item expandable` — standard = continuous,
  * segmented = 2 dp gaps. `accordion` = exclusive (one row open). Nested
  * `k3-list` in expand slot = folder. `embedded` = nested radii.
@@ -61,6 +74,8 @@ export class K3List extends K3Element {
   @property({ type: Boolean, reflect: true }) emphasized = false;
   @property({ type: Boolean, reflect: true }) sortable = false;
   @property({ type: Boolean, reflect: true }) dismissible = false;
+  /** Multiple selection — promotes `selection` `none` / `single` to `multiple`. */
+  @property({ type: Boolean, reflect: true }) multi = false;
   @property() label = '';
 
   @state() private menuItem: K3ListItem | null = null;
@@ -69,6 +84,47 @@ export class K3List extends K3Element {
   private sortableCtrl: SortableController | null = null;
   private sortingActive = false;
   private unwatchDpr: (() => void) | null = null;
+  private syncQueued = false;
+
+  /** Effective selection mode (`multi` promotes none / single → multiple). */
+  get resolvedSelection(): ListSelection {
+    if (this.multi && (this.selection === 'none' || this.selection === 'single')) {
+      return 'multiple';
+    }
+    return this.selection;
+  }
+
+  /**
+   * Selected (enabled) value(s): `null` when nothing is selected, a string
+   * for one value, an array for several.
+   */
+  get value(): string | string[] | null {
+    const values = this.selectedItems()
+      .filter((i) => !i.disabled)
+      .map((i) => i.value || i.getAttribute('value') || '');
+    if (values.length === 0) return null;
+    return values.length === 1 ? values[0]! : values;
+  }
+
+  /** @internal Coalesced re-sync (child slot / media changes). */
+  requestSync(): void {
+    if (this.syncQueued) return;
+    this.syncQueued = true;
+    queueMicrotask(() => {
+      this.syncQueued = false;
+      if (this.isConnected && !this.sortingActive) this.syncChildren();
+    });
+  }
+
+  /** Reserve leading width for rows without leading content. */
+  private syncLeadingReserve(list: K3ListItem[]): void {
+    const kinds = new Set<string>(
+      list.map((i) => i.resolvedLeading ?? '').filter(Boolean),
+    );
+    const reserve = LEADING_RESERVE_ORDER.find((k) => kinds.has(k));
+    if (reserve) this.setAttribute('data-leading-reserve', reserve);
+    else this.removeAttribute('data-leading-reserve');
+  }
 
   private items(): K3ListItem[] {
     return [...this.querySelectorAll(':scope > k3-list-item')].filter(
@@ -94,7 +150,9 @@ export class K3List extends K3Element {
     const list = this.items();
     const n = list.length;
     const segmented = this.variant === 'segmented' || !this.variant;
+    const selection = this.resolvedSelection;
     this.applySegmentGapToken();
+    this.syncLeadingReserve(list);
 
     list.forEach((item, i) => {
       /* Segment position for shape morph */
@@ -150,15 +208,13 @@ export class K3List extends K3Element {
       }
 
       /* Selection mode + hide indicator */
-      if (item.selection !== this.selection) item.selection = this.selection;
+      if (item.selection !== selection) item.selection = selection;
       item.hideSelectionIndicator = this.hideSelectionIndicator;
       /* Parent emphasized → child typography (M3 Expressive). */
       if (this.emphasized) item.emphasized = true;
 
       if (
-        (this.selection === 'single' ||
-          this.selection === 'multiple' ||
-          this.selection === 'switch') &&
+        (selection === 'single' || selection === 'multiple' || selection === 'switch') &&
         !item.interactive
       ) {
         item.interactive = true;
@@ -173,7 +229,7 @@ export class K3List extends K3Element {
     for (const child of item.children) {
       if (!(child instanceof HTMLElement) || child.localName !== 'k3-list') continue;
       const slot = child.getAttribute('slot') || '';
-      if (slot && slot !== 'expand' && slot !== 'content') continue;
+      if (slot && slot !== 'expand' && slot !== 'content' && slot !== 'items') continue;
       const nested = child as K3List;
       if (!nested.embedded) nested.embedded = true;
       if (nested.variant !== 'segmented') nested.variant = 'segmented';
@@ -191,14 +247,21 @@ export class K3List extends K3Element {
   }
 
   private applySelect(item: K3ListItem): void {
-    if (this.selection === 'none' || item.disabled) return;
+    const selection = this.resolvedSelection;
+    if (selection === 'none' || item.disabled) return;
 
-    if (this.selection === 'single') {
+    /* Single: re-activating the selected row is not a change. */
+    const changes = !(selection === 'single' && item.selected);
+    const next = selection === 'single' ? true : !item.selected;
+    const detail = { source: 'user' as const, item, value: item.value, selected: next };
+    if (changes && !emitLifecycle(this, 'select-start', detail)) return;
+
+    if (selection === 'single') {
       for (const el of this.items()) {
         el.selected = el === item;
       }
-    } else if (this.selection === 'multiple' || this.selection === 'switch') {
-      item.selected = !item.selected;
+    } else if (selection === 'multiple' || selection === 'switch') {
+      item.selected = next;
     }
 
     this.emit('k3-select', {
@@ -207,10 +270,12 @@ export class K3List extends K3Element {
       selected: item.selected,
       values: this.selectedValues(),
     });
+    if (!changes) return;
     this.emit('k3-change', {
-      value: this.selection === 'single' ? item.value : this.selectedValues(),
+      value: selection === 'single' ? item.value : this.selectedValues(),
       values: this.selectedValues(),
     });
+    emitLifecycle(this, 'select-end', { ...detail, values: this.selectedValues() });
   }
 
   // ── Accordion ─────────────────────────────────────────────────────────────
@@ -314,9 +379,8 @@ export class K3List extends K3Element {
     if (!ok) return;
     item.remove();
     const next = list[idx] ?? list[idx - 1];
-    const focusEl = next?.shadowRoot?.querySelector('[part="container"]') as
-      | HTMLElement
-      | null;
+    const focusEl = (next?.shadowRoot?.querySelector('[part="link"]') ??
+      next?.shadowRoot?.querySelector('[part="container"]')) as HTMLElement | null;
     (focusEl ?? next)?.focus?.();
     this.syncChildren();
     this.sortableCtrl?.refresh();
@@ -379,9 +443,8 @@ export class K3List extends K3Element {
       wrap: false,
       homeEnd: true,
       focusItem: (el) => {
-        const surface = el.shadowRoot?.querySelector(
-          '[part="container"]',
-        ) as HTMLElement | null;
+        const surface = (el.shadowRoot?.querySelector('[part="link"]') ??
+          el.shadowRoot?.querySelector('[part="container"]')) as HTMLElement | null;
         (surface ?? el).focus?.();
       },
     });
@@ -421,6 +484,7 @@ export class K3List extends K3Element {
       changed.has('sortable') ||
       changed.has('variant') ||
       changed.has('selection') ||
+      changed.has('multi') ||
       changed.has('hideSelectionIndicator') ||
       changed.has('dismissible') ||
       changed.has('embedded')
@@ -452,15 +516,16 @@ export class K3List extends K3Element {
      * The list role lives on this container — not on the host — so the
      * row-actions menu rendered beside it is not an (invalid) child of the list.
      */
+    const selection = this.resolvedSelection;
     const selectable =
-      this.selection === 'single' || this.selection === 'multiple' || this.selection === 'switch';
+      selection === 'single' || selection === 'multiple' || selection === 'switch';
 
     return html`
       <div
         class="list k3-scroll"
         part="container"
         role=${selectable ? 'listbox' : 'list'}
-        aria-multiselectable=${selectable ? (this.selection === 'single' ? 'false' : 'true') : nothing}
+        aria-multiselectable=${selectable ? (selection === 'single' ? 'false' : 'true') : nothing}
         aria-label=${this.forwardedAria('aria-label') || this.label || nothing}
       >
         <slot @slotchange=${this.onSlotChange}></slot>

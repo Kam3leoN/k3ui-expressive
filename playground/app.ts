@@ -72,6 +72,8 @@ import {
   THEME_SEEDS,
   THEME_STORE_KEYS,
   THEME_STORE_PREFIX,
+  defaultThemeSeed,
+  isThemeAwayFromDefaults,
 } from './theme-defaults.js';
 import { mountSponsors } from './sponsors.js';
 import { enhanceAllDemos } from './demo-enhance.js';
@@ -194,7 +196,7 @@ const COLOR_VARIANTS: readonly ColorVariant[] = [
 function parseColorVariant(raw: string | null | undefined): ColorVariant {
   return COLOR_VARIANTS.includes(raw as ColorVariant)
     ? (raw as ColorVariant)
-    : 'expressive';
+    : DEFAULT_THEME.variant;
 }
 
 function parseContrast(raw: string | null | undefined): ContrastLevel {
@@ -659,6 +661,31 @@ function syncSettingsSheet(): void {
     el.classList.toggle('is-active', on);
     el.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
+
+  const resetHost = document.getElementById('settings-theme-reset');
+  if (resetHost) {
+    resetHost.hidden = !isThemeAwayFromDefaults({
+      seed: seedNorm,
+      mode: themeMode,
+      variant: colorVariant,
+      contrast: contrastLevel,
+      spec: colorSpec,
+    });
+  }
+}
+
+/** Restore native K3ui theme (Indigo · tonalspot · light · 2025). */
+function resetThemeToDefaults(): void {
+  seeds.splice(0, seeds.length, ...THEME_SEEDS);
+  seedIdx = DEFAULT_THEME.seedIdx;
+  themeMode = DEFAULT_THEME.mode;
+  colorVariant = DEFAULT_THEME.variant;
+  contrastLevel = DEFAULT_THEME.contrast;
+  colorSpec = DEFAULT_THEME.spec;
+  applyThemePersist();
+  syncColorSeedInputs(defaultThemeSeed());
+  syncColorVariantButtons();
+  syncColorModeButtons();
 }
 
 /** MD2 hue ladder — each family at tone 500 (Material Design 2014 order). */
@@ -4144,6 +4171,22 @@ function wireShellChrome(): void {
     }
   });
 
+  document.getElementById('btn-settings-theme-reset')?.addEventListener('k3-click', () => {
+    if (
+      !isThemeAwayFromDefaults({
+        seed: normalizeHex(seeds[seedIdx] ?? '') ?? seeds[seedIdx] ?? '',
+        mode: themeMode,
+        variant: colorVariant,
+        contrast: contrastLevel,
+        spec: colorSpec,
+      })
+    ) {
+      return;
+    }
+    resetThemeToDefaults();
+    void showFlash(t('playground.settings.flash.resetTheme'));
+  });
+
   /* Color spec — applied on the fly (theme API is synchronous; no re-init) */
   document.getElementById('settings-spec')?.addEventListener('k3-change', (e) => {
     if (e.target !== e.currentTarget) return;
@@ -4602,7 +4645,7 @@ function applySeedHex(hex: string): void {
 }
 
 function wireColorLab(): void {
-  syncColorSeedInputs(seeds[seedIdx] ?? '#6750A4');
+  syncColorSeedInputs(seeds[seedIdx] ?? '#3F51B5');
   syncColorVariantButtons();
   syncColorModeButtons();
 

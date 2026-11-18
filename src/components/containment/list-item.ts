@@ -1,11 +1,13 @@
 import { html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import {
   K3Element,
   stateLayerStyles,
   focusRingStyles,
   emitLifecycle,
+  waitForMotion,
   hasNamedSlot,
   attachDrag,
   type DragController,
@@ -23,18 +25,47 @@ if (!customElements.get('k3-switch')) customElements.define('k3-switch', K3Switc
 export type ListItemLines = 'one' | 'two' | 'three' | 'auto';
 export type ListItemLeading = '' | 'icon' | 'avatar' | 'image' | 'video';
 export type ListItemSelection = 'none' | 'single' | 'multiple' | 'switch';
+/** Detected kind of leading / trailing content (`undefined` = empty slot). */
+export type ListItemContentType = 'video' | 'image' | 'avatar' | 'icon' | 'text' | undefined;
 
 type DismissSource = 'swipe' | 'menu' | 'api';
+
+const LEADING_SLOTS = ['leading', 'start', 'icon', 'leading-icon'] as const;
+const TRAILING_SLOTS = ['trailing', 'end', 'trailing-icon', 'trailing-supporting-text'] as const;
+const SELECTION_CONTROLS = new Set(['k3-checkbox', 'k3-radio', 'k3-switch']);
+const ICON_SELECTOR = '.ms, .k3-icon, [data-k3-icon], svg, k3-icon';
+
+/** Classify slotted media — video › image › avatar › icon › text. */
+function contentTypeOf(els: Element[]): ListItemContentType {
+  if (!els.length) return undefined;
+  const has = (pred: (el: Element) => boolean) => els.some(pred);
+  if (has((el) => el.localName === 'video' || !!el.querySelector?.(':scope > video'))) {
+    return 'video';
+  }
+  if (has((el) => el.localName === 'img' || el.localName === 'picture')) return 'image';
+  if (has((el) => el.localName === 'k3-avatar')) return 'avatar';
+  if (has((el) => el.matches?.(ICON_SELECTOR))) return 'icon';
+  return 'text';
+}
 
 /**
  * M3 / M3 Expressive list item.
  *
  * Anatomy: leading · overline · headline · supporting · trailing · optional expand.
- * Leading: icon · avatar · image · video (slot `leading` / `start` / `icon`).
- * Trailing: meta · icon · checkbox · radio · switch · chevron (slot `trailing` / `end`).
+ * Leading: icon · avatar · image · video (slot `leading` / `start` / `icon` /
+ * `leading-icon`) — media kind is detected from the slotted element when the
+ * `leading` attribute is not set.
+ * Trailing: meta · icon · checkbox · radio · switch · chevron (slot `trailing` /
+ * `end` / `trailing-icon` / `trailing-supporting-text`).
  *
- * Density: one 56 · two 72 · three 88 (or `auto` from slots).
+ * Density: one 56 · two 72 · three 88 (or `auto` from slots), minus 4 dp per
+ * density step (`density="-1…-3"` or `--k3-list-density-scale`).
  * Selection / dismiss / expand wired via parent `k3-list` or local props.
+ * Action row: `href` (+ `target` · `rel` · `download`) renders a link surface.
+ * Expand: `expandable` + `expanded` (alias `open`) · slot `expand` / `content`
+ * / `items` (nested `k3-list` = folder) · slot `toggle-icon` replaces chevron.
+ * Lifecycle: `k3-expand-start` / `k3-collapse-start` (cancelable on user
+ * toggle) · `k3-expand-end` / `k3-collapse-end` after motion.
  *
  * @see https://m3.material.io/components/lists/specs
  * @see https://m3.material.io/components/lists/guidelines
@@ -57,6 +88,8 @@ export class K3ListItem extends K3Element {
   @property({ type: Boolean, reflect: true }) dismissible = false;
   @property({ type: Boolean, reflect: true }) expandable = false;
   @property({ type: Boolean, reflect: true }) expanded = false;
+  /** Alias of `expanded` — both stay in sync. */
+  @property({ type: Boolean, reflect: true }) open = false;
   /** Non-last segmented item marker (spacing = parent list flex gap). */
   @property({ type: Boolean, reflect: true, attribute: 'data-seg-gap' })
   segGap = false;
@@ -80,6 +113,14 @@ export class K3ListItem extends K3Element {
   /** Fraction of width (0–1) to dismiss — default 0.35 */
   @property({ type: Number, attribute: 'dismiss-threshold' }) dismissThreshold = 0.35;
   @property({ type: Number, attribute: 'dismiss-velocity' }) dismissVelocity = 0.55;
+  /** Action row — URL the row points to (renders a link surface). */
+  @property() href = '';
+  /** Link target (`_blank`…) — with `href`. */
+  @property() target = '';
+  /** Link relationship — with `href`. */
+  @property() rel = '';
+  /** Download the linked resource (optional file name) — with `href`. */
+  @property() download?: string;
 
   @state() private pressed = false;
   @state() private hasLeading = false;
@@ -88,27 +129,68 @@ export class K3ListItem extends K3Element {
   @state() private hasTrailing = false;
   @state() private hasMetaSlot = false;
   @state() private hasExpand = false;
+  @state() private hasTrailingControl = false;
+  @state() private leadingType: ListItemContentType = undefined;
+  @state() private trailingType: ListItemContentType = undefined;
+  @state() private focusVisible = false;
 
   private dismissDrag: DragController | null = null;
   private longPressTimer: number | null = null;
   private longPressOrigin: { x: number; y: number } | null = null;
+  /** Expand toggled by the user (start event already emitted, cancelable). */
+  private expandFromUser = false;
+  private expandMotionToken = 0;
+
+  /** Light-DOM children assigned to one of `names`. */
+  private slotted(names: readonly string[]): Element[] {
+    return [...this.children].filter((c) => names.includes(c.getAttribute('slot') ?? ''));
+  }
 
   private syncSlots = (): void => {
-    this.hasLeading =
-      hasNamedSlot(this, 'leading') ||
-      hasNamedSlot(this, 'start') ||
-      hasNamedSlot(this, 'icon');
+    this.hasLeading = LEADING_SLOTS.some((n) => hasNamedSlot(this, n));
     this.hasOverline = hasNamedSlot(this, 'overline');
     this.hasSupporting =
       hasNamedSlot(this, 'supporting') || hasNamedSlot(this, 'supporting-text');
-    this.hasTrailing =
-      hasNamedSlot(this, 'trailing') || hasNamedSlot(this, 'end');
+    this.hasTrailing = TRAILING_SLOTS.some((n) => hasNamedSlot(this, n));
     this.hasMetaSlot = hasNamedSlot(this, 'meta');
     this.hasExpand =
-      hasNamedSlot(this, 'expand') || hasNamedSlot(this, 'content');
+      hasNamedSlot(this, 'expand') ||
+      hasNamedSlot(this, 'content') ||
+      hasNamedSlot(this, 'items');
     if (this.hasExpand && !this.expandable) this.expandable = true;
+
+    const trailing = this.slotted(TRAILING_SLOTS);
+    this.hasTrailingControl = trailing.some((el) => SELECTION_CONTROLS.has(el.localName));
+
+    const prevLeading = this.leadingType;
+    this.leadingType = contentTypeOf(this.slotted(LEADING_SLOTS));
+    this.trailingType = contentTypeOf(trailing);
+    if (prevLeading !== this.leadingType) this.notifyParentList();
     this.syncExpandMode();
   };
+
+  /** Parent `k3-list` re-measures leading alignment (direct children only). */
+  private notifyParentList(): void {
+    const parent = this.parentElement as (HTMLElement & { requestSync?: () => void }) | null;
+    if (parent?.localName === 'k3-list') parent.requestSync?.();
+  }
+
+  /** Detected kind of leading content (slot `leading` / `start` / `icon` / `leading-icon`). */
+  get leadingContentType(): ListItemContentType {
+    return this.leadingType;
+  }
+
+  /** Detected kind of trailing content (slot `trailing` / `end` / `trailing-*`). */
+  get trailingContentType(): ListItemContentType {
+    return this.trailingType;
+  }
+
+  /** Leading media kind used for sizing — explicit `leading` wins over detection. */
+  get resolvedLeading(): ListItemLeading {
+    if (this.leading) return this.leading;
+    const t = this.leadingType;
+    return t === 'video' || t === 'image' || t === 'avatar' || t === 'icon' ? t : '';
+  }
 
   /**
    * M3E folder expand = nested `k3-list` in expand slot (separate segments).
@@ -122,7 +204,8 @@ export class K3ListItem extends K3Element {
         c.localName === 'k3-list' &&
         (!c.getAttribute('slot') ||
           c.getAttribute('slot') === 'expand' ||
-          c.getAttribute('slot') === 'content'),
+          c.getAttribute('slot') === 'content' ||
+          c.getAttribute('slot') === 'items'),
     );
     this.toggleAttribute('data-expand-folder', folder);
   }
@@ -144,8 +227,11 @@ export class K3ListItem extends K3Element {
     ) {
       return false;
     }
-    /* Custom trailing/leading control replaces auto indicator */
-    if (this.selectionPosition === 'trailing' && this.hasTrailing) return false;
+    /*
+     * A slotted checkbox / radio / switch IS the indicator. Other trailing
+     * content (icons, meta) gives way to the auto indicator instead.
+     */
+    if (this.selectionPosition === 'trailing' && this.hasTrailingControl) return false;
     if (this.selectionPosition === 'leading' && this.hasLeading) return false;
     return true;
   }
@@ -155,8 +241,14 @@ export class K3ListItem extends K3Element {
       this.interactive ||
       this.selection !== 'none' ||
       this.expandable ||
+      !!this.href ||
       this.hasAttribute('interactive')
     );
+  }
+
+  /** Action row rendered as a link. */
+  private get isLink(): boolean {
+    return !!this.href;
   }
 
   private fromInteractiveSlot(e: Event): boolean {
@@ -328,9 +420,45 @@ export class K3ListItem extends K3Element {
   };
 
   private toggleExpand(): void {
-    this.expanded = !this.expanded;
+    const next = !this.expanded;
+    const phase = next ? 'expand-start' : 'collapse-start';
+    if (!emitLifecycle(this, phase, { source: 'user', item: this })) return;
+    this.expandFromUser = true;
+    this.expanded = next;
     this.emit('k3-expand', { expanded: this.expanded, item: this });
   }
+
+  /** `*-start` (API changes) then `*-end` once the expand motion settles. */
+  private runExpandLifecycle(): void {
+    const expanded = this.expanded;
+    const source = this.expandFromUser ? 'user' : 'api';
+    if (!this.expandFromUser) {
+      emitLifecycle(this, expanded ? 'expand-start' : 'collapse-start', { source, item: this });
+    }
+    this.expandFromUser = false;
+    const token = ++this.expandMotionToken;
+    const body = this.renderRoot.querySelector('.expand') as HTMLElement | null;
+    void waitForMotion(body ?? this).then(() => {
+      if (token !== this.expandMotionToken || !this.isConnected) return;
+      emitLifecycle(this, expanded ? 'expand-end' : 'collapse-end', { source, item: this });
+    });
+  }
+
+  private onFocusIn = (e: FocusEvent): void => {
+    const t = e.target as Element | null;
+    if (t !== e.currentTarget && !t?.classList?.contains('link')) return;
+    let visible = false;
+    try {
+      visible = !!t?.matches(':focus-visible');
+    } catch {
+      visible = false;
+    }
+    this.focusVisible = visible;
+  };
+
+  private onFocusOut = (): void => {
+    this.focusVisible = false;
+  };
 
   private onActivate = (e: Event): void => {
     if (this.disabled) return;
@@ -371,6 +499,8 @@ export class K3ListItem extends K3Element {
 
   private onKeyDown = (e: KeyboardEvent): void => {
     if (this.disabled || !this.isActionable) return;
+    /* Link rows — Enter is handled natively by the anchor */
+    if (this.isLink) return;
     if (e.key !== 'Enter' && e.key !== ' ') return;
     e.preventDefault();
     this.pressed = true;
@@ -393,7 +523,35 @@ export class K3ListItem extends K3Element {
     this.reflectLinesAttr();
   }
 
+  /** Keep `open` ⇄ `expanded` in sync (no extra render). */
+  override willUpdate(changed: Map<string, unknown>): void {
+    const o = changed.has('open');
+    const x = changed.has('expanded');
+    if (o && x) {
+      if (this.open !== this.expanded) {
+        /* First render: either attribute opens the row. */
+        const first = changed.get('open') === undefined && changed.get('expanded') === undefined;
+        const v = first ? this.open || this.expanded : this.expanded;
+        this.open = v;
+        this.expanded = v;
+      }
+    } else if (o && this.expanded !== this.open) {
+      this.expanded = this.open;
+    } else if (x && this.open !== this.expanded) {
+      this.open = this.expanded;
+    }
+  }
+
   override updated(changed: Map<string, unknown>): void {
+    if (changed.has('expanded') && changed.get('expanded') !== undefined) {
+      this.runExpandLifecycle();
+    }
+    this.toggleAttribute('data-actionable', this.isActionable && !this.disabled);
+    this.toggleAttribute('data-pressed', this.pressed);
+    this.toggleAttribute('data-focus-visible', this.focusVisible);
+    const media = this.resolvedLeading;
+    if (media) this.setAttribute('data-leading', media);
+    else this.removeAttribute('data-leading');
     if (changed.has('dismissible') || changed.has('disabled')) this.bindDismissDrag();
     if (
       changed.has('lines') ||
@@ -440,22 +598,37 @@ export class K3ListItem extends K3Element {
     if (!show) return nothing;
     if (this.selection === 'multiple') {
       return html`<span class="sel-indicator has" part="selection-indicator" aria-hidden="true" inert>
-        <k3-checkbox ?checked=${this.selected} tabindex="-1"></k3-checkbox>
+        <k3-checkbox ?checked=${this.selected} ?disabled=${this.disabled} tabindex="-1"></k3-checkbox>
       </span>`;
     }
     if (this.selection === 'switch') {
       return html`<span class="sel-indicator has" part="selection-indicator" aria-hidden="true" inert>
-        <k3-switch ?selected=${this.selected} tabindex="-1"></k3-switch>
+        <k3-switch ?selected=${this.selected} ?disabled=${this.disabled} tabindex="-1"></k3-switch>
       </span>`;
     }
     return html`<span class="sel-indicator has" part="selection-indicator" aria-hidden="true" inert>
-      <k3-radio ?checked=${this.selected} tabindex="-1"></k3-radio>
+      <k3-radio ?checked=${this.selected} ?disabled=${this.disabled} tabindex="-1"></k3-radio>
     </span>`;
+  }
+
+  private renderLink() {
+    if (!this.isLink) return nothing;
+    return html`<a
+      class="link"
+      part="link"
+      href=${this.disabled ? nothing : this.href}
+      target=${this.target || nothing}
+      rel=${this.rel || nothing}
+      download=${ifDefined(this.download ?? undefined)}
+      aria-labelledby="content"
+      aria-disabled=${this.disabled ? 'true' : nothing}
+    ></a>`;
   }
 
   override render() {
     const lines = this.resolvedLines;
     const actionable = this.isActionable;
+    const link = this.isLink;
     const leadingSel =
       this.showSelIndicator && this.selectionPosition === 'leading';
     const trailingSel =
@@ -473,16 +646,19 @@ export class K3ListItem extends K3Element {
       this.setAttribute('lines', lines);
     }
 
+    /* Link rows: the anchor is the tab stop, the row is not focusable. */
+    const tabindex = link ? nothing : actionable && !this.disabled ? 0 : -1;
+
     return html`
       <div
         class=${classMap({
           item: true,
           'k3-state-layer': actionable && !this.disabled,
-          'k3-focus-ring': actionable && !this.disabled,
+          'k3-focus-ring': actionable && !this.disabled && !link,
         })}
-      part="container"
+        part="container"
         role=${this.selection === 'none' ? 'listitem' : 'option'}
-        tabindex=${actionable && !this.disabled ? 0 : -1}
+        tabindex=${tabindex}
         aria-disabled=${this.disabled ? 'true' : 'false'}
         aria-selected=${this.selection !== 'none'
           ? this.selected
@@ -490,6 +666,7 @@ export class K3ListItem extends K3Element {
             : 'false'
           : nothing}
         aria-expanded=${this.expandable ? (this.expanded ? 'true' : 'false') : nothing}
+        aria-controls=${this.expandable ? 'expand' : nothing}
         data-pressed=${this.pressed ? '' : nothing}
         @pointerdown=${this.onPointerDown}
         @pointermove=${this.onPointerMove}
@@ -501,7 +678,10 @@ export class K3ListItem extends K3Element {
         @keydown=${this.onKeyDown}
         @keyup=${this.onKeyUp}
         @blur=${this.onPointerUp}
+        @focusin=${this.onFocusIn}
+        @focusout=${this.onFocusOut}
       >
+        ${this.renderLink()}
         <span
           class=${classMap({ leading: true, has: hasLeadingCol })}
           part="leading"
@@ -510,15 +690,16 @@ export class K3ListItem extends K3Element {
           <slot name="leading" @slotchange=${this.syncSlots}></slot>
           <slot name="start" @slotchange=${this.syncSlots}></slot>
           <slot name="icon" @slotchange=${this.syncSlots}></slot>
+          <slot name="leading-icon" @slotchange=${this.syncSlots}></slot>
         </span>
-        <span class="content" part="content">
+        <span class="content" part="content" id="content">
           <span
             class=${classMap({ overline: true, has: this.hasOverline })}
             part="overline"
           >
             <slot name="overline" @slotchange=${this.syncSlots}></slot>
-      </span>
-        <span class="headline" part="headline">
+          </span>
+          <span class="headline" part="headline">
             <slot name="headline" @slotchange=${this.syncSlots}></slot>
             <slot></slot>
           </span>
@@ -531,26 +712,39 @@ export class K3ListItem extends K3Element {
           </span>
         </span>
         <span
-          class=${classMap({ trailing: true, has: hasTrailingCol })}
+          class=${classMap({
+            trailing: true,
+            has: hasTrailingCol,
+            'sel-replaces': trailingSel,
+          })}
           part="trailing"
         >
           ${this.meta
             ? html`<span class="meta" part="meta">${this.meta}</span>`
             : nothing}
           <slot name="meta" @slotchange=${this.syncSlots}></slot>
+          <slot name="trailing-supporting-text" @slotchange=${this.syncSlots}></slot>
           <slot name="trailing" @slotchange=${this.syncSlots}></slot>
           <slot name="end" @slotchange=${this.syncSlots}></slot>
+          <slot name="trailing-icon" @slotchange=${this.syncSlots}></slot>
           ${trailingSel ? this.renderSelIndicator() : nothing}
           <span
-            class=${classMap({
-              chevron: true,
-              has: this.expandable,
-              open: this.expanded,
-            })}
-            part="chevron"
+            class=${classMap({ toggle: true, has: this.expandable, open: this.expanded })}
+            part="toggle"
             aria-hidden="true"
-            >expand_more</span
           >
+            <slot name="toggle-icon"
+              ><span
+                class=${classMap({
+                  chevron: true,
+                  has: this.expandable,
+                  open: this.expanded,
+                })}
+                part="chevron"
+                >expand_more</span
+              ></slot
+            >
+          </span>
         </span>
       </div>
       <div
@@ -560,11 +754,13 @@ export class K3ListItem extends K3Element {
           open: this.expanded,
         })}
         part="expand"
+        id="expand"
       >
         <div class="expand-inner">
           <div class="expand-body">
             <slot name="expand" @slotchange=${this.syncSlots}></slot>
             <slot name="content" @slotchange=${this.syncSlots}></slot>
+            <slot name="items" @slotchange=${this.syncSlots}></slot>
           </div>
         </div>
       </div>

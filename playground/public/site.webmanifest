@@ -4,8 +4,8 @@
   "description": "Material 3 Expressive web components — Lit + TypeScript",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FEF7FF",
-  "theme_color": "#6750A4",
+  "background_color": "#FBF8FE",
+  "theme_color": "#3F51B5",
   "icons": [
     {
       "src": "/favicon.svg",

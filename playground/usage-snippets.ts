@@ -34,7 +34,7 @@ import "k3ui/k3ui.css";
 
 await K3UI.init({
   locale: "en",
-  theme: { seed: "#6750A4", mode: "auto", motion: "expressive" },
+  theme: { seed: "#3F51B5", mode: "auto", variant: "tonalspot", motion: "expressive" },
   components: [${list}],
 });
 ${extra}`.trim();
@@ -635,16 +635,16 @@ palette.addEventListener('k3-command-select', (e) => console.log(e.detail.value)
 </k3-card-set>`,
   },
   list: {
-    components: ['k3-list', 'k3-list-item', 'k3-checkbox', 'k3-radio'],
+    components: ['k3-list', 'k3-list-item', 'k3-divider', 'k3-checkbox', 'k3-radio', 'k3-switch'],
     html: `<!-- Segmented · single-select -->
 <k3-list variant="segmented" selection="single" label="Folders">
   <k3-list-item value="inbox" leading="icon">
-    <span slot="leading" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="inbox"></span>
+    <span slot="leading" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="inbox" aria-hidden="true"></span>
     <span slot="headline">Inbox</span>
-    <span slot="trailing" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="chevron_right"></span>
+    <span slot="trailing" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="chevron_right" aria-hidden="true"></span>
   </k3-list-item>
   <k3-list-item value="sent" leading="icon" selected>
-    <span slot="leading" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="send"></span>
+    <span slot="leading" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="send" aria-hidden="true"></span>
     <span slot="headline">Sent</span>
   </k3-list-item>
 </k3-list>
@@ -672,7 +672,44 @@ palette.addEventListener('k3-command-select', (e) => console.log(e.detail.value)
     <span slot="headline">Closed</span>
     <div slot="expand">…</div>
   </k3-list-item>
+</k3-list>
+
+<!-- Folder — nested list in slot items -->
+<k3-list variant="segmented">
+  <k3-list-item open>
+    <span slot="headline">Folder</span>
+    <k3-list slot="items">
+      <k3-list-item interactive><span slot="headline">Child</span></k3-list-item>
+    </k3-list>
+  </k3-list-item>
+</k3-list>
+
+<!-- Dividers (standard only) -->
+<k3-list variant="standard">
+  <k3-list-item><span slot="headline">Item 1</span></k3-list-item>
+  <k3-divider inset></k3-divider>
+  <k3-list-item><span slot="headline">Item 2</span></k3-list-item>
+</k3-list>
+
+<!-- Action rows -->
+<k3-list variant="segmented">
+  <k3-list-item href="https://m3.material.io" target="_blank" rel="noopener">
+    <span slot="headline">Material 3</span>
+  </k3-list-item>
+  <k3-list-item href="/docs" disabled><span slot="headline">Disabled</span></k3-list-item>
+</k3-list>
+
+<!-- Multi-select · density -->
+<k3-list variant="segmented" multi density="-3" label="Tags">
+  <k3-list-item value="a"><span slot="headline">Alpha</span></k3-list-item>
+  <k3-list-item value="b" disabled selected><span slot="headline">Beta</span></k3-list-item>
 </k3-list>`,
+    jsExtra: `
+const tags = document.querySelector('k3-list[label="Tags"]');
+tags.addEventListener('k3-select-start', (e) => {
+  if (!confirm('Change selection?')) e.preventDefault();
+});
+tags.addEventListener('k3-change', () => console.log(tags.value));`,
   },
   table: {
     components: ['k3-table'],

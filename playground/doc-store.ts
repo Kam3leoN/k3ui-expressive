@@ -2,7 +2,7 @@
  * Playground / docs persistence — any key under `k3ui.doc.*`.
  *
  * ```ts
- * docStore.set('theme.seed', '#6750A4');
+ * docStore.set('theme.seed', '#3F51B5');
  * docStore.get('theme.mode', 'light');
  * ```
  */

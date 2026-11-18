@@ -28,7 +28,7 @@ body:has(.app[data-nav='bar']) {
 
 html {
   color-scheme: light dark;
-  background: var(--k3-sys-color-background, #fff7ff);
+  background: var(--k3-sys-color-background, #fbf8fe);
   /* Shell owns scroll — never show the document’s native Windows scrollbar */
   height: 100%;
   overflow: hidden;
@@ -40,8 +40,8 @@ body {
   min-height: 100%;
   overflow: hidden;
   font-family: var(--k3-ref-typeface-plain, 'Google Sans', system-ui, sans-serif);
-  background: var(--k3-sys-color-background, #fff7ff);
-  color: var(--k3-sys-color-on-surface, #3d2a51);
+  background: var(--k3-sys-color-background, #fbf8fe);
+  color: var(--k3-sys-color-on-surface, #31323b);
   transition:
     background-color var(--k3-sys-motion-duration-short4, 200ms) ease,
     color var(--k3-sys-motion-duration-short4, 200ms) ease;
@@ -458,8 +458,8 @@ html:has(.app[data-nav='rail']) {
   box-sizing: border-box;
   margin: 0;
   padding: var(--k3-sys-spacing-space400, 2rem);
-  background: var(--k3-sys-color-surface, #fff7ff);
-  color: var(--k3-sys-color-on-surface, #3d2a51);
+  background: var(--k3-sys-color-surface, #fbf8fe);
+  color: var(--k3-sys-color-on-surface, #31323b);
   pointer-events: all;
 }
 .doc-page-loading.is-on,
@@ -960,6 +960,13 @@ k3-top-app-bar.shell-appbar {
   flex-direction: column;
   gap: var(--k3-sys-spacing-space200, 0.75rem);
   min-width: 0;
+}
+.settings-section--reset {
+  gap: 0;
+}
+.settings-theme-reset-btn {
+  display: block;
+  width: 100%;
 }
 .settings-section-title {
   margin: 0;

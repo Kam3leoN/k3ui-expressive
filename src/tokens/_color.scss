@@ -1,27 +1,28 @@
 :root {
   /* Reference / system color roles (overridden by theme.apply) */
-  --k3-sys-color-primary: #6850a5;
-  --k3-sys-color-on-primary: #fdf7ff;
-  --k3-sys-color-primary-container: #cab6ff;
-  --k3-sys-color-on-primary-container: #442c7f;
-  --k3-sys-color-secondary: #625b71;
-  --k3-sys-color-on-secondary: #ffffff;
-  --k3-sys-color-secondary-container: #e8def8;
-  --k3-sys-color-on-secondary-container: #1d192b;
-  --k3-sys-color-tertiary: #7d5260;
-  --k3-sys-color-on-tertiary: #ffffff;
-  --k3-sys-color-tertiary-container: #ffd8e4;
-  --k3-sys-color-on-tertiary-container: #31111d;
-  --k3-sys-color-error: #b3261e;
-  --k3-sys-color-on-error: #ffffff;
-  --k3-sys-color-error-container: #f9dedc;
-  --k3-sys-color-on-error-container: #410e0b;
+  /* Fallbacks = seed #3F51B5 (MD2 Indigo 500) · tonalspot · light · spec 2025 */
+  --k3-sys-color-primary: #545c8c;
+  --k3-sys-color-on-primary: #faf8ff;
+  --k3-sys-color-primary-container: #bfc6fd;
+  --k3-sys-color-on-primary-container: #373f6d;
+  --k3-sys-color-secondary: #5b5e72;
+  --k3-sys-color-on-secondary: #faf8ff;
+  --k3-sys-color-secondary-container: #e0e1f9;
+  --k3-sys-color-on-secondary-container: #4e5065;
+  --k3-sys-color-tertiary: #71557c;
+  --k3-sys-color-on-tertiary: #fff7fc;
+  --k3-sys-color-tertiary-container: #f1cefc;
+  --k3-sys-color-on-tertiary-container: #5d4368;
+  --k3-sys-color-error: #a8364b;
+  --k3-sys-color-on-error: #fff7f7;
+  --k3-sys-color-error-container: #f97386;
+  --k3-sys-color-on-error-container: #6e0523;
 
   /* Extended semantics (Success / Warning / Info) — overridden by theme.apply */
   --k3-sys-color-success: #146c2e;
   --k3-sys-color-on-success: #ffffff;
-  --k3-sys-color-success-container: #c4eed0;
-  --k3-sys-color-on-success-container: #00210b;
+  --k3-sys-color-success-container: #a1f6a8;
+  --k3-sys-color-on-success-container: #1c1b1f;
   /* Warning — M2 Orange darken-1; on* dark for AA (like note) */
   --k3-sys-color-warning: #fb8c00;
   --k3-sys-color-on-warning: #1c1b1f;
@@ -34,52 +35,52 @@
   /* Note — seed M2 Amber accent-1; on* = dark (white illegible) */
   --k3-sys-color-note: #ffe57f;
   --k3-sys-color-on-note: #1c1b1f;
-  --k3-sys-color-note-container: #fff1b8;
+  --k3-sys-color-note-container: #fff0c1;
   --k3-sys-color-on-note-container: #1c1b1f;
 
-  /* Fallbacks = seed #6750A4 · expressive · light · spec 2025 (matches themeCssVars). */
-  --k3-sys-color-background: #fff7ff;
-  --k3-sys-color-on-background: #3d2a51;
-  --k3-sys-color-surface: #fff7ff;
-  --k3-sys-color-on-surface: #3d2a51;
-  --k3-sys-color-surface-variant: #efdbff;
-  --k3-sys-color-on-surface-variant: #6b5681;
-  --k3-sys-color-outline: #88729e;
-  --k3-sys-color-outline-variant: #c1a8d8;
+  /* Surface / outline roles (matches themeCssVars indigo tonalspot 2025) */
+  --k3-sys-color-background: #fbf8fe;
+  --k3-sys-color-on-background: #31323b;
+  --k3-sys-color-surface: #fbf8fe;
+  --k3-sys-color-on-surface: #31323b;
+  --k3-sys-color-surface-variant: #e3e1ed;
+  --k3-sys-color-on-surface-variant: #5e5e68;
+  --k3-sys-color-outline: #7a7a84;
+  --k3-sys-color-outline-variant: #b2b1bc;
   --k3-sys-color-shadow: #000000;
   --k3-sys-color-scrim: #000000;
-  --k3-sys-color-inverse-surface: #322f35;
-  --k3-sys-color-inverse-on-surface: #f5eff7;
-  --k3-sys-color-inverse-primary: #d0bcff;
-  --k3-sys-color-surface-dim: #e9d1ff;
-  --k3-sys-color-surface-bright: #fff7ff;
+  --k3-sys-color-inverse-surface: #0d0e12;
+  --k3-sys-color-inverse-on-surface: #9e9ca2;
+  --k3-sys-color-inverse-primary: #bfc6fd;
+  --k3-sys-color-surface-dim: #dad9e4;
+  --k3-sys-color-surface-bright: #fbf8fe;
   --k3-sys-color-surface-container-lowest: #ffffff;
-  --k3-sys-color-surface-container-low: #fbf0ff;
-  --k3-sys-color-surface-container: #f7e9ff;
-  --k3-sys-color-surface-container-high: #f3e2ff;
-  --k3-sys-color-surface-container-highest: #efdbff;
+  --k3-sys-color-surface-container-low: #f5f2fb;
+  --k3-sys-color-surface-container: #efedf6;
+  --k3-sys-color-surface-container-high: #e9e7f1;
+  --k3-sys-color-surface-container-highest: #e3e1ed;
   --k3-sys-color-surface-tint: var(--k3-sys-color-primary);
 
   /* Fixed accent roles (overridden by theme.apply / MCU) */
-  --k3-sys-color-primary-fixed: #eaddff;
-  --k3-sys-color-primary-fixed-dim: #d0bcff;
-  --k3-sys-color-on-primary-fixed: #21005d;
-  --k3-sys-color-on-primary-fixed-variant: #4f378b;
-  --k3-sys-color-secondary-fixed: #e8def8;
-  --k3-sys-color-secondary-fixed-dim: #ccc2dc;
-  --k3-sys-color-on-secondary-fixed: #1d192b;
-  --k3-sys-color-on-secondary-fixed-variant: #4a4458;
-  --k3-sys-color-tertiary-fixed: #ffd8e4;
-  --k3-sys-color-tertiary-fixed-dim: #efb8c8;
-  --k3-sys-color-on-tertiary-fixed: #31111d;
-  --k3-sys-color-on-tertiary-fixed-variant: #633b48;
+  --k3-sys-color-primary-fixed: #bfc6fd;
+  --k3-sys-color-primary-fixed-dim: #b1b8ee;
+  --k3-sys-color-on-primary-fixed: #232b57;
+  --k3-sys-color-on-primary-fixed-variant: #404876;
+  --k3-sys-color-secondary-fixed: #e0e1f9;
+  --k3-sys-color-secondary-fixed-dim: #d1d3eb;
+  --k3-sys-color-on-secondary-fixed: #3c3e51;
+  --k3-sys-color-on-secondary-fixed-variant: #585a6f;
+  --k3-sys-color-tertiary-fixed: #f1cefc;
+  --k3-sys-color-tertiary-fixed-dim: #e2c0ee;
+  --k3-sys-color-on-tertiary-fixed: #493055;
+  --k3-sys-color-on-tertiary-fixed-variant: #674c72;
 
   /* Palette key colors (Theme Builder / MCU) */
-  --k3-sys-color-primary-palette-key-color: #6750a4;
-  --k3-sys-color-secondary-palette-key-color: #625b71;
-  --k3-sys-color-tertiary-palette-key-color: #7d5260;
-  --k3-sys-color-neutral-palette-key-color: #79747e;
-  --k3-sys-color-neutral-variant-palette-key-color: #79747e;
+  --k3-sys-color-primary-palette-key-color: #6c74a5;
+  --k3-sys-color-secondary-palette-key-color: #74768b;
+  --k3-sys-color-tertiary-palette-key-color: #8a6d95;
+  --k3-sys-color-neutral-palette-key-color: #77767b;
+  --k3-sys-color-neutral-variant-palette-key-color: #767680;
 
   /* md-sys mirror for portability */
   --md-sys-color-primary: var(--k3-sys-color-primary);

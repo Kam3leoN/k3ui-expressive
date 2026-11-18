@@ -270,7 +270,7 @@ export async function mountPackBuilder(
       '',
       '<!-- or, with a bundler -->',
       `import { init } from './${customFile}';`,
-      "await init({ theme: { seed: '#6750A4' } });",
+      "await init({ theme: { seed: '#3F51B5', variant: 'tonalspot' } });",
     ].join('\n');
   };
 

@@ -572,6 +572,12 @@ export const COMPONENT_SPECS: Record<string, SpecRow[]> = {
     { token: 'item.height.1line', value: '56 dp' },
     { token: 'item.height.2line', value: '72 dp' },
     { token: 'item.height.3line', value: '88 dp' },
+    { token: 'density', value: '−4 dp per step (−1 … −3)' },
+    { token: 'segmented.gap', value: '2 dp' },
+    { token: 'segmented.shape', value: 'container 16 · item 4 · hover 12 · focus 16 · selected 16' },
+    { token: 'segmented.item.spacing', value: '12 dp (standard 16 dp)' },
+    { token: 'media', value: 'icon 24 · avatar 40 · image 56 · video 100 × 56' },
+    { token: 'divider.inset', value: 'start 16 · end 24 (standard only)' },
     { token: 'slots', value: 'start · headline · supporting · meta · end · expand' },
     {
       token: 'expand',

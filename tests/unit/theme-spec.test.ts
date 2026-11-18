@@ -39,6 +39,7 @@ describe('Material color spec', () => {
     const el = document.createElement('k3-theme') as HTMLElement & { updateComplete: Promise<unknown> };
     el.setAttribute('primary-seed', '#6750A4');
     el.setAttribute('color-mode', 'light');
+    el.setAttribute('color-variant', 'expressive');
     el.setAttribute('spec-version', '2021');
     el.removeAttribute('global');
     (el as unknown as { global: boolean }).global = false;

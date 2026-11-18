@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+### Added — List (`k3-list` / `k3-list-item`)
+
+- `multi` (promotes `none` / `single` to `multiple`), read-only `value` (`null` · string · string[]); `k3-select-start` (cancelable) and `k3-select-end` around each selection change
+- Action rows: `href` · `target` · `rel` · `download` on `k3-list-item` — full-surface link, the anchor is the tab stop, `disabled` drops the href; list arrow keys focus the link
+- Dividers: `k3-divider` / `hr` children render in standard lists (inset via `--k3-list-divider-inset-start-size` / `-end-size`) and are hidden in segmented lists
+- Leading media detection (`video` › `image` › `avatar` › `icon`) when `leading` is not set (`leadingContentType` / `trailingContentType`); rows without leading content reserve the width used by their siblings so headlines stay aligned; standard lists bleed leading video to the edge
+- Density: `density="-1…-3"` (or `--k3-list-density-scale` / `--k3-sys-density-scale`) — 4 dp shorter rows per step
+- Expand: `open` alias of `expanded`, slot `items` (nested `k3-list` = folder), slot `toggle-icon`, toggle pill filled while open in segmented lists, `aria-controls`; lifecycle `k3-expand-start` / `k3-collapse-start` (cancelable on user toggle) and `k3-expand-end` / `k3-collapse-end`
+- Slot aliases `leading-icon`, `trailing-icon`, `trailing-supporting-text`
+- Theming tokens for every part of the row: spacing (`--k3-list-item-between-space`, `-leading-space`, `-trailing-space`, `-{one,two,three}-line-{top,bottom}-space`, `-{one,two,three}-line-height`), typography (headline · overline · supporting · trailing text), colors (label · overline · supporting · leading · trailing · container), shapes (container · hover · focus · selected), media sizes / shapes (icon · avatar · image · video), disabled and selected variants, state layers (hover · focus · pressed); segmented remaps through `--k3-segmented-list-*` (`-item-container-color`, `-item-container-shape`, `-item-hover-container-shape`, `-item-focus-container-shape`, `-item-selected-container-shape`, `-item-spacing`, `-item-image-shape`, `-item-video-shape`); `--k3-list-padding-block`
+- `k3-divider`: `--k3-divider-space`, `--k3-divider-inset-start-size`, `--k3-divider-inset-end-size` (defaults unchanged)
+
+### Changed — List visuals
+
+- Segmented shapes: container 16 · item 4 · hover 12 · focus 16 · selected 16 (was 24 outer / selected); pressed uses the hover shape; item spacing 12 dp; media corners 8 dp (standard 0)
+- Standard: rest 0 · hover 12 · focus 16 · selected 16 on the row surface; no block padding on the list (`--k3-list-padding-block`)
+- Selection: the indicator replaces non-control trailing content (`hide-selection-indicator` brings it back; a slotted checkbox / radio / switch still acts as the indicator); the indicator no longer grows rows past 56 dp; selected icons render filled; re-activating the selected row of a single-select list no longer fires `k3-change`
+- Disabled: content at 38 % on-surface, media dimmed, segmented rows keep their container; selected + disabled uses a 10 % on-surface fill
+- Focus shows a 10 % state layer; folder expand: header top and nested terminal child take the container shape
+- Video leading is 100 × 56 in every density; two-line rows use 8 dp block padding (height stays 72)
+
 ### Added — Banner (`k3-banner`)
 
 - Full-bleed strip above sticky app bars — variants, `position` fixed/static, dismissible, optional action / marquee

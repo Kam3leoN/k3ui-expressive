@@ -2131,7 +2131,10 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
     properties: [
       ['variant', "'standard'|'segmented'", 'segmented', 'Continuous vs M3E gaps'],
       ['selection', "'none'|'single'|'multiple'|'switch'", 'none', 'Child selection mode'],
-      ['hide-selection-indicator', 'boolean', 'false', 'Keep selected surface without chrome'],
+      ['multi', 'boolean', 'false', 'Promotes none / single to multiple'],
+      ['hide-selection-indicator', 'boolean', 'false', 'Keep selected surface without chrome (indicator otherwise replaces trailing content)'],
+      ['density', "0|-1|-2|-3|'compact'", 'default', '4 dp shorter rows per step'],
+      ['value', 'string|string[]|null', '—', 'Read-only — selected (enabled) value(s)'],
       ['accordion', 'boolean', 'false', 'Exclusive expand'],
       ['embedded', 'boolean', 'false', 'Nested under expandable header'],
       ['elevated', 'boolean', 'false', 'Elevated surface'],
@@ -2144,14 +2147,30 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['interactive', 'boolean', 'false', 'On k3-list-item'],
       ['expandable', 'boolean', 'false', 'On k3-list-item'],
       ['expanded', 'boolean', 'false', 'On k3-list-item'],
-      ['leading', "''|'icon'|'avatar'|'image'|'video'", "''", 'On k3-list-item'],
+      ['open', 'boolean', 'false', 'On k3-list-item — alias of expanded'],
+      ['leading', "''|'icon'|'avatar'|'image'|'video'", "''", 'On k3-list-item — detected from the slot when empty'],
       ['lines', "'one'|'two'|'three'|'auto'", 'auto', 'On k3-list-item'],
+      ['href', 'string', "''", 'On k3-list-item — action row (link)'],
+      ['target · rel · download', 'string', "''", 'On k3-list-item — with href'],
     ],
     events: [
-      ['k3-change', '{ values }', 'Selection changed'],
+      ['k3-select-start', '{ item, value, selected }', 'Cancelable — before a selection change'],
+      ['k3-select', '{ item, value, selected, values }', 'Row activated in a selection list'],
+      ['k3-change', '{ value, values }', 'Selection changed'],
+      ['k3-select-end', '{ item, value, selected, values }', 'After a selection change'],
+      ['k3-expand', '{ expanded, item }', 'Row expanded / collapsed (user)'],
+      ['k3-expand-start · k3-collapse-start', '{ source, item }', 'Before expand / collapse (cancelable when source = user)'],
+      ['k3-expand-end · k3-collapse-end', '{ source, item }', 'After the expand motion'],
       ['k3-dismiss', '{ value, source }', 'Item dismissed'],
     ],
-    slots: [['(default)', 'k3-list-item children']],
+    slots: [
+      ['(default)', 'k3-list-item children · k3-divider / hr (standard)'],
+      ['leading · start · icon · leading-icon', 'On k3-list-item — icon, avatar, image, video'],
+      ['overline · headline · supporting · supporting-text', 'On k3-list-item — text lines'],
+      ['trailing · end · trailing-icon · trailing-supporting-text · meta', 'On k3-list-item — trailing content'],
+      ['expand · content · items', 'On k3-list-item — revealed body (nested k3-list = folder)'],
+      ['toggle-icon', 'On k3-list-item — custom expand icon'],
+    ],
   },
   'app-bar': {
     properties: [
@@ -2285,7 +2304,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
   },
   'color-roles': {
     init: [
-      ['theme.seed', 'string (hex)', '#6750A4', 'Dynamic color seed'],
+      ['theme.seed', 'string (hex)', '#3F51B5', 'Dynamic color seed (MD2 Indigo 500)'],
       [
         'theme.mode',
         "'light'|'dark'|'auto'|'system'",
@@ -2295,7 +2314,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       [
         'theme.variant',
         "'tonalspot'|'vibrant'|'fidelity'|'expressive'|'content'|…",
-        'expressive',
+        'tonalspot',
         'MCU scheme (Content = Noph default)',
       ],
       ['theme.contrast', "'default'|'medium'|'high'", 'default', 'MCU contrastLevel 0 / 0.5 / 1'],
@@ -2315,11 +2334,11 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
   },
   'color-palettes': {
     init: [
-      ['theme.seed', 'string (hex)', '#6750A4', 'Dynamic color seed'],
+      ['theme.seed', 'string (hex)', '#3F51B5', 'Dynamic color seed (MD2 Indigo 500)'],
       [
         'theme.variant',
         "'tonalspot'|'vibrant'|'fidelity'|'expressive'|'content'|…",
-        'expressive',
+        'tonalspot',
         'MCU scheme (Content = Noph default)',
       ],
       ['theme.contrast', "'default'|'medium'|'high'", 'default', 'MCU contrastLevel'],
@@ -2400,7 +2419,7 @@ export const INIT_SECTION: DocTableSection = {
   columns: OPTION_COLS,
   rows: [
     ['locale', 'LocaleCode', 'detect', 'i18n locale (fr / en / …)'],
-    ['theme.seed', 'string', '#6750A4', 'Dynamic color seed'],
+    ['theme.seed', 'string', '#3F51B5', 'Dynamic color seed (MD2 Indigo 500)'],
     [
       'theme.mode',
       "'light'|'dark'|'auto'|'system'",
@@ -2410,7 +2429,7 @@ export const INIT_SECTION: DocTableSection = {
     [
       'theme.variant',
       "'tonalspot'|'vibrant'|'fidelity'|'expressive'|'monochrome'|'neutral'|'rainbow'|'fruitsalad'",
-      'expressive',
+      'tonalspot',
       'MCU scheme variant',
     ],
     ['theme.contrast', "'default'|'medium'|'high'", 'default', 'MCU contrastLevel 0 / 0.5 / 1'],
