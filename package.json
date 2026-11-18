@@ -42,7 +42,9 @@
   "sideEffects": [
     "**/*.css",
     "**/*.scss",
-    "./dist/**/*.js"
+    "./dist/**/*.js",
+    "./src/**/*.ts",
+    "./src/**/*.js"
   ],
   "publishConfig": {
     "access": "public"
