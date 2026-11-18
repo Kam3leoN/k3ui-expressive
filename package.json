@@ -39,6 +39,18 @@
     "README.md",
     "CHANGELOG.md"
   ],
+  "sideEffects": [
+    "**/*.css",
+    "./dist/k3ui.css",
+    "./dist/fonts/**",
+    "./dist/k3ui.js",
+    "./dist/lazy/k3ui.js",
+    "./dist/lazy/components/**",
+    "./dist/k3ui-syntax.js"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "vite --config playground/vite.config.ts",
     "dev:qr": "vite --config apps/qr-generator/vite.config.ts",
@@ -48,7 +60,7 @@
     "build:pack": "node scripts/build-pack.mjs",
     "manifest": "cem analyze --config custom-elements-manifest.config.mjs",
     "build:fonts": "node scripts/copy-fonts.mjs",
-    "build:playground": "npm run build:lazy && npm --prefix ../k3ux run build:lazy && vite build --config playground/vite.config.ts",
+    "build:playground": "npm run build:lazy && node scripts/playground-prebuild.mjs && vite build --config playground/vite.config.ts",
     "build:qr": "vite build --config apps/qr-generator/vite.config.ts",
     "build:tokens": "node scripts/export-tokens.mjs",
     "budget:bundle": "node scripts/budget-bundle.mjs",
@@ -59,6 +71,7 @@
     "test:e2e:update-snapshots": "playwright test tests/e2e/visual.spec.ts --update-snapshots",
     "lint": "tsc --noEmit",
     "check": "npm run lint && npm test && npm run build",
+    "prepublishOnly": "npm run check",
     "preview": "vite preview --config playground/vite.config.ts",
     "preview:qr": "vite preview --config apps/qr-generator/vite.config.ts",
     "build:syntax": "node scripts/build-syntax.mjs",
@@ -83,15 +96,17 @@
     "type": "git",
     "url": "git+https://github.com/Kam3leoN/k3ui-expressive.git"
   },
+  "peerDependencies": {
+    "lit": "^3.2.1"
+  },
   "dependencies": {
-    "@fontsource/google-sans": "^5.3.2",
-    "@fontsource/jetbrains-mono": "^5.3.0",
     "@material/material-color-utilities": "^0.4.0",
-    "chart.js": "^4.6.1",
-    "lit": "^3.2.1",
     "material-shapes-ts": "^0.3.0"
   },
   "devDependencies": {
+    "@fontsource/google-sans": "^5.3.2",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "chart.js": "^4.6.1",
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@open-wc/testing": "^4.0.0",
     "@playwright/test": "^1.51.0",
@@ -101,7 +116,7 @@
     "esbuild": "^0.25.12",
     "flag-icons": "^7.6.0",
     "jsdom": "^26.0.0",
-    "k3ux": "file:../k3ux",
+    "lit": "^3.2.1",
     "sass": "^1.85.1",
     "tailwindcss": "^4.0.14",
     "terser": "^5.51.2",
