@@ -62,7 +62,8 @@
     "preview": "vite preview --config playground/vite.config.ts",
     "preview:qr": "vite preview --config apps/qr-generator/vite.config.ts",
     "build:syntax": "node scripts/build-syntax.mjs",
-    "lighthouse": "node scripts/lighthouse-scores.mjs"
+    "lighthouse": "node scripts/lighthouse-scores.mjs",
+    "bench": "node scripts/bench-components.mjs"
   },
   "keywords": [
     "material-design",
