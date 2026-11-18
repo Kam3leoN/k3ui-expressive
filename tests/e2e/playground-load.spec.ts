@@ -30,8 +30,14 @@ test('home: catalog visible at once, every doc page stamped after boot', async (
   /* Prerendered at build in production; the dev server builds it at boot */
   await expect(page.locator('#catalog-grid .catalog-card').first()).toBeVisible();
   await ready(page, 'home');
-  /* Material ambient shapes (pale, spinning) behind the hero */
+  /* Blurred Material orbs (Trainable-style) behind the hero */
+  await expect(page.locator('#home-ambient .home-ambient__orb')).toHaveCount(4);
   await expect(page.locator('#home-ambient .home-ambient__shape')).toHaveCount(4);
+  await expect(page.locator('#home-stats .home-stat')).toHaveCount(4);
+  await expect(page.locator('#home-stats [data-stat="k3ui"] .home-stat__value')).not.toHaveText('');
+  await expect(page.locator('#home-stats [data-stat="oss"] .home-stat__value')).toContainText(/open source/i);
+  await expect(page.locator('.home-hero-banner__chips k3-chip')).toHaveCount(3);
+  await expect(page.locator('.home-hero-morph__shape')).toHaveCount(3);
   /* Every doc page was put back once the app booted */
   const empty = await page.evaluate(
     () => [...document.querySelectorAll('.comp-page')].filter((a) => !a.firstElementChild).length,

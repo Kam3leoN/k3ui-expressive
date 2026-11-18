@@ -409,11 +409,48 @@
 
         <!-- HOME — component index -->
         <article class="comp-page home-page is-active" data-page="home" id="page-home">
-          <section class="home-hero-banner" aria-labelledby="home-hero-title">
-            <div class="home-hero-banner__glow" aria-hidden="true"></div>
+                    <section class="home-hero-banner" aria-labelledby="home-hero-title">
             <div class="home-hero-banner__copy">
+              <div class="home-hero-banner__chips" role="list" aria-label="Highlights">
+                <k3-chip role="listitem">
+                  <span
+                    slot="icon"
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="code"
+                    aria-hidden="true"
+                  ></span>
+                  <span data-i18n="playground.home.chip.openSource">Open source</span>
+                </k3-chip>
+                <k3-chip role="listitem">
+                  <span
+                    slot="icon"
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="do_not_disturb_on"
+                    aria-hidden="true"
+                  ></span>
+                  <span data-i18n="playground.home.chip.noAds">No ads</span>
+                </k3-chip>
+                <k3-chip id="home-hero-ver" role="listitem">
+                  <span
+                    slot="icon"
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="check"
+                    aria-hidden="true"
+                  ></span>
+                  <span>v1.2.7</span>
+                </k3-chip>
+              </div>
               <p class="eyebrow" data-i18n="playground.eyebrow">Material 3 Expressive · Web</p>
-              <h1 id="home-hero-title" class="k3-display-large hero-title">K3ui</h1>
+              <h1 id="home-hero-title" class="hero-title">
+                <span data-doc-product="k3ui">K3ui</span>
+                <span data-doc-product="k3ux" hidden>K3ux</span>
+              </h1>
               <p class="hero-lead" data-doc-product="k3ui" data-i18n="playground.lead">
                 Shape morph, five sizes, expressive motion — custom elements drop-in (k3ui.js +
                 k3ui.css).
@@ -426,14 +463,57 @@
                 <k3-button variant="filled" size="md" data-nav="quick-start"
                   ><span data-i18n="playground.cta.start">Get started</span></k3-button
                 >
+                <a
+                  class="home-hero-banner__gh"
+                  href="https://github.com/Kam3leoN/k3ui-expressive"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <k3-button variant="tonal" size="md">
+                    <span
+                      class="ms notranslate"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="code"
+                      aria-hidden="true"
+                    ></span>
+                    <span data-i18n="playground.cta.github">GitHub</span>
+                  </k3-button>
+                </a>
               </div>
+              <p class="home-hero-banner__meta">
+                <span
+                  class="ms notranslate"
+                  translate="no"
+                  lang="zxx"
+                  data-k3-icon="check_circle"
+                  aria-hidden="true"
+                ></span>
+                <span data-i18n="playground.home.meta.wc">Web components</span>
+                <span class="home-hero-banner__dot" aria-hidden="true"></span>
+                <span data-i18n="playground.home.meta.mit">MIT license</span>
+                <span class="home-hero-banner__dot" aria-hidden="true"></span>
+                <span data-i18n="playground.home.meta.free">100% free · No ads</span>
+              </p>
             </div>
-            <div
-              class="home-hero-morph"
-              id="home-hero-morph"
-              aria-hidden="true"
-              data-home-hero-morph
-            ></div>
+            <div class="home-hero-banner__visual" aria-hidden="true">
+              <div
+                class="home-hero-morph"
+                id="home-hero-morph"
+                data-home-hero-morph
+              ></div>
+            </div>
+          </section>
+          <!-- Stats banner — Material shapes (Trainable-style) · filled by home-stats/mount.ts -->
+          <section
+            class="home-stats k3-layout-grid k3-demo-cols-4"
+            id="home-stats"
+            aria-labelledby="home-stats-title"
+            data-home-stats
+          >
+            <h2 id="home-stats-title" class="visually-hidden" data-i18n="playground.home.stats.title">
+              K3ui in numbers
+            </h2>
           </section>
           <header class="section-head home-hero">
             <div class="product-switch">

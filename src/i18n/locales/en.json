@@ -504,6 +504,12 @@
   "playground.home.stats.openSourceLabel": "MIT license",
   "playground.home.stats.free": "100% free No ads",
   "playground.home.stats.freeLabel": "Forever",
+  "playground.home.chip.openSource": "Open source",
+  "playground.home.chip.noAds": "No ads",
+  "playground.home.meta.wc": "Web components",
+  "playground.home.meta.mit": "MIT license",
+  "playground.home.meta.free": "100% free · No ads",
   "playground.cta.start": "Get started",
+  "playground.cta.github": "GitHub",
   "playground.ctrl.variant.content": "Content"
 }
