@@ -103,10 +103,14 @@ function writeVirtualEntry(entryName, { main, extraImports = [] }) {
     if (!rel.startsWith('.')) rel = `./${rel}`;
     return rel.replace(/\\/g, '/');
   };
-  const lines = [
-    `import '${relImport(main)}';`,
-    ...extraImports.map((rel) => `import '${relImport(rel)}';`),
-  ];
+  /*
+   * Bare `import './ce.ts'` is dropped when package.json `sideEffects` omits
+   * `src/**` (esbuild treats those modules as pure). Keep a live binding so
+   * the module evaluates and `customElements.define` runs.
+   */
+  const lines = [main, ...extraImports].map(
+    (rel, i) => `import * as __bench${i} from '${relImport(rel)}';\nglobalThis.__k3BenchKeep${i} = __bench${i};`,
+  );
   fs.writeFileSync(file, `${lines.join('\n')}\n`);
   return file;
 }
