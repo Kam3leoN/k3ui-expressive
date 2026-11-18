@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-11-18T14:02:14.007Z",
-  "throttle": 4,
+  "timestamp": "2026-11-18T14:06:01.284Z",
+  "throttle": 1,
   "entryPaths": {
     "button": {
       "main": "src/components/actions/button.ts",
@@ -35,45 +35,45 @@
   },
   "bundles": {
     "button": {
-      "minBytes": 40913,
-      "gzip": 12741,
-      "brotli": 11476,
+      "minBytes": 47907,
+      "gzip": 14232,
+      "brotli": 12816,
       "path": "docs/bench/bundles/button.js"
     },
     "checkbox": {
-      "minBytes": 29806,
-      "gzip": 9796,
-      "brotli": 8805,
+      "minBytes": 33924,
+      "gzip": 11008,
+      "brotli": 9901,
       "path": "docs/bench/bundles/checkbox.js"
     },
     "text-field": {
-      "minBytes": 108909,
-      "gzip": 28114,
-      "brotli": 24421,
+      "minBytes": 116868,
+      "gzip": 30096,
+      "brotli": 26121,
       "path": "docs/bench/bundles/text-field.js"
     },
     "list": {
-      "minBytes": 166278,
-      "gzip": 41364,
-      "brotli": 35578,
+      "minBytes": 168341,
+      "gzip": 42035,
+      "brotli": 36191,
       "path": "docs/bench/bundles/list.js"
     },
     "dialog": {
-      "minBytes": 98786,
-      "gzip": 27882,
-      "brotli": 24067,
+      "minBytes": 104963,
+      "gzip": 29239,
+      "brotli": 25154,
       "path": "docs/bench/bundles/dialog.js"
     },
     "date-picker": {
-      "minBytes": 155923,
-      "gzip": 40454,
-      "brotli": 34968,
+      "minBytes": 161844,
+      "gzip": 41808,
+      "brotli": 35985,
       "path": "docs/bench/bundles/date-picker.js"
     },
     "index": {
-      "minBytes": 1560352,
-      "gzip": 378757,
-      "brotli": 287595,
+      "minBytes": 1560572,
+      "gzip": 378829,
+      "brotli": 287398,
       "path": "docs/bench/bundles/index.js"
     }
   },
@@ -81,134 +81,134 @@
     "button": {
       "passes": 7,
       "render": {
-        "medianMs": 1902.3999999761581
+        "medianMs": 226.60000002384186
       },
       "update": {
-        "medianMs": 574.2999999523163
+        "medianMs": 86.5
       },
       "remove": {
-        "medianMs": 278.7000000476837
+        "medianMs": 46.10000002384186
       },
       "cdp": {
-        "JSHeapUsedSize": 2967004,
+        "JSHeapUsedSize": 2984932,
         "Nodes": 47,
-        "RecalcStyleDuration": 0.571119,
-        "LayoutDuration": 0.366479,
-        "ScriptDuration": 0.637021
+        "RecalcStyleDuration": 0.06782,
+        "LayoutDuration": 0.039829,
+        "ScriptDuration": 0.086045
       }
     },
     "checkbox": {
       "passes": 7,
       "render": {
-        "medianMs": 1101.3999999761581
+        "medianMs": 131.69999992847443
       },
       "update": {
-        "medianMs": 1802.2999999523163
+        "medianMs": 267.1999999284744
       },
       "remove": {
-        "medianMs": 2217.899999976158
+        "medianMs": 754.1000000238419
       },
       "cdp": {
-        "JSHeapUsedSize": 2847596,
-        "Nodes": 53,
-        "RecalcStyleDuration": 0.998149,
-        "LayoutDuration": 0.340788,
-        "ScriptDuration": 0.147183
+        "JSHeapUsedSize": 2862888,
+        "Nodes": 70,
+        "RecalcStyleDuration": 0.148161,
+        "LayoutDuration": 0.036557,
+        "ScriptDuration": 0.018873
       }
     },
     "text-field": {
       "passes": 7,
       "render": {
-        "medianMs": 596.5999999046326
+        "medianMs": 73.60000002384186
       },
       "update": {
-        "medianMs": 98.20000004768372
+        "medianMs": 24.899999976158142
       },
       "remove": {
-        "medianMs": 36
+        "medianMs": 32.89999997615814
       },
       "cdp": {
-        "JSHeapUsedSize": 3116016,
+        "JSHeapUsedSize": 3128872,
         "Nodes": 81,
-        "RecalcStyleDuration": 0.098614,
-        "LayoutDuration": 0.122922,
-        "ScriptDuration": 0.085097
+        "RecalcStyleDuration": 0.012652,
+        "LayoutDuration": 0.012291,
+        "ScriptDuration": 0.012883
       }
     },
     "list": {
       "passes": 7,
       "render": {
-        "medianMs": 1650.2999999523163
+        "medianMs": 195.60000002384186
       },
       "update": {
-        "medianMs": 1694.2000000476837
+        "medianMs": 259
       },
       "remove": {
-        "medianMs": 1421.6000000238419
+        "medianMs": 355.7999999523163
       },
       "cdp": {
-        "JSHeapUsedSize": 6059416,
-        "Nodes": 36114,
-        "RecalcStyleDuration": 1.400683,
-        "LayoutDuration": 0.245878,
-        "ScriptDuration": 0.451742
+        "JSHeapUsedSize": 6885112,
+        "Nodes": 36217,
+        "RecalcStyleDuration": 0.190421,
+        "LayoutDuration": 0.028504,
+        "ScriptDuration": 0.063525
       }
     },
     "dialog": {
       "passes": 7,
       "render": {
-        "medianMs": 230.09999990463257
+        "medianMs": 29
       },
       "update": {
-        "medianMs": 937
+        "medianMs": 130.30000007152557
       },
       "remove": {
-        "medianMs": 341.2999999523163
+        "medianMs": 35.10000002384186
       },
       "cdp": {
-        "JSHeapUsedSize": 3443284,
+        "JSHeapUsedSize": 3449200,
         "Nodes": 6075,
-        "RecalcStyleDuration": 0.456406,
-        "LayoutDuration": 0.207196,
-        "ScriptDuration": 0.28008
+        "RecalcStyleDuration": 0.06033,
+        "LayoutDuration": 0.027719,
+        "ScriptDuration": 0.034764
       }
     },
     "date-picker": {
       "passes": 7,
       "render": {
-        "medianMs": 3910.600000023842
+        "medianMs": 469.60000002384186
       },
       "update": {
-        "medianMs": 2764.600000023842
+        "medianMs": 350.60000002384186
       },
       "remove": {
-        "medianMs": 82.80000007152557
+        "medianMs": 33.60000002384186
       },
       "cdp": {
-        "JSHeapUsedSize": 3243592,
-        "Nodes": 213,
-        "RecalcStyleDuration": 0.027151,
-        "LayoutDuration": 0.000436,
-        "ScriptDuration": 0.247658
+        "JSHeapUsedSize": 4026476,
+        "Nodes": 225,
+        "RecalcStyleDuration": 0.00384,
+        "LayoutDuration": 0.000071,
+        "ScriptDuration": 0.031244
       }
     },
     "index": {
       "passes": 7,
       "render": {
-        "medianMs": 52.40000009536743
+        "medianMs": 19.299999952316284
       },
       "update": {
-        "medianMs": 26.299999952316284
+        "medianMs": 33.10000002384186
       },
       "remove": {
-        "medianMs": 33
+        "medianMs": 33.5
       },
       "cdp": {
-        "JSHeapUsedSize": 6256064,
+        "JSHeapUsedSize": 6256100,
         "Nodes": 37,
-        "RecalcStyleDuration": 0.01829,
-        "LayoutDuration": 0.006538,
-        "ScriptDuration": 0.037447
+        "RecalcStyleDuration": 0.002307,
+        "LayoutDuration": 0.000727,
+        "ScriptDuration": 0.004526
       }
     }
   }
