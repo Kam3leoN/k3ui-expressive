@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { init } from '../../src/index.js';
 import type { K3Tree } from '../../src/components/containment/tree.js';
 import type { K3TreeItem } from '../../src/components/containment/tree-item.js';
@@ -66,6 +66,32 @@ describe('k3-tree', () => {
     );
     await Promise.resolve();
     expect(second.selected).toBe(true);
+    el.remove();
+  });
+
+  it('nests children in the group slot (not the label)', async () => {
+    window.K3UI_MANUAL = true;
+    await init({ components: ['k3-tree', 'k3-tree-item'], theme: { mode: 'light' } });
+    const el = document.createElement('k3-tree') as K3Tree;
+    el.innerHTML = `
+      <k3-tree-item label="Projects" value="projects" expanded>
+        <k3-tree-item label="Design" value="design"></k3-tree-item>
+      </k3-tree-item>
+    `;
+    document.body.appendChild(el);
+    const root = el.querySelector(':scope > k3-tree-item') as K3TreeItem;
+    const child = root.querySelector(':scope > k3-tree-item') as K3TreeItem;
+    await root.updateComplete;
+    await child.updateComplete;
+    await Promise.resolve();
+
+    const labelSlot = root.shadowRoot!.querySelector('.label slot') as HTMLSlotElement;
+    const groupSlot = root.shadowRoot!.querySelector('.children slot') as HTMLSlotElement;
+    expect(labelSlot.getAttribute('name')).toBe('label');
+    expect(groupSlot.assignedElements()).toContain(child);
+    expect(labelSlot.assignedElements()).not.toContain(child);
+    expect(root.shadowRoot!.querySelector('.label')?.textContent?.trim()).toBe('Projects');
+    expect(root.shadowRoot!.querySelector('.children')?.hasAttribute('hidden')).toBe(false);
     el.remove();
   });
 });

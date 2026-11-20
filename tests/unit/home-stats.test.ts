@@ -1,7 +1,8 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { catalog as k3uiCatalog } from '../../src/registry/catalog.js';
-import { catalog as k3uxCatalog } from '../../../k3ux/src/registry/catalog.js';
-import { MATERIAL_SHAPE_NAMES } from '../../src/shapes/index.js';
+import { HOME_SHAPE_NAMES } from '../../playground/home-shapes.js';
 import {
   buildHomeStatDefs,
   mountHomeStats,
@@ -10,6 +11,9 @@ import {
   syncHomeStatsI18n,
 } from '../../playground/home-stats/mount.js';
 
+/* Optional sibling checkout — see scripts/k3ux-sibling.mjs */
+const hasK3ux = existsSync(resolve(__dirname, '../../../k3ux/src/registry/catalog.ts'));
+
 describe('home-stats', () => {
   afterEach(() => {
     document.body.innerHTML = '';
@@ -17,10 +21,19 @@ describe('home-stats', () => {
     vi.unstubAllGlobals();
   });
 
-  it('resolveHomeStatCounts matches both catalogs', async () => {
+  it.skipIf(!hasK3ux)('resolveHomeStatCounts matches both catalogs', async () => {
+    const { catalog: k3uxCatalog } = (await import('@k3ux/registry/catalog.js')) as {
+      catalog: unknown[];
+    };
     const counts = await resolveHomeStatCounts();
     expect(counts.k3ui).toBe(k3uiCatalog.length);
     expect(counts.k3ux).toBe(k3uxCatalog.length);
+  });
+
+  it.skipIf(hasK3ux)('resolveHomeStatCounts falls back to 0 without ../k3ux', async () => {
+    const counts = await resolveHomeStatCounts();
+    expect(counts.k3ui).toBe(k3uiCatalog.length);
+    expect(counts.k3ux).toBe(0);
   });
 
   it('buildHomeStatDefs uses Trainable-style Material shapes', () => {
@@ -33,10 +46,12 @@ describe('home-stats', () => {
     ]);
   });
 
-  it('pickRandomShape never returns the excluded shape', () => {
-    for (const name of MATERIAL_SHAPE_NAMES.slice(0, 8)) {
+  it('pickRandomShape stays in the home allowlist and avoids exclude', () => {
+    for (const name of HOME_SHAPE_NAMES.slice(0, 8)) {
       for (let i = 0; i < 20; i++) {
-        expect(pickRandomShape(name)).not.toBe(name);
+        const next = pickRandomShape(name);
+        expect(HOME_SHAPE_NAMES).toContain(next);
+        expect(next).not.toBe(name);
       }
     }
   });

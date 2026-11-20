@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { cpSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { build as esbuild } from 'esbuild';
-import { catalogGridHtml } from './catalog.js';
+import { showcaseGalleryHtml } from './showcase/gallery.js';
 import { lighthouseLive } from './lighthouse-live.js';
 import {
   DEFAULT_THEME,
@@ -18,7 +18,9 @@ import {
   K3UX_CSS,
   K3UX_HOLO_SCSS,
   K3UX_LAZY_DIST,
+  K3UX_SRC,
 } from '../scripts/k3ux-sibling.mjs';
+import { k3uxOptional } from '../scripts/k3ux-optional.mjs';
 
 const K3UX_ENTRY = HAS_K3UX
   ? resolve(__dirname, '../../k3ux/src/index.ts')
@@ -138,7 +140,7 @@ function prerenderCatalog(html: string): string {
     (Object.hasOwn(main, key) ? main[key] : Object.hasOwn(en, key) ? en[key] : key) ?? key;
   return html.replace(
     '<div id="catalog-grid" class="catalog-grid"></div>',
-    `<div id="catalog-grid" class="catalog-grid" data-prerendered="${DEFAULT_LOCALE}">${catalogGridHtml(t, '', t('playground.search.placeholder'))}</div>`,
+    `<div id="catalog-grid" class="catalog-grid gallery-root" data-prerendered="${DEFAULT_LOCALE}">${showcaseGalleryHtml(t, '', t('playground.search.placeholder'))}</div>`,
   );
 }
 
@@ -271,6 +273,7 @@ export default defineConfig({
   root: resolve(__dirname),
   publicDir: resolve(__dirname, 'public'),
   plugins: [
+    k3uxOptional(),
     tailwindcss(),
     lighthouseLive(),
     packBuilderAssets(),
@@ -335,6 +338,8 @@ export default defineConfig({
         find: 'k3ux/holo-effects.css',
         replacement: K3UX_HOLO,
       },
+      /* Sibling sources (`@k3ux/…`); without ../k3ux the k3uxOptional plugin serves empty modules. */
+      ...(HAS_K3UX ? [{ find: /^@k3ux\//, replacement: `${K3UX_SRC}/` }] : []),
       {
         /* Peer import from k3ux sources — never the built dist (bundled Lit). */
         find: /^k3ui$/,

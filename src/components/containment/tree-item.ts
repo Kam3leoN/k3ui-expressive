@@ -107,20 +107,22 @@ export class K3TreeItem extends K3Element {
           : html`<span class="chevron" part="spacer" aria-hidden="true" style="visibility:hidden"></span>`}
         <span class="leading" part="leading"><slot name="leading"></slot></span>
         <span class="label" part="label"
-          ><slot>${this.label}</slot></span
+          ><slot name="label">${this.label}</slot></span
         >
         <span class="trailing" part="trailing"><slot name="trailing"></slot></span>
       </div>
-      ${this.hasChildren
-        ? html`<div
-            class="children"
-            part="group"
-            role="group"
-            ?hidden=${!this.expanded}
-          >
-            <slot @slotchange=${this.syncChildren}></slot>
-          </div>`
-        : nothing}
+      <!--
+        Default slot = nested k3-tree-item only (never dual unnamed slots —
+        otherwise children redistribute into the label and the tree breaks).
+      -->
+      <div
+        class="children"
+        part="group"
+        role="group"
+        ?hidden=${!this.hasChildren || !this.expanded}
+      >
+        <slot @slotchange=${this.syncChildren}></slot>
+      </div>
     `;
   }
 }

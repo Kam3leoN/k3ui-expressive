@@ -43,7 +43,6 @@ import {
   TYPE_FAMILIES,
 } from '../src/tokens/meta.js';
 import {
-  catalogGridHtml,
   catalogSearchHits,
   catalogEntryProduct,
   componentsInCategory,
@@ -67,6 +66,11 @@ import {
   iconForComponent,
 } from './nav-destinations.js';
 import { mountMaterialSymbols } from './material-symbols.js';
+import {
+  showcaseGalleryHtml,
+  showcaseTagsInHtml,
+  wireShowcaseInteractions,
+} from './showcase/gallery.js';
 import { docStore, DocKeys } from './doc-store.js';
 import { ariaTabs, installTabKeyboard, selectTab } from './aria-tabs.js';
 import {
@@ -505,6 +509,7 @@ function applyPlaygroundI18n(): void {
   buildCatalogGrid();
   fillScrollbarDemo();
   void import('./home-stats/mount.js').then((m) => m.syncHomeStatsI18n());
+  void import('./home-lift-cta/mount.js').then((m) => m.syncHomeLiftCtaI18n());
   const page = articlePageId(currentPageId());
   syncDocNav(page);
   if (page === 'color-roles') renderColorRoles();
@@ -1092,21 +1097,37 @@ function layoutForNavHost(host: HTMLElement): 'vertical' | 'horizontal' {
   return 'vertical';
 }
 
+/** Nav items in named slots (fab / trailing) — not primary destinations. */
+function isSlottedNavItem(el: Element, host: HTMLElement): boolean {
+  let n: Element | null = el;
+  while (n && n !== host) {
+    if (n.hasAttribute('slot')) return true;
+    n = n.parentElement;
+  }
+  return false;
+}
+
+/**
+ * Catalog destinations only — excludes slotted chrome and `#rail-sponsors`
+ * (auxiliary destination, last before the trailing divider).
+ */
+function isShellPrimaryNavItem(el: Element, host: HTMLElement): boolean {
+  if (el.id === 'rail-sponsors') return false;
+  return !isSlottedNavItem(el, host);
+}
+
 /** Keep rail/bar items in place so select pill can scaleX (no destroy/recreate). */
 function syncPrimaryItems(host: HTMLElement): ShellNavItem[] {
-  const slotted = new Set(
-    [...host.querySelectorAll('[slot]')].map((el) => el as Element),
-  );
-  let items = [...host.querySelectorAll('k3-nav-item')].filter(
-    (el) => !slotted.has(el),
-  ) as ShellNavItem[];
+  const primaryItems = (): ShellNavItem[] =>
+    [...host.querySelectorAll('k3-nav-item')].filter((el) =>
+      isShellPrimaryNavItem(el, host),
+    ) as ShellNavItem[];
+  let items = primaryItems();
   const layout = layoutForNavHost(host);
 
   while (items.length > NAV_DESTINATIONS.length) {
     items.pop()?.remove();
-    items = [...host.querySelectorAll('k3-nav-item')].filter(
-      (el) => !slotted.has(el),
-    ) as ShellNavItem[];
+    items = primaryItems();
   }
   while (items.length < NAV_DESTINATIONS.length) {
     const el = document.createElement('k3-nav-item') as ShellNavItem;
@@ -1131,6 +1152,13 @@ function syncPrimaryItems(host: HTMLElement): ShellNavItem[] {
   return items;
 }
 
+/** Pin Sponsors as the last default-slot destination (above trailing divider). */
+function pinRailSponsorsAfterPrimary(rail: HTMLElement): void {
+  const sponsors = document.getElementById('rail-sponsors');
+  if (!sponsors || !rail.contains(sponsors)) return;
+  rail.appendChild(sponsors);
+}
+
 function armPrimarySelection(items: ShellNavItem[], activeIdx: number): void {
   armNavActive(items as unknown as K3NavItem[], activeIdx, true);
 }
@@ -1148,20 +1176,33 @@ function buildPrimaryNav(): void {
 
   const railItems = syncPrimaryItems(rail);
   const barItems = syncPrimaryItems(bar);
+  pinRailSponsorsAfterPrimary(rail);
+  const sponsors = railSponsorsItem();
+  if (sponsors) sponsors.layout = layoutForNavHost(rail);
 
+  const onSponsors = isSponsorsHash(pageId);
   const railHost = rail as HTMLElement & { active: number };
   const barHost = bar as HTMLElement & { active: number };
+  const catalogIdx = onSponsors ? -1 : activeIdx;
   const prevIdx = railHost.active;
-  const selectionChanged = prevIdx !== activeIdx;
-  const needsArm = railItems.some((el, i) => el.active !== (i === activeIdx));
+  const selectionChanged = prevIdx !== catalogIdx;
+  const needsArm = railItems.some((el, i) => el.active !== (i === catalogIdx));
 
-  railHost.active = activeIdx;
-  barHost.active = activeIdx;
+  /*
+   * Catalog index only (`data-nav-aux` Sponsors is outside queryNavItems).
+   * On Sponsors page, clear catalog via active=-1 then arm Sponsors like peers.
+   */
+  railHost.active = catalogIdx;
+  barHost.active = catalogIdx;
 
-  /* Parent armActive runs when index changes; otherwise arm after Lit paint */
-  if (!selectionChanged && needsArm) {
-    armPrimarySelection(railItems, activeIdx);
-    armPrimarySelection(barItems, activeIdx);
+  if (onSponsors) {
+    armRailSponsorsSelection(rail, railItems);
+  } else {
+    if (!selectionChanged && needsArm) {
+      armPrimarySelection(railItems, catalogIdx);
+      armPrimarySelection(barItems, catalogIdx);
+    }
+    syncRailSponsorsActive(false);
   }
 }
 
@@ -1222,11 +1263,8 @@ function syncNavMenuOpenHighlight(): void {
   for (const hostId of ['nav-rail', 'nav-bar'] as const) {
     const host = document.getElementById(hostId);
     if (!host) continue;
-    const slotted = new Set(
-      [...host.querySelectorAll('[slot]')].map((el) => el as Element),
-    );
-    const items = [...host.querySelectorAll('k3-nav-item')].filter(
-      (el) => !slotted.has(el),
+    const items = [...host.querySelectorAll('k3-nav-item')].filter((el) =>
+      isShellPrimaryNavItem(el, host),
     ) as ShellNavItem[];
     NAV_DESTINATIONS.forEach((dest, i) => {
       const el = items[i];
@@ -2065,7 +2103,7 @@ function applyDocProduct(product: DocProduct, opts?: { navigateHome?: boolean })
     el.hidden = el.dataset.docProduct !== product;
   });
   syncProductSwitchButtons(product);
-  /* Title uses [data-doc-product] spans — do not wipe children with textContent. */
+  /* Hero title uses [data-doc-product] stacks — do not wipe children with textContent. */
   if (changed) {
     catalogHtml = null;
     const grid = document.getElementById('catalog-grid');
@@ -2109,21 +2147,35 @@ function wireProductSwitch(): void {
   });
 }
 
+/** Register live demo CEs + wire snackbar/dialog/tap in the home gallery. */
+async function hydrateShowcaseGallery(grid: HTMLElement): Promise<void> {
+  const tags = [
+    'k3-accordion',
+    'k3-expansion-panel',
+    ...showcaseTagsInHtml(grid.innerHTML),
+    ...collectPageK3Tags(grid),
+  ];
+  await registerPresentK3Tags([...new Set(tags)]);
+  wireShowcaseInteractions(grid);
+}
+
 function buildCatalogGrid(filter = ''): void {
   const grid = document.getElementById('catalog-grid');
   if (!grid) return;
   const emptyHint = filter.trim()
     ? t('playground.search.empty')
     : t('playground.search.placeholder');
-  const html = catalogGridHtml(t, filter, emptyHint);
+  const html = showcaseGalleryHtml(t, filter, emptyHint);
   if (html === catalogHtml) return;
   /* Build-time prerender (default locale): keep those nodes — they are the LCP. */
   if (catalogHtml === null && !filter.trim() && grid.dataset.prerendered === window.K3UI?.i18n.locale) {
     catalogHtml = html;
+    void hydrateShowcaseGallery(grid);
     return;
   }
   catalogHtml = html;
   grid.innerHTML = html;
+  void hydrateShowcaseGallery(grid);
 }
 
 /** Fill `#doc-search` suggestions — both packs, with k3ui/k3ux chips + auto switch. */
@@ -2300,6 +2352,36 @@ function waitNextPaint(): Promise<void> {
   });
 }
 
+function isSponsorsHash(id: string): boolean {
+  return id === 'sponsors';
+}
+
+function railSponsorsItem(): K3NavItem | null {
+  return document.getElementById('rail-sponsors') as K3NavItem | null;
+}
+
+/**
+ * Arm / clear Sponsors with the same selected-pill path as catalog destinations
+ * (`armNavActive` → clear → paint → arm).
+ */
+function syncRailSponsorsActive(active: boolean): void {
+  const item = railSponsorsItem();
+  if (!item) return;
+  if (!active) {
+    if (item.active) item.active = false;
+    return;
+  }
+  armNavActive([item], 0, true);
+}
+
+/** Clear catalog destinations and arm Sponsors in one selection pass. */
+function armRailSponsorsSelection(rail: HTMLElement, primary: ShellNavItem[]): void {
+  const sponsors = railSponsorsItem();
+  if (!sponsors || !rail.contains(sponsors)) return;
+  sponsors.layout = layoutForNavHost(rail);
+  armNavActive([...primary, sponsors] as K3NavItem[], primary.length, true);
+}
+
 function showPage(id: string): void {
   const articleId = articlePageId(id);
   syncProductForPage(articleId);
@@ -2390,6 +2472,14 @@ function syncDocNav(pageId: string): void {
     return;
   }
 
+  if (pageId === 'sponsors') {
+    docNav.previousHref = '#/';
+    docNav.previousTitle = t('doc.catalog.title');
+    docNav.nextHref = '#/quick-start';
+    docNav.nextTitle = t('doc.quick-start.title');
+    return;
+  }
+
   if (pageId === 'pack') {
     docNav.previousHref = '#/quick-start';
     docNav.previousTitle = t('doc.quick-start.title');
@@ -2428,13 +2518,13 @@ async function fillShapes(): Promise<void> {
 
 /**
  * Soft blurred Material orbs behind the home hero (Trainable ambient recipe):
- * float translate + spin rotate + blur(48px). Shapes: VerySunny · Clover8Leaf ·
- * Pentagon · Cookie9Sided.
+ * float translate + spin rotate + blur(48px). Home allowlist only.
  */
 async function mountHomeAmbient(): Promise<void> {
   const host = document.getElementById('home-ambient');
   if (!host || host.childElementCount) return;
   const { MATERIAL_SHAPE_SVG } = await import('../src/shapes/index.js');
+  /* Same allowlist family as hero morph / stats (Cookie*Sided · Clover*Leaf…). */
   const slots = [
     { name: 'VerySunny', slot: 'a' },
     { name: 'Clover8Leaf', slot: 'b' },
@@ -3681,6 +3771,7 @@ async function boot(): Promise<void> {
     /* Hero morph ASAP — CSS d keyframes must start on first home paint. */
     void import('./hero-morph/mount.js').then((m) => m.mountHomeHeroMorph());
     void import('./home-stats/mount.js').then((m) => m.mountHomeStats());
+    void import('./home-lift-cta/mount.js').then((m) => m.mountHomeLiftCta());
 
     applyAdaptiveShell();
     containerOn = docStore.get(DocKeys.uiContainer, true);
@@ -3764,6 +3855,10 @@ async function boot(): Promise<void> {
         document.querySelector<HTMLElement>(`.comp-page[data-page="${articleId}"]`) ??
         (articleId === 'home' ? document.getElementById('page-home') : null);
       if (!page) return;
+      if (articleId === 'sponsors') {
+        mountSponsors();
+        return;
+      }
       /* Load k3ux module when visiting a UX page (even before scanning tags). */
       if (K3UX_PAGES.has(articleId) || getDocProduct() === 'k3ux') {
         await ensureK3ux();
@@ -3891,9 +3986,10 @@ async function boot(): Promise<void> {
       e: Event,
     ): { item: Element; dest: (typeof NAV_DESTINATIONS)[number] } | null => {
       const item = navItemFromEvent(e, host);
-      if (!item) return null;
-      const slotted = new Set([...host.querySelectorAll('[slot]')].map((el) => el as Element));
-      const items = [...host.querySelectorAll('k3-nav-item')].filter((el) => !slotted.has(el));
+      if (!item || !isShellPrimaryNavItem(item, host)) return null;
+      const items = [...host.querySelectorAll('k3-nav-item')].filter((el) =>
+        isShellPrimaryNavItem(el, host),
+      );
       const idx = items.indexOf(item as (typeof items)[number]);
       const dest = NAV_DESTINATIONS[idx];
       if (idx < 0 || !dest) return null;
@@ -3906,6 +4002,24 @@ async function boot(): Promise<void> {
 
     const onPrimaryClick = (e: Event): void => {
       const host = e.currentTarget as HTMLElement;
+      const raw = navItemFromEvent(e, host);
+      /* Sponsors — same click → arm → navigate path as href destinations */
+      if (host.id === 'nav-rail' && raw?.id === 'rail-sponsors') {
+        e.preventDefault();
+        e.stopPropagation();
+        closeShellNavMenu();
+        const primary = [...host.querySelectorAll('k3-nav-item')].filter((el) =>
+          isShellPrimaryNavItem(el, host),
+        ) as ShellNavItem[];
+        (host as HTMLElement & { active: number }).active = -1;
+        armRailSponsorsSelection(host, primary);
+        if (location.hash === '#/sponsors') {
+          void navigateDocPage('sponsors', ensurePageComponents).then(() => buildPrimaryNav());
+        } else {
+          location.hash = '#/sponsors';
+        }
+        return;
+      }
       const hit = resolvePrimaryDest(host, e);
       if (!hit) return;
       const { item, dest } = hit;
@@ -3913,6 +4027,7 @@ async function boot(): Promise<void> {
       e.stopPropagation();
       if (dest.href) {
         closeShellNavMenu();
+        syncRailSponsorsActive(false);
         if (location.hash === dest.href || location.hash === dest.href.replace(/^#/, '#')) {
           void navigateDocPage(dest.id, ensurePageComponents).then(() => buildPrimaryNav());
         } else {

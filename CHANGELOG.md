@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Fixed — Packaging & optional k3ux
+
+- `package.json#sideEffects` keeps published component chunks (via `./dist/**/*.js`); `import 'k3ui/components/<tag>'` must not be tree-shaken away
+- Guards: `npm run check:consumer` (run at the end of `npm run build`) bundles a side-effect import of every published component and fails if a component chunk is dropped; `tests/unit/package-side-effects.test.ts` checks every built file that defines an element is covered
+- Playground runs, builds and tests without the sibling `../k3ux`: `@k3ux/*` imports go through an alias when the sibling exists and resolve to empty modules otherwise (`scripts/k3ux-optional.mjs`); with `../k3ux` present, behaviour is unchanged
+- `home-stats` and `qr-generator` tests skip their k3ux parts without the sibling; `scripts/k3ux-sibling.d.mts` types the helper for `tsc`
+- List API table: `target`, `rel`, `download` documented as separate properties; inherited `density` described under `variant`
+
 ### Added — Stepper (`k3-stepper` / `k3-step`)
 
 - Horizontal and vertical headers, linear mode, step states (completed · optional · error · disabled), supporting slot, `next()` / `previous()` / `reset()`, `selected-index`, `k3-change`

@@ -293,4 +293,15 @@ describe('k3-time-picker', () => {
     await new Promise((r) => setTimeout(r, 500));
     expect(el.open).toBe(false);
   });
+
+  it('docked panel width resists light-DOM width:100% (max-content !important)', async () => {
+    const { timePickerStyles } = await import(
+      '../../src/components/pickers/time-picker.styles.js'
+    );
+    const css = (Array.isArray(timePickerStyles) ? timePickerStyles : [timePickerStyles])
+      .map((s) => (s as { cssText?: string }).cssText ?? String(s))
+      .join('\n');
+    expect(css).toContain('width: max-content !important');
+    expect(css).toContain('height: max-content !important');
+  });
 });

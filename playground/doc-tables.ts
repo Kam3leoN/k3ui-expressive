@@ -2129,11 +2129,10 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
   },
   list: {
     properties: [
-      ['variant', "'standard'|'segmented'", 'segmented', 'Continuous vs M3E gaps'],
+      ['variant', "'standard'|'segmented'", 'segmented', 'Continuous vs M3E gaps — inherited density="-1…-3" shortens rows 4 dp per step'],
       ['selection', "'none'|'single'|'multiple'|'switch'", 'none', 'Child selection mode'],
       ['multi', 'boolean', 'false', 'Promotes none / single to multiple'],
       ['hide-selection-indicator', 'boolean', 'false', 'Keep selected surface without chrome (indicator otherwise replaces trailing content)'],
-      ['density', "0|-1|-2|-3|'compact'", 'default', '4 dp shorter rows per step'],
       ['value', 'string|string[]|null', '—', 'Read-only — selected (enabled) value(s)'],
       ['accordion', 'boolean', 'false', 'Exclusive expand'],
       ['embedded', 'boolean', 'false', 'Nested under expandable header'],
@@ -2151,9 +2150,9 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['leading', "''|'icon'|'avatar'|'image'|'video'", "''", 'On k3-list-item — detected from the slot when empty'],
       ['lines', "'one'|'two'|'three'|'auto'", 'auto', 'On k3-list-item'],
       ['href', 'string', "''", 'On k3-list-item — action row (link)'],
-      ['target', 'string', "''", 'On k3-list-item — with href'],
-      ['rel', 'string', "''", 'On k3-list-item — with href'],
-      ['download', 'string', "''", 'On k3-list-item — with href'],
+      ['target', 'string', "''", 'On k3-list-item — link target (with href)'],
+      ['rel', 'string', "''", 'On k3-list-item — link relationship (with href)'],
+      ['download', 'string', '—', 'On k3-list-item — download file name (with href)'],
     ],
     events: [
       ['k3-select-start', '{ item, value, selected }', 'Cancelable — before a selection change'],

@@ -132,14 +132,7 @@
           if (/^#\/?(?!home$)[a-z0-9-]+$/i.test(location.hash)) {
             document.documentElement.setAttribute('data-k3-deeplink', '');
           }
-          /* Hero brand matches saved pack once the title node exists (under the boot veil) */
-          document.addEventListener('DOMContentLoaded', function () {
-            try {
-              var prod = JSON.parse(localStorage.getItem('k3ui.doc.doc.product') || 'null');
-              var title = document.getElementById('home-hero-title');
-              if (title) title.textContent = prod === 'k3ux' ? 'K3ux' : 'K3ui';
-            } catch (e) {}
-          });
+          /* Hero brand uses [data-doc-product] stacks — applyDocProduct toggles visibility. */
         })(document.currentScript.parentElement);
       </script>
       <!-- Desktop / tablet ≥600dp: navigation rail (theme + motion at foot, like m3.material.io) -->
@@ -161,6 +154,16 @@
           <span class="ms" slot="icon">home</span>
           <span data-i18n="playground.rail.home">Accueil</span>
         </k3-extended-fab>
+        <k3-nav-item
+          id="rail-sponsors"
+          class="rail-sponsors"
+          icon="favorite"
+          href="#/sponsors"
+          layout="vertical"
+          data-nav-aux
+          data-i18n-label="playground.nav.sponsors"
+          label="Sponsors"
+        ></k3-nav-item>
         <div slot="trailing" class="rail-foot">
           <k3-chip id="ver" class="rail-ver-chip" aria-label="Version">v0.0.1</k3-chip>
         </div>
@@ -446,14 +449,27 @@
                   <span>v1.2.7</span>
                 </k3-chip>
               </div>
-              <p class="eyebrow" data-i18n="playground.eyebrow">Material 3 Expressive · Web</p>
               <h1 id="home-hero-title" class="hero-title">
-                <span data-doc-product="k3ui">K3ui</span>
-                <span data-doc-product="k3ux" hidden>K3ux</span>
+                <span class="hero-title__stack" data-doc-product="k3ui">
+                  <span class="hero-title__line" data-i18n="playground.hero.title.k3ui"
+                    >Material K3ui</span
+                  >
+                  <span class="hero-title__accent" data-i18n="playground.hero.title.accent"
+                    >Expressive</span
+                  >
+                </span>
+                <span class="hero-title__stack" data-doc-product="k3ux" hidden>
+                  <span class="hero-title__line" data-i18n="playground.hero.title.k3ux"
+                    >Material K3ux</span
+                  >
+                  <span class="hero-title__accent" data-i18n="playground.hero.title.accent"
+                    >Expressive</span
+                  >
+                </span>
               </h1>
               <p class="hero-lead" data-doc-product="k3ui" data-i18n="playground.lead">
-                Shape morph, five sizes, expressive motion — custom elements drop-in (k3ui.js +
-                k3ui.css).
+                Build thoughtful, beautiful interfaces with Material 3 Expressive Web Components.
+                Use them anywhere the web goes.
               </p>
               <p class="hero-lead" data-doc-product="k3ux" hidden data-i18n="playground.lead.k3ux">
                 Decorative UX animations companion — confetti, text effects, holographic cards
@@ -536,18 +552,97 @@
               </k3-button-group>
             </div>
           </header>
-          <p class="catalog-intro" data-doc-product="k3ui" data-i18n="doc.catalog.intro">
-            Browse components — one page per component, like m3.material.io.
-          </p>
-          <p class="catalog-intro" data-doc-product="k3ux" hidden data-i18n="doc.catalog.intro.k3ux">
-            Browse UX animations — optional package so k3ui stays UI-only.
-          </p>
-          <div id="catalog-grid" class="catalog-grid"></div>
+          <section class="component-gallery" aria-labelledby="gallery-title">
+            <div class="gallery-heading">
+              <div>
+                <p class="gallery-eyebrow" data-i18n="playground.gallery.eyebrow">
+                  Explore the library
+                </p>
+                <h2 id="gallery-title" data-i18n="playground.gallery.title">
+                  See the components in action.
+                </h2>
+              </div>
+              <p class="gallery-lead" data-doc-product="k3ui" data-i18n="playground.gallery.lead">
+                Try a component here, then open its showcase for examples and API details.
+              </p>
+              <p
+                class="gallery-lead"
+                data-doc-product="k3ux"
+                hidden
+                data-i18n="playground.gallery.lead.k3ux"
+              >
+                Try a UX animation here, then open its page for examples and API details.
+              </p>
+            </div>
+            <div id="catalog-grid" class="catalog-grid gallery-root"></div>
+          </section>
 
           <!-- Lighthouse scores of this page — playground/lighthouse.ts (loaded on approach) -->
           <div id="lighthouse-root" class="home-lighthouse-root"></div>
 
-          <!-- Sponsors — Chakra-style tiers (prices ÷2) + logo walls + Don min 5€ -->
+          <!-- Footer CTA — Trainable-style lift card · blobs + stars via home-lift-cta/mount.ts -->
+          <section
+            class="home-lift-cta"
+            id="home-lift-cta"
+            aria-labelledby="home-lift-title"
+            data-home-lift-cta
+          >
+            <div class="home-lift-cta__blobs" aria-hidden="true"></div>
+            <div class="home-lift-cta__inner">
+              <h2 id="home-lift-title" class="home-lift-cta__title" data-i18n="playground.home.lift.title">
+                Ready to build?
+              </h2>
+              <p class="home-lift-cta__lead" data-i18n="playground.home.lift.lead">
+                Free, open source, Material 3 for the web.
+              </p>
+              <div class="home-lift-cta__actions">
+                <k3-button variant="filled" size="md" data-nav="quick-start">
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="rocket_launch"
+                    aria-hidden="true"
+                  ></span>
+                  <span data-i18n="playground.home.lift.start">Get started</span>
+                </k3-button>
+                <k3-button variant="filled" size="md" data-nav="pack">
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="inventory_2"
+                    aria-hidden="true"
+                  ></span>
+                  <span data-i18n="playground.home.lift.pack">Pack Builder</span>
+                </k3-button>
+                <a
+                  class="home-lift-cta__gh"
+                  href="https://github.com/Kam3leoN/k3ui-expressive"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <k3-button variant="outlined" size="md">
+                    <span
+                      class="ms notranslate"
+                      translate="no"
+                      lang="zxx"
+                      data-k3-icon="star"
+                      aria-hidden="true"
+                    ></span>
+                    <span data-home-lift-star-label data-i18n="playground.home.lift.star"
+                      >Star on GitHub</span
+                    >
+                    <span class="visually-hidden" data-home-lift-stars hidden></span>
+                  </k3-button>
+                </a>
+              </div>
+            </div>
+          </section>
+        </article>
+
+        <!-- SPONSORS — title + one row of placeholder cells (playground/sponsors.ts) -->
+        <article class="comp-page" data-page="sponsors" id="page-sponsors" hidden>
           <div id="sponsors-root" class="sponsors-root"></div>
         </article>
 

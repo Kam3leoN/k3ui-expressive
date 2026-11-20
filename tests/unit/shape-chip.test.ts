@@ -12,6 +12,7 @@ import {
   shapeChipMetrics,
 } from '../../src/components/actions/shape-chip.specs.js';
 import { IconButtonSizeDp } from '../../src/components/actions/icon-button.specs.js';
+import { shapeChipStyles } from '../../src/components/actions/shape-chip.styles.js';
 import type { K3ShapeChip } from '../../src/components/actions/shape-chip.js';
 
 describe('shape-chip specs', () => {
@@ -89,6 +90,22 @@ describe('k3-shape-chip', () => {
 
     expect(el.hasIcon).toBe(true);
     expect(el.shadowRoot?.querySelector('.shape-icon slot')).toBeTruthy();
+  });
+
+  it('supports filled icons via data-k3-fill=1', async () => {
+    const el = document.createElement('k3-shape-chip') as K3ShapeChip;
+    const icon = document.createElement('span');
+    icon.slot = 'icon';
+    icon.className = 'ms';
+    icon.setAttribute('data-k3-icon', 'star');
+    icon.setAttribute('data-k3-fill', '1');
+    el.append(icon, document.createTextNode('Special'));
+    document.body.append(el);
+    await el.updateComplete;
+
+    expect(el.hasIcon).toBe(true);
+    expect(el.querySelector('[data-k3-fill="1"]')).toBe(icon);
+    expect(shapeChipStyles.cssText).toContain("data-k3-fill='1'");
   });
 
   it('mirrors shape when placement is trailing', async () => {

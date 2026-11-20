@@ -1,18 +1,41 @@
-import { describe, expect, it } from 'vitest';
-import { HERO_MORPH } from '../../playground/hero-morph/data.js';
-import { mountHomeHeroMorph } from '../../playground/hero-morph/mount.js';
+import { afterEach, describe, expect, it } from 'vitest';
+import { HERO_LAYER_START, mountHomeHeroMorph } from '../../playground/hero-morph/mount.js';
+import { HOME_SHAPE_NAMES } from '../../playground/home-shapes.js';
 
 describe('home hero morph', () => {
-  it('HERO_MORPH layers have matching path point counts across keyframes', () => {
-    for (const layer of ['back', 'mid', 'front'] as const) {
-      const frames = HERO_MORPH[layer].values.split(';');
-      expect(frames.length).toBe(9);
-      const counts = frames.map((f) => (f.match(/L/gi) ?? []).length);
-      expect(new Set(counts).size, `${layer} unequal L counts`).toBe(1);
+  afterEach(() => {
+    document.body.innerHTML = '';
+    document.documentElement.removeAttribute('data-k3-reduce-motion');
+  });
+
+  it('layer starts are in the home allowlist', () => {
+    for (const name of Object.values(HERO_LAYER_START)) {
+      expect(HOME_SHAPE_NAMES).toContain(name);
     }
   });
 
-  it('mountHomeHeroMorph injects CSS morph keyframes and shapes', () => {
+  it('depth scales: front < mid < back', () => {
+    document.documentElement.setAttribute('data-k3-reduce-motion', '');
+    document.body.innerHTML = `
+      <style>
+        .home-hero-morph__svg { transform: scale(var(--home-hero-morph-scale, 1)); }
+        .home-hero-morph__shape--back { --home-hero-morph-scale: 1; }
+        .home-hero-morph__shape--mid { --home-hero-morph-scale: 0.9; }
+        .home-hero-morph__shape--front { --home-hero-morph-scale: 0.82; }
+      </style>
+      <div id="home-hero-morph"></div>`;
+    mountHomeHeroMorph();
+    const host = document.getElementById('home-hero-morph')!;
+    const scaleOf = (layer: string) => {
+      const el = host.querySelector(`.home-hero-morph__shape--${layer}`) as HTMLElement;
+      return Number.parseFloat(getComputedStyle(el).getPropertyValue('--home-hero-morph-scale'));
+    };
+    expect(scaleOf('front')).toBeLessThan(scaleOf('mid'));
+    expect(scaleOf('mid')).toBeLessThan(scaleOf('back'));
+  });
+
+  it('mountHomeHeroMorph injects 3 shapes from the allowlist', () => {
+    document.documentElement.setAttribute('data-k3-reduce-motion', '');
     document.body.innerHTML = '<div id="home-hero-morph"></div>';
     mountHomeHeroMorph();
     const host = document.getElementById('home-hero-morph')!;
@@ -20,9 +43,26 @@ describe('home hero morph', () => {
     expect(host.querySelectorAll('svg.home-hero-morph__svg')).toHaveLength(3);
     expect(host.querySelectorAll('.home-hero-morph__animated')).toHaveLength(3);
     expect(host.querySelector('animate')).toBeNull();
-    const style = document.getElementById('home-hero-morph-keyframes');
-    expect(style?.textContent).toContain('@keyframes home-hero-morph-d-back');
-    expect(style?.textContent).toContain('d: path("M');
     expect(host.querySelector('.home-hero-morph__k')?.textContent).toBe('K');
+    for (const el of host.querySelectorAll<HTMLElement>('.home-hero-morph__shape')) {
+      expect(HOME_SHAPE_NAMES).toContain(el.dataset.shape);
+    }
+    expect(host.querySelector('.home-hero-morph__shape--back')?.dataset.shape).toBe(
+      HERO_LAYER_START.back,
+    );
+    expect(host.querySelector('.home-hero-morph__shape--mid')?.dataset.shape).toBe(
+      HERO_LAYER_START.mid,
+    );
+    expect(host.querySelector('.home-hero-morph__shape--front')?.dataset.shape).toBe(
+      HERO_LAYER_START.front,
+    );
+  });
+
+  it('is idempotent', () => {
+    document.documentElement.setAttribute('data-k3-reduce-motion', '');
+    document.body.innerHTML = '<div id="home-hero-morph"></div>';
+    mountHomeHeroMorph();
+    mountHomeHeroMorph();
+    expect(document.querySelectorAll('#home-hero-morph .home-hero-morph__shape')).toHaveLength(3);
   });
 });

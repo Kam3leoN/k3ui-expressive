@@ -124,7 +124,7 @@ export class K3ExpansionPanel extends K3Element {
         role="region"
         aria-labelledby=${this.headerId}
       >
-        <div class="expand-inner">
+        <div class="expand-inner" part="expand-inner">
           <div class="body" part="content">
             <slot name="content"></slot>
             <slot></slot>

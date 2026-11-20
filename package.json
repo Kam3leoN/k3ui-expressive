@@ -52,7 +52,7 @@
   "scripts": {
     "dev": "vite --config playground/vite.config.ts",
     "dev:qr": "vite --config apps/qr-generator/vite.config.ts",
-    "build": "npm run build:lib && npm run build:lazy && npm run build:syntax && npm run build:fonts && npm run build:tokens && npm run manifest && npm run budget:bundle",
+    "build": "npm run build:lib && npm run build:lazy && npm run build:syntax && npm run build:fonts && npm run build:tokens && npm run manifest && npm run budget:bundle && npm run check:consumer",
     "build:lib": "vite build",
     "build:lazy": "vite build --config vite.lazy.config.ts",
     "build:pack": "node scripts/build-pack.mjs",
@@ -62,6 +62,7 @@
     "build:qr": "vite build --config apps/qr-generator/vite.config.ts",
     "build:tokens": "node scripts/export-tokens.mjs",
     "budget:bundle": "node scripts/budget-bundle.mjs",
+    "check:consumer": "node scripts/check-consumer-import.mjs",
     "version:bump": "node scripts/bump-version.mjs",
     "test": "vitest run",
     "test:watch": "vitest",

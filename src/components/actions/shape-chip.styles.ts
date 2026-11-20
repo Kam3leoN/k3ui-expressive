@@ -234,6 +234,15 @@ export const shapeChipStyles = css`
     direction: ltr !important;
   }
 
+  /* Filled Material Symbol — opt-in via data-k3-fill="1" on the slotted icon */
+  .shape-icon ::slotted([data-k3-fill='1']) {
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+  }
+
   .shape-icon ::slotted(svg) {
     width: var(--k3-shape-chip-icon) !important;
     height: var(--k3-shape-chip-icon) !important;

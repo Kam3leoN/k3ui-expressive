@@ -63,12 +63,13 @@ export const datePickerStyles: CSSResultGroup = [
       margin: 0 !important;
       top: var(--k3-tp-top, 0) !important;
       left: var(--k3-tp-left, 0) !important;
-      width: max-content;
-      height: max-content;
+      /* !important — beat light-DOM width:100% (e.g. gallery-demo--fill) */
+      width: max-content !important;
+      height: max-content !important;
       /* Noph docked ≈ 360 + pad — calendar body dominates header */
       --k3-dp-pad: 0.75rem 1rem 0.5rem; /* tighter chrome */
       min-width: 22.5rem; /* 360 */
-      max-width: calc(100vw - 1rem);
+      max-width: min(22.5rem, calc(100vw - 1rem));
       max-height: calc(100vh - 1rem);
       background: var(--k3-sys-color-surface-container-high);
       border-radius: var(--k3-dp-shape-docked);

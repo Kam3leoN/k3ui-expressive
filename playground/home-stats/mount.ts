@@ -1,14 +1,14 @@
 /**
  * Home stats banner — Trainable-style Material shape counters
- * with continuous random morph (VerySunny · Cookie4Sided · Pill · SoftBurst…).
+ * with continuous random morph (home allowlist only).
  */
 import { catalog as k3uiCatalog } from '../../src/registry/catalog.js';
 import {
-  MATERIAL_SHAPE_NAMES,
   MATERIAL_SHAPE_SVG,
   animateMaterialShapeMorph,
   type MaterialShapeName,
 } from '../../src/shapes/index.js';
+import { pickRandomHomeShape } from '../home-shapes.js';
 
 export type HomeStatTone = 'primary' | 'tertiary' | 'secondary' | 'container';
 
@@ -57,8 +57,9 @@ function stackLines(value: string): string[] {
 export async function resolveHomeStatCounts(): Promise<{ k3ui: number; k3ux: number }> {
   const k3ui = k3uiCatalog.length;
   try {
-    const ux = await import('../../../k3ux/src/registry/catalog.js');
-    return { k3ui, k3ux: ux.catalog.length };
+    /* Empty module without ../k3ux (k3uxOptional) → no catalog → 0. */
+    const ux = (await import('@k3ux/registry/catalog.js')) as { catalog?: unknown[] };
+    return { k3ui, k3ux: ux.catalog?.length ?? 0 };
   } catch {
     return { k3ui, k3ux: 0 };
   }
@@ -99,19 +100,9 @@ export function buildHomeStatDefs(counts: { k3ui: number; k3ux: number }): HomeS
   ];
 }
 
-/** Pick a random catalog shape different from `exclude`. */
+/** Pick a random home-allowlisted shape different from `exclude`. */
 export function pickRandomShape(exclude: MaterialShapeName): MaterialShapeName {
-  const pool = MATERIAL_SHAPE_NAMES;
-  if (pool.length < 2) return exclude;
-  let next = pool[Math.floor(Math.random() * pool.length)]!;
-  for (let i = 0; i < 8 && next === exclude; i++) {
-    next = pool[Math.floor(Math.random() * pool.length)]!;
-  }
-  if (next === exclude) {
-    const idx = pool.indexOf(exclude);
-    next = pool[(idx + 1) % pool.length]!;
-  }
-  return next;
+  return pickRandomHomeShape(exclude);
 }
 
 function shapeMarkup(name: MaterialShapeName): string {

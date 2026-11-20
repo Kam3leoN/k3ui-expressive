@@ -19,10 +19,19 @@ export function slotHasContent(slot: HTMLSlotElement): boolean {
  * Light-DOM child for a named slot — works before the first shadow render
  * and after DOM moves (e.g. menu gap elev). Prefer this when `hasSlot` can
  * still be false on first paint.
+ *
+ * Nested empty `<slot name="…" slot="…">` redistributors (e.g. autocomplete →
+ * text-field) do **not** count — otherwise `data-has-leading` pads the field
+ * as if an icon were present.
  */
 export function hasLightSlot(host: HTMLElement, name: string): boolean {
   for (const child of host.children) {
-    if (child instanceof HTMLElement && child.slot === name) return true;
+    if (!(child instanceof HTMLElement) || child.slot !== name) continue;
+    if (child instanceof HTMLSlotElement) {
+      if (slotHasContent(child)) return true;
+      continue;
+    }
+    return true;
   }
   return false;
 }

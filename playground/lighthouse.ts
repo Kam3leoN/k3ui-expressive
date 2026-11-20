@@ -182,6 +182,8 @@ class LighthouseSection {
   private anim = 0;
   private devServer = false;
   private detected = false;
+  /** One realistic k3ux confetti burst when gauges first finish (Lighthouse 100 vibe). */
+  private celebrated = false;
 
   constructor(private readonly root: HTMLElement) {}
 
@@ -287,15 +289,39 @@ class LighthouseSection {
         this.paintGauge(c);
       }
     };
-    if (reduceMotion()) return paint(1);
+    const finish = () => {
+      paint(1);
+      void this.celebrateArrival();
+    };
+    if (reduceMotion()) return finish();
     const t0 = performance.now();
     const duration = 1100;
     const step = (now: number) => {
       const t = (now - t0) / duration;
       paint(t);
       if (t < 1) this.anim = requestAnimationFrame(step);
+      else finish();
     };
     this.anim = requestAnimationFrame(step);
+  }
+
+  /**
+   * First time gauges settle in view — fire k3ux realistic confetti
+   * (same vibe as Lighthouse’s 100 celebration). No-op without sibling k3ux
+   * or when reduced motion is on.
+   */
+  private async celebrateArrival(): Promise<void> {
+    if (this.celebrated || reduceMotion()) return;
+    this.celebrated = true;
+    if (import.meta.env.VITE_K3UX_SIBLING !== '1') return;
+    try {
+      const mod = (await import('@k3ux/components/animation/confetti.js')) as {
+        ConfettiPresets?: { fireRealistic?: () => void };
+      };
+      mod.ConfettiPresets?.fireRealistic?.();
+    } catch {
+      /* sibling missing / optional stub */
+    }
   }
 
   private paintGauge(cat: LighthouseCategory): void {

@@ -87,7 +87,8 @@ test('home product switch is honored when opening Pack via Démarrage (not stuck
 }) => {
   await page.goto('/#/');
   await page.locator('[data-product-switch="k3ui"]').click();
-  await expect(page.locator('#home-hero-title')).toHaveText(/K3ui/i);
+  await expect(page.locator('#home-hero-title')).toContainText(/Material K3ui/i);
+  await expect(page.locator('#home-hero-title .hero-title__accent')).toBeVisible();
   await page.locator('#page-home [data-nav="quick-start"]').click();
   await expect(page.locator('#page-quick-start')).toBeVisible({ timeout: 30_000 });
   await page

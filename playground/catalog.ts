@@ -1081,33 +1081,3 @@ export function catalogSearchHits(
 export function catalogEntryProduct(c: DocComponent): DocProduct {
   return c.product ?? 'k3ui';
 }
-
-/**
- * Home catalog cards markup — shared by the app (search / locale changes) and
- * the build, which prerenders the default locale so the cards are in the first
- * frame (they are the LCP element on wide screens).
- */
-export function catalogGridHtml(t: (key: string) => string, filter = '', emptyHint = ''): string {
-  const q = filter.trim();
-  const blocks: string[] = [];
-  for (const [cat, comps] of componentsByCategory()) {
-    const visible = q
-      ? comps.filter((c) => catalogEntryMatches(c, cat, q, t))
-      : comps;
-    if (!visible.length) continue;
-    blocks.push(`<section class="catalog-cat">
-      <h2 class="catalog-cat-title">${cat}</h2>
-      <div class="catalog-cards">
-        ${visible
-          .map(
-            (c) => `<a class="catalog-card" href="#/${c.id}">
-            <span class="catalog-card-title">${t(c.titleKey)}</span>
-            <span class="catalog-card-blurb">${t(c.blurbKey)}</span>
-          </a>`,
-          )
-          .join('')}
-      </div>
-    </section>`);
-  }
-  return blocks.join('') || `<p class="hint">${emptyHint}</p>`;
-}

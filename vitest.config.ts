@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'node:path';
 import { HAS_K3UX, K3UX_SRC } from './scripts/k3ux-sibling.mjs';
+import { k3uxOptional } from './scripts/k3ux-optional.mjs';
 
 const k3uxEntry = HAS_K3UX
   ? resolve(__dirname, '../k3ux/src/index.ts')
@@ -10,6 +11,8 @@ const fsAllow = [resolve(__dirname)];
 if (HAS_K3UX) fsAllow.push(resolve(__dirname, '../k3ux'));
 
 export default defineConfig({
+  /* Without ../k3ux, `@k3ux/*` imports resolve to empty modules (tests skip). */
+  plugins: [k3uxOptional()],
   define: {
     'import.meta.env.VITE_K3UX_SIBLING': JSON.stringify(HAS_K3UX ? '1' : '0'),
   },

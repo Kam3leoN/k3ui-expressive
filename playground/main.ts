@@ -4,7 +4,7 @@ import './icons.css';
 import '../src/styles/k3ui.scss';
 /* Companion UX FOUC placeholders (charts, sticky audio) — optional sibling package. */
 if (import.meta.env.VITE_K3UX_SIBLING === '1') {
-  void import('../../k3ux/src/styles/k3ux.scss');
+  void import('@k3ux/styles/k3ux.scss');
 }
 /* Holo foils (GPL-3.0 add-on) load with the Card holographic page — app.ts */
 

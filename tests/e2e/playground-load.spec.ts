@@ -28,7 +28,8 @@ test('home: catalog visible at once, every doc page stamped after boot', async (
   await recordShifts(page);
   await page.goto('/');
   /* Prerendered at build in production; the dev server builds it at boot */
-  await expect(page.locator('#catalog-grid .catalog-card').first()).toBeVisible();
+  await expect(page.locator('#catalog-grid .gallery-item').first()).toBeVisible();
+  await expect(page.locator('#gallery-title')).toBeVisible();
   await ready(page, 'home');
   /* Blurred Material orbs (Trainable-style) behind the hero */
   await expect(page.locator('#home-ambient .home-ambient__orb')).toHaveCount(4);
@@ -38,12 +39,34 @@ test('home: catalog visible at once, every doc page stamped after boot', async (
   await expect(page.locator('#home-stats [data-stat="oss"] .home-stat__value')).toContainText(/open source/i);
   await expect(page.locator('.home-hero-banner__chips k3-chip')).toHaveCount(3);
   await expect(page.locator('.home-hero-morph__shape')).toHaveCount(3);
+  await expect(page.locator('#home-lift-cta')).toBeVisible();
+  await expect(page.locator('#home-lift-cta .home-lift-cta__blob')).toHaveCount(2);
+  await expect(page.locator('#home-lift-cta k3-button[data-nav="quick-start"]')).toBeVisible();
+  await expect(page.locator('#home-lift-cta k3-button[data-nav="pack"]')).toBeVisible();
+  /* Sponsors live on their own page — not on home */
+  await expect(page.locator('#page-home #sponsors-root')).toHaveCount(0);
+  /* Rail destinations: Sponsors sits just above the trailing divider */
+  await expect(page.locator('#nav-rail #rail-sponsors')).toBeVisible();
+  await expect(page.locator('#nav-rail #rail-sponsors')).not.toHaveAttribute('slot', 'trailing');
+  await expect(page.locator('#nav-rail .rail-foot #ver')).toBeVisible();
   /* Every doc page was put back once the app booted */
   const empty = await page.evaluate(
     () => [...document.querySelectorAll('.comp-page')].filter((a) => !a.firstElementChild).length,
   );
   expect(empty).toBe(0);
   expect(await page.evaluate(() => (window as unknown as { __cls: number }).__cls)).toBeLessThan(0.05);
+});
+
+test('sponsors page: rail trailing opens the cells grid', async ({ page }) => {
+  await page.goto('/#/sponsors');
+  await ready(page, 'sponsors');
+  await expect(page.locator('#page-sponsors')).toBeVisible();
+  /* 216 − 5×8 − 10×3 = 146 DOM cells · 5 large (3×3) + 10 small (2×2) */
+  await expect(page.locator('#sponsors-root .sponsor-wall-cell')).toHaveCount(146);
+  await expect(page.locator('#sponsors-root .sponsor-wall-cell--mega')).toHaveCount(15);
+  await expect(page.locator('#sponsors-root .sponsor-wall-cell--mega-lg')).toHaveCount(5);
+  await expect(page.locator('#sponsors-root .sponsor-wall-cell--mega-sm')).toHaveCount(10);
+  await expect(page.locator('#rail-sponsors')).toHaveAttribute('active', '');
 });
 
 test('deep link: veil instead of a flash of the home page, no layout shift', async ({ page }) => {

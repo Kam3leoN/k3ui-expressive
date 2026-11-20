@@ -342,4 +342,13 @@ describe('k3-date-picker', () => {
     await new Promise((r) => setTimeout(r, 500));
     expect(el.open).toBe(false);
   });
+
+  it('docked panel width resists light-DOM width:100% (max-content !important)', async () => {
+    const { datePickerStyles } = await import(
+      '../../src/components/pickers/date-picker.styles.js'
+    );
+    const css = datePickerStyles.map((s) => s.cssText ?? String(s)).join('\n');
+    expect(css).toContain('width: max-content !important');
+    expect(css).toContain('height: max-content !important');
+  });
 });

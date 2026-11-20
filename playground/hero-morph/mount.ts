@@ -1,13 +1,33 @@
 /**
  * Home hero morph art — 3 rotating/morphing Material shapes + centre mark (K).
- * Path morph: CSS `d: path()` keyframes (starts on first paint).
+ * Path morph: Material Morph via RAF (home allowlist only).
  * Spin: CSS transform on a DIV wrapper (not the SVG — avoids compositor freeze).
- * Recipe / path data adapted from noph.dev hero.
  */
-import { HERO_MORPH, type HeroMorphLayer } from './data.js';
+import {
+  MATERIAL_SHAPE_SVG,
+  animateMaterialShapeMorph,
+  type MaterialShapeName,
+} from '../../src/shapes/index.js';
+import { pickRandomHomeShape } from '../home-shapes.js';
 
-const STYLE_ID = 'home-hero-morph-keyframes';
 const LAYERS = ['back', 'mid', 'front'] as const;
+type Layer = (typeof LAYERS)[number];
+
+/** Distinct starting shapes so the stack reads as three different forms. */
+export const HERO_LAYER_START: Record<Layer, MaterialShapeName> = {
+  back: 'VerySunny',
+  mid: 'Cookie9Sided',
+  front: 'Pill',
+};
+
+/** Morph duration per step — staggered so layers drift out of sync. */
+const LAYER_MORPH_MS: Record<Layer, number> = {
+  back: 4200,
+  mid: 3300,
+  front: 2700,
+};
+
+const HOLD_MS = 280;
 
 function escapeAttr(value: string): string {
   return value
@@ -16,51 +36,16 @@ function escapeAttr(value: string): string {
     .replace(/</g, '&lt;');
 }
 
-function escapeCssPath(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+function prefersReducedMotion(): boolean {
+  return (
+    document.documentElement.hasAttribute('data-k3-reduce-motion') ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 }
 
-function keyframesCss(name: string, data: HeroMorphLayer): string {
-  const frames = data.values.split(';');
-  const times = data.keyTimes.split(';').map(Number);
-  const steps = frames
-    .map((d, i) => {
-      const t = times[i] ?? i / Math.max(1, frames.length - 1);
-      const pct = `${(t * 100).toFixed(4).replace(/\.?0+$/, '')}%`;
-      return `  ${pct} { d: path("${escapeCssPath(d)}"); }`;
-    })
-    .join('\n');
-  return `@keyframes ${name} {\n${steps}\n}`;
-}
-
-function ensureMorphStyles(): void {
-  if (document.getElementById(STYLE_ID)) return;
-
-  const parts: string[] = [
-    `/* Hero morph — CSS d animation (instant start; SMIL begin=0s misses late inject). */`,
-  ];
-  for (const layer of LAYERS) {
-    const data = HERO_MORPH[layer];
-    const kf = `home-hero-morph-d-${layer}`;
-    parts.push(keyframesCss(kf, data));
-    parts.push(`.home-hero-morph__shape--${layer} .home-hero-morph__animated {
-  animation: ${kf} ${data.dur} cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}`);
-  }
-  parts.push(`@media (prefers-reduced-motion: reduce) {
-  .home-hero-morph__animated { animation: none !important; }
-}
-html[data-k3-reduce-motion] .home-hero-morph__animated { animation: none !important; }`);
-
-  const style = document.createElement('style');
-  style.id = STYLE_ID;
-  style.textContent = parts.join('\n');
-  document.head.append(style);
-}
-
-function morphSvgMarkup(data: HeroMorphLayer): string {
-  const d = escapeAttr(data.still);
-  return `<svg xmlns="http://www.w3.org/2000/svg" class="home-hero-morph__svg" viewBox="0 0 48 48" aria-hidden="true">
+function morphSvgMarkup(name: MaterialShapeName): string {
+  const d = escapeAttr(MATERIAL_SHAPE_SVG[name]);
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="home-hero-morph__svg" viewBox="0 0 1 1" aria-hidden="true">
   <path class="home-hero-morph__animated" fill="currentColor" d="${d}" />
   <path class="home-hero-morph__still" fill="currentColor" d="${d}" />
 </svg>`;
@@ -73,11 +58,64 @@ function centreMark(): HTMLDivElement {
   return wrap;
 }
 
-function layerSpin(layer: (typeof LAYERS)[number], data: HeroMorphLayer): HTMLDivElement {
+function layerSpin(layer: Layer, start: MaterialShapeName): HTMLDivElement {
   const spin = document.createElement('div');
   spin.className = `home-hero-morph__shape home-hero-morph__shape--${layer}`;
-  spin.innerHTML = morphSvgMarkup(data);
+  spin.dataset.shape = start;
+  spin.innerHTML = morphSvgMarkup(start);
   return spin;
+}
+
+let stopMorph: (() => void) | null = null;
+
+function wireMorph(host: HTMLElement): () => void {
+  if (prefersReducedMotion()) return () => undefined;
+
+  const shapes = [...host.querySelectorAll<HTMLElement>('.home-hero-morph__shape')];
+  const controllers: AbortController[] = [];
+  const timers: number[] = [];
+  let cancelled = false;
+
+  const wait = (ms: number): Promise<void> =>
+    new Promise((resolve) => {
+      const id = window.setTimeout(resolve, ms);
+      timers.push(id);
+    });
+
+  const runLayer = async (el: HTMLElement, layer: Layer, staggerMs: number): Promise<void> => {
+    await wait(staggerMs);
+    let current =
+      (el.dataset.shape as MaterialShapeName | undefined) ?? HERO_LAYER_START[layer];
+    while (!cancelled && !prefersReducedMotion()) {
+      const path = el.querySelector<SVGPathElement>('.home-hero-morph__animated');
+      if (!path) return;
+      const to = pickRandomHomeShape(current);
+      const go = new AbortController();
+      controllers.push(go);
+      await animateMaterialShapeMorph({
+        from: current,
+        to,
+        duration: LAYER_MORPH_MS[layer],
+        signal: go.signal,
+        onFrame: (d) => path.setAttribute('d', d),
+      });
+      if (cancelled || go.signal.aborted) return;
+      current = to;
+      el.dataset.shape = to;
+      await wait(HOLD_MS);
+    }
+  };
+
+  shapes.forEach((el, i) => {
+    const layer = (LAYERS[i] ?? 'front') as Layer;
+    void runLayer(el, layer, 120 + i * 220);
+  });
+
+  return () => {
+    cancelled = true;
+    for (const id of timers) window.clearTimeout(id);
+    for (const c of controllers) c.abort();
+  };
 }
 
 /** Mount morphing 3-shape stack into `#home-hero-morph` (idempotent). */
@@ -85,7 +123,8 @@ export function mountHomeHeroMorph(): void {
   const host = document.getElementById('home-hero-morph');
   if (!host || host.childElementCount) return;
 
-  ensureMorphStyles();
-  const layers = LAYERS.map((layer) => layerSpin(layer, HERO_MORPH[layer]));
+  stopMorph?.();
+  const layers = LAYERS.map((layer) => layerSpin(layer, HERO_LAYER_START[layer]));
   host.replaceChildren(...layers, centreMark());
+  stopMorph = wireMorph(host);
 }

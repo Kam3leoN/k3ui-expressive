@@ -203,7 +203,7 @@ describe.skipIf(!hasK3ux)('k3-qr-generator', () => {
   });
 });
 
-describe('k3-select inside a Lit template', () => {
+describe.skipIf(!hasK3ux)('k3-select inside a Lit template', () => {
   it('shows the option label without Lit part markers', async () => {
     const gen = document.createElement('k3-qr-generator') as K3QrGenerator;
     gen.type = 'wifi';

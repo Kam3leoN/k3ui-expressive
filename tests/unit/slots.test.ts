@@ -23,4 +23,14 @@ describe('hasLightSlot / hasNamedSlot', () => {
     host.append(wrap);
     expect(hasLightSlot(host, 'icon')).toBe(false);
   });
+
+  it('ignores empty redistributed <slot slot="…"> (autocomplete → text-field)', () => {
+    const host = document.createElement('div');
+    const redistributor = document.createElement('slot');
+    redistributor.name = 'leading-icon';
+    redistributor.slot = 'leading-icon';
+    host.append(redistributor);
+    expect(hasLightSlot(host, 'leading-icon')).toBe(false);
+    expect(hasNamedSlot(host, 'leading-icon')).toBe(false);
+  });
 });

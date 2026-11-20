@@ -119,4 +119,12 @@ describe('k3-autocomplete', () => {
 
     expect(el.value).toBe('A');
   });
+
+  it('does not reserve leading-icon padding when no icon is slotted', async () => {
+    const el = await mount(`<k3-autocomplete label="Fruit"></k3-autocomplete>`);
+    await el.updateComplete;
+    const tf = field(el);
+    await (tf as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete;
+    expect(tf.hasAttribute('data-has-leading')).toBe(false);
+  });
 });

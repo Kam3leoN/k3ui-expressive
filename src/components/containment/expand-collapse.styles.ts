@@ -22,6 +22,13 @@ export const expandCollapseStyles = css`
     overflow: hidden;
     min-height: 0;
   }
+  /*
+   * Once open, allow nested floaters (FAB menu, menus, tooltips) to escape.
+   * Closed stays clipped so the 0fr collapse still hides overflow.
+   */
+  .expand.open > .expand-inner {
+    overflow: visible;
+  }
 
   .chevron {
     display: inline-flex;

@@ -1,8 +1,11 @@
 import type { K3NavItem } from './nav-item.js';
 
-/** Slotted destinations under a nav host (bar / rail). */
+/**
+ * Destinations under a nav host (bar / rail).
+ * `data-nav-aux` items are managed outside `host.active` (e.g. shell Sponsors).
+ */
 export function queryNavItems(host: HTMLElement): K3NavItem[] {
-  return [...host.querySelectorAll<K3NavItem>('k3-nav-item')];
+  return [...host.querySelectorAll<K3NavItem>('k3-nav-item:not([data-nav-aux])')];
 }
 
 /** Resolve the clicked `k3-nav-item` from a composed event path. */
