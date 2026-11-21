@@ -17,7 +17,7 @@ const CASE_FRAME =
   '.demo-frame--cases, .demo-frame--demo, .demo-frame--icon-button, .demo-frame--fab';
 
 const SKIP_HOST =
-  '.color-tone-row, .color-role-swatch, .token-scale, .catalog-grid, .shell-sheet-link, [data-demo-enhance="off"]';
+  '.color-tone-row, .color-role-swatch, .token-scale, .shell-sheet-link, [data-demo-enhance="off"]';
 
 const SKIP_PAGE =
   '[data-page="home"], [data-page="quick-start"], [data-page^="color-"], [data-page="elevation"], [data-page="motion"], [data-page="shapes"], [data-page="spacing"], [data-page="typography"]';

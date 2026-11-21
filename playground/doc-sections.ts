@@ -759,6 +759,18 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     a11y: 'doc.badge.a11y',
     versions: { na: 'Single overlay — dot vs large are options' },
   },
+  status: {
+    theming: [
+      ['variants', 'success · error · warning · info · neutral', 'Tone'],
+      ['color tokens', '--k3-status-* (+ -dark)', 'Override tones / derived text·bg'],
+      ['icon', 'leading · trailing · none', 'Circle placement'],
+    ],
+    keyboard: { na: 'Non-interactive status — no key handling' },
+    focus: 'doc.status.focus',
+    motion: { na: 'Color transition short2 — none under reduced motion' },
+    a11y: 'doc.status.a11y',
+    versions: { na: 'Single chip — boolean vs named variants are options' },
+  },
   'countdown': {
     theming: { na: "Pending gabarit migration" },
     keyboard: { na: "Pending gabarit migration" },

@@ -3,12 +3,14 @@ import { css, type CSSResultGroup } from 'lit';
 /**
  * k3-nav-rail styles — M3 Expressive.
  *
- * Motion (scheme-aware via `--k3-sys-motion-easing-spatial|effects`):
- * - **spatial default** — width, radii, toggle/FAB center↔start, FAB morph
+ * Motion:
+ * - **expand** — expressive spatial overshoot (Android rail ChangeBounds)
+ * - **collapse** — emphasized decelerate (no bounce)
  * - **effects default** — opacities (labels / crossfades)
  *
- * Compact resting: toggle + FAB centered with destinations.
- * Expanded / mid-width: start-anchored (same spring as width — not after settle).
+ * Collapsed baseline = everything centered in the compact content track.
+ * Expand keeps that same X (offsets stay on the compact track) so icons do
+ * not slide — the rail grows and row labels reveal beside the pill.
  * Modal chrome only while expanded (compact = straight end edge).
  *
  * @see https://m3.material.io/components/navigation-rail/guidelines
@@ -24,11 +26,17 @@ export const navRailStyles: CSSResultGroup = css`
     width: var(--k3-nav-rail-width);
     --k3-nav-rail-compact: 6.5rem; /* 104 — fits “Containment” @ 12px */
     --k3-nav-rail-width: var(--k3-nav-rail-compact);
-    --k3-nav-rail-content: calc(var(--k3-nav-rail-compact) - 1rem); /* pad 0.5×2 */
+    --k3-nav-rail-pad-inline: 0.5rem;
+    --k3-nav-rail-content: calc(
+      var(--k3-nav-rail-compact) - 2 * var(--k3-nav-rail-pad-inline)
+    );
     --k3-nav-rail-fab-size: 3.5rem; /* 56 */
     --k3-nav-rail-fab-max: 17.5rem; /* 280 — M3 extended label cap */
     --k3-nav-rail-toggle-size: var(--k3-sys-touch-target, 3rem); /* 48 */
-    /* Center offsets in the compact content track (eased ↔ 0 when expanded) */
+    /*
+     * Compact-track centering — identical collapsed ↔ expanded (expand
+     * baseline). Not recalculated on the wide rail, so icons stay put.
+     */
     --k3-nav-rail-center-toggle: max(
       0px,
       calc((var(--k3-nav-rail-content) - var(--k3-nav-rail-toggle-size)) / 2)
@@ -37,10 +45,18 @@ export const navRailStyles: CSSResultGroup = css`
       0px,
       calc((var(--k3-nav-rail-content) - var(--k3-nav-rail-fab-size)) / 2)
     );
+    /*
+     * M3 Expressive NavigationRail (Android):
+     * collapsed item min height 64dp · item spacing 4dp
+     * @see https://github.com/material-components/material-components-android/blob/master/docs/components/NavigationRail.md
+     */
+    --k3-nav-rail-item-gap: var(--k3-sys-spacing-space50, 0.25rem); /* 4dp */
+    --k3-nav-rail-item-min-height: 4rem; /* 64dp collapsed */
     --k3-nav-rail-motion: var(--k3-sys-motion-duration-spatial-default, 500ms);
+    /* Collapse destination — decelerate, no overshoot */
     --k3-nav-rail-ease: var(
-      --k3-sys-motion-easing-spatial,
-      var(--k3-sys-motion-easing-expressive-spatial)
+      --k3-sys-motion-easing-emphasized-decelerate,
+      cubic-bezier(0.05, 0.7, 0.1, 1)
     );
     --k3-nav-rail-effects: var(--k3-sys-motion-duration-effects-default, 200ms)
       var(
@@ -54,6 +70,17 @@ export const navRailStyles: CSSResultGroup = css`
   /* Expanded width — size / expanded / deprecated mode */
   :host(:is([size='large'], [expanded], [mode='expanded'])) {
     --k3-nav-rail-width: 16rem;
+    /* Expanded rows are the 56dp indicator height (spacing still 4dp) */
+    --k3-nav-rail-item-min-height: 3.5rem; /* 56dp */
+    /*
+     * Expand destination — Android expressive spatial overshoot
+     * PathInterpolator(0.38, 1.21, 0.22, 1). CSS uses the post-change
+     * transition, so expand bounces; collapse stays on compact decelerate.
+     */
+    --k3-nav-rail-ease: var(
+      --k3-sys-motion-easing-expressive-spatial,
+      cubic-bezier(0.38, 1.21, 0.22, 1)
+    );
   }
 
   .rail {
@@ -66,7 +93,7 @@ export const navRailStyles: CSSResultGroup = css`
     height: 100%;
     min-height: 100%;
     margin: 0;
-    padding: 0.75rem 0.5rem 1rem;
+    padding: 0.75rem var(--k3-nav-rail-pad-inline) 1rem;
     overflow: visible; /* foot tooltips may paint into the content pane */
     background: var(--k3-nav-rail-bg, var(--k3-sys-color-surface));
     border: 0;
@@ -122,7 +149,7 @@ export const navRailStyles: CSSResultGroup = css`
     box-shadow: var(--k3-nav-rail-elevation, var(--k3-sys-elevation-level1));
   }
 
-  /* —— Toggle (menu_open) —— */
+  /* —— Toggle (menu_open) —— centered on compact track (expand baseline) */
   .toggle {
     display: none;
     place-items: center;
@@ -142,13 +169,9 @@ export const navRailStyles: CSSResultGroup = css`
     cursor: pointer;
     font: inherit;
     perspective: 2.5rem;
-    transition: margin-inline-start var(--k3-nav-rail-motion) var(--k3-nav-rail-ease);
   }
   :host([collapsible]) .toggle {
     display: grid;
-  }
-  :host(:is([size='large'], [expanded], [mode='expanded'])) .toggle {
-    margin-inline-start: 0.25rem;
   }
 
   .toggle-icon {
@@ -178,7 +201,7 @@ export const navRailStyles: CSSResultGroup = css`
 
   /*
    * Header FAB — single k3-extended-fab[data-rail-collapsed] morph.
-   * Center↔start via padding on this host (synced with width spring).
+   * Centered on compact track (same X collapsed ↔ expanded).
    */
   .fab {
     display: none;
@@ -188,7 +211,6 @@ export const navRailStyles: CSSResultGroup = css`
     min-height: var(--k3-nav-rail-fab-size);
     padding-inline-start: var(--k3-nav-rail-center-fab);
     padding-inline-end: 0;
-    transition: padding-inline-start var(--k3-nav-rail-motion) var(--k3-nav-rail-ease);
   }
   .fab.has {
     display: grid;
@@ -196,9 +218,6 @@ export const navRailStyles: CSSResultGroup = css`
     grid-template-rows: auto;
     justify-items: start;
     align-items: center;
-  }
-  :host(:is([size='large'], [expanded], [mode='expanded'])) .fab {
-    padding-inline-start: 0;
   }
 
   ::slotted(k3-fab),
@@ -234,12 +253,12 @@ export const navRailStyles: CSSResultGroup = css`
     flex-shrink: 0;
   }
 
-  /* Leading destinations */
+  /* Leading destinations — M3E itemSpacing 4dp */
   .destinations {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 0.25rem;
+    gap: var(--k3-nav-rail-item-gap);
     flex: 1;
     min-width: 0;
     min-height: 0;

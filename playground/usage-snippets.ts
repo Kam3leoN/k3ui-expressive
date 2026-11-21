@@ -587,6 +587,15 @@ document.getElementById("dlg")?.show?.();`,
     html: `<k3-badge value="3">${MS('notifications')}</k3-badge>`,
     css: defaultCss,
   },
+  status: {
+    components: ['k3-status'],
+    html: `<k3-status status="false" value="32.3%"></k3-status>
+<k3-status status="true" value="67.7%"></k3-status>
+<k3-status status="warning" value="12 pending"></k3-status>
+<k3-status status="success" value="Off" disabled></k3-status>
+<k3-status status="success" value="Premium" position="trailing"
+  color="#111827" text-color="#111827" bg-color="#fde68a" icon-color="#fde68a"></k3-status>`,
+  },
   kbd: {
     components: ['k3-kbd'],
     html: `<k3-kbd keys="Ctrl+K"></k3-kbd>

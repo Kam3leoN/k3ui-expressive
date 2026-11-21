@@ -4,6 +4,7 @@ import { K3Theme } from '../../src/components/theme/theme.js';
 import {
   DEFAULT_THEME,
   THEME_SEEDS,
+  THEME_STORE_KEYS,
   defaultThemeSeed,
   isThemeAwayFromDefaults,
 } from '../../playground/theme-defaults.js';
@@ -14,6 +15,11 @@ describe('default theme — Indigo · 2025 · tonalspot', () => {
     expect(DEFAULT_THEME.variant).toBe('tonalspot');
     expect(DEFAULT_THEME.spec).toBe('2025');
     expect(DEFAULT_THEME.mode).toBe('light');
+  });
+
+  it('THEME_STORE_KEYS includes secondarySeed for CMF without changing defaults', () => {
+    expect(THEME_STORE_KEYS).toContain('secondarySeed');
+    expect(DEFAULT_THEME.spec).toBe('2025');
   });
 
   it('themeCssVars() with no args matches indigo tonalspot 2025 light', () => {

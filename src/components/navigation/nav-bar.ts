@@ -7,6 +7,7 @@ import {
   findMarkedNavIndex,
   navItemFromEvent,
   queryNavItems,
+  queryNavItemsForLayout,
   type ArmNavHandle,
 } from './nav-selection.js';
 
@@ -71,7 +72,7 @@ export class K3NavBar extends K3Element {
   private arm: ArmNavHandle | null = null;
 
   private syncLayout(): void {
-    for (const el of queryNavItems(this)) el.layout = this.layout;
+    for (const el of queryNavItemsForLayout(this)) el.layout = this.layout;
   }
 
   private applyActive(animate: boolean): void {

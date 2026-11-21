@@ -66,11 +66,6 @@ import {
   iconForComponent,
 } from './nav-destinations.js';
 import { mountMaterialSymbols } from './material-symbols.js';
-import {
-  showcaseGalleryHtml,
-  showcaseTagsInHtml,
-  wireShowcaseInteractions,
-} from './showcase/gallery.js';
 import { docStore, DocKeys } from './doc-store.js';
 import { ariaTabs, installTabKeyboard, selectTab } from './aria-tabs.js';
 import {
@@ -85,26 +80,17 @@ import {
 import { mountSponsors } from './sponsors.js';
 import { enhanceAllDemos } from './demo-enhance.js';
 import { wireNavRailLab } from './nav-rail-lab.js';
+import {
+  isShowcasePage,
+  mountShowcaseDoc,
+  showcaseRequiredTags,
+  unmountShowcaseDoc,
+} from './showcase-mount.js';
 /* API tables + Usage / doc sections — component / style pages → own chunks */
 const loadDocTables = () => import('./doc-tables.js');
 
-/** Home: Lighthouse gauges — module loaded when the section nears the viewport. */
-function watchLighthouse(): void {
-  const root = document.getElementById('lighthouse-root');
-  if (!root) return;
-  const load = () => void import('./lighthouse.js').then((m) => m.mountLighthouse(root));
-  if (typeof IntersectionObserver !== 'function') return load();
-  const io = new IntersectionObserver(
-    (entries) => {
-      if (!entries.some((e) => e.isIntersecting)) return;
-      io.disconnect();
-      load();
-    },
-    { rootMargin: '600px 0px' },
-  );
-  io.observe(root);
-}
 import {
+  coercePlaygroundLocale,
   isPlaygroundLocale,
   localeMenuEntry,
   mountLocaleFlags,
@@ -138,7 +124,7 @@ async function primeSoundFx(): Promise<void> {
 
 /**
  * Shell-critical custom elements — enough for first paint (home + chrome).
- * Remaining catalog tags register after idle so LCP is not blocked by demos.
+ * Remaining catalog tags register on demand per doc page.
  */
 const SHELL_COMPONENTS = [
   'k3-theme',
@@ -158,6 +144,7 @@ const SHELL_COMPONENTS = [
   'k3-search',
   'k3-chip',
   'k3-chip-set',
+  'k3-status',
   'k3-split-button',
   'k3-top-app-bar',
   'k3-button',
@@ -193,10 +180,20 @@ let shellSnowOn = docStore.get<boolean>(DocKeys.uiSnow, false) === true;
 /** Shell sparkle trail (settings) — never drives #demo-sparkle-mouse on its page. */
 let shellSparkleOn = docStore.get<boolean>(DocKeys.uiSparkle, false) === true;
 /** M3 motion scheme — Expressive (spring) default · Standard (utilitarian). */
-/** Material color spec — 2025 (M3 Expressive) or 2021 (legacy hues). */
-let colorSpec: ColorSpecVersion = (() => {
-  const saved = docStore.get<string>(DocKeys.themeSpec, DEFAULT_THEME.spec);
-  return saved === '2021' ? '2021' : '2025';
+/** Material color spec — 2025 (default) · 2026 (CMF) · 2021 (legacy). */
+function parseColorSpec(raw: string | null | undefined): ColorSpecVersion {
+  if (raw === '2021' || raw === '2026') return raw;
+  return '2025';
+}
+
+let colorSpec: ColorSpecVersion = parseColorSpec(
+  docStore.get<string>(DocKeys.themeSpec, DEFAULT_THEME.spec),
+);
+
+/** Second seed for MCU SchemeCmf (Spec 2026). */
+let secondarySeed: string = (() => {
+  const saved = normalizeHex(docStore.get<string>(DocKeys.themeSecondarySeed, ''));
+  return saved || THEME_SEEDS[2] || '#8B1A4A';
 })();
 
 let motionScheme: MotionScheme = (() => {
@@ -213,7 +210,45 @@ const COLOR_VARIANTS: readonly ColorVariant[] = [
   'neutral',
   'rainbow',
   'fruitsalad',
+  'cmf',
 ] as const;
+
+/**
+ * Variants that MCU actually keeps for each spec (`maybeFallbackSpecVersion`):
+ * - 2026 → CMF only
+ * - 2025 → tonalspot / vibrant / expressive / neutral
+ * - 2021 → everything except CMF (legacy + expressive family at 2021)
+ */
+const VARIANTS_BY_SPEC: Record<ColorSpecVersion, readonly ColorVariant[]> = {
+  '2026': ['cmf'],
+  '2025': ['tonalspot', 'vibrant', 'expressive', 'neutral'],
+  '2021': [
+    'tonalspot',
+    'vibrant',
+    'fidelity',
+    'expressive',
+    'content',
+    'monochrome',
+    'neutral',
+    'rainbow',
+    'fruitsalad',
+  ],
+};
+
+function variantsForSpec(spec: ColorSpecVersion): readonly ColorVariant[] {
+  return VARIANTS_BY_SPEC[spec] ?? VARIANTS_BY_SPEC['2025'];
+}
+
+function isVariantValidForSpec(variant: ColorVariant, spec: ColorSpecVersion): boolean {
+  return variantsForSpec(spec).includes(variant);
+}
+
+/** Prefer current variant if still valid for `spec`, else first allowed (CMF / tonalspot). */
+function coerceVariantForSpec(variant: ColorVariant, spec: ColorSpecVersion): ColorVariant {
+  const allowed = variantsForSpec(spec);
+  if (allowed.includes(variant)) return variant;
+  return allowed[0] ?? DEFAULT_THEME.variant;
+}
 
 function parseColorVariant(raw: string | null | undefined): ColorVariant {
   return COLOR_VARIANTS.includes(raw as ColorVariant)
@@ -225,8 +260,9 @@ function parseContrast(raw: string | null | undefined): ContrastLevel {
   return raw === 'medium' || raw === 'high' ? raw : 'default';
 }
 
-let colorVariant: ColorVariant = parseColorVariant(
-  docStore.get<string>(DocKeys.themeVariant, DEFAULT_THEME.variant),
+let colorVariant: ColorVariant = coerceVariantForSpec(
+  parseColorVariant(docStore.get<string>(DocKeys.themeVariant, DEFAULT_THEME.variant)),
+  colorSpec,
 );
 let contrastLevel: ContrastLevel = parseContrast(
   docStore.get<string>(DocKeys.themeContrast, DEFAULT_THEME.contrast),
@@ -442,7 +478,6 @@ function wirePinSuccessDemo(): void {
 function applyPlaygroundI18n(): void {
   /* Ensure sponsors DOM exists before translating data-i18n nodes */
   mountSponsors();
-  watchLighthouse();
   document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
     const key = el.getAttribute('data-i18n');
     if (!key || el.children.length > 0) return;
@@ -506,10 +541,10 @@ function applyPlaygroundI18n(): void {
   syncSettingsSheet();
   buildPrimaryNav();
   buildNavMenu();
-  buildCatalogGrid();
   fillScrollbarDemo();
   void import('./home-stats/mount.js').then((m) => m.syncHomeStatsI18n());
   void import('./home-lift-cta/mount.js').then((m) => m.syncHomeLiftCtaI18n());
+  void import('./home-about/mount.js').then((m) => m.syncHomeAboutI18n());
   const page = articlePageId(currentPageId());
   syncDocNav(page);
   if (page === 'color-roles') renderColorRoles();
@@ -530,11 +565,12 @@ function fillScrollbarDemo(): void {
 }
 
 function currentLocale(): PlaygroundLocale {
-  /* Prefer stored menu selection (region tags like nl-BE) over i18n language. */
+  /* Prefer stored menu selection; coerce legacy region tags (nl-BE → …). */
   const stored = docStore.get(DocKeys.uiLocale, 'fr') as string;
-  if (isPlaygroundLocale(stored)) return stored;
-  const fromI18n = window.K3UI?.i18n.locale as string | undefined;
-  return isPlaygroundLocale(fromI18n ?? '') ? (fromI18n as PlaygroundLocale) : 'fr';
+  const fromStore = coercePlaygroundLocale(stored);
+  if (fromStore) return fromStore;
+  const fromI18n = coercePlaygroundLocale(window.K3UI?.i18n.locale as string | undefined ?? '');
+  return fromI18n ?? 'fr';
 }
 
 /** Locale rows live in the split trail menu (shadow-adopted). */
@@ -627,6 +663,8 @@ function syncSettingsSheet(): void {
     syncSettingsToggle(el, el.getAttribute('data-settings-variant') === colorVariant);
   });
 
+  syncSecondarySeedUi();
+
   document.querySelectorAll<HTMLElement>('[data-settings-contrast]').forEach((el) => {
     syncSettingsToggle(el, el.getAttribute('data-settings-contrast') === contrastLevel);
   });
@@ -706,10 +744,60 @@ function resetThemeToDefaults(): void {
   colorVariant = DEFAULT_THEME.variant;
   contrastLevel = DEFAULT_THEME.contrast;
   colorSpec = DEFAULT_THEME.spec;
+  secondarySeed = THEME_SEEDS[2] || '#8B1A4A';
   applyThemePersist();
   syncColorSeedInputs(defaultThemeSeed());
   syncColorVariantButtons();
   syncColorModeButtons();
+  syncSecondarySeedUi();
+}
+
+/** Show only MCU-valid variants for the current Spec. */
+function syncVariantAvailabilityForSpec(): void {
+  const allowed = new Set(variantsForSpec(colorSpec));
+  document
+    .querySelectorAll<HTMLElement>('[data-settings-variant], [data-color-variant]')
+    .forEach((el) => {
+      const key =
+        el.getAttribute('data-settings-variant') ?? el.getAttribute('data-color-variant') ?? '';
+      const on = allowed.has(key as ColorVariant);
+      el.hidden = !on;
+      if (!on && 'selected' in el) (el as HTMLElement & { selected?: boolean }).selected = false;
+    });
+}
+
+/** Show / hide CMF secondary seed controls and sync their values. */
+function syncSecondarySeedUi(): void {
+  syncVariantAvailabilityForSpec();
+  const show = colorVariant === 'cmf' && colorSpec === '2026';
+  const hex = normalizeHex(secondarySeed) ?? secondarySeed;
+  document.querySelectorAll<HTMLElement>('.color-secondary-seed-row').forEach((row) => {
+    row.hidden = !show;
+  });
+  const settingsRow = document.getElementById('settings-secondary-seed-row');
+  if (settingsRow) settingsRow.hidden = !show;
+  const settingsSwatch = document.getElementById(
+    'settings-secondary-seed',
+  ) as HTMLInputElement | null;
+  if (settingsSwatch && document.activeElement !== settingsSwatch) settingsSwatch.value = hex;
+  document.querySelectorAll<HTMLInputElement>('.color-secondary-seed-input').forEach((input) => {
+    if (document.activeElement === input) return;
+    input.value = hex;
+  });
+  document.querySelectorAll<HTMLInputElement>('.color-secondary-hex-input').forEach((input) => {
+    if (document.activeElement === input) return;
+    input.value = hex;
+    input.classList.remove('is-invalid');
+  });
+}
+
+function applySecondarySeedHex(hex: string): void {
+  const next = normalizeHex(hex);
+  if (!next) return;
+  secondarySeed = next;
+  docStore.set(DocKeys.themeSecondarySeed, next);
+  syncSecondarySeedUi();
+  applyThemePersist();
 }
 
 /** MD2 hue ladder — each family at tone 500 (Material Design 2014 order). */
@@ -1972,9 +2060,6 @@ async function openShellNavMenu(
   await shellMenuLock;
 }
 
-/** Markup currently in #catalog-grid (skips identical rebuilds — locale sync runs it often). */
-let catalogHtml: string | null = null;
-
 /** Doc pages whose CEs live in companion package `k3ux`. */
 const K3UX_PAGES = new Set([
   'confetti',
@@ -2105,10 +2190,6 @@ function applyDocProduct(product: DocProduct, opts?: { navigateHome?: boolean })
   syncProductSwitchButtons(product);
   /* Hero title uses [data-doc-product] stacks — do not wipe children with textContent. */
   if (changed) {
-    catalogHtml = null;
-    const grid = document.getElementById('catalog-grid');
-    if (grid) delete grid.dataset.prerendered;
-    buildCatalogGrid();
     buildPrimaryNav();
     buildNavMenu();
     if (currentPageId() === 'pack') void ensurePackPageMounted(true);
@@ -2145,37 +2226,6 @@ function wireProductSwitch(): void {
       apply(btn.dataset.productSwitch as DocProduct | undefined);
     });
   });
-}
-
-/** Register live demo CEs + wire snackbar/dialog/tap in the home gallery. */
-async function hydrateShowcaseGallery(grid: HTMLElement): Promise<void> {
-  const tags = [
-    'k3-accordion',
-    'k3-expansion-panel',
-    ...showcaseTagsInHtml(grid.innerHTML),
-    ...collectPageK3Tags(grid),
-  ];
-  await registerPresentK3Tags([...new Set(tags)]);
-  wireShowcaseInteractions(grid);
-}
-
-function buildCatalogGrid(filter = ''): void {
-  const grid = document.getElementById('catalog-grid');
-  if (!grid) return;
-  const emptyHint = filter.trim()
-    ? t('playground.search.empty')
-    : t('playground.search.placeholder');
-  const html = showcaseGalleryHtml(t, filter, emptyHint);
-  if (html === catalogHtml) return;
-  /* Build-time prerender (default locale): keep those nodes — they are the LCP. */
-  if (catalogHtml === null && !filter.trim() && grid.dataset.prerendered === window.K3UI?.i18n.locale) {
-    catalogHtml = html;
-    void hydrateShowcaseGallery(grid);
-    return;
-  }
-  catalogHtml = html;
-  grid.innerHTML = html;
-  void hydrateShowcaseGallery(grid);
 }
 
 /** Fill `#doc-search` suggestions — both packs, with k3ui/k3ux chips + auto switch. */
@@ -2278,7 +2328,6 @@ async function updateDocSearchSuggestions(query: string): Promise<void> {
         applyDocProduct(pack);
       }
       location.hash = `#/${c.id}`;
-      buildCatalogGrid('');
     });
 
     list.append(item);
@@ -3118,6 +3167,11 @@ function syncThemeElement(seed: string): void {
   theme.setAttribute('contrast', contrastLevel);
   theme.setAttribute('motion', motionScheme);
   theme.setAttribute('spec-version', colorSpec);
+  if (colorVariant === 'cmf' && secondarySeed) {
+    theme.setAttribute('secondary-seed', secondarySeed);
+  } else {
+    theme.removeAttribute('secondary-seed');
+  }
 }
 
 /**
@@ -3148,8 +3202,10 @@ function cacheAppliedTheme(): void {
 }
 
 function applyThemePersist(): void {
+  colorVariant = coerceVariantForSpec(colorVariant, colorSpec);
   const seed = seeds[seedIdx] ?? seeds[0]!;
   docStore.set(DocKeys.themeSeed, seed);
+  docStore.set(DocKeys.themeSecondarySeed, secondarySeed);
   docStore.set(DocKeys.themeSeedIdx, seedIdx);
   docStore.set(DocKeys.themeMode, themeMode);
   docStore.set(DocKeys.themeVariant, colorVariant);
@@ -3158,6 +3214,7 @@ function applyThemePersist(): void {
   docStore.set(DocKeys.themeSpec, colorSpec);
   const theme = document.getElementById('theme') as HTMLElement & {
     primarySeed: string;
+    secondarySeed?: string;
     colorMode: string;
     colorVariant?: string;
     contrast?: ContrastLevel;
@@ -3172,9 +3229,17 @@ function applyThemePersist(): void {
     if ('contrast' in theme) theme.contrast = contrastLevel;
     if ('motion' in theme) theme.motion = motionScheme;
     if ('specVersion' in theme) (theme as unknown as { specVersion: ColorSpecVersion }).specVersion = colorSpec;
+    if (colorVariant === 'cmf') {
+      theme.setAttribute('secondary-seed', secondarySeed);
+      if ('secondarySeed' in theme) theme.secondarySeed = secondarySeed;
+    } else {
+      theme.removeAttribute('secondary-seed');
+      if ('secondarySeed' in theme) theme.secondarySeed = '';
+    }
   }
   window.K3UI?.theme.apply({
     seed,
+    secondarySeed: colorVariant === 'cmf' ? secondarySeed : undefined,
     mode: themeMode,
     motion: motionScheme,
     variant: colorVariant,
@@ -3443,7 +3508,7 @@ async function ensureDocTables(pageId?: string): Promise<void> {
     }
     return;
   }
-  if (id === 'quick-start' || id === 'pack') return;
+  if (id === 'quick-start' || id === 'pack' || isShowcasePage(id)) return;
   const page = document.querySelector<HTMLElement>(`.comp-page[data-page="${id}"]`);
   if (!page) return;
   await Promise.all([registry.register('k3-table'), registry.register('k3-codeblock')]);
@@ -3739,14 +3804,13 @@ async function boot(): Promise<void> {
     window.K3UI_MANUAL = true;
     const savedSeed = seeds[seedIdx] ?? seeds[0]!;
     const savedLocaleRaw = docStore.get(DocKeys.uiLocale, 'fr') as string;
-    const savedLocale: PlaygroundLocale = isPlaygroundLocale(savedLocaleRaw)
-      ? savedLocaleRaw
-      : 'fr';
+    const savedLocale: PlaygroundLocale = coercePlaygroundLocale(savedLocaleRaw) ?? 'fr';
     syncThemeElement(savedSeed);
     const api = await init({
       locale: playgroundToI18n(savedLocale),
       theme: {
         seed: savedSeed,
+        secondarySeed: colorVariant === 'cmf' ? secondarySeed : undefined,
         mode: themeMode,
         motion: motionScheme,
         variant: colorVariant,
@@ -3763,7 +3827,10 @@ async function boot(): Promise<void> {
     cacheAppliedTheme();
     const verLabel = `v${api.version}`;
     const ver = document.getElementById('ver');
-    if (ver) ver.textContent = verLabel;
+    if (ver) {
+      ver.setAttribute('value', verLabel);
+      (ver as HTMLElement & { value?: string }).value = verLabel;
+    }
     const heroVer = document.querySelector('#home-hero-ver span:not([data-k3-icon])');
     if (heroVer) heroVer.textContent = verLabel;
     /* Boot in short tasks: each step's component renders stay in its own task. */
@@ -3772,6 +3839,7 @@ async function boot(): Promise<void> {
     void import('./hero-morph/mount.js').then((m) => m.mountHomeHeroMorph());
     void import('./home-stats/mount.js').then((m) => m.mountHomeStats());
     void import('./home-lift-cta/mount.js').then((m) => m.mountHomeLiftCta());
+    void import('./home-about/mount.js').then((m) => m.mountHomeAbout());
 
     applyAdaptiveShell();
     containerOn = docStore.get(DocKeys.uiContainer, true);
@@ -3796,7 +3864,6 @@ async function boot(): Promise<void> {
     await yieldToMain();
     buildNavMenu();
     await yieldToMain();
-    buildCatalogGrid();
     void mountHomeAmbient();
     /* CTA buttons only — not `.app[data-nav=rail|bar]` shell chrome.
        Listen to `k3-click` (composed) — plain `click` can miss the host. */
@@ -3818,7 +3885,7 @@ async function boot(): Promise<void> {
     /* Re-apply persisted theme (seed already restored into seeds[seedIdx]) */
     applyThemePersist();
     await yieldToMain();
-    /* Restore region tag (nl-BE / de-AT…) + html lang after init’s language code */
+    /* Restore html lang after init’s language code */
     document.documentElement.lang = localeMenuEntry(savedLocale).htmlLang;
     /* After CE upgrade + adoptMenuItems (flags live in split shadow menu) */
     const paintLocaleFlags = (): void => mountLocaleFlags(currentLocale());
@@ -3859,6 +3926,12 @@ async function boot(): Promise<void> {
         mountSponsors();
         return;
       }
+      if (isShowcasePage(articleId)) {
+        await registry.registerAll([...showcaseRequiredTags()]);
+        mountShowcaseDoc(articleId);
+        return;
+      }
+      unmountShowcaseDoc();
       /* Load k3ux module when visiting a UX page (even before scanning tags). */
       if (K3UX_PAGES.has(articleId) || getDocProduct() === 'k3ux') {
         await ensureK3ux();
@@ -4305,7 +4378,7 @@ function wireShellChrome(): void {
     if (typeof v === 'string' && isPlaygroundLocale(v)) setLocale(v);
   });
 
-  /* Chip version badge — never toggle selected */
+  /* Rail version status — decorative, ignore clicks */
   document.getElementById('ver')?.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -4326,6 +4399,7 @@ function wireShellChrome(): void {
     void openSettingsSheet();
   };
   document.getElementById('btn-settings')?.addEventListener('k3-click', openSettings);
+  document.getElementById('home-thoughtful-settings')?.addEventListener('k3-click', openSettings);
 
   const flashToggle = (labelKey: string, on: boolean): void => {
     void showFlash(
@@ -4367,17 +4441,23 @@ function wireShellChrome(): void {
   document.getElementById('settings-spec')?.addEventListener('k3-change', (e) => {
     if (e.target !== e.currentTarget) return;
     const v = (e as CustomEvent<{ value?: string }>).detail?.value;
-    if (v !== '2021' && v !== '2025') return;
+    if (v !== '2021' && v !== '2025' && v !== '2026') return;
     if (v === colorSpec) return;
     colorSpec = v;
+    colorVariant = coerceVariantForSpec(colorVariant, v);
     applyThemePersist();
-    void showFlash(t('playground.settings.flash.spec', { value: t(`playground.ctrl.spec.${v}`) }));
+    void showFlash(
+      v === '2026'
+        ? t('playground.settings.flash.specCmf', { value: t('playground.ctrl.spec.2026') })
+        : t('playground.settings.flash.spec', { value: t(`playground.ctrl.spec.${v}`) }),
+    );
   });
 
   /* Color variant (settings sheet) — was missing: UI toggled but theme stayed on expressive */
   document.getElementById('settings-variant-group')?.addEventListener('k3-change', (e) => {
     const btn = (e as CustomEvent<{ selected?: HTMLElement }>).detail?.selected;
     const next = parseColorVariant(btn?.getAttribute('data-settings-variant'));
+    if (!isVariantValidForSpec(next, colorSpec)) return;
     if (next === colorVariant) return;
     colorVariant = next;
     applyThemePersist();
@@ -4386,6 +4466,10 @@ function wireShellChrome(): void {
         value: t(`playground.ctrl.variant.${next}`),
       }),
     );
+  });
+
+  document.getElementById('settings-secondary-seed')?.addEventListener('input', (e) => {
+    applySecondarySeedHex((e.target as HTMLInputElement).value);
   });
 
   document.getElementById('settings-contrast-group')?.addEventListener('k3-change', (e) => {
@@ -4527,16 +4611,9 @@ function wireShellChrome(): void {
   docSearch?.addEventListener('k3-input', ((e: CustomEvent<{ value: string }>) => {
     const q = e.detail?.value ?? '';
     void updateDocSearchSuggestions(q);
-    if (currentPageId() !== 'home') {
-      location.hash = '#/';
-      window.setTimeout(() => buildCatalogGrid(q), 0);
-      return;
-    }
-    buildCatalogGrid(q);
   }) as EventListener);
   docSearch?.addEventListener('k3-clear', () => {
     void updateDocSearchSuggestions('');
-    buildCatalogGrid('');
   });
 
   wireCommandPalette();
@@ -4748,6 +4825,7 @@ function syncColorSeedInputs(seed: string): void {
 }
 
 function syncColorVariantButtons(): void {
+  syncVariantAvailabilityForSpec();
   document.querySelectorAll<HTMLElement>('[data-color-variant]').forEach((btn) => {
     const v = btn.getAttribute('data-color-variant');
     (btn as HTMLElement & { selected?: boolean }).selected = v === colorVariant;
@@ -4824,6 +4902,7 @@ function wireColorLab(): void {
   syncColorSeedInputs(seeds[seedIdx] ?? '#3F51B5');
   syncColorVariantButtons();
   syncColorModeButtons();
+  syncSecondarySeedUi();
 
   document.querySelectorAll<HTMLInputElement>('.color-seed-input').forEach((input) => {
     if (input.dataset.wired === '1') return;
@@ -4862,9 +4941,43 @@ function wireColorLab(): void {
     btn.dataset.wired = '1';
     btn.addEventListener('click', () => {
       const v = parseColorVariant(btn.getAttribute('data-color-variant'));
+      if (!isVariantValidForSpec(v, colorSpec)) return;
       colorVariant = v;
       syncColorVariantButtons();
+      syncSecondarySeedUi();
       applyThemePersist();
+    });
+  });
+
+  document.querySelectorAll<HTMLInputElement>('.color-secondary-seed-input').forEach((input) => {
+    if (input.dataset.wired === '1') return;
+    input.dataset.wired = '1';
+    input.addEventListener('input', () => applySecondarySeedHex(input.value));
+  });
+
+  document.querySelectorAll<HTMLInputElement>('.color-secondary-hex-input').forEach((input) => {
+    if (input.dataset.wired === '1') return;
+    input.dataset.wired = '1';
+    const commit = () => {
+      const next = normalizeHex(input.value);
+      if (!next) {
+        input.classList.add('is-invalid');
+        return;
+      }
+      input.classList.remove('is-invalid');
+      applySecondarySeedHex(next);
+    };
+    input.addEventListener('change', commit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        commit();
+      }
+    });
+    input.addEventListener('input', () => {
+      const next = normalizeHex(input.value);
+      input.classList.toggle('is-invalid', input.value.trim().length > 0 && !next);
+      if (next) applySecondarySeedHex(next);
     });
   });
 

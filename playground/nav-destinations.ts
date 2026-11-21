@@ -93,6 +93,7 @@ export const COMPONENT_ITEM_ICONS: Record<string, string> = {
   dialog: 'chat',
   tooltip: 'help',
   badge: 'notifications',
+  status: 'check_circle',
   kbd: 'keyboard',
   countdown: 'timer',
   marquee: 'view_list',
@@ -220,6 +221,13 @@ export const NAV_DESTINATIONS: NavDestination[] = [
     href: '',
   },
   {
+    id: 'showcase',
+    category: 'Showcase',
+    icon: 'apps',
+    labelKey: 'doc.nav.showcase',
+    href: '#/showcase',
+  },
+  {
     id: 'resources',
     category: 'Resources',
     icon: 'inventory_2',
@@ -256,6 +264,14 @@ export function destinationForPage(
   if (pageId === 'quick-start' || pageId === 'pack') {
     /* Pack is reached from Démarrage — keep that rail item active. */
     return NAV_DESTINATIONS.find((d) => d.id === 'quick-start') ?? null;
+  }
+  if (
+    pageId === 'showcase' ||
+    pageId === 'showcase-pricing' ||
+    pageId === 'showcase-login' ||
+    pageId === 'showcase-dialer'
+  ) {
+    return NAV_DESTINATIONS.find((d) => d.id === 'showcase') ?? null;
   }
   /* Legacy Color hashes share the Styles destination */
   if (

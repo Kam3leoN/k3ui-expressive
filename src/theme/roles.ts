@@ -5,18 +5,22 @@
 
 export type ColorRoleKey =
   | 'primary'
+  | 'primaryDim'
   | 'onPrimary'
   | 'primaryContainer'
   | 'onPrimaryContainer'
   | 'secondary'
+  | 'secondaryDim'
   | 'onSecondary'
   | 'secondaryContainer'
   | 'onSecondaryContainer'
   | 'tertiary'
+  | 'tertiaryDim'
   | 'onTertiary'
   | 'tertiaryContainer'
   | 'onTertiaryContainer'
   | 'error'
+  | 'errorDim'
   | 'onError'
   | 'errorContainer'
   | 'onErrorContainer'
@@ -85,18 +89,22 @@ export interface ColorRoleGroup {
 /** Flat list applied by theme.apply (excl. key colors — optional / debug). */
 export const COLOR_ROLES = [
   'primary',
+  'primaryDim',
   'onPrimary',
   'primaryContainer',
   'onPrimaryContainer',
   'secondary',
+  'secondaryDim',
   'onSecondary',
   'secondaryContainer',
   'onSecondaryContainer',
   'tertiary',
+  'tertiaryDim',
   'onTertiary',
   'tertiaryContainer',
   'onTertiaryContainer',
   'error',
+  'errorDim',
   'onError',
   'errorContainer',
   'onErrorContainer',
@@ -140,22 +148,22 @@ export const COLOR_ROLE_GROUPS: readonly ColorRoleGroup[] = [
   {
     id: 'primary',
     labelKey: 'doc.colors.group.primary',
-    roles: ['primary', 'onPrimary', 'primaryContainer', 'onPrimaryContainer'],
+    roles: ['primary', 'primaryDim', 'onPrimary', 'primaryContainer', 'onPrimaryContainer'],
   },
   {
     id: 'secondary',
     labelKey: 'doc.colors.group.secondary',
-    roles: ['secondary', 'onSecondary', 'secondaryContainer', 'onSecondaryContainer'],
+    roles: ['secondary', 'secondaryDim', 'onSecondary', 'secondaryContainer', 'onSecondaryContainer'],
   },
   {
     id: 'tertiary',
     labelKey: 'doc.colors.group.tertiary',
-    roles: ['tertiary', 'onTertiary', 'tertiaryContainer', 'onTertiaryContainer'],
+    roles: ['tertiary', 'tertiaryDim', 'onTertiary', 'tertiaryContainer', 'onTertiaryContainer'],
   },
   {
     id: 'error',
     labelKey: 'doc.colors.group.error',
-    roles: ['error', 'onError', 'errorContainer', 'onErrorContainer'],
+    roles: ['error', 'errorDim', 'onError', 'errorContainer', 'onErrorContainer'],
   },
   {
     id: 'success',

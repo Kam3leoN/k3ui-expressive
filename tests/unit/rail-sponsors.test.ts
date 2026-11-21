@@ -44,6 +44,16 @@ describe('rail sponsors before trailing divider', () => {
     expect(sponsors.hasAttribute('data-nav-aux')).toBe(true);
   });
 
+  it('does not push Sponsors with margin-block-start auto (same flow as peers)', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const file = path.resolve(__dirname, '../../playground/playground.css');
+    const text = fs.readFileSync(file, 'utf8');
+    const block = text.match(/\.rail-sponsors\s*\{[^}]*\}/)?.[0] ?? '';
+    expect(block).toContain('.rail-sponsors');
+    expect(block).not.toMatch(/margin-block-start:\s*auto/);
+  });
+
   it('pins Sponsors as last default-slot destination (above trailing divider)', () => {
     document.body.innerHTML = `
       <k3-nav-rail id="nav-rail">

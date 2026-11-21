@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added — Status (`k3-status`)
+
+- Tonal status chip with overhanging icon circle — boolean (`true`/`false`) or variants success · error · warning · info · neutral
+- Material Symbols glyphs (check · close · warning · info · remove), `icon` override, `disabled`
+- Leading / trailing / none, RTL, custom color tokens (`--k3-status-*`); inner `.chip` resists document `*` padding reset
+- Playground page, catalog, home gallery card, registry, unit tests
+
 ### Fixed — Packaging & optional k3ux
 
 - `package.json#sideEffects` keeps published component chunks (via `./dist/**/*.js`); `import 'k3ui/components/<tag>'` must not be tree-shaken away

@@ -13,6 +13,8 @@ export type LocaleCode =
   | 'de'
   | 'sv'
   | 'it'
+  | 'es'
+  | 'pt'
   | 'fi'
   | 'pl'
   | 'cs'
@@ -35,6 +37,8 @@ export const LOCALE_CODES: readonly LocaleCode[] = [
   'de',
   'sv',
   'it',
+  'es',
+  'pt',
   'fi',
   'pl',
   'cs',
@@ -57,6 +61,8 @@ const catalogs: Record<LocaleCode, Dict> = {
   de: empty(),
   sv: empty(),
   it: empty(),
+  es: empty(),
+  pt: empty(),
   fi: empty(),
   pl: empty(),
   cs: empty(),

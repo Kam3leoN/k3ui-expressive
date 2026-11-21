@@ -4,7 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 import { cpSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { build as esbuild } from 'esbuild';
-import { showcaseGalleryHtml } from './showcase/gallery.js';
 import { lighthouseLive } from './lighthouse-live.js';
 import {
   DEFAULT_THEME,
@@ -128,19 +127,6 @@ function prerenderI18n(html: string): string {
     /(<([a-z0-9-]+)\b[^>]*\sdata-i18n="([^"]+)"[^>]*>)([^<]*)(<\/\2>)/g,
     (m, open: string, _tag: string, key: string, _text: string, close: string) =>
       key in dict ? `${open}${escapeHtml(dict[key]!)}${close}` : m,
-  );
-}
-
-/** Home catalog cards in the default locale — same markup the app builds. */
-function prerenderCatalog(html: string): string {
-  const main = loadPlaygroundLocaleDict(DEFAULT_LOCALE);
-  const en = loadPlaygroundLocaleDict('en');
-  /* Same lookup order as i18n.t(): locale → English → key */
-  const t = (key: string): string =>
-    (Object.hasOwn(main, key) ? main[key] : Object.hasOwn(en, key) ? en[key] : key) ?? key;
-  return html.replace(
-    '<div id="catalog-grid" class="catalog-grid"></div>',
-    `<div id="catalog-grid" class="catalog-grid gallery-root" data-prerendered="${DEFAULT_LOCALE}">${showcaseGalleryHtml(t, '', t('playground.search.placeholder'))}</div>`,
   );
 }
 
@@ -304,7 +290,7 @@ export default defineConfig({
           if (!bundle) {
             return deferInactivePages(html, false).replace('</head>', `${prepaint}  </head>`);
           }
-          let out = deferInactivePages(compactHtml(prerenderCatalog(prerenderI18n(html))), true).replace(
+          let out = deferInactivePages(compactHtml(prerenderI18n(html)), true).replace(
             '</head>',
             `${prepaint}  </head>`,
           );
@@ -357,8 +343,13 @@ export default defineConfig({
       },
     ],
   },
-  /* Pack builder: pre-bundling would break the URL of Rollup's .wasm parser. */
-  optimizeDeps: { exclude: ['@rollup/browser'] },
+  /* Pack builder: pre-bundling would break the URL of Rollup's .wasm parser.
+   * Force-include MCU so switching the vendored GitHub build (SchemeCmf / 2026)
+   * invalidates the esbuild prebundle instead of serving a stale barrel. */
+  optimizeDeps: {
+    exclude: ['@rollup/browser'],
+    include: ['@material/material-color-utilities'],
+  },
   server: {
     port: 5173,
     strictPort: true /* fail if busy — avoid drifting to 5174/5177 */,

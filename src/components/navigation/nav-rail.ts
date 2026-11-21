@@ -13,6 +13,7 @@ import {
   findMarkedNavIndex,
   navItemFromEvent,
   queryNavItems,
+  queryNavItemsForLayout,
   type ArmNavHandle,
 } from './nav-selection.js';
 import { navRailStyles } from './nav-rail.styles.js';
@@ -46,10 +47,13 @@ const WIDTH_SETTLE_FALLBACK_MS = 560;
  * - Slots **leading** (or default) · **trailing** (bottom + divider) · **fab**
  *
  * Compact + expanded use elevation level 1 (no end border).
- * Expand/collapse: spatial spring on width; destinations go vertical at collapse
- * start (labels stay visible); extended FAB morphs via `data-rail-collapsed`.
+ * Expand/collapse morph mirrors Android NavigationRailView:
+ * dual labels crossfade (200ms) + width decelerate (500ms); items stay
+ * `layout=horizontal` during collapse flight, then settle to vertical.
+ * Extended FAB morphs via `data-rail-collapsed`.
  *
  * @see https://m3.material.io/components/navigation-rail/guidelines
+ * @see https://github.com/material-components/material-components-android/blob/master/lib/java/com/google/android/material/navigationrail/NavigationRailView.java
  */
 export class K3NavRail extends K3Element {
   static override styles = [hostReset, stateLayerStyles, navRailStyles];
@@ -110,6 +114,7 @@ export class K3NavRail extends K3Element {
   private clearCollapseArm(): void {
     this.collapsing = false;
     this.removeAttribute('data-collapsing');
+    this.removeAttribute('data-stack-in');
     this.removeAttribute('data-expanding');
     this.removeEventListener('transitionend', this.onWidthTransitionEnd);
     this.clearCollapseTimer();
@@ -120,27 +125,48 @@ export class K3NavRail extends K3Element {
     this.settleCollapse();
   };
 
-  /** Finish collapse: clear morph flag after width spring (items already vertical). */
+  /**
+   * Finish collapse: flip to vertical while `data-collapsing` still holds the
+   * tucked geometry, wait for Lit to reflect `layout`, then clear the flag —
+   * avoids one frame of horizontal padding/shell (vertical jump).
+   */
   private settleCollapse(): void {
     if (!this.collapsing) return;
-    this.collapsing = false;
     this.removeEventListener('transitionend', this.onWidthTransitionEnd);
     this.clearCollapseTimer();
-    if (!this.isExpanded()) this.syncItemLayout();
+    void this.finishCollapseLayout();
+  }
+
+  private async finishCollapseLayout(): Promise<void> {
+    if (!this.isExpanded()) {
+      this.syncItemLayout();
+      await Promise.all(
+        queryNavItemsForLayout(this).map((el) =>
+          'updateComplete' in el
+            ? (el as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete
+            : Promise.resolve(),
+        ),
+      );
+    }
+    if (this.isExpanded()) return;
+    this.collapsing = false;
     this.removeAttribute('data-collapsing');
+    this.removeAttribute('data-stack-in');
   }
 
   /**
-   * Collapse — vertical destinations immediately (labels stay under icons),
-   * then wait for width `transitionend` to clear `data-collapsing`.
+   * Collapse — keep horizontal layout during flight so dual labels can
+   * crossfade (Android: Fade out expanded + Fade in collapsed, then ChangeBounds).
+   * `data-collapsing` tucks the shell; settle flips to vertical.
+   * Stack label: one paint at “from below”, then `data-stack-in` rises + fades.
    */
   private armCollapseSettle(): void {
-    this.collapsing = true;
-    this.setAttribute('data-collapsing', '');
-    this.removeAttribute('data-expanding');
-    this.syncItemLayout();
     if (prefersReducedMotion()) {
-      this.settleCollapse();
+      this.collapsing = false;
+      this.removeAttribute('data-collapsing');
+      this.removeAttribute('data-stack-in');
+      this.removeAttribute('data-expanding');
+      this.syncItemLayout();
       return;
     }
     this.removeEventListener('transitionend', this.onWidthTransitionEnd);
@@ -150,10 +176,19 @@ export class K3NavRail extends K3Element {
       () => this.settleCollapse(),
       WIDTH_SETTLE_FALLBACK_MS,
     );
+    /* Paint stacked label at translateY(4dp) + opacity 0, then release rise. */
+    this.removeAttribute('data-stack-in');
+    void this.offsetWidth;
+    requestAnimationFrame(() => {
+      if (this.collapsing) this.setAttribute('data-stack-in', '');
+    });
   }
 
-  /** Expand — horizontal from a tucked start (`data-expanding`), then release. */
-  private armExpandMorph(): void {
+  /**
+   * Expand — paint tucked start (`data-expanding` + horizontal layout), wait for
+   * Lit to commit, then release so width morph + label crossfade can run.
+   */
+  private async armExpandMorph(): Promise<void> {
     this.collapsing = false;
     this.removeAttribute('data-collapsing');
     this.removeEventListener('transitionend', this.onWidthTransitionEnd);
@@ -162,10 +197,22 @@ export class K3NavRail extends K3Element {
     this.size = 'large';
     this.expanded = true;
     this.syncItemLayout();
+    if (prefersReducedMotion()) {
+      this.removeAttribute('data-expanding');
+      return;
+    }
+    await this.updateComplete;
+    await Promise.all(
+      queryNavItemsForLayout(this).map((el) =>
+        'updateComplete' in el
+          ? (el as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete
+          : Promise.resolve(),
+      ),
+    );
+    /* Force a tucked paint frame before releasing the morph. */
+    void this.offsetWidth;
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (this.isExpanded()) this.removeAttribute('data-expanding');
-      });
+      if (this.isExpanded()) this.removeAttribute('data-expanding');
     });
   }
 
@@ -174,8 +221,13 @@ export class K3NavRail extends K3Element {
     if (this.isExpanded() === next) return;
     if (!emitLifecycle(this, 'change-start', { source: 'user', expanded: next })) return;
     if (next) {
-      this.armExpandMorph();
+      void this.armExpandMorph();
     } else {
+      /* Arm collapsing BEFORE size change so updated() skips vertical sync. */
+      this.collapsing = true;
+      this.removeAttribute('data-stack-in');
+      this.setAttribute('data-collapsing', '');
+      this.removeAttribute('data-expanding');
       this.size = 'compact';
       this.expanded = false;
       if (this.mode === 'expanded') this.mode = 'compact';
@@ -195,7 +247,8 @@ export class K3NavRail extends K3Element {
 
   private syncItemLayout(): void {
     const layout = this.resolvedSize() === 'large' ? 'horizontal' : 'vertical';
-    for (const el of queryNavItems(this)) el.layout = layout;
+    /* Include data-nav-aux (Sponsors) — excluded from selection, not from layout */
+    for (const el of queryNavItemsForLayout(this)) el.layout = layout;
   }
 
   private applyActive(animate: boolean): void {
@@ -283,7 +336,7 @@ export class K3NavRail extends K3Element {
     if (sizeChanged) {
       this.syncExpandedAttr();
       this.syncFabMorph();
-      /* During collapse, items are already vertical from armCollapseSettle. */
+      /* During collapse flight, keep horizontal so dual-label morph can run. */
       if (this.isExpanded() || !this.collapsing) this.syncItemLayout();
     }
     if (sizeChanged || changed.has('active')) {

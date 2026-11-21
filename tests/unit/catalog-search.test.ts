@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DOC_COMPONENTS,
   catalogEntryMatches,
   catalogEntryProduct,
   catalogSearchHits,
@@ -8,6 +9,7 @@ import {
   stemCatalogQuery,
   type DocComponent,
 } from '../../playground/catalog.js';
+import { NAV_DESTINATIONS, destinationForPage } from '../../playground/nav-destinations.js';
 
 const t = (key: string) => {
   const map: Record<string, string> = {
@@ -22,6 +24,29 @@ const t = (key: string) => {
   };
   return map[key] ?? key;
 };
+
+describe('catalog showcase rail', () => {
+  it('exposes Showcase as a parent destination between Styles and Resources', () => {
+    const ids = NAV_DESTINATIONS.map((d) => d.id);
+    const styles = ids.indexOf('styles');
+    const showcase = ids.indexOf('showcase');
+    const resources = ids.indexOf('resources');
+    expect(showcase).toBeGreaterThan(styles);
+    expect(showcase).toBeLessThan(resources);
+    expect(NAV_DESTINATIONS[showcase]?.href).toBe('#/showcase');
+  });
+
+  it('keeps showcase pages on the Showcase rail item', () => {
+    expect(destinationForPage('showcase', () => undefined)?.id).toBe('showcase');
+    expect(destinationForPage('showcase-pricing', () => undefined)?.id).toBe('showcase');
+    expect(destinationForPage('showcase-login', () => undefined)?.id).toBe('showcase');
+  });
+
+  it('is not listed under Utilities catalog', () => {
+    setDocProduct('k3ui');
+    expect(DOC_COMPONENTS.some((c) => c.id === 'showcase')).toBe(false);
+  });
+});
 
 describe('catalog search', () => {
   it('normalizes accents and stems FR plurals', () => {

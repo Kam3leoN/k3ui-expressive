@@ -59,6 +59,7 @@ export const docStore = {
 /** Well-known doc keys */
 export const DocKeys = {
   themeSeed: 'theme.seed',
+  themeSecondarySeed: 'theme.secondarySeed',
   themeMode: 'theme.mode',
   themeMotion: 'theme.motion',
   themeSpec: 'theme.spec',

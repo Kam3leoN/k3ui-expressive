@@ -126,6 +126,9 @@ describe('k3-codeblock', () => {
     expect(cssText).toMatch(/:host\s*\{[^}]*overflow:\s*visible/s);
     expect(cssText).toMatch(/\.chrome\s*\{[^}]*overflow:\s*visible/s);
     expect(scrollCss).toMatch(/\.k3-scroll\.k3-scroll--x::-webkit-scrollbar/);
+    /* Must not blanket-contain Y — that traps page scroll over codeblocks */
+    expect(scrollCss).toMatch(/overscroll-behavior-y:\s*auto/);
+    expect(scrollCss).not.toMatch(/overscroll-behavior:\s*contain/);
 
     const el = document.createElement('k3-codeblock') as K3CodeBlock;
     el.language = 'bash';

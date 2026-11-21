@@ -43,6 +43,9 @@ alwaysApply: true
 
 5. **Interdit** sur WebKit : `scrollbar-width` / `scrollbar-color` sur le même nœud que `::-webkit-scrollbar-*`.
 6. Tokens : `--k3-scroll-size` (défaut **6dp**) · `--k3-scroll-track-inset` (0 si coins carrés).
+7. **Ne jamais** `overscroll-behavior: contain` sur `.k3-scroll` global — ça piège le scroll page
+   sur codeblocks / tables. Défaut : `overscroll-behavior-x: contain` · `overscroll-behavior-y: auto`.
+   Isolation Y (`contain`) **uniquement** sur sheets / dialogs / menus / pickers.
 
 ```ts
 // ✅ GOOD — shadow

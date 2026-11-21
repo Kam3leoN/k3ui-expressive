@@ -1,0 +1,1382 @@
+/* Shared pricing/login surfaces — used by apps/showcase + playground doc */
+
+.page {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fixed demo strip — host spacer pushes chrome; surface is viewport-pinned */
+.demo-banner {
+  display: block;
+  flex: none;
+}
+
+.page-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space200);
+  margin-block-end: var(--k3-sys-spacing-space400);
+}
+
+.page-title {
+  margin: 0;
+  font: var(--k3-sys-typescale-headline-medium);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.stack-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--k3-sys-spacing-space50) var(--k3-sys-spacing-space150);
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-primary-container);
+  color: var(--k3-sys-color-on-primary-container);
+  font: var(--k3-sys-typescale-label-large);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.stack-badge--k3ui-k3ux {
+  background: var(--k3-sys-color-tertiary-container);
+  color: var(--k3-sys-color-on-tertiary-container);
+}
+
+.page-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--k3-sys-spacing-space250);
+  margin-block-end: var(--k3-sys-spacing-space600);
+}
+
+.page-hero--billing {
+  gap: 0;
+  margin-block-end: var(--k3-sys-spacing-space500);
+}
+
+.billing-toggle {
+  margin-block-start: 0;
+}
+
+.billing-save {
+  margin-inline-start: var(--k3-sys-spacing-space100);
+  font: var(--k3-sys-typescale-label-small);
+  opacity: 0.85;
+}
+
+/* Plan cards — layout grid (1 / 2 / 4 cols by breakpoint) */
+.plan-grid {
+  align-items: stretch;
+  margin-block-end: var(--k3-sys-spacing-space400);
+  /* Room for straddling “Recommandé” badge + orbit shape */
+  padding-block-start: var(--k3-sys-spacing-space800);
+  overflow: visible;
+}
+
+.plan-grid > .plan-card {
+  grid-column-end: span 4;
+  min-width: 0;
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .plan-grid > .plan-card {
+    grid-column-end: span 4;
+  }
+}
+
+@media (min-width: 905px) {
+  .plan-grid > .plan-card {
+    grid-column-end: span 3;
+  }
+}
+
+.plan-grid > .plan-card {
+  --plan-shape-fg: var(--k3-sys-color-primary);
+  --plan-check-fg: var(--k3-sys-color-primary);
+  --plan-save-bg: var(--k3-sys-color-tertiary-container);
+  --plan-save-fg: var(--k3-sys-color-on-tertiary-container);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space200);
+  min-inline-size: 0;
+  padding: var(--k3-sys-spacing-space400);
+  border-radius: var(--k3-sys-shape-corner-extra-large, 1.75rem);
+  background: var(--k3-sys-color-surface-container-low);
+  color: var(--k3-sys-color-on-surface);
+  box-shadow: none;
+  overflow: visible;
+  transition:
+    border-radius var(--k3-sys-motion-duration-long2, 500ms)
+      var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.34, 1.56, 0.64, 1)),
+    background-color var(--k3-sys-motion-duration-medium2, 300ms)
+      var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1)),
+    color var(--k3-sys-motion-duration-medium2, 300ms)
+      var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1));
+}
+
+/* Surface plans: same as k3-doc-nav prev/next → secondary-container */
+.plan-grid > .plan-card:not(.plan-card--featured):hover {
+  border-radius: var(--k3-sys-shape-corner-extra-extra-large, 3rem);
+  background: var(--k3-sys-color-secondary-container);
+  color: var(--k3-sys-color-on-secondary-container);
+  --plan-shape-fg: var(--k3-sys-color-on-secondary-container);
+  --plan-check-fg: var(--k3-sys-color-on-secondary-container);
+  --plan-save-bg: color-mix(in srgb, var(--k3-sys-color-on-secondary-container) 18%, transparent);
+  --plan-save-fg: var(--k3-sys-color-on-secondary-container);
+}
+
+/* Tonal CTAs would vanish on secondary-container — force filled primary */
+.plan-grid > .plan-card:not(.plan-card--featured):hover .plan-card__cta::part(container) {
+  background: var(--k3-sys-color-primary);
+  color: var(--k3-sys-color-on-primary);
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-grid > .plan-card {
+    transition: none;
+  }
+}
+
+/* Featured = primary (deep) surface like the draft — same specificity as base card */
+.plan-grid > .plan-card.plan-card--featured {
+  --plan-shape-fg: var(--k3-sys-color-on-primary);
+  --plan-check-fg: var(--k3-sys-color-on-primary);
+  --plan-save-bg: color-mix(in srgb, var(--k3-sys-color-on-primary) 18%, transparent);
+  --plan-save-fg: var(--k3-sys-color-on-primary);
+
+  background: var(--k3-sys-color-primary);
+  color: var(--k3-sys-color-on-primary);
+  box-shadow: none;
+}
+
+/* Recommended plan: M3 state-layer hover (on-primary @ 8%), keep primary identity */
+.plan-grid > .plan-card.plan-card--featured:hover {
+  border-radius: var(--k3-sys-shape-corner-extra-extra-large, 3rem);
+  /* Literal 8% — opacity token is 0.08 and breaks color-mix */
+  background: color-mix(in srgb, var(--k3-sys-color-on-primary) 8%, var(--k3-sys-color-primary));
+  color: var(--k3-sys-color-on-primary);
+  --plan-shape-fg: var(--k3-sys-color-on-primary);
+  --plan-check-fg: var(--k3-sys-color-on-primary);
+  --plan-save-bg: color-mix(in srgb, var(--k3-sys-color-on-primary) 18%, transparent);
+  --plan-save-fg: var(--k3-sys-color-on-primary);
+}
+
+.plan-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--k3-sys-spacing-space100);
+  min-block-size: 2.75rem;
+}
+
+.plan-card__shape {
+  display: block;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  color: var(--plan-shape-fg);
+  flex: none;
+}
+
+/* Badge centered on the top edge of the featured card */
+.plan-card__badge {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45em 1em;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-tertiary-container);
+  color: var(--k3-sys-color-on-tertiary-container);
+  font: var(--k3-sys-typescale-title-small);
+  font-weight: 800;
+  box-shadow: var(--k3-sys-elevation-level2);
+  white-space: nowrap;
+}
+
+.plan-card__badge-shape {
+  display: block;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  color: currentColor;
+  flex: none;
+}
+
+/* Decorative shape — top-right, clockwise spin */
+.plan-card__orbit {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: -2.25rem;
+  inset-inline-end: -2.25rem;
+  pointer-events: none;
+  color: var(--k3-sys-color-on-primary);
+  opacity: 0.28;
+  animation: plan-orbit-spin 14s linear infinite;
+}
+
+.plan-card__orbit-shape {
+  display: block;
+  inline-size: 10rem;
+  block-size: 10rem;
+}
+
+@keyframes plan-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-card__orbit {
+    animation: none;
+  }
+}
+
+.plan-card__name {
+  margin: 0;
+  font-family: var(--k3-sys-typescale-display-small-font, inherit);
+  font-size: clamp(1.75rem, 2.2vw, 2.25rem);
+  line-height: 1.1;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.plan-card__tag {
+  margin: 0;
+  opacity: 0.88;
+  font: var(--k3-sys-typescale-body-large);
+  min-block-size: 2.75em;
+}
+
+.plan-card__price-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--k3-sys-spacing-space100);
+  margin-block-start: var(--k3-sys-spacing-space50);
+}
+
+.plan-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.plan-card__amount {
+  font-family: var(--k3-sys-typescale-display-large-font, inherit);
+  font-size: clamp(3.25rem, 5vw, 4.25rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+}
+
+.plan-card__unit {
+  display: flex;
+  flex-direction: column;
+  padding-block-start: 0.45em;
+  line-height: 1.15;
+}
+
+.plan-card__currency {
+  font: var(--k3-sys-typescale-title-large);
+  font-weight: 800;
+}
+
+.plan-card__period {
+  font: var(--k3-sys-typescale-label-large);
+  opacity: 0.8;
+}
+
+.plan-card__sub {
+  margin: 0;
+  font: var(--k3-sys-typescale-body-medium);
+  opacity: 0.85;
+}
+
+.plan-card__save {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2em 0.65em;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--plan-save-bg);
+  color: var(--plan-save-fg);
+  font: var(--k3-sys-typescale-label-medium);
+  font-weight: 700;
+}
+
+.plan-card__cta {
+  display: flex;
+  justify-content: center;
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-block-start: var(--k3-sys-spacing-space100);
+}
+
+.plan-card__cta-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.plan-card__note {
+  margin: 0;
+  text-align: center;
+  font: var(--k3-sys-typescale-label-small);
+  font-size: 0.7rem;
+  line-height: 1.25;
+  opacity: 0.75;
+}
+
+.plan-card__includes {
+  margin: 0;
+  font: var(--k3-sys-typescale-label-large);
+  font-weight: 700;
+}
+
+.plan-card__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space150);
+  flex: 1 1 auto;
+}
+
+.plan-card__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--k3-sys-spacing-space150);
+  font: var(--k3-sys-typescale-body-medium);
+}
+
+.plan-card__check {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  margin-block-start: 0.15em;
+  color: var(--plan-check-fg);
+}
+
+.plan-card__check-shape {
+  display: block;
+  inline-size: 1.15rem;
+  block-size: 1.15rem;
+}
+
+.pricing-trust {
+  margin: 0 0 var(--k3-sys-spacing-space400);
+  text-align: center;
+  color: var(--k3-sys-color-on-surface-variant);
+  font: var(--k3-sys-typescale-body-medium);
+}
+
+.pricing-compare {
+  display: flex;
+  justify-content: center;
+  margin-block-end: var(--k3-sys-spacing-space800);
+}
+
+.pricing-compare k3-button {
+  min-inline-size: min(100%, 28rem);
+}
+
+.pricing-compare__chev {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  margin-inline-start: var(--k3-sys-spacing-space100);
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-primary);
+  color: var(--k3-sys-color-on-primary);
+  font-size: 1.25rem;
+}
+
+/* Feature comparison matrix */
+.compare {
+  margin-block-end: var(--k3-sys-spacing-space800);
+}
+
+.compare__panel {
+  padding: var(--k3-sys-spacing-space500) var(--k3-sys-spacing-space300)
+    var(--k3-sys-spacing-space400);
+  border-radius: var(--k3-sys-shape-corner-extra-large);
+  background: var(--k3-sys-color-surface-container-low);
+}
+
+.compare__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--k3-sys-spacing-space200);
+  padding-inline: var(--k3-sys-spacing-space200);
+  margin-block-end: var(--k3-sys-spacing-space400);
+}
+
+.compare__title {
+  margin: 0;
+  font: var(--k3-sys-typescale-headline-medium);
+  letter-spacing: -0.02em;
+}
+
+.compare__diffs {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space200);
+  margin: 0;
+  font: var(--k3-sys-typescale-title-small);
+  color: var(--k3-sys-color-on-surface);
+  cursor: pointer;
+}
+
+/* Horizontal only — do not trap wheel/page scroll (k3-scroll defaults to
+   overflow-y:auto + overscroll-behavior:contain, which blocks the shell). */
+.compare__scroll.k3-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  --k3-scroll-track-inset: var(--k3-sys-shape-corner-large, 1rem);
+}
+
+.compare__inner {
+  min-inline-size: 44rem;
+}
+
+.compare-matrix__head,
+.compare-row {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1.35fr) repeat(4, minmax(7rem, 1fr));
+  align-items: stretch;
+}
+
+.compare-matrix__corner {
+  display: flex;
+  align-items: flex-end;
+  padding: var(--k3-sys-spacing-space200);
+  font: var(--k3-sys-typescale-label-large);
+  color: var(--k3-sys-color-on-surface-variant);
+}
+
+.compare-matrix__plan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space100);
+  padding: var(--k3-sys-spacing-space300) var(--k3-sys-spacing-space150)
+    var(--k3-sys-spacing-space200);
+  text-align: center;
+  border-radius: var(--k3-sys-shape-corner-large) var(--k3-sys-shape-corner-large) 0 0;
+}
+
+.compare-matrix__plan--featured {
+  background: var(--k3-sys-color-primary);
+  color: var(--k3-sys-color-on-primary);
+}
+
+.compare-matrix__plan-name {
+  font: var(--k3-sys-typescale-title-medium);
+  font-weight: 700;
+}
+
+.compare-matrix__plan-price {
+  font: var(--k3-sys-typescale-body-small);
+  color: var(--k3-sys-color-on-surface-variant);
+}
+
+.compare-matrix__plan--featured .compare-matrix__plan-price {
+  color: color-mix(in srgb, var(--k3-sys-color-on-primary) 78%, transparent);
+}
+
+.compare-matrix__plan-cta {
+  margin-block-start: var(--k3-sys-spacing-space50);
+}
+
+.compare-cat__title {
+  margin: 0;
+  padding: var(--k3-sys-spacing-space400) var(--k3-sys-spacing-space200)
+    var(--k3-sys-spacing-space150);
+  font: var(--k3-sys-typescale-label-large);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--k3-sys-color-primary);
+}
+
+.compare-row {
+  border-block-start: 1px solid var(--k3-sys-color-outline-variant);
+}
+
+.compare-row__label {
+  padding: var(--k3-sys-spacing-space200);
+  font: var(--k3-sys-typescale-body-medium);
+  color: var(--k3-sys-color-on-surface);
+}
+
+.compare-row__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--k3-sys-spacing-space200) var(--k3-sys-spacing-space150);
+  text-align: center;
+  font: var(--k3-sys-typescale-title-small);
+  font-weight: 600;
+}
+
+.compare-row__cell--featured {
+  background: color-mix(in srgb, var(--k3-sys-color-primary) 8%, transparent);
+}
+
+.compare-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: var(--k3-sys-shape-corner-full);
+  color: var(--k3-sys-color-primary);
+  font-size: 1.15rem;
+}
+
+.compare-check--featured {
+  background: var(--k3-sys-color-primary);
+  color: var(--k3-sys-color-on-primary);
+}
+
+.compare-dash {
+  color: var(--k3-sys-color-outline);
+  font-weight: 500;
+}
+
+.compare-text {
+  color: var(--k3-sys-color-on-surface);
+}
+
+/* FAQ */
+.faq {
+  max-inline-size: 44rem;
+  margin-inline: auto;
+  margin-block-end: var(--k3-sys-spacing-space800);
+}
+
+.faq h2 {
+  margin: 0 0 var(--k3-sys-spacing-space400);
+  text-align: center;
+  font: var(--k3-sys-typescale-headline-small);
+}
+
+.faq k3-accordion {
+  display: block;
+  border-radius: var(--k3-sys-shape-corner-large);
+  overflow: hidden;
+  background: var(--k3-sys-color-surface-container-low);
+}
+
+.faq k3-expansion-panel p {
+  margin: 0;
+  color: var(--k3-sys-color-on-surface-variant);
+  font: var(--k3-sys-typescale-body-medium);
+}
+
+/* Bottom CTA */
+.pricing-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--k3-sys-spacing-space400);
+  padding: var(--k3-sys-spacing-space500);
+  border-radius: var(--k3-sys-shape-corner-extra-large);
+  background: var(--k3-sys-color-secondary-container);
+  color: var(--k3-sys-color-on-secondary-container);
+}
+
+.pricing-cta h2 {
+  margin: 0 0 var(--k3-sys-spacing-space100);
+  font: var(--k3-sys-typescale-headline-small);
+}
+
+.pricing-cta p {
+  margin: 0;
+  max-inline-size: 36rem;
+  font: var(--k3-sys-typescale-body-large);
+  opacity: 0.92;
+}
+
+/* Login */
+.page--login {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-block: var(--k3-sys-spacing-space200);
+  gap: var(--k3-sys-spacing-space400);
+}
+
+.login-lead {
+  margin: 0;
+  max-inline-size: 40rem;
+  color: var(--k3-sys-color-on-surface-variant);
+  font: var(--k3-sys-typescale-body-large);
+}
+
+/* Google-style “Manage your Google Account” pill → opens dialog */
+.login-account-bar {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space200);
+  max-inline-size: 100%;
+  margin: 0;
+  padding-block: var(--k3-sys-spacing-space150);
+  padding-inline: var(--k3-sys-spacing-space300) var(--k3-sys-spacing-space400);
+  border: 1px solid var(--k3-sys-color-outline-variant);
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-surface);
+  color: var(--k3-sys-color-on-surface);
+  box-shadow: none;
+  cursor: pointer;
+  font: var(--k3-sys-typescale-title-medium);
+  text-align: start;
+  transition: background-color var(--k3-sys-motion-duration-short4, 200ms)
+    var(--k3-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1));
+}
+
+.login-account-bar:hover {
+  background: var(--k3-sys-color-surface-container);
+}
+
+.login-account-bar:focus-visible {
+  outline: 2px solid var(--k3-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.login-account-bar .login-brand {
+  flex: 0 0 auto;
+  display: block;
+}
+
+.login-account-bar__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.login-dialog {
+  --k3-dialog-max-width: 28rem; /* room for equal-width social segmented */
+}
+
+.login-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space400);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.page--login .login-card {
+  align-self: center;
+}
+
+.login-card {
+  width: 100%;
+  max-inline-size: 28rem;
+  padding: var(--k3-sys-spacing-space500);
+  border-radius: var(--k3-sys-shape-corner-extra-large);
+  background: var(--k3-sys-color-surface-container-low);
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space400);
+}
+
+.login-card__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--k3-sys-spacing-space150);
+}
+
+.login-card__head h1,
+.login-card__head h2 {
+  margin: 0;
+  font-size: var(--k3-sys-typescale-headline-small-size, 1.5rem);
+  line-height: var(--k3-sys-typescale-headline-small-line-height, 2rem);
+  font-weight: var(--k3-sys-typescale-headline-small-emphasized-weight, 500);
+}
+
+/* Match card title — dialog default is already headline-small */
+.login-dialog::part(headline) {
+  font-size: var(--k3-sys-typescale-headline-small-size, 1.5rem);
+  line-height: var(--k3-sys-typescale-headline-small-line-height, 2rem);
+  font-weight: var(--k3-sys-typescale-headline-small-emphasized-weight, 500);
+}
+
+.login-card__head p {
+  margin: 0;
+  color: var(--k3-sys-color-on-surface-variant);
+  font: var(--k3-sys-typescale-body-medium);
+}
+
+.login-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space300);
+}
+
+/* Off-screen bait — Chrome fills these instead of the demo fields */
+.login-autofill-trap {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.login-form k3-text-field {
+  display: block;
+  width: 100%;
+  max-width: none;
+  align-self: stretch;
+  --k3-text-field-max-width: none;
+}
+
+.login-form k3-text-field::part(container) {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fake password without type=password (avoids Chrome credential bubble) */
+.login-field--secret:not([data-revealed])::part(input) {
+  -webkit-text-security: disc;
+}
+
+.login-secret-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--k3-sys-color-on-surface-variant);
+  cursor: pointer;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--k3-sys-shape-corner-full);
+}
+
+.login-secret-toggle:hover {
+  color: var(--k3-sys-color-on-surface);
+}
+
+.login-secret-toggle:focus-visible {
+  outline: 2px solid var(--k3-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.login-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--k3-sys-spacing-space200);
+}
+
+.login-form__row k3-checkbox {
+  flex: 0 1 auto;
+  width: auto;
+}
+
+.login-form__submit {
+  display: flex;
+  width: 100%;
+  align-self: stretch;
+}
+
+/* Host width alone isn’t enough — pill is .container (inline-flex) */
+.login-form__submit::part(container) {
+  width: 100%;
+  max-width: none;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.login-or {
+  display: flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space200);
+  margin: 0;
+  color: var(--k3-sys-color-on-surface-variant);
+  font: var(--k3-sys-typescale-label-medium);
+}
+
+.login-or::before,
+.login-or::after {
+  content: '';
+  flex: 1;
+  border-block-start: 1px solid var(--k3-sys-color-outline-variant);
+}
+
+.login-social {
+  display: flex;
+  width: 100%;
+  align-self: stretch;
+}
+
+.login-social::part(container) {
+  width: 100%;
+}
+
+.login-social .login-social__btn {
+  min-inline-size: 0;
+}
+
+.login-social .login-social__btn::part(container) {
+  justify-content: center;
+  max-width: none;
+}
+
+.login-brand {
+  display: block;
+  flex-shrink: 0;
+}
+
+.login-signup {
+  margin: 0;
+  text-align: center;
+  font: var(--k3-sys-typescale-body-medium);
+}
+
+.login-link {
+  color: var(--k3-sys-color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+/* —— T9 dialer (Rivo-inspired live pad) —— */
+.dialer-lead {
+  margin: 0 0 var(--k3-sys-spacing-space400);
+  max-inline-size: 48rem;
+  color: var(--k3-sys-color-on-surface-variant);
+  font: var(--k3-sys-typescale-body-large);
+}
+
+.dialer-stage {
+  align-items: stretch;
+  margin-block-end: var(--k3-sys-spacing-space600);
+}
+
+.dial-phone {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space200);
+  padding: var(--k3-sys-spacing-space300);
+  border-radius: var(--k3-sys-shape-corner-extra-large);
+  background: var(--k3-sys-color-surface-container);
+  box-shadow: none;
+  max-inline-size: 24rem;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.dial-phone__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--dial-call-bg);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: blur(28px);
+  opacity: 0.42;
+  transform: scale(1.2); /* hide soft blur edges inside the rounded phone */
+}
+
+.dial-phone--in-call > :not(.dial-phone__bg) {
+  position: relative;
+  z-index: 1;
+}
+
+.dial-phone__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: var(--k3-sys-spacing-space100);
+  font: var(--k3-sys-typescale-label-small);
+  font-weight: 600;
+  color: var(--k3-sys-color-on-surface-variant);
+}
+
+.dial-phone__notch {
+  inline-size: 0.55rem;
+  block-size: 0.55rem;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-on-surface);
+  opacity: 0.35;
+}
+
+.dial-phone__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--k3-sys-spacing-space100);
+}
+
+.dial-phone__sim {
+  cursor: pointer;
+}
+
+.dial-phone__display {
+  display: flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space100);
+  min-block-size: 3.5rem;
+  padding: var(--k3-sys-spacing-space200) var(--k3-sys-spacing-space250);
+  border-radius: var(--k3-sys-shape-corner-large);
+  background: var(--k3-sys-color-surface-container-lowest, var(--k3-sys-color-surface));
+  box-shadow: none;
+}
+
+.dial-phone__digits {
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--k3-sys-typescale-headline-large-font, inherit);
+  font-size: 2rem; /* match key digit presence in the display field */
+  font-weight: var(--k3-sys-typescale-title-medium-emphasized-weight, 700);
+  line-height: 1.15;
+  letter-spacing: 0.03em;
+  word-break: break-all;
+}
+
+.dial-phone__digits--empty {
+  font: var(--k3-sys-typescale-body-large);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--k3-sys-color-on-surface-variant);
+  opacity: 0.7;
+}
+
+.dial-pad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-items: stretch;
+  place-content: center;
+  gap: var(--k3-sys-spacing-space150);
+  padding: var(--k3-sys-spacing-space100);
+  margin-inline: auto;
+  inline-size: 100%;
+}
+
+/* Wide stadium keys — digit + letters centered as one block (capture 2) */
+.dial-key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem; /* snug under digit, not stuck */
+  width: 100%;
+  min-block-size: 3rem;
+  aspect-ratio: 1.75 / 1;
+  padding: 0; /* equal box → true optical center */
+  border: 1px solid var(--k3-sys-color-outline-variant);
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-surface-container-lowest, var(--k3-sys-color-surface));
+  color: var(--k3-sys-color-on-surface);
+  box-shadow: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+  transition:
+    transform var(--k3-sys-motion-duration-short2, 100ms)
+      var(--k3-sys-motion-easing-standard, ease),
+    background var(--k3-sys-motion-duration-short2, 100ms)
+      var(--k3-sys-motion-easing-standard, ease),
+    border-color var(--k3-sys-motion-duration-short2, 100ms)
+      var(--k3-sys-motion-easing-standard, ease);
+}
+
+.dial-key:hover {
+  background: var(--k3-sys-color-surface-container-high);
+}
+
+.dial-key:focus-visible {
+  outline: 2px solid var(--k3-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.dial-key:active {
+  transform: scale(0.97);
+}
+
+.dial-key__digit {
+  display: block;
+  font-family: var(--k3-sys-typescale-headline-medium-font, inherit);
+  font-size: 1.75rem;
+  font-weight: var(--k3-sys-typescale-title-medium-emphasized-weight, 700);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.dial-key__letters {
+  display: block;
+  font: var(--k3-sys-typescale-label-small);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: var(--k3-sys-color-on-surface-variant);
+  /* reserve one letter row so “1” aligns with 2–9 without a tall empty gap */
+  min-block-size: 0.625rem;
+}
+
+.dial-key__letters--blank {
+  visibility: hidden;
+}
+
+.dial-phone__actions {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space200);
+  padding-block: var(--k3-sys-spacing-space100);
+  padding-inline: var(--k3-sys-spacing-space100);
+}
+
+.dial-call {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 4.5rem;
+  block-size: 4.5rem;
+  border: 0;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-ref-palette-green-600, #43a047);
+  color: #fff;
+  font-size: 1.75rem;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 0.35rem color-mix(in srgb, var(--k3-ref-palette-green-600, #43a047) 28%, transparent),
+    var(--k3-sys-elevation-level2);
+  transition: transform var(--k3-sys-motion-duration-short2, 100ms) ease;
+}
+
+.dial-call:hover {
+  filter: brightness(1.05);
+}
+
+.dial-call:active {
+  transform: scale(0.96);
+}
+
+.dial-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space300);
+  padding: var(--k3-sys-spacing-space400);
+  border-radius: var(--k3-sys-shape-corner-extra-large);
+  background: var(--k3-sys-color-surface-container-low);
+  box-shadow: none;
+  min-block-size: 100%;
+}
+
+.dial-results__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--k3-sys-spacing-space200);
+}
+
+.dial-results__title {
+  display: flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space150);
+  margin: 0 0 var(--k3-sys-spacing-space50);
+  font: var(--k3-sys-typescale-title-large);
+  font-weight: 750;
+}
+
+.dial-results__live {
+  inline-size: 0.55rem;
+  block-size: 0.55rem;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-ref-palette-green-600, #43a047);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--k3-ref-palette-green-600, #43a047) 25%, transparent);
+}
+
+.dial-results__blurb {
+  margin: 0;
+  color: var(--k3-sys-color-on-surface-variant);
+  font: var(--k3-sys-typescale-body-medium);
+}
+
+.dial-results__list {
+  display: block;
+  --k3-list-max-height: 22rem;
+  --k3-scroll-track-inset: var(--k3-sys-shape-corner-medium, 0.75rem);
+}
+
+.dial-result__avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  overflow: visible;
+  color: var(--dial-accent, var(--k3-sys-color-primary));
+  flex-shrink: 0;
+}
+
+.dial-result__photo {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.dial-result__mark {
+  background: color-mix(in srgb, var(--k3-sys-color-primary) 22%, transparent);
+  color: inherit;
+  border-radius: 0.2em;
+  padding-inline: 0.05em;
+}
+
+.dial-combos__label {
+  margin: 0 0 var(--k3-sys-spacing-space150);
+  font: var(--k3-sys-typescale-label-large);
+  font-weight: 700;
+  color: var(--k3-sys-color-on-surface-variant);
+}
+
+.dial-combos__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--k3-sys-spacing-space100);
+}
+
+.dial-combos__row k3-chip {
+  cursor: pointer;
+}
+
+/* —— In-call screen —— */
+.dial-in-call {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space200);
+  padding-block: var(--k3-sys-spacing-space200) var(--k3-sys-spacing-space100);
+  text-align: center;
+}
+
+/* One shape: only the clip path spins — face stays fixed */
+.dial-in-call__hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 11rem;
+  block-size: 11rem;
+  margin-block: var(--k3-sys-spacing-space200);
+  overflow: visible;
+}
+
+.dial-in-call__photo {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0.35rem 0.85rem color-mix(in srgb, #000 22%, transparent));
+}
+
+.dial-in-call__face {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.dial-in-call__face .shape-avatar-spin__clip {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: dial-orbit-spin 22s linear infinite;
+}
+
+.dial-in-call__initial {
+  display: grid;
+  place-items: center;
+  inline-size: 72%;
+  block-size: 72%;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--dial-accent, var(--k3-sys-color-primary));
+  color: #fff;
+  font: var(--k3-sys-typescale-headline-medium);
+  font-weight: 800;
+}
+
+.dial-in-call__name {
+  margin: 0;
+  font: var(--k3-sys-typescale-headline-small);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.dial-in-call__phone {
+  margin: 0;
+  font: var(--k3-sys-typescale-body-medium);
+  color: var(--k3-sys-color-on-surface-variant);
+}
+
+.dial-in-call__timer {
+  margin: 0;
+  padding: var(--k3-sys-spacing-space50) var(--k3-sys-spacing-space200);
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: color-mix(in srgb, var(--k3-sys-color-primary) 16%, transparent);
+  color: var(--k3-sys-color-primary);
+  font: var(--k3-sys-typescale-label-large);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dial-in-call__secondary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--k3-sys-spacing-space100);
+}
+
+.dial-in-call__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space100);
+  padding: var(--k3-sys-spacing-space100) var(--k3-sys-spacing-space200);
+  border: 0;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-surface-container-high);
+  color: var(--k3-sys-color-on-surface);
+  font: var(--k3-sys-typescale-label-large);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dial-in-call__pill .ms {
+  font-size: 1.125rem;
+}
+
+.dial-in-call__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--k3-sys-spacing-space150);
+  inline-size: 100%;
+  margin-block-start: var(--k3-sys-spacing-space100);
+}
+
+.dial-in-call__ctrl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--k3-sys-spacing-space100);
+  min-block-size: 4.5rem;
+  padding: var(--k3-sys-spacing-space150);
+  border: 0;
+  border-radius: var(--k3-sys-shape-corner-large);
+  background: var(--k3-sys-color-surface-container-high);
+  color: var(--k3-sys-color-on-surface);
+  font: var(--k3-sys-typescale-label-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dial-in-call__ctrl .ms {
+  font-size: 1.5rem;
+}
+
+.dial-in-call__ctrl--on {
+  background: var(--k3-sys-color-secondary-container);
+  color: var(--k3-sys-color-on-secondary-container);
+}
+
+.dial-in-call__hangup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  min-block-size: 3.5rem;
+  margin-block-start: var(--k3-sys-spacing-space100);
+  border: 0;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-error);
+  color: var(--k3-sys-color-on-error);
+  font-size: 1.75rem;
+  cursor: pointer;
+  box-shadow: var(--k3-sys-elevation-level2);
+}
+
+.dial-in-call__hangup:hover {
+  filter: brightness(1.05);
+}
+
+.dial-in-call__hangup:active {
+  transform: scale(0.98);
+}
+
+@keyframes dial-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dial-key,
+  .dial-call,
+  .dial-in-call__hangup {
+    transition: none;
+  }
+  .dial-key:active,
+  .dial-call:active,
+  .dial-in-call__hangup:active {
+    transform: none;
+  }
+  .dial-in-call__face .shape-avatar-spin__clip {
+    animation: none;
+  }
+}

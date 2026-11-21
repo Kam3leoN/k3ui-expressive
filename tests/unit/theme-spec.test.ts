@@ -48,4 +48,49 @@ describe('Material color spec', () => {
     expect(el.style.getPropertyValue('--k3-sys-color-primary')).toBe('#006b5a');
     el.remove();
   });
+
+  it('accepts specVersion 2026', () => {
+    const vars = themeCssVars({ seed: '#3F51B5', variant: 'tonalspot', specVersion: '2026' });
+    expect(primary(vars)).toMatch(/^#[0-9a-f]{6}$/i);
+  });
+
+  it('non-CMF + 2026 falls back to the same primary as 2025', () => {
+    for (const variant of ['tonalspot', 'expressive', 'vibrant', 'neutral'] as const) {
+      const v2025 = primary(themeCssVars({ seed: '#3F51B5', variant, specVersion: '2025' }));
+      const v2026 = primary(themeCssVars({ seed: '#3F51B5', variant, specVersion: '2026' }));
+      expect(v2026, variant).toBe(v2025);
+    }
+  });
+
+  it('CMF + 2026 produces a palette distinct from tonalspot', () => {
+    const seed = '#3F51B5';
+    const secondary = '#8B1A4A';
+    const cmf = themeCssVars({
+      seed,
+      secondarySeed: secondary,
+      variant: 'cmf',
+      specVersion: '2026',
+    });
+    const tonal = themeCssVars({ seed, variant: 'tonalspot', specVersion: '2025' });
+    expect(primary(cmf)).toMatch(/^#[0-9a-f]{6}$/i);
+    expect(primary(cmf)).not.toBe(primary(tonal));
+    expect(cmf['--k3-sys-color-secondary']).toBeTruthy();
+    /* Dim roles bridged from MCU colorSpec (2026). */
+    expect(cmf['--k3-sys-color-primary-dim']).toMatch(/^#[0-9a-f]{6}$/i);
+  });
+
+  it('<k3-theme> accepts cmf + secondary-seed + spec 2026', async () => {
+    const el = document.createElement('k3-theme') as HTMLElement & { updateComplete: Promise<unknown> };
+    el.setAttribute('primary-seed', '#3F51B5');
+    el.setAttribute('secondary-seed', '#8B1A4A');
+    el.setAttribute('color-mode', 'light');
+    el.setAttribute('color-variant', 'cmf');
+    el.setAttribute('spec-version', '2026');
+    el.removeAttribute('global');
+    (el as unknown as { global: boolean }).global = false;
+    document.body.appendChild(el);
+    await el.updateComplete;
+    expect(el.style.getPropertyValue('--k3-sys-color-primary')).toMatch(/^#[0-9a-f]{6}$/i);
+    el.remove();
+  });
 });

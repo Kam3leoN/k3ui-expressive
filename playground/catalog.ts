@@ -413,6 +413,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.badge.blurb',
   },
   {
+    id: 'status',
+    category: 'Feedback',
+    title: 'Status',
+    titleKey: 'doc.status.title',
+    blurbKey: 'doc.status.blurb',
+  },
+  {
     id: 'kbd',
     category: 'Feedback',
     title: 'Kbd',

@@ -23,7 +23,10 @@ export const edgeScrollbarStyles = css`
     --k3-scroll-size: 0.375rem; /* 6dp — discreet */
     overflow-x: hidden;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    /* X: contain sideways bounce. Y: auto so in-flow code/tables don't trap
+       page scroll (sheets / dialogs / menus set contain on their own ports). */
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
   }
 
   /* Horizontal (and optional vertical) — code samples, wide tables */

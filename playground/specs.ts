@@ -519,6 +519,15 @@ export const COMPONENT_SPECS: Record<string, SpecRow[]> = {
     },
     { token: 'color', value: 'error / on-error' },
   ],
+  status: [
+    { token: 'height', value: '28 dp pill · 36 dp icon circle' },
+    { token: 'radius', value: '8 dp' },
+    { token: 'type', value: '15 / 700 tabular' },
+    { token: 'variants', value: 'success · error · warning · info · neutral' },
+    { token: 'icon', value: 'leading · trailing · none' },
+    { token: 'boolean', value: 'true → success · false → error' },
+    { token: 'color', value: 'tone + color-mix text/bg · custom color tokens' },
+  ],
   avatar: [
     { token: 'size.sm', value: '32 dp' },
     { token: 'size.md', value: '40 dp' },

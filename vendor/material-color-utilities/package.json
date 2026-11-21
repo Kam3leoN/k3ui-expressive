@@ -1,0 +1,46 @@
+{
+  "name": "@material/material-color-utilities",
+  "version": "0.4.0-git.dca2d34",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Algorithms and utilities that power the Material Design 3 (M3) color system, including choosing theme colors from images and creating tones of colors; all in a new color space.",
+  "keywords": [
+    "material",
+    "material design",
+    "material3",
+    "material you",
+    "color extraction",
+    "theming"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/material-foundation/material-color-utilities.git",
+    "directory": "typescript"
+  },
+  "author": "Material Eng",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/material-foundation/material-color-utilities/issues"
+  },
+  "homepage": "https://github.com/material-foundation/material-color-utilities/tree/main/typescript",
+  "type": "module",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "!**/*_test.*",
+    "!.wireit/**"
+  ],
+  "main": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "_mcuCommit": "dca2d34221e4a56f90e05ef3223481183ebd1d5d"
+}

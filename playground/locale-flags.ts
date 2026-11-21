@@ -3,80 +3,34 @@
  * - `1x1` → icon slots (square + 4dp radius)
  * - `4x3` → wider surfaces elsewhere
  *
- * Menu entries are country / language choices; several share one i18n catalog
- * (e.g. BE → nl, AT/CH → de) until dedicated translations exist.
+ * Menu entries are language choices; incomplete catalogs fall back to English.
  */
 /// <reference types="vite/client" />
 
 import type { LocaleCode } from '../src/i18n/index.js';
 
-import at1x1 from 'flag-icons/flags/1x1/at.svg?raw';
-import at4x3 from 'flag-icons/flags/4x3/at.svg?raw';
-import be1x1 from 'flag-icons/flags/1x1/be.svg?raw';
-import be4x3 from 'flag-icons/flags/4x3/be.svg?raw';
-import ch1x1 from 'flag-icons/flags/1x1/ch.svg?raw';
-import ch4x3 from 'flag-icons/flags/4x3/ch.svg?raw';
-import cn1x1 from 'flag-icons/flags/1x1/cn.svg?raw';
-import cn4x3 from 'flag-icons/flags/4x3/cn.svg?raw';
-import cz1x1 from 'flag-icons/flags/1x1/cz.svg?raw';
-import cz4x3 from 'flag-icons/flags/4x3/cz.svg?raw';
+import de1x1 from 'flag-icons/flags/1x1/de.svg?raw';
+import de4x3 from 'flag-icons/flags/4x3/de.svg?raw';
 import en1x1 from 'flag-icons/flags/1x1/gb.svg?raw';
 import en4x3 from 'flag-icons/flags/4x3/gb.svg?raw';
-import fi1x1 from 'flag-icons/flags/1x1/fi.svg?raw';
-import fi4x3 from 'flag-icons/flags/4x3/fi.svg?raw';
+import es1x1 from 'flag-icons/flags/1x1/es.svg?raw';
+import es4x3 from 'flag-icons/flags/4x3/es.svg?raw';
 import fr1x1 from 'flag-icons/flags/1x1/fr.svg?raw';
 import fr4x3 from 'flag-icons/flags/4x3/fr.svg?raw';
-import gr1x1 from 'flag-icons/flags/1x1/gr.svg?raw';
-import gr4x3 from 'flag-icons/flags/4x3/gr.svg?raw';
-import hu1x1 from 'flag-icons/flags/1x1/hu.svg?raw';
-import hu4x3 from 'flag-icons/flags/4x3/hu.svg?raw';
-import il1x1 from 'flag-icons/flags/1x1/il.svg?raw';
-import il4x3 from 'flag-icons/flags/4x3/il.svg?raw';
 import it1x1 from 'flag-icons/flags/1x1/it.svg?raw';
 import it4x3 from 'flag-icons/flags/4x3/it.svg?raw';
-import jp1x1 from 'flag-icons/flags/1x1/jp.svg?raw';
-import jp4x3 from 'flag-icons/flags/4x3/jp.svg?raw';
-import nl1x1 from 'flag-icons/flags/1x1/nl.svg?raw';
-import nl4x3 from 'flag-icons/flags/4x3/nl.svg?raw';
-import pl1x1 from 'flag-icons/flags/1x1/pl.svg?raw';
-import pl4x3 from 'flag-icons/flags/4x3/pl.svg?raw';
-import ro1x1 from 'flag-icons/flags/1x1/ro.svg?raw';
-import ro4x3 from 'flag-icons/flags/4x3/ro.svg?raw';
-import se1x1 from 'flag-icons/flags/1x1/se.svg?raw';
-import se4x3 from 'flag-icons/flags/4x3/se.svg?raw';
-import tr1x1 from 'flag-icons/flags/1x1/tr.svg?raw';
-import tr4x3 from 'flag-icons/flags/4x3/tr.svg?raw';
-import ua1x1 from 'flag-icons/flags/1x1/ua.svg?raw';
-import ua4x3 from 'flag-icons/flags/4x3/ua.svg?raw';
+import pt1x1 from 'flag-icons/flags/1x1/pt.svg?raw';
+import pt4x3 from 'flag-icons/flags/4x3/pt.svg?raw';
 
 export type FlagRatio = '1x1' | '4x3';
 
-/** Playground menu id — may be a region tag (nl-BE) or a language code. */
-export type PlaygroundLocale =
-  | 'fr'
-  | 'en'
-  | 'nl'
-  | 'nl-BE'
-  | 'de-AT'
-  | 'sv'
-  | 'it'
-  | 'de-CH'
-  | 'fi'
-  | 'pl'
-  | 'cs'
-  | 'ro'
-  | 'hu'
-  | 'el'
-  | 'uk'
-  | 'tr'
-  | 'he'
-  | 'zh'
-  | 'ja';
+/** Playground menu id — language codes only (short list, no scroll). */
+export type PlaygroundLocale = 'fr' | 'en' | 'de' | 'it' | 'es' | 'pt';
 
 export type LocaleMenuEntry = {
   /** `data-locale` / storage key */
   code: PlaygroundLocale;
-  /** flag-icons ISO 3166-1 alpha-2 (or gb for English) */
+  /** flag-icons ISO 3166-1 alpha-2 (gb for English) */
   flag: string;
   /** Native endonym in the menu */
   label: string;
@@ -86,80 +40,72 @@ export type LocaleMenuEntry = {
   htmlLang: string;
 };
 
-/** Ordered locale menu — FR / EN first, then requested countries. */
+/** Ordered locale menu — six languages only. */
 export const LOCALE_MENU: readonly LocaleMenuEntry[] = [
   { code: 'fr', flag: 'fr', label: 'Français', i18n: 'fr', htmlLang: 'fr' },
   { code: 'en', flag: 'gb', label: 'English', i18n: 'en', htmlLang: 'en' },
-  { code: 'nl', flag: 'nl', label: 'Nederlands', i18n: 'nl', htmlLang: 'nl' },
-  { code: 'nl-BE', flag: 'be', label: 'België', i18n: 'nl', htmlLang: 'nl-BE' },
-  { code: 'de-AT', flag: 'at', label: 'Deutsch', i18n: 'de', htmlLang: 'de-AT' },
-  { code: 'sv', flag: 'se', label: 'Svenska', i18n: 'sv', htmlLang: 'sv' },
+  { code: 'de', flag: 'de', label: 'Deutsch', i18n: 'de', htmlLang: 'de' },
   { code: 'it', flag: 'it', label: 'Italiano', i18n: 'it', htmlLang: 'it' },
-  { code: 'de-CH', flag: 'ch', label: 'Deutsch (CH)', i18n: 'de', htmlLang: 'de-CH' },
-  { code: 'fi', flag: 'fi', label: 'Suomi', i18n: 'fi', htmlLang: 'fi' },
-  { code: 'pl', flag: 'pl', label: 'Polski', i18n: 'pl', htmlLang: 'pl' },
-  { code: 'cs', flag: 'cz', label: 'Čeština', i18n: 'cs', htmlLang: 'cs' },
-  { code: 'ro', flag: 'ro', label: 'Română', i18n: 'ro', htmlLang: 'ro' },
-  { code: 'hu', flag: 'hu', label: 'Magyar', i18n: 'hu', htmlLang: 'hu' },
-  { code: 'el', flag: 'gr', label: 'Ελληνικά', i18n: 'el', htmlLang: 'el' },
-  { code: 'uk', flag: 'ua', label: 'Українська', i18n: 'uk', htmlLang: 'uk' },
-  { code: 'tr', flag: 'tr', label: 'Türkçe', i18n: 'tr', htmlLang: 'tr' },
-  { code: 'he', flag: 'il', label: 'עברית', i18n: 'he', htmlLang: 'he' },
-  { code: 'zh', flag: 'cn', label: '中文', i18n: 'zh', htmlLang: 'zh-CN' },
-  { code: 'ja', flag: 'jp', label: '日本語', i18n: 'ja', htmlLang: 'ja' },
+  { code: 'es', flag: 'es', label: 'Español', i18n: 'es', htmlLang: 'es' },
+  { code: 'pt', flag: 'pt', label: 'Português', i18n: 'pt', htmlLang: 'pt' },
 ] as const;
 
 const MENU_BY_CODE: Record<PlaygroundLocale, LocaleMenuEntry> = Object.fromEntries(
   LOCALE_MENU.map((e) => [e.code, e]),
 ) as Record<PlaygroundLocale, LocaleMenuEntry>;
 
+/** Old region tags → current menu codes (stored prefs). */
+const LEGACY_LOCALE: Record<string, PlaygroundLocale> = {
+  'de-at': 'de',
+  'de-ch': 'de',
+  'nl-be': 'fr',
+  nl: 'fr',
+  sv: 'en',
+  fi: 'en',
+  pl: 'en',
+  cs: 'en',
+  ro: 'en',
+  hu: 'en',
+  el: 'en',
+  uk: 'en',
+  tr: 'en',
+  he: 'en',
+  zh: 'en',
+  ja: 'en',
+};
+
 const FLAG_SVG: Record<FlagRatio, Record<string, string>> = {
   '1x1': {
     fr: fr1x1,
     gb: en1x1,
-    nl: nl1x1,
-    be: be1x1,
-    at: at1x1,
-    se: se1x1,
+    de: de1x1,
     it: it1x1,
-    ch: ch1x1,
-    fi: fi1x1,
-    pl: pl1x1,
-    cz: cz1x1,
-    ro: ro1x1,
-    hu: hu1x1,
-    gr: gr1x1,
-    ua: ua1x1,
-    tr: tr1x1,
-    il: il1x1,
-    cn: cn1x1,
-    jp: jp1x1,
+    es: es1x1,
+    pt: pt1x1,
   },
   '4x3': {
     fr: fr4x3,
     gb: en4x3,
-    nl: nl4x3,
-    be: be4x3,
-    at: at4x3,
-    se: se4x3,
+    de: de4x3,
     it: it4x3,
-    ch: ch4x3,
-    fi: fi4x3,
-    pl: pl4x3,
-    cz: cz4x3,
-    ro: ro4x3,
-    hu: hu4x3,
-    gr: gr4x3,
-    ua: ua4x3,
-    tr: tr4x3,
-    il: il4x3,
-    cn: cn4x3,
-    jp: jp4x3,
+    es: es4x3,
+    pt: pt4x3,
   },
 };
 
 export function isPlaygroundLocale(value: string): value is PlaygroundLocale {
   return Object.hasOwn(MENU_BY_CODE, value);
+}
+
+/** Resolve a stored / legacy tag to a menu locale (or null). */
+export function coercePlaygroundLocale(value: string): PlaygroundLocale | null {
+  const raw = String(value ?? '').trim();
+  if (!raw) return null;
+  if (isPlaygroundLocale(raw)) return raw;
+  const key = raw.toLowerCase();
+  if (Object.hasOwn(LEGACY_LOCALE, key)) return LEGACY_LOCALE[key]!;
+  const lang = key.split(/[-_]/)[0] ?? '';
+  return isPlaygroundLocale(lang) ? lang : null;
 }
 
 export function localeMenuEntry(locale: PlaygroundLocale): LocaleMenuEntry {
@@ -236,7 +182,7 @@ export function mountLocaleFlags(locale: PlaygroundLocale): void {
     if (!code) continue;
     const ratioAttr = el.getAttribute('data-flag-ratio');
     const ratio: FlagRatio = ratioAttr === '4x3' ? '4x3' : '1x1';
-    /* data-locale-flag holds the ISO flag code (fr, gb, nl, be, …) */
+    /* data-locale-flag holds the ISO flag code (fr, gb, de, …) */
     setLocaleFlagEl(el, code, ratio);
     const item = el.closest('k3-menu-item') as { syncSlots?: () => void } | null;
     item?.syncSlots?.();

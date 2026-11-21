@@ -8,6 +8,14 @@ export function queryNavItems(host: HTMLElement): K3NavItem[] {
   return [...host.querySelectorAll<K3NavItem>('k3-nav-item:not([data-nav-aux])')];
 }
 
+/**
+ * Destinations for density / layout sync (expand ↔ collapse morph).
+ * Includes default-slot, `data-nav-aux` (Sponsors), and trailing/foot items.
+ */
+export function queryNavItemsForLayout(host: HTMLElement): K3NavItem[] {
+  return [...host.querySelectorAll<K3NavItem>(':scope > k3-nav-item')];
+}
+
 /** Resolve the clicked `k3-nav-item` from a composed event path. */
 export function navItemFromEvent(
   e: Event,

@@ -16,10 +16,10 @@ test.describe('mobile viewport', () => {
     test.skip(!test.info().project.name.startsWith('mobile-'), 'mobile projects only');
   });
 
-  test('home catalog is reachable and dialog opens from a deep link', async ({ page }) => {
+  test('home is reachable and dialog opens from a deep link', async ({ page }) => {
     await page.goto('/');
     await ready(page, 'home');
-    await expect(page.locator('#catalog-grid .gallery-item').first()).toBeVisible();
+    await expect(page.locator('#home-hero-title')).toBeVisible();
 
     await page.goto('/#/dialog');
     await ready(page, 'dialog');

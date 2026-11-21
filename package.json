@@ -52,6 +52,7 @@
   "scripts": {
     "dev": "vite --config playground/vite.config.ts",
     "dev:qr": "vite --config apps/qr-generator/vite.config.ts",
+    "dev:showcase": "vite --config apps/showcase/vite.config.ts",
     "build": "npm run build:lib && npm run build:lazy && npm run build:syntax && npm run build:fonts && npm run build:tokens && npm run manifest && npm run budget:bundle && npm run check:consumer",
     "build:lib": "vite build",
     "build:lazy": "vite build --config vite.lazy.config.ts",
@@ -60,6 +61,7 @@
     "build:fonts": "node scripts/copy-fonts.mjs",
     "build:playground": "npm run build:lazy && node scripts/playground-prebuild.mjs && vite build --config playground/vite.config.ts",
     "build:qr": "vite build --config apps/qr-generator/vite.config.ts",
+    "build:showcase": "vite build --config apps/showcase/vite.config.ts",
     "build:tokens": "node scripts/export-tokens.mjs",
     "budget:bundle": "node scripts/budget-bundle.mjs",
     "check:consumer": "node scripts/check-consumer-import.mjs",
@@ -73,9 +75,11 @@
     "prepublishOnly": "npm run check",
     "preview": "vite preview --config playground/vite.config.ts",
     "preview:qr": "vite preview --config apps/qr-generator/vite.config.ts",
+    "preview:showcase": "vite preview --config apps/showcase/vite.config.ts",
     "build:syntax": "node scripts/build-syntax.mjs",
     "lighthouse": "node scripts/lighthouse-scores.mjs",
-    "bench": "node scripts/bench-components.mjs"
+    "bench": "node scripts/bench-components.mjs",
+    "sync:mcu": "node scripts/sync-mcu.mjs"
   },
   "keywords": [
     "material-design",
@@ -99,7 +103,7 @@
     "lit": "^3.2.1"
   },
   "dependencies": {
-    "@material/material-color-utilities": "^0.4.0",
+    "@material/material-color-utilities": "file:vendor/material-color-utilities",
     "material-shapes-ts": "^0.3.0"
   },
   "devDependencies": {

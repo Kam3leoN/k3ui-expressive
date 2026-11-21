@@ -60,6 +60,7 @@ export const catalog: ComponentDef[] = [
   { tag: 'k3-banner', load: () => import('../components/feedback/banner.js') },
   { tag: 'k3-tooltip', load: () => import('../components/feedback/tooltip.js') },
   { tag: 'k3-badge', load: () => import('../components/feedback/badge.js') },
+  { tag: 'k3-status', load: () => import('../components/feedback/status.js') },
   { tag: 'k3-kbd', load: () => import('../components/feedback/kbd.js') },
   // UX extras (countdown, marquee, sound-fx, chart, audio, qr, …) → package `k3ux`
   // containment

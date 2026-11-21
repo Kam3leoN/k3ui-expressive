@@ -9,6 +9,7 @@ import {
   SchemeFidelity,
   SchemeMonochrome,
   SchemeNeutral,
+  SchemeCmf,
   MaterialDynamicColors,
   DynamicScheme,
   TonalPalette,
@@ -53,6 +54,7 @@ export const AUTO_LIGHT_END_H = 18;
  * MCU scheme variants (Material Theme Builder / m3e).
  * Rainbow & Fruit Salad ship in MCU files but are omitted from the 0.2.7 barrel —
  * rebuilt locally from the same recipes.
+ * `cmf` = Color Match Formula (MCU Spec 2026, dual-seed).
  */
 export type ColorVariant =
   | 'tonalspot'
@@ -63,7 +65,8 @@ export type ColorVariant =
   | 'monochrome'
   | 'neutral'
   | 'rainbow'
-  | 'fruitsalad';
+  | 'fruitsalad'
+  | 'cmf';
 
 /** Theme Builder contrast — maps to MCU `contrastLevel` −1…1. */
 export type ContrastLevel = 'default' | 'medium' | 'high';
@@ -72,16 +75,23 @@ export type ContrastLevel = 'default' | 'medium' | 'high';
 export type ContrastPreference = ContrastLevel | 'auto';
 
 /**
- * Material color spec. `2025` = Material 3 Expressive: the Expressive variant
- * keeps the seed hue on primary (2021 rotated it by +240°). Variants without a
- * 2025 recipe (fidelity, monochrome, rainbow, fruit salad) use 2021 either way.
+ * Material color spec.
+ * - `2025` = Material 3 Expressive (default): Expressive keeps seed hue on primary.
+ * - `2026` = MCU refinements; only **CMF** uses 2026 for real — other variants
+ *   fall back to 2025 inside MCU (`maybeFallbackSpecVersion`).
+ * - `2021` = legacy hues (Expressive rotated primary +240°).
  */
-export type ColorSpecVersion = '2021' | '2025';
+export type ColorSpecVersion = '2021' | '2025' | '2026';
 
 export const DEFAULT_COLOR_SPEC: ColorSpecVersion = '2025';
 
 export interface ThemeOptions {
   seed?: string;
+  /**
+   * Second seed for `variant: 'cmf'` (MCU SchemeCmf tertiary / dual-source).
+   * Defaults to `seed` when omitted.
+   */
+  secondarySeed?: string;
   mode?: ColorMode;
   motion?: MotionScheme;
   variant?: ColorVariant;
@@ -97,6 +107,28 @@ const Variant = {
   RAINBOW: 7,
   FRUIT_SALAD: 8,
 } as const;
+
+/**
+ * MCU GitHub exposes `*Dim` via `colorSpec` methods but not as static fields
+ * (unlike `primary`, `secondary`, …). Bridge them so COLOR_ROLES can resolve.
+ */
+const MCU_DIM_ROLES = ['primaryDim', 'secondaryDim', 'tertiaryDim', 'errorDim'] as const;
+{
+  const mdc = MaterialDynamicColors as unknown as Record<string, DynamicColor | undefined> & {
+    colorSpec?: Record<string, (() => DynamicColor | undefined) | undefined>;
+  };
+  for (const key of MCU_DIM_ROLES) {
+    if (mdc[key]) continue;
+    const fn = mdc.colorSpec?.[key];
+    if (typeof fn === 'function') {
+      try {
+        mdc[key] = fn.call(mdc.colorSpec);
+      } catch {
+        /* Spec without Dim — skip */
+      }
+    }
+  }
+}
 
 const CONTRAST_LEVEL: Record<ContrastLevel, number> = {
   default: 0,
@@ -197,10 +229,16 @@ function buildScheme(
   variant: ColorVariant,
   contrast: ContrastLevel,
   spec: ColorSpecVersion = DEFAULT_COLOR_SPEC,
+  secondarySeed?: string,
 ): DynamicScheme {
   const source = Hct.fromInt(argbFromHex(seed));
   const c = contrastValue(contrast);
   switch (variant) {
+    case 'cmf': {
+      /* SchemeCmf requires Spec 2026 — MCU throws otherwise. */
+      const secondary = Hct.fromInt(argbFromHex(secondarySeed || seed));
+      return new SchemeCmf([source, secondary], dark, c, '2026', 'phone');
+    }
     case 'expressive':
       return new SchemeExpressive(source, dark, c, spec, 'phone');
     case 'content':
@@ -224,7 +262,14 @@ function buildScheme(
   }
 }
 
-type SchemeArgs = [seed: string, dark: boolean, variant: ColorVariant, contrast: ContrastLevel, spec: ColorSpecVersion];
+type SchemeArgs = [
+  seed: string,
+  dark: boolean,
+  variant: ColorVariant,
+  contrast: ContrastLevel,
+  spec: ColorSpecVersion,
+  secondarySeed?: string,
+];
 
 /** Recently computed schemes — re-applying a theme (or a prepared one) is free. */
 const schemeCache = new Map<string, Record<string, string>>();
@@ -241,8 +286,10 @@ function cacheScheme(key: string, vars: Record<string, string>): Record<string, 
  * Computes the scheme role by role. `pause` (async callers) runs between
  * batches so a first, cold computation never becomes one long task.
  */
-function* schemeVarsSteps(...[seed, dark, variant, contrast, spec]: SchemeArgs): Generator<void, Record<string, string>> {
-  const scheme = buildScheme(seed, dark, variant, contrast, spec);
+function* schemeVarsSteps(
+  ...[seed, dark, variant, contrast, spec, secondarySeed]: SchemeArgs
+): Generator<void, Record<string, string>> {
+  const scheme = buildScheme(seed, dark, variant, contrast, spec, secondarySeed);
   yield;
   const vars: Record<string, string> = {};
   const colors = MaterialDynamicColors as unknown as Record<string, DynamicColor | undefined>;
@@ -266,9 +313,10 @@ function schemeToCssVars(
   variant: ColorVariant,
   contrast: ContrastLevel,
   spec: ColorSpecVersion = DEFAULT_COLOR_SPEC,
+  secondarySeed?: string,
 ): Record<string, string> {
-  const args: SchemeArgs = [seed, dark, variant, contrast, spec];
-  const key = args.join('|');
+  const args: SchemeArgs = [seed, dark, variant, contrast, spec, secondarySeed];
+  const key = args.map((v) => v ?? '').join('|');
   const hit = schemeCache.get(key);
   if (hit) return hit;
   const steps = schemeVarsSteps(...args);
@@ -278,7 +326,7 @@ function schemeToCssVars(
 }
 
 async function schemeToCssVarsAsync(args: SchemeArgs, pause: () => Promise<void>): Promise<void> {
-  const key = args.join('|');
+  const key = args.map((v) => v ?? '').join('|');
   if (schemeCache.has(key)) return;
   const steps = schemeVarsSteps(...args);
   let r: IteratorResult<void, Record<string, string>>;
@@ -297,6 +345,7 @@ async function schemeToCssVarsAsync(args: SchemeArgs, pause: () => Promise<void>
 export function themeCssVars(
   options: {
     seed?: string;
+    secondarySeed?: string;
     dark?: boolean;
     variant?: ColorVariant;
     contrast?: ContrastLevel;
@@ -309,6 +358,7 @@ export function themeCssVars(
     options.variant ?? 'tonalspot',
     options.contrast ?? 'default',
     options.specVersion ?? DEFAULT_COLOR_SPEC,
+    options.secondarySeed,
   ) };
 }
 
@@ -373,18 +423,38 @@ export const themeApi = {
     if (isDocument) lastOptions = merged;
 
     const seed = merged.seed ?? '#3F51B5';
+    const secondarySeed = merged.secondarySeed;
     const mode = merged.mode ?? 'auto';
     const motion = merged.motion ?? 'expressive';
     const variant = merged.variant ?? 'tonalspot';
     const contrastPref = merged.contrast ?? 'default';
     const contrast = resolveContrast(contrastPref);
-    const spec = merged.specVersion ?? DEFAULT_COLOR_SPEC;
+    /* CMF always resolves under Spec 2026 inside MCU. */
+    const spec =
+      variant === 'cmf' ? '2026' : (merged.specVersion ?? DEFAULT_COLOR_SPEC);
     const resolved = resolveMode(mode);
-    const signature = [seed, mode, resolved, motion, variant, contrastPref, contrast, spec].join('|');
+    const signature = [
+      seed,
+      secondarySeed ?? '',
+      mode,
+      resolved,
+      motion,
+      variant,
+      contrastPref,
+      contrast,
+      spec,
+    ].join('|');
 
     try {
       if (bindings.get(target)?.signature === signature) return;
-      const vars = schemeToCssVars(seed, resolved === 'dark', variant, contrast, spec);
+      const vars = schemeToCssVars(
+        seed,
+        resolved === 'dark',
+        variant,
+        contrast,
+        spec,
+        secondarySeed,
+      );
       for (const [k, v] of Object.entries(vars)) {
         target.style.setProperty(k, v);
       }
@@ -395,6 +465,9 @@ export const themeApi = {
       target.dataset.k3Motion = motion;
       target.dataset.k3ColorVariant = variant;
       target.dataset.k3Contrast = contrast;
+      target.dataset.k3ColorSpec = spec;
+      if (secondarySeed) target.dataset.k3SecondarySeed = secondarySeed;
+      else delete target.dataset.k3SecondarySeed;
       target.style.colorScheme = resolved;
 
       bindListeners(target, { ...merged, target: undefined }, signature);
@@ -402,12 +475,12 @@ export const themeApi = {
       target.dispatchEvent(
         new CustomEvent('k3-theme-change', {
           bubbles: true,
-          detail: { seed, mode, resolved, motion, variant, contrast },
+          detail: { seed, secondarySeed, mode, resolved, motion, variant, contrast, spec },
         }),
       );
       debug.info(
         'theme',
-        `seed=${seed} mode=${mode}→${resolved} motion=${motion} variant=${variant} contrast=${contrast}`,
+        `seed=${seed} mode=${mode}→${resolved} motion=${motion} variant=${variant} contrast=${contrast} spec=${spec}`,
       );
     } catch (err) {
       debug.error('theme', err);
@@ -426,12 +499,16 @@ export const themeApi = {
     const { target: _target, ...rest } = options;
     const merged: ThemeOptions = { ...lastOptions, ...rest };
     const contrast = resolveContrast(merged.contrast ?? 'default');
+    const variant = merged.variant ?? 'tonalspot';
+    const spec =
+      variant === 'cmf' ? '2026' : (merged.specVersion ?? DEFAULT_COLOR_SPEC);
     const args: SchemeArgs = [
       merged.seed ?? '#3F51B5',
       resolveMode(merged.mode ?? 'auto') === 'dark',
-      merged.variant ?? 'tonalspot',
+      variant,
       contrast,
-      merged.specVersion ?? DEFAULT_COLOR_SPEC,
+      spec,
+      merged.secondarySeed,
     ];
     try {
       await schemeToCssVarsAsync(args, pause);

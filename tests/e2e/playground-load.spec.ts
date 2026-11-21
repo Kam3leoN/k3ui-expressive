@@ -24,13 +24,12 @@ const ready = (page: Page, id: string) =>
     { timeout: 20_000 },
   );
 
-test('home: catalog visible at once, every doc page stamped after boot', async ({ page }) => {
+test('home: hero + stats ready, every doc page stamped after boot', async ({ page }) => {
   await recordShifts(page);
   await page.goto('/');
-  /* Prerendered at build in production; the dev server builds it at boot */
-  await expect(page.locator('#catalog-grid .gallery-item').first()).toBeVisible();
-  await expect(page.locator('#gallery-title')).toBeVisible();
   await ready(page, 'home');
+  await expect(page.locator('#home-hero-title')).toBeVisible();
+  await expect(page.locator('#product-switch')).toBeVisible();
   /* Blurred Material orbs (Trainable-style) behind the hero */
   await expect(page.locator('#home-ambient .home-ambient__orb')).toHaveCount(4);
   await expect(page.locator('#home-ambient .home-ambient__shape')).toHaveCount(4);
@@ -39,6 +38,9 @@ test('home: catalog visible at once, every doc page stamped after boot', async (
   await expect(page.locator('#home-stats [data-stat="oss"] .home-stat__value')).toContainText(/open source/i);
   await expect(page.locator('.home-hero-banner__chips k3-chip')).toHaveCount(3);
   await expect(page.locator('.home-hero-morph__shape')).toHaveCount(3);
+  await expect(page.locator('#home-thoughtful')).toBeVisible();
+  await expect(page.locator('#home-thoughtful .home-thoughtful-card')).toHaveCount(3);
+  await expect(page.locator('#home-thoughtful-settings')).toBeVisible();
   await expect(page.locator('#home-lift-cta')).toBeVisible();
   await expect(page.locator('#home-lift-cta .home-lift-cta__blob')).toHaveCount(2);
   await expect(page.locator('#home-lift-cta k3-button[data-nav="quick-start"]')).toBeVisible();
@@ -48,7 +50,10 @@ test('home: catalog visible at once, every doc page stamped after boot', async (
   /* Rail destinations: Sponsors sits just above the trailing divider */
   await expect(page.locator('#nav-rail #rail-sponsors')).toBeVisible();
   await expect(page.locator('#nav-rail #rail-sponsors')).not.toHaveAttribute('slot', 'trailing');
-  await expect(page.locator('#nav-rail .rail-foot #ver')).toBeVisible();
+  const ver = page.locator('#nav-rail .rail-foot #ver');
+  await expect(ver).toBeVisible();
+  await expect(ver).toHaveJSProperty('localName', 'k3-status');
+  await expect(ver).toHaveAttribute('show-icon', 'false');
   /* Every doc page was put back once the app booted */
   const empty = await page.evaluate(
     () => [...document.querySelectorAll('.comp-page')].filter((a) => !a.firstElementChild).length,

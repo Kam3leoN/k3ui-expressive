@@ -272,6 +272,8 @@ export const codeblockStyles = [
       font-family: inherit;
       font-variant-ligatures: none;
       --k3-scroll-track-inset: var(--k3-codeblock-radius, 1rem);
+      /* Never trap the docs shell scroll when the wheel is over the sample */
+      overscroll-behavior-y: auto;
     }
 
     .code ::selection {

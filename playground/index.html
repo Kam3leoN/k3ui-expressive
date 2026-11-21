@@ -165,7 +165,14 @@
           label="Sponsors"
         ></k3-nav-item>
         <div slot="trailing" class="rail-foot">
-          <k3-chip id="ver" class="rail-ver-chip" aria-label="Version">v0.0.1</k3-chip>
+          <k3-status
+            id="ver"
+            class="rail-ver-chip"
+            status="neutral"
+            show-icon="false"
+            value="v0.0.1"
+            accessible-label="Version"
+          ></k3-status>
         </div>
       </k3-nav-rail>
 
@@ -210,41 +217,14 @@
                 ></span>
                 English
               </k3-menu-item>
-              <k3-menu-item id="btn-nl" slot="menu" data-locale="nl" value="nl">
+              <k3-menu-item id="btn-de" slot="menu" data-locale="de" value="de">
                 <span
                   class="flag-icon flag-icon--1x1"
                   slot="icon"
-                  data-locale-flag="nl"
-                  aria-hidden="true"
-                ></span>
-                Nederlands
-              </k3-menu-item>
-              <k3-menu-item id="btn-be" slot="menu" data-locale="nl-BE" value="nl-BE">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="be"
-                  aria-hidden="true"
-                ></span>
-                België
-              </k3-menu-item>
-              <k3-menu-item id="btn-at" slot="menu" data-locale="de-AT" value="de-AT">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="at"
+                  data-locale-flag="de"
                   aria-hidden="true"
                 ></span>
                 Deutsch
-              </k3-menu-item>
-              <k3-menu-item id="btn-se" slot="menu" data-locale="sv" value="sv">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="se"
-                  aria-hidden="true"
-                ></span>
-                Svenska
               </k3-menu-item>
               <k3-menu-item id="btn-it" slot="menu" data-locale="it" value="it">
                 <span
@@ -255,113 +235,23 @@
                 ></span>
                 Italiano
               </k3-menu-item>
-              <k3-menu-item id="btn-ch" slot="menu" data-locale="de-CH" value="de-CH">
+              <k3-menu-item id="btn-es" slot="menu" data-locale="es" value="es">
                 <span
                   class="flag-icon flag-icon--1x1"
                   slot="icon"
-                  data-locale-flag="ch"
+                  data-locale-flag="es"
                   aria-hidden="true"
                 ></span>
-                Deutsch (CH)
+                Español
               </k3-menu-item>
-              <k3-menu-item id="btn-fi" slot="menu" data-locale="fi" value="fi">
+              <k3-menu-item id="btn-pt" slot="menu" data-locale="pt" value="pt">
                 <span
                   class="flag-icon flag-icon--1x1"
                   slot="icon"
-                  data-locale-flag="fi"
+                  data-locale-flag="pt"
                   aria-hidden="true"
                 ></span>
-                Suomi
-              </k3-menu-item>
-              <k3-menu-item id="btn-pl" slot="menu" data-locale="pl" value="pl">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="pl"
-                  aria-hidden="true"
-                ></span>
-                Polski
-              </k3-menu-item>
-              <k3-menu-item id="btn-cs" slot="menu" data-locale="cs" value="cs">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="cz"
-                  aria-hidden="true"
-                ></span>
-                Čeština
-              </k3-menu-item>
-              <k3-menu-item id="btn-ro" slot="menu" data-locale="ro" value="ro">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="ro"
-                  aria-hidden="true"
-                ></span>
-                Română
-              </k3-menu-item>
-              <k3-menu-item id="btn-hu" slot="menu" data-locale="hu" value="hu">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="hu"
-                  aria-hidden="true"
-                ></span>
-                Magyar
-              </k3-menu-item>
-              <k3-menu-item id="btn-el" slot="menu" data-locale="el" value="el">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="gr"
-                  aria-hidden="true"
-                ></span>
-                Ελληνικά
-              </k3-menu-item>
-              <k3-menu-item id="btn-uk" slot="menu" data-locale="uk" value="uk">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="ua"
-                  aria-hidden="true"
-                ></span>
-                Українська
-              </k3-menu-item>
-              <k3-menu-item id="btn-tr" slot="menu" data-locale="tr" value="tr">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="tr"
-                  aria-hidden="true"
-                ></span>
-                Türkçe
-              </k3-menu-item>
-              <k3-menu-item id="btn-he" slot="menu" data-locale="he" value="he">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="il"
-                  aria-hidden="true"
-                ></span>
-                עברית
-              </k3-menu-item>
-              <k3-menu-item id="btn-zh" slot="menu" data-locale="zh" value="zh">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="cn"
-                  aria-hidden="true"
-                ></span>
-                中文
-              </k3-menu-item>
-              <k3-menu-item id="btn-ja" slot="menu" data-locale="ja" value="ja">
-                <span
-                  class="flag-icon flag-icon--1x1"
-                  slot="icon"
-                  data-locale-flag="jp"
-                  aria-hidden="true"
-                ></span>
-                日本語
+                Português
               </k3-menu-item>
             </k3-split-button>
             <k3-tooltip id="tip-settings" position="bottom" content="Settings">
@@ -552,33 +442,303 @@
               </k3-button-group>
             </div>
           </header>
-          <section class="component-gallery" aria-labelledby="gallery-title">
-            <div class="gallery-heading">
-              <div>
-                <p class="gallery-eyebrow" data-i18n="playground.gallery.eyebrow">
-                  Explore the library
+          <!-- Thoughtful by design — theming · a11y · developer (home) -->
+          <section
+            class="home-thoughtful"
+            id="home-thoughtful"
+            aria-labelledby="home-thoughtful-title"
+          >
+            <header class="home-thoughtful__head k3-layout-grid">
+              <div class="home-thoughtful__titles k3-col-span-8">
+                <p class="home-thoughtful__eyebrow" data-i18n="playground.home.thoughtful.eyebrow">
+                  More than components
                 </p>
-                <h2 id="gallery-title" data-i18n="playground.gallery.title">
-                  See the components in action.
+                <h2 id="home-thoughtful-title" class="home-thoughtful__title" data-i18n="playground.home.thoughtful.title">
+                  Thoughtful by design.
                 </h2>
               </div>
-              <p class="gallery-lead" data-doc-product="k3ui" data-i18n="playground.gallery.lead">
-                Try a component here, then open its showcase for examples and API details.
+              <p class="home-thoughtful__lead k3-col-span-4" data-i18n="playground.home.thoughtful.lead">
+                Personalize the experience and build for more people, with less work.
               </p>
-              <p
-                class="gallery-lead"
-                data-doc-product="k3ux"
-                hidden
-                data-i18n="playground.gallery.lead.k3ux"
-              >
-                Try a UX animation here, then open its page for examples and API details.
-              </p>
+            </header>
+
+            <div class="home-thoughtful__cards k3-layout-grid k3-demo-cols-3">
+              <article class="home-thoughtful-card">
+                <div class="home-thoughtful-card__icon" aria-hidden="true">
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="palette"
+                  ></span>
+                </div>
+                <h3 class="home-thoughtful-card__title" data-i18n="playground.home.thoughtful.yours.title">
+                  Make it yours
+                </h3>
+                <dl class="home-thoughtful-card__list">
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.yours.dynamic.title">Dynamic color</dt>
+                    <dd data-i18n="playground.home.thoughtful.yours.dynamic.body">
+                      Create a palette from a single color, with light, dark, and contrast options.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.yours.expressive.title">Expressive design</dt>
+                    <dd data-i18n="playground.home.thoughtful.yours.expressive.body">
+                      Bring interfaces to life with Material 3 typography, shapes, and motion.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.yours.density.title">Adjustable density</dt>
+                    <dd data-i18n="playground.home.thoughtful.yours.density.body">
+                      Make supported components spacious or compact while preserving touch targets.
+                    </dd>
+                  </div>
+                </dl>
+                <k3-button
+                  class="home-thoughtful-card__link"
+                  variant="text"
+                  size="sm"
+                  data-nav="color-roles"
+                >
+                  <span data-i18n="playground.home.thoughtful.yours.cta">Explore theming</span>
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="arrow_forward"
+                    aria-hidden="true"
+                  ></span>
+                </k3-button>
+              </article>
+
+              <article class="home-thoughtful-card">
+                <div class="home-thoughtful-card__icon" aria-hidden="true">
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="accessibility"
+                  ></span>
+                </div>
+                <h3 class="home-thoughtful-card__title" data-i18n="playground.home.thoughtful.people.title">
+                  Designed for people
+                </h3>
+                <dl class="home-thoughtful-card__list">
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.people.a11y.title">Accessible interactions</dt>
+                    <dd data-i18n="playground.home.thoughtful.people.a11y.body">
+                      Keyboard navigation, focus management, and screen reader semantics.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.people.text.title">Text scaling &amp; direction</dt>
+                    <dd data-i18n="playground.home.thoughtful.people.text.body">
+                      Support larger text and left-to-right or right-to-left layouts.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.people.motion.title">Reduced motion</dt>
+                    <dd data-i18n="playground.home.thoughtful.people.motion.body">
+                      Honor the user’s system preference for less motion.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.people.contrast.title">Forced colors</dt>
+                    <dd data-i18n="playground.home.thoughtful.people.contrast.body">
+                      Adapt to high-contrast environments.
+                    </dd>
+                  </div>
+                </dl>
+                <k3-button
+                  class="home-thoughtful-card__link"
+                  variant="text"
+                  size="sm"
+                  data-nav="color-roles"
+                >
+                  <span data-i18n="playground.home.thoughtful.people.cta">Explore color accessibility</span>
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="arrow_forward"
+                    aria-hidden="true"
+                  ></span>
+                </k3-button>
+              </article>
+
+              <article class="home-thoughtful-card">
+                <div class="home-thoughtful-card__icon" aria-hidden="true">
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="code"
+                  ></span>
+                </div>
+                <h3 class="home-thoughtful-card__title" data-i18n="playground.home.thoughtful.build.title">
+                  Ready to build
+                </h3>
+                <dl class="home-thoughtful-card__list">
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.build.web.title">Web-native</dt>
+                    <dd data-i18n="playground.home.thoughtful.build.web.body">
+                      Use custom elements across frameworks, with dedicated React bindings.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.build.forms.title">Native forms</dt>
+                    <dd data-i18n="playground.home.thoughtful.build.forms.body">
+                      Form-associated controls integrate with submission and validation.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.build.modular.title">Modular imports</dt>
+                    <dd data-i18n="playground.home.thoughtful.build.modular.body">
+                      Import individual components or the full library.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="playground.home.thoughtful.build.tooling.title">Helpful tooling</dt>
+                    <dd data-i18n="playground.home.thoughtful.build.tooling.body">
+                      Explore live examples, API documentation, and editor support.
+                    </dd>
+                  </div>
+                </dl>
+                <k3-button
+                  class="home-thoughtful-card__link"
+                  variant="text"
+                  size="sm"
+                  data-nav="quick-start"
+                >
+                  <span data-i18n="playground.home.thoughtful.build.cta">Explore developer setup</span>
+                  <span
+                    class="ms notranslate"
+                    translate="no"
+                    lang="zxx"
+                    data-k3-icon="arrow_forward"
+                    aria-hidden="true"
+                  ></span>
+                </k3-button>
+              </article>
             </div>
-            <div id="catalog-grid" class="catalog-grid gallery-root"></div>
+
+            <aside class="home-thoughtful__banner" aria-labelledby="home-thoughtful-banner-title">
+              <div class="home-thoughtful__banner-copy">
+                <h3 id="home-thoughtful-banner-title" data-i18n="playground.home.thoughtful.banner.title">
+                  See it for yourself.
+                </h3>
+                <p data-i18n="playground.home.thoughtful.banner.lead">
+                  Try color, contrast, text size, direction, and motion settings across the showcase.
+                  Reduced motion and forced colors follow your system settings.
+                </p>
+              </div>
+              <k3-button
+                id="home-thoughtful-settings"
+                variant="outlined"
+                size="md"
+              >
+                <span
+                  class="ms notranslate"
+                  translate="no"
+                  lang="zxx"
+                  data-k3-icon="settings"
+                  aria-hidden="true"
+                ></span>
+                <span data-i18n="playground.home.thoughtful.banner.cta">Open settings</span>
+              </k3-button>
+            </aside>
           </section>
 
-          <!-- Lighthouse scores of this page — playground/lighthouse.ts (loaded on approach) -->
-          <div id="lighthouse-root" class="home-lighthouse-root"></div>
+          <!-- Behind k3ui — VIVI-style creator band · Cookie/Flower clips via home-about/mount.ts -->
+          <section
+            class="home-about"
+            id="home-about"
+            aria-labelledby="home-about-title"
+            data-home-about
+          >
+            <div class="home-about__grid">
+              <figure class="home-about__portrait">
+                <!-- Spinning Cookie clip injected by home-about/mount.ts -->
+                <div class="home-about__frame"></div>
+                <figcaption class="home-about__caption">
+                  <span class="home-about__name notranslate" translate="no">Kam3leoN</span>
+                  <span
+                    class="home-about__role"
+                    data-i18n="playground.home.about.role"
+                    >Creator and lead developer</span
+                  >
+                </figcaption>
+              </figure>
+
+              <div class="home-about__copy">
+                <h2
+                  id="home-about-title"
+                  class="home-about__title"
+                  data-i18n="playground.home.about.title"
+                >
+                  Behind k3ui
+                </h2>
+                <p class="home-about__lead" data-i18n="playground.home.about.p1">
+                  k3ui started as a passion project: Material 3 Expressive components for the
+                  web — open source, free of ads, built for real products.
+                </p>
+                <p class="home-about__lead" data-i18n="playground.home.about.p2">
+                  Today it grows with a community of contributors who believe design systems
+                  should be expressive and open to everyone.
+                </p>
+                <div class="home-about__actions">
+                  <a
+                    class="home-about__profile"
+                    href="https://github.com/Kam3leoN"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span class="home-about__profile-av" aria-hidden="true">
+                      <img
+                        src="/avatars/kam3leon.gif"
+                        width="48"
+                        height="48"
+                        alt=""
+                        decoding="async"
+                      />
+                    </span>
+                    <span class="home-about__profile-text">
+                      <span data-i18n="playground.home.about.profile">View profile</span>
+                      <small data-i18n="playground.home.about.profileOn">on GitHub</small>
+                    </span>
+                    <span class="home-about__go" aria-hidden="true">
+                      <span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="north_east"
+                      ></span>
+                    </span>
+                  </a>
+                  <a class="home-about__support" href="#/sponsors">
+                    <span class="home-about__support-badge" aria-hidden="true">
+                      <span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="favorite"
+                      ></span>
+                    </span>
+                    <span data-i18n="playground.home.about.support">Support the project</span>
+                    <span class="home-about__go" aria-hidden="true">
+                      <span
+                        class="ms notranslate"
+                        translate="no"
+                        lang="zxx"
+                        data-k3-icon="north_east"
+                      ></span>
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <!-- Footer CTA — Trainable-style lift card · blobs + stars via home-lift-cta/mount.ts -->
           <section
@@ -8936,6 +9096,253 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
         </article>
 
         <!-- KBD -->
+        <article class="comp-page" data-page="status" id="page-status" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
+            <h1 data-i18n="doc.status.title">Status</h1>
+            <p data-i18n="doc.status.blurb">
+              Tonal chip · boolean or semantic · leading / trailing icon.
+            </p>
+            <p class="doc-intro" data-i18n="doc.status.intro">
+              k3-status shows a compact status value with an overhanging icon circle. Pass
+              status="true" / "false" for success / error, or a named variant. Hide the icon,
+              flip placement, and override tones via color tokens.
+            </p>
+          </header>
+
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h2 data-i18n="doc.section.examples">Examples</h2>
+            </header>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.status.option.bool">status (boolean)</h3>
+              <p data-i18n="doc.status.option.bool.desc">false → error · true → success.</p>
+            </header>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span>
+                <span class="variant-label" data-i18n="doc.status.legend.false">false · error</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span>
+                <span class="variant-label" data-i18n="doc.status.legend.true">true · success</span>
+              </li>
+            </ol>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="false" value="32.3%"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="true" value="67.7%"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.status.option.icon">icon position</h3>
+              <p data-i18n="doc.status.option.icon.desc">Leading, trailing, or none.</p>
+            </header>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span>
+                <span class="variant-label" data-i18n="doc.status.legend.leading">Leading icon</span>
+              </li>
+              <li>
+                <span class="pill-num">2</span>
+                <span class="variant-label" data-i18n="doc.status.legend.trailing"
+                  >Trailing icon</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">3</span>
+                <span class="variant-label" data-i18n="doc.status.legend.none">No icon</span>
+              </li>
+            </ol>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="false" value="32.3%"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="true" value="67.7%" position="trailing"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="false" value="32.3%" show-icon="false"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.status.option.variants">variants</h3>
+              <p data-i18n="doc.status.option.variants.desc">
+                success · error · warning · info · neutral.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="success" value="Validated"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="error" value="Rejected"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="warning" value="12 pending"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="info" value="v2.4.1"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">4</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="neutral" value="Draft"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">5</span>
+                </div>
+              </div>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.status.option.custom">custom colors</h3>
+              <p data-i18n="doc.status.option.custom.desc">
+                color alone derives text/bg; or set text-color, bg-color, icon-color.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="neutral" value="In progress" color="#8b5cf6"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status
+                      status="success"
+                      value="Premium"
+                      color="#111827"
+                      text-color="#111827"
+                      bg-color="#fde68a"
+                      icon-color="#fde68a"
+                    ></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.status.option.rtl">RTL</h3>
+              <p data-i18n="doc.status.option.rtl.desc">
+                rtl flips leading/trailing with logical insets.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="false" value="32.3%" rtl></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status
+                      status="true"
+                      value="67.7%"
+                      position="trailing"
+                      rtl
+                    ></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.status.option.disabled">disabled</h3>
+              <p data-i18n="doc.status.option.disabled.desc">
+                Muted at 38% opacity · pointer-events none · aria-disabled.
+              </p>
+            </header>
+            <ol class="variant-guide">
+              <li>
+                <span class="pill-num">1</span>
+                <span class="variant-label" data-i18n="doc.status.legend.disabled"
+                  >Disabled</span
+                >
+              </li>
+              <li>
+                <span class="pill-num">2</span>
+                <span class="variant-label" data-i18n="doc.status.legend.true">true · success</span>
+              </li>
+            </ol>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="error" value="Rejected" disabled></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-status status="success" value="Validated"></k3-status>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
         <article class="comp-page" data-page="kbd" id="page-kbd" hidden>
           <header class="section-head">
             <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
@@ -16057,6 +16464,79 @@ static styles = [
 
 </article>
 
+        <!-- SHOWCASE hub + live children (rail parent between Styles and Sponsors) -->
+        <article class="comp-page" data-page="showcase" id="page-showcase" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
+            <h1 data-i18n="doc.showcase.title">Showcase</h1>
+            <p data-i18n="doc.showcase.blurb">
+              Live UI patterns — pricing and login composed with k3ui.
+            </p>
+            <p class="doc-intro" data-i18n="doc.showcase.intro">
+              Pick a composition to explore. Each card opens a full live page built with the same
+              components as the docs.
+            </p>
+          </header>
+          <div id="showcase-root" class="showcase-root"></div>
+        </article>
+
+        <article class="comp-page" data-page="showcase-pricing" id="page-showcase-pricing" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
+            <div class="section-head__title-row">
+              <h1 data-i18n="doc.showcase.pricing.title">Pricing</h1>
+              <span
+                class="showcase-stack-badge"
+                translate="no"
+                data-i18n="doc.showcase.stack.k3ui"
+                >k3ui</span
+              >
+            </div>
+            <p data-i18n="doc.showcase.pricing.blurb">
+              Four plans · monthly / annual billing · FAQ accordion.
+            </p>
+          </header>
+          <div id="showcase-pricing-root" class="showcase-root"></div>
+        </article>
+
+        <article class="comp-page" data-page="showcase-login" id="page-showcase-login" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
+            <div class="section-head__title-row">
+              <h1 data-i18n="doc.showcase.login.title">Login</h1>
+              <span
+                class="showcase-stack-badge"
+                translate="no"
+                data-i18n="doc.showcase.stack.k3ui"
+                >k3ui</span
+              >
+            </div>
+            <p data-i18n="doc.showcase.login.blurb">
+              Email · password · remember me — live text fields and checkbox.
+            </p>
+          </header>
+          <div id="showcase-login-root" class="showcase-root"></div>
+        </article>
+
+        <article class="comp-page" data-page="showcase-dialer" id="page-showcase-dialer" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
+            <div class="section-head__title-row">
+              <h1 data-i18n="doc.showcase.dialer.title">T9 dialer</h1>
+              <span
+                class="showcase-stack-badge"
+                translate="no"
+                data-i18n="doc.showcase.stack.k3ui"
+                >k3ui</span
+              >
+            </div>
+            <p data-i18n="doc.showcase.dialer.blurb">
+              Live phone keypad · T9 contact search · Dual SIM chip.
+            </p>
+          </header>
+          <div id="showcase-dialer-root" class="showcase-root"></div>
+        </article>
+
         <!-- STYLES: COLOR — ROLES -->
         <article class="comp-page" data-page="color-roles" id="page-color-roles" hidden>
           <header class="section-head">
@@ -16123,7 +16603,32 @@ static styles = [
                   <k3-button data-color-variant="fruitsalad" size="xs" variant="tonal"
                     >Fruit Salad</k3-button
                   >
+                  <k3-button data-color-variant="cmf" size="xs" variant="tonal">CMF</k3-button>
                 </k3-button-group>
+              </div>
+              <div class="row wrap gap-sm items-center color-secondary-seed-row" hidden>
+                <label class="color-seed-label">
+                  <span data-i18n="playground.ctrl.settings.secondarySeed">Secondary seed</span>
+                  <input
+                    class="color-secondary-seed-input color-seed-swatch"
+                    type="color"
+                    value="#8B1A4A"
+                    aria-label="Secondary seed color"
+                    data-i18n-aria-label="playground.ctrl.settings.secondarySeed"
+                  />
+                </label>
+                <label class="color-hex-label">
+                  <span data-i18n="doc.color-lab.hex">HEX</span>
+                  <input
+                    class="color-secondary-hex-input"
+                    type="text"
+                    spellcheck="false"
+                    maxlength="7"
+                    value="#8B1A4A"
+                    placeholder="#8B1A4A"
+                    aria-label="Secondary seed HEX"
+                  />
+                </label>
               </div>
               <p class="color-hct hint code-inline"></p>
               <p class="hint" data-i18n="doc.color-lab.copy-hint">
@@ -16229,7 +16734,32 @@ K3UI.theme.apply({ seed: '#3F51B5', mode: 'auto', variant: 'tonalspot' });
                   <k3-button data-color-variant="fruitsalad" size="xs" variant="tonal"
                     >Fruit Salad</k3-button
                   >
+                  <k3-button data-color-variant="cmf" size="xs" variant="tonal">CMF</k3-button>
                 </k3-button-group>
+              </div>
+              <div class="row wrap gap-sm items-center color-secondary-seed-row" hidden>
+                <label class="color-seed-label">
+                  <span data-i18n="playground.ctrl.settings.secondarySeed">Secondary seed</span>
+                  <input
+                    class="color-secondary-seed-input color-seed-swatch"
+                    type="color"
+                    value="#8B1A4A"
+                    aria-label="Secondary seed color"
+                    data-i18n-aria-label="playground.ctrl.settings.secondarySeed"
+                  />
+                </label>
+                <label class="color-hex-label">
+                  <span data-i18n="doc.color-lab.hex">HEX</span>
+                  <input
+                    class="color-secondary-hex-input"
+                    type="text"
+                    spellcheck="false"
+                    maxlength="7"
+                    value="#8B1A4A"
+                    placeholder="#8B1A4A"
+                    aria-label="Secondary seed HEX"
+                  />
+                </label>
               </div>
               <p class="color-hct hint code-inline"></p>
               <p class="hint" data-i18n="doc.color-lab.copy-hint">
@@ -17339,11 +17869,12 @@ K3UI.theme.apply({ seed: '#3F51B5', mode: 'auto', variant: 'tonalspot' });
                 label="Material color spec"
                 data-i18n-label="playground.ctrl.settings.specLabel"
               >
+                <k3-menu-item value="2026" data-i18n="playground.ctrl.spec.2026">2026 · MCU CMF</k3-menu-item>
                 <k3-menu-item value="2025" data-i18n="playground.ctrl.spec.2025">2025 · Material 3 Expressive</k3-menu-item>
                 <k3-menu-item value="2021" data-i18n="playground.ctrl.spec.2021">2021 · Material 3 (legacy)</k3-menu-item>
               </k3-select>
               <p class="settings-hint" data-i18n="playground.ctrl.settings.specHint">
-                2025 keeps your seed hue on primary with Expressive. Fidelity, monochrome, rainbow and fruit salad always use 2021.
+                Only variants MCU keeps for the chosen spec are listed. 2026 → CMF (dual seed). 2025 → Tonal Spot, Vibrant, Expressive, Neutral. 2021 → full legacy set including Fidelity, Content, Monochrome, Rainbow and Fruit Salad.
               </p>
             </div>
           </k3-card>
@@ -17392,7 +17923,30 @@ K3UI.theme.apply({ seed: '#3F51B5', mode: 'auto', variant: 'tonalspot' });
                 <k3-button data-settings-variant="fruitsalad" size="xs" variant="tonal">
                   <span data-i18n="playground.ctrl.variant.fruitsalad">Fruit Salad</span>
                 </k3-button>
+                <k3-button data-settings-variant="cmf" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.variant.cmf">CMF</span>
+                </k3-button>
               </k3-button-group>
+              <div
+                id="settings-secondary-seed-row"
+                class="settings-secondary-seed"
+                hidden
+              >
+                <label class="color-seed-label">
+                  <span data-i18n="playground.ctrl.settings.secondarySeed">Secondary seed</span>
+                  <input
+                    id="settings-secondary-seed"
+                    class="color-seed-swatch settings-secondary-seed-swatch"
+                    type="color"
+                    value="#8B1A4A"
+                    aria-label="Secondary seed color"
+                    data-i18n-aria-label="playground.ctrl.settings.secondarySeed"
+                  />
+                </label>
+                <p class="settings-hint" data-i18n="playground.ctrl.settings.secondarySeedHint">
+                  CMF (Spec 2026) blends a second seed into the scheme.
+                </p>
+              </div>
             </div>
           </k3-card>
         </section>

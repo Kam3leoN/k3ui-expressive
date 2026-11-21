@@ -24,10 +24,11 @@ export const menuStyles: CSSResultGroup = [
     --k3-menu-surface-radius: var(--k3-sys-shape-corner-large); /* 16 */
     /* Gap-facing surface corner — 12 to match item first/last hover */
     --k3-menu-gap-inner-radius: var(--k3-sys-shape-corner-medium); /* 12 */
-    --k3-menu-pad: 0.25rem; /* 4 all sides */
+    --k3-menu-pad: 0.25rem; /* 4 — applied on .list so scrollbar hugs the edge */
     --k3-menu-item-gap: 0.125rem; /* 2 between items */
     --k3-menu-min-w: 7rem; /* 112 */
     --k3-menu-max-w: 17.5rem; /* 280 */
+    --k3-menu-list-max-h: min(28rem, 75vh);
     /* Density 0 (default) — item 48 · inherited by items + flyouts */
     --k3-menu-density-item-h: 3rem;
     --k3-menu-bg: var(--k3-sys-color-surface-container-low);
@@ -139,8 +140,8 @@ export const menuStyles: CSSResultGroup = [
     min-width: var(--k3-menu-min-w);
     max-width: min(var(--k3-menu-max-w), 90vw);
     overflow: visible;
-    /* !important: keep pad token authoritative vs host resets */
-    padding: var(--k3-menu-pad) !important;
+    /* Pad lives on .list — keeps edge scrollbar flush with the radius */
+    padding: 0 !important;
     border-radius: var(--k3-menu-radius);
     background: var(--k3-menu-bg);
     color: var(--k3-menu-fg);
@@ -238,16 +239,20 @@ export const menuStyles: CSSResultGroup = [
   }
 
   /*
-   * Scrollport — cap tall menus; class k3-scroll (edgeScrollbarStyles)
-   * provides the discreet thumb (no Windows arrows). overflow-y comes from
-   * that class; keep max-height here.
+   * Scrollport — pad + max-height here so .k3-scroll thumb sits on the panel
+   * edge (not inset by panel padding). Cap tall menus; short ones (locale)
+   * set --k3-menu-list-max-h: none.
    */
   .list {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: var(--k3-menu-item-gap);
-    max-height: min(28rem, 75vh); /* room for dual-line items (L1+en-US) */
+    box-sizing: border-box;
+    padding: var(--k3-menu-pad);
+    max-height: var(--k3-menu-list-max-h, min(28rem, 75vh));
+    border-radius: inherit;
+    --k3-scroll-track-inset: var(--k3-menu-radius);
   }
   /* Submenus use position:fixed — don’t clip while a flyout is open */
   :host([data-submenu-open]) .list {
