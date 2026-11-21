@@ -305,6 +305,8 @@
   "snow.ariaLabel": "Neige",
   "firework.ariaLabel": "Feux d’artifice",
   "voiceRing.ariaLabel": "Anneau vocal",
+  "parallax.ariaLabel": "Diapositives parallax",
+  "parallax.role": "parallax",
   "chart.ariaLabel": "Graphique",
   "confetti.ariaLabel": "Confettis",
   "confetti.preset.basic": "Basique",

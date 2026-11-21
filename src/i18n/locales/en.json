@@ -305,6 +305,8 @@
   "snow.ariaLabel": "Snow",
   "firework.ariaLabel": "Firework",
   "voiceRing.ariaLabel": "Voice ring",
+  "parallax.ariaLabel": "Parallax slides",
+  "parallax.role": "parallax",
   "chart.ariaLabel": "Chart",
   "confetti.ariaLabel": "Confetti",
   "confetti.preset.basic": "Basic",

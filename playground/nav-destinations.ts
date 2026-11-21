@@ -112,6 +112,7 @@ export const COMPONENT_ITEM_ICONS: Record<string, string> = {
   'text-scramble': 'shuffle',
   'icons-burst': 'favorite',
   halftone: 'grid_on',
+  parallax: 'layers',
   avatar: 'account_circle',
   bubble: 'chat',
   quote: 'notes',

@@ -867,6 +867,14 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     a11y: { na: "Pending gabarit migration" },
     versions: { na: "Pending gabarit migration" },
   },
+  parallax: {
+    theming: { na: "Pending gabarit migration" },
+    keyboard: { na: "Pending gabarit migration" },
+    focus: { na: "Pending gabarit migration" },
+    motion: { na: "Pending gabarit migration" },
+    a11y: { na: "Pending gabarit migration" },
+    versions: { na: "Pending gabarit migration" },
+  },
   'card-holo': {
     theming: { na: "Pending gabarit migration" },
     keyboard: { na: "Pending gabarit migration" },

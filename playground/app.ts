@@ -2071,6 +2071,7 @@ const K3UX_PAGES = new Set([
   'text-scramble',
   'icons-burst',
   'halftone',
+  'parallax',
   'card-holo',
   'card-lenticular',
   'card-scratch',

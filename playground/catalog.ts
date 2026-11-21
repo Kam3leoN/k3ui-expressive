@@ -524,6 +524,14 @@ export const DOC_COMPONENTS: DocComponent[] = [
     product: 'k3ux',
   },
   {
+    id: 'parallax',
+    category: 'Animation',
+    title: 'Parallax',
+    titleKey: 'doc.parallax.title',
+    blurbKey: 'doc.parallax.blurb',
+    product: 'k3ux',
+  },
+  {
     id: 'card-holo',
     category: 'Containment',
     title: 'Card holographic',

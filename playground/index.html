@@ -14358,6 +14358,57 @@ k3-codeblock[collapsible]:not([expanded])::part(panel) {
           </div>
         </article>
 
+        <!-- ANIMATION: PARALLAX -->
+        <article class="comp-page" data-page="parallax" id="page-parallax" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.animation">Animation</p>
+            <h1 data-i18n="doc.parallax.title">Parallax</h1>
+            <p data-i18n="doc.parallax.blurb">
+              Full-page wheel / touch parallax slides — CodePen-style stacked backgrounds.
+            </p>
+            <p class="doc-intro" data-i18n="doc.parallax.intro">
+              k3-parallax stacks full-bleed k3-parallax-slide panels and advances one slide at a
+              time on wheel, swipe, or keyboard. Backgrounds and content ease with different
+              offsets (parallax), matching the classic full-page CodePen effect.
+            </p>
+          </header>
+          <section class="doc-section">
+            <h2 data-i18n="doc.parallax.section.demo">Demo</h2>
+            <p data-i18n="doc.parallax.section.demo.blurb">
+              Focus the stage, then scroll, swipe, or use ↑ ↓.
+            </p>
+          </section>
+          <div class="demo-block">
+            <div
+              class="demo-frame demo-frame--cases demo-frame--stack"
+              data-demo-enhance="off"
+              style="overflow: hidden"
+            >
+              <div class="demo-case">
+                <div class="demo-case-stage" style="padding: 0; min-height: 28rem">
+                  <k3-parallax style="height: 28rem; width: 100%">
+                    <k3-parallax-slide
+                      background="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&amp;fit=crop&amp;w=1600&amp;q=80"
+                      heading="Full Page Parallax Effect"
+                      subtitle="Scroll down and up to see the effect!"
+                    ></k3-parallax-slide>
+                    <k3-parallax-slide
+                      background="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&amp;fit=crop&amp;w=1600&amp;q=80"
+                      heading="Cras lacinia non eros nec semper."
+                      subtitle="Class aptent taciti sociosqu ad litora torquent per conubia nostra."
+                    ></k3-parallax-slide>
+                    <k3-parallax-slide
+                      background="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&amp;fit=crop&amp;w=1600&amp;q=80"
+                      heading="Etiam consequat lectus."
+                      subtitle="Nullam tristique urna sed tellus ornare congue."
+                    ></k3-parallax-slide>
+                  </k3-parallax>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
         <!-- ANIMATION: TEXT BOUNCE -->
         <article class="comp-page" data-page="text-bounce" id="page-text-bounce" hidden>
           <header class="section-head">

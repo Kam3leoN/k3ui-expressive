@@ -1217,6 +1217,31 @@ el.play();`,
 </k3-icons-burst>`,
     jsExtra: `document.querySelector('k3-icons-burst')?.burst(12);`,
   },
+  parallax: {
+    components: ['k3-parallax', 'k3-parallax-slide'],
+    html: `<k3-parallax style="height: 70vh" sensitivity="30" lock-ms="600">
+  <k3-parallax-slide
+    background="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1600"
+    heading="Full Page Parallax Effect"
+    subtitle="Scroll down and up to see the effect!"
+  ></k3-parallax-slide>
+  <k3-parallax-slide
+    background="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600"
+    heading="Second slide"
+    subtitle="Wheel, swipe, or arrow keys."
+  ></k3-parallax-slide>
+  <k3-parallax-slide
+    background="linear-gradient(135deg, #1e3a5f, #0f172a)"
+    heading="Third slide"
+    subtitle="Tune overlay, offsets, and sensitivity."
+  ></k3-parallax-slide>
+</k3-parallax>`,
+    jsExtra: `const el = document.querySelector('k3-parallax');
+el?.addEventListener('k3-parallax-change', (e) => {
+  console.log('slide', e.detail.index);
+});
+// el.next(); el.previous(); el.goTo(2);`,
+  },
   halftone: {
     components: ['k3-halftone'],
     html: `<!-- Screen print of an image: separated inks, rotated screens -->
