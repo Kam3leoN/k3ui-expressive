@@ -37,12 +37,14 @@ export interface InitOptions {
   theme?: {
     /** Source colour, `#rgb` or `#rrggbb`. */
     seed?: string;
+    /** Second seed for `variant: 'cmf'` (MCU Spec 2026 dual-source). */
+    secondarySeed?: string;
     mode?: ColorMode;
     motion?: MotionScheme;
     variant?: ColorVariant;
     /** `auto` follows the OS `prefers-contrast` setting. */
     contrast?: ContrastPreference;
-    /** Material color spec — `2025` (default) or `2021`. */
+    /** Material color spec — `2025` (default) · `2026` (CMF) · `2021` (legacy). */
     specVersion?: ColorSpecVersion;
   };
   motion?: {

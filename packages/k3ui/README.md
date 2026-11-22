@@ -312,10 +312,13 @@ Lighthouse is not a dependency: the runner uses a local install, `LIGHTHOUSE_BIN
 
 ## Development
 
+k3ui lives in the [k3-expressive monorepo](../../README.md) next to `k3ux` (npm workspaces).
+Run the commands from the repository root:
+
 ```bash
-npm ci
+npm ci                # installs both packages, links k3ui ↔ k3ux
 npm run dev           # playground
-npm run check         # lint (tsc) + tests + build — same as CI
+npm run check         # lint (tsc) + tests + build, both packages — same as CI
 npm run build:playground
 ```
 

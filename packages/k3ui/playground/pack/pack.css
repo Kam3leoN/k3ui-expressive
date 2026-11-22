@@ -141,24 +141,23 @@
   gap: 0.75rem;
 }
 
-.pack-product-switch {
-  display: flex;
-  justify-content: stretch;
-  width: 100%;
+.pack-ux-divider {
+  margin-block: var(--k3-sys-spacing-space400, 1.5rem) var(--k3-sys-spacing-space200, 0.75rem);
+  padding-block-start: var(--k3-sys-spacing-space300, 1rem);
+  border-block-start: 1px solid var(--k3-sys-color-outline-variant);
 }
-.pack-product-switch k3-button-group {
-  display: block;
-  width: 100%;
+.pack-ux-title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--k3-sys-color-on-surface);
 }
-.pack-product-switch k3-button-group::part(container) {
-  width: 100%;
+.pack-ux-blurb {
+  margin: 0 0 var(--k3-sys-spacing-space200, 0.75rem);
+  color: var(--k3-sys-color-on-surface-variant);
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
-.pack-product-switch k3-button {
-  flex: 1 1 0;
-  min-inline-size: 0;
-  justify-content: center;
-}
-
 .pack-summary {
   padding: 1.25rem;
   border-radius: var(--k3-sys-shape-corner-extra-large, 1.75rem);
@@ -167,6 +166,20 @@
 .pack-summary--full {
   background: var(--k3-sys-color-primary-container);
   color: var(--k3-sys-color-on-primary-container);
+  transition: opacity 160ms ease, filter 160ms ease;
+}
+.pack-summary--full[data-disabled],
+.pack-summary--custom[data-disabled] {
+  opacity: 0.48;
+  filter: grayscale(0.35);
+  pointer-events: none;
+  user-select: none;
+}
+.pack-summary-lock {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  font-weight: 600;
 }
 .pack-summary-kicker {
   margin: 0 0 0.25rem;
@@ -260,11 +273,15 @@
   .pack-layout .pack-side {
     grid-column: 1 / -1;
   }
-  /* Side column (switch + summary) pinned to the bottom edge while ticking. */
+  /* Side column (switch + summary) pinned to the bottom edge while ticking —
+     capped so it never covers most of a phone screen (it scrolls on its own). */
   .pack-side {
     position: sticky;
     inset-block: auto 0.5rem;
     order: 2;
+    max-block-size: 45dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .pack-summary-blurb,
   .pack-summary-kicker,

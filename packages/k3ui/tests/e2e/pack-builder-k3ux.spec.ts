@@ -2,8 +2,11 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 
-const built = existsSync(resolve(process.cwd(), '../k3ux/dist/lazy/components.json'));
-test.skip(!built, 'k3ux/dist/lazy missing — run `npm run build:lazy` in k3ux');
+/* The download assembles k3ux dist/lazy chunks + dist/k3ux.css: needs the full build. */
+const built =
+  existsSync(resolve(process.cwd(), '../k3ux/dist/lazy/components.json')) &&
+  existsSync(resolve(process.cwd(), '../k3ux/dist/k3ux.css'));
+test.skip(!built, 'k3ux dist missing — run `npm run build` at the repository root');
 
 const checked = (page: import('@playwright/test').Page): Promise<string[]> =>
   page.evaluate(() =>
@@ -17,20 +20,28 @@ const checked = (page: import('@playwright/test').Page): Promise<string[]> =>
   );
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/?product=k3ux&components=confetti#/pack');
+  await page.goto('/?components=confetti#/pack');
   await expect(page.locator('#pack-layout')).toBeVisible({ timeout: 30_000 });
   await page.waitForFunction(() => !!customElements.get('k3-checkbox'));
 });
 
-test('k3ux catalog: core locked, confetti selected, no k3ui-only tags', async ({ page }) => {
+test('unified pack: core locked, confetti selected among k3ui + k3ux rows', async ({
+  page,
+  isMobile,
+}) => {
   await expect.poll(() => checked(page)).toEqual(['core*', 'k3-confetti']);
-  await expect(page.locator('k3-checkbox[data-tag="k3-select"]')).toHaveCount(0);
+  await expect(page.locator('k3-checkbox[data-tag="k3-select"]')).toHaveCount(1);
   await expect(page.locator('k3-checkbox[data-tag="k3-snow"]')).toHaveCount(1);
-  await expect(page.locator('#pack-download')).toContainText(/K3ux Custom/i);
-  await expect(page.locator('#nav-rail')).toBeVisible();
+  await expect(page.locator('.pack-ux-divider')).toBeVisible();
+  await expect(page.locator('#pack-app')).toHaveAttribute('data-pack-product', 'unified');
+  await expect(page.locator('#pack-download')).toContainText(/Custom/i);
+  /* Phones: the shell swaps the rail for the bottom nav bar. */
+  await expect(page.locator(isMobile ? '#nav-bar' : '#nav-rail')).toBeVisible();
 });
 
-test('k3ux download is a self-describing pack with peer imports', async ({ page }) => {
+test('k3ux-only selection downloads a self-describing k3ux pack with peer imports', async ({
+  page,
+}) => {
   test.setTimeout(180_000);
   const [download] = await Promise.all([
     page.waitForEvent('download', { timeout: 150_000 }),

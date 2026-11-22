@@ -1,5 +1,5 @@
 import { html, nothing } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { K3Element, emitLifecycle, isRtl } from '../../core/index.js';
 import { hostReset } from '../_shared.js';
@@ -30,8 +30,6 @@ export class K3Stepper extends K3Element {
   /** Accessible name for the step tab list. */
   @property() label = '';
 
-  @state() private stepCount = 0;
-
   private steps(): K3StepType[] {
     return [
       ...this.querySelectorAll(':scope > k3-step'),
@@ -45,7 +43,6 @@ export class K3Stepper extends K3Element {
 
   private syncActive(): void {
     const list = this.steps();
-    this.stepCount = list.length;
     list.forEach((step, i) => {
       step.active = i === this.selectedIndex;
     });

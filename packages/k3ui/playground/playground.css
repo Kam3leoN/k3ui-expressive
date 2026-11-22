@@ -2036,6 +2036,11 @@ html[data-k3-reduce-motion] .home-ambient__spin {
   scroll-margin-top: 1.5rem;
 }
 
+.doc-product-badge {
+  margin-block: var(--k3-sys-spacing-space100, 0.5rem);
+  inline-size: fit-content;
+}
+
 .section-head {
   margin-bottom: 1rem;
 }

@@ -82,7 +82,7 @@ export class K3IndexList extends K3Element {
 
   /** Per-index haptic on rail select / scrub — respects global `haptic.setEnabled`. */
   @property({ type: Boolean, reflect: true })
-  haptic = IndexListSpecs.haptic;
+  haptic: boolean = IndexListSpecs.haptic;
 
   @property({ attribute: 'scroll-root' })
   scrollRoot: string | null = null;

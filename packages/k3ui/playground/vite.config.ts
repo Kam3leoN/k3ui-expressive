@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from 'vite';
-import { extname, resolve, sep } from 'node:path';
+import { dirname, extname, resolve, sep } from 'node:path';
+import { createRequire } from 'node:module';
 import tailwindcss from '@tailwindcss/vite';
 import { cpSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -29,6 +30,10 @@ const K3UX_HOLO = HAS_K3UX ? K3UX_HOLO_SCSS : resolve(__dirname, 'stubs/k3ux-emp
 /* Default playground locale — static HTML ships its strings so the first paint
    is final (no English → French swap after boot, which delayed LCP). */
 const DEFAULT_LOCALE = 'fr';
+/* Workspace install: Lit is hoisted to the monorepo root, so resolve it instead of
+   hard-coding <package>/node_modules/lit. */
+const litRoot = dirname(createRequire(import.meta.url).resolve('lit'));
+
 const escapeHtml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -169,7 +174,7 @@ const LAZY_MIME: Record<string, string> = {
   '.css': 'text/css',
 };
 
-function serveLazyTree(mount: string, dist: string, hint: string): (req: import('http').IncomingMessage, res: import('http').ServerResponse) => void {
+function serveLazyTree(dist: string, hint: string): (req: import('http').IncomingMessage, res: import('http').ServerResponse) => void {
   return (req, res) => {
     const rel = decodeURIComponent((req.url ?? '/').split('?')[0]!).replace(/^\/+/, '');
     const file = resolve(dist, rel);
@@ -190,12 +195,12 @@ function packBuilderAssets(): Plugin {
     configureServer(server) {
       server.middlewares.use(
         '/k3ui-lazy',
-        serveLazyTree('/k3ui-lazy', LAZY_DIST, 'run `npm run build:lazy`'),
+        serveLazyTree(LAZY_DIST, 'run `npm run build:lazy`'),
       );
       if (HAS_K3UX) {
         server.middlewares.use(
           '/k3ux-lazy',
-          serveLazyTree('/k3ux-lazy', K3UX_LAZY_DIST, 'run `npm run build:lazy` in k3ux'),
+          serveLazyTree(K3UX_LAZY_DIST, 'run `npm run build:lazy` in k3ux'),
         );
       }
       /* Built stylesheets for pack embed (minify + inject into .full.js / .custom.js). */
@@ -334,12 +339,12 @@ export default defineConfig({
       { find: '@k3ui', replacement: resolve(__dirname, '../src') },
       {
         find: /^lit$/,
-        replacement: resolve(__dirname, '../node_modules/lit'),
+        replacement: litRoot,
       },
       {
         /* Trailing `/` required: resolve() drops it on Windows → litdecorators.js */
         find: /^lit\//,
-        replacement: `${resolve(__dirname, '../node_modules/lit')}/`,
+        replacement: `${litRoot}/`,
       },
     ],
   },

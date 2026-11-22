@@ -347,7 +347,12 @@ describe('k3-date-picker', () => {
     const { datePickerStyles } = await import(
       '../../src/components/pickers/date-picker.styles.js'
     );
-    const css = datePickerStyles.map((s) => s.cssText ?? String(s)).join('\n');
+    const parts = Array.isArray(datePickerStyles)
+      ? datePickerStyles
+      : [datePickerStyles];
+    const css = parts
+      .map((s) => (typeof s === 'object' && s && 'cssText' in s ? String(s.cssText) : String(s)))
+      .join('\n');
     expect(css).toContain('width: max-content !important');
     expect(css).toContain('height: max-content !important');
   });

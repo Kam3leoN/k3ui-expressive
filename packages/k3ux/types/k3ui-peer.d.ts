@@ -1,6 +1,6 @@
 /**
  * Loose ambient peer typings for `k3ui` during `tsc --noEmit`.
- * Runtime / Vitest resolve the real package via alias or file:../K3ui.
+ * Runtime / Vitest resolve the real package via alias or the k3ui workspace (packages/k3ui).
  */
 declare module 'k3ui' {
   import { LitElement, type CSSResultGroup } from 'lit';
@@ -97,6 +97,14 @@ declare module 'k3ui' {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export const registry: any;
+
+  export type FloatingChromeInsetObserver = {
+    /** Force a remeasure now. */
+    sync: () => number;
+    /** Stop observing. */
+    disconnect: () => void;
+  };
+  export function observeFloatingChromeInset(root?: HTMLElement): FloatingChromeInsetObserver;
 }
 
 interface Window {

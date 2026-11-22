@@ -35,7 +35,7 @@ export class K3Parallax extends K3Element {
   /** Wheel delta threshold (higher = less sensitive). */
   @property({ type: Number }) sensitivity = ParallaxSpecs.sensitivity;
   /** Lock duration after a slide change (ms). */
-  @property({ type: Number, attribute: 'lock-ms' }) lockMs = ParallaxSpecs.lockMs;
+  @property({ type: Number, attribute: 'lock-ms' }) lockMs: number = ParallaxSpecs.lockMs;
   /** Wheel listener throttle (ms). */
   @property({ type: Number, attribute: 'throttle-ms' }) throttleMs = ParallaxSpecs.throttleMs;
   /** Background translate offset (CSS length). */
@@ -148,7 +148,6 @@ export class K3Parallax extends K3Element {
   }
 
   private slides(): K3ParallaxSlide[] {
-    const root = this.slotEl ?? this;
     const assigned =
       this.slotEl?.assignedElements({ flatten: true }) ??
       [...this.children].filter((c) => c instanceof HTMLElement);

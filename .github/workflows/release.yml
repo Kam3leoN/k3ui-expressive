@@ -1,0 +1,45 @@
+name: Release
+
+# Each package ships on its own. Push a tag named after the package and its version:
+#   git tag k3ui@1.2.8 && git push origin k3ui@1.2.8
+#   git tag k3ux@0.2.3 && git push origin k3ux@0.2.3
+# Requires the NPM_TOKEN repository secret (npm automation token).
+on:
+  push:
+    tags:
+      - 'k3ui@*'
+      - 'k3ux@*'
+
+permissions:
+  contents: read
+  id-token: write # npm provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - name: Resolve package from tag
+        id: pkg
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          name="${tag%@*}"
+          version="${tag#*@}"
+          actual="$(node -p "require('./packages/${name}/package.json').version")"
+          if [ "$actual" != "$version" ]; then
+            echo "::error::Tag ${tag} does not match packages/${name}/package.json (${actual})"
+            exit 1
+          fi
+          echo "name=${name}" >> "$GITHUB_OUTPUT"
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+      - run: npm publish -w ${{ steps.pkg.outputs.name }} --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

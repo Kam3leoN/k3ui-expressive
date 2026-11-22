@@ -2,8 +2,11 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 
-const built = existsSync(resolve(process.cwd(), 'dist/lazy/components.json'));
-test.skip(!built, 'dist/lazy missing — run `npm run build:lazy`');
+/* The download assembles dist/lazy chunks + dist/k3ui.css: needs the full build. */
+const built =
+  existsSync(resolve(process.cwd(), 'dist/lazy/components.json')) &&
+  existsSync(resolve(process.cwd(), 'dist/k3ui.css'));
+test.skip(!built, 'dist missing — run `npm run build`');
 
 const checked = (page: import('@playwright/test').Page): Promise<string[]> =>
   page.evaluate(() =>
@@ -77,48 +80,43 @@ test('downloads one self-describing file without the components left out', async
   expect(code.length).toBeLessThan(1_200_000);
 });
 
-test('pack stays inside the docs shell (nav rail)', async ({ page }) => {
-  await expect(page.locator('#nav-rail')).toBeVisible();
+test('pack stays inside the docs shell (nav rail)', async ({ page, isMobile }) => {
+  /* Phones: the shell swaps the rail for the bottom nav bar. */
+  await expect(page.locator(isMobile ? '#nav-bar' : '#nav-rail')).toBeVisible();
   await expect(page.locator('#pack-app')).toBeVisible();
 });
 
-test('home product switch is honored when opening Pack via Démarrage (not stuck on k3ux)', async ({
+test('opening Pack via Démarrage mounts the unified builder (k3ui then k3ux)', async ({
   page,
 }) => {
   await page.goto('/#/');
-  await page.locator('[data-product-switch="k3ui"]').click();
   await expect(page.locator('#home-hero-title')).toContainText(/Material K3ui/i);
   await expect(page.locator('#home-hero-title .hero-title__accent')).toBeVisible();
   await page.locator('#page-home [data-nav="quick-start"]').click();
   await expect(page.locator('#page-quick-start')).toBeVisible({ timeout: 30_000 });
-  await page
-    .locator('#page-quick-start [data-doc-product="k3ui"] .qs-card--pack a.qs-pack-cta')
-    .click();
+  await page.locator('#page-quick-start .qs-card--pack a.qs-pack-cta').click();
   await expect(page).toHaveURL(/#\/pack/);
   await expect(page.locator('#pack-layout')).toBeVisible({ timeout: 30_000 });
-  await expect(page.locator('#pack-app')).toHaveAttribute('data-pack-product', 'k3ui');
-  await expect(page.locator('#pack-download')).toContainText(/K3ui Custom/i);
-  await expect(page.locator('#pack-product-switch [data-product-switch="k3ui"]')).toHaveAttribute(
-    'selected',
-    '',
-  );
+  await expect(page.locator('#pack-app')).toHaveAttribute('data-pack-product', 'unified');
+  await expect(page.locator('#pack-download')).toContainText(/Custom/i);
+  await expect(page.locator('#pack-product-switch')).toHaveCount(0);
 });
 
 const hasK3uxLazy = existsSync(resolve(process.cwd(), '../k3ux/dist/lazy/components.json'));
 
-test('pack-side switch toggles catalog without leaving the page', async ({ page }) => {
+test('unified pack lists k3ux after k3ui when sibling lazy build exists', async ({ page }) => {
   test.skip(!hasK3uxLazy, 'k3ux/dist/lazy missing — sibling k3ux optional');
-  await page.goto('/?product=k3ui#/pack');
+  await page.goto('/#/pack');
   await expect(page.locator('#pack-layout')).toBeVisible({ timeout: 30_000 });
-  await page.locator('#pack-product-switch [data-product-switch="k3ux"]').click();
-  await expect(page.locator('#pack-app')).toHaveAttribute('data-pack-product', 'k3ux');
-  await expect(page.locator('#pack-download')).toContainText(/K3ux Custom/i);
-  await expect(page).toHaveURL(/#\/pack/);
+  await expect(page.locator('#pack-app')).toHaveAttribute('data-pack-product', 'unified');
+  await expect(page.locator('.pack-ux-divider')).toBeVisible();
+  await expect(page.locator('k3-checkbox[data-tag="k3-select"]')).toHaveCount(1);
+  await expect(page.locator('k3-checkbox[data-tag="k3-confetti"]')).toHaveCount(1);
 });
 
 test('two summary cards show raw + gzip; full download yields a complete file', async ({ page }) => {
   test.setTimeout(180_000);
-  await page.goto('/?product=k3ui#/pack');
+  await page.goto('/#/pack');
   await expect(page.locator('#pack-layout')).toBeVisible({ timeout: 30_000 });
   await expect(page.locator('.pack-summary--full')).toBeVisible();
   await expect(page.locator('.pack-summary--custom')).toBeVisible();
@@ -157,12 +155,19 @@ test('two summary cards show raw + gzip; full download yields a complete file', 
 });
 
 test('custom reset clears selection and URL without leaving Pack', async ({ page }) => {
-  await page.goto('/?product=k3ui&components=select+dialog#/pack');
+  await page.goto('/?components=select+dialog#/pack');
   await expect(page.locator('#pack-layout')).toBeVisible({ timeout: 30_000 });
   await expect.poll(() => checked(page)).toContain('k3-select');
+  /* Custom selection disables the whole AiO card */
+  await expect(page.locator('#pack-summary-full')).toHaveAttribute('data-disabled', '');
+  await expect(page.locator('#pack-download-full')).toHaveAttribute('disabled', '');
+  await expect(page.locator('#pack-summary-custom')).not.toHaveAttribute('data-disabled');
   await page.locator('#pack-reset').click();
   await expect.poll(() => checked(page)).toEqual(['core*']);
   await expect(page).not.toHaveURL(/components=/);
   await expect(page.locator('#pack-feedback')).toHaveText(/effacée|cleared/i);
   await expect(page.locator('#pack-reset')).toHaveAttribute('disabled', '');
+  await expect(page.locator('#pack-summary-full')).not.toHaveAttribute('data-disabled');
+  await expect(page.locator('#pack-download-full')).not.toHaveAttribute('disabled');
+  await expect(page.locator('#pack-summary-custom')).toHaveAttribute('data-disabled', '');
 });

@@ -237,20 +237,12 @@ export const NAV_DESTINATIONS: NavDestination[] = [
   },
 ];
 
-/** Rail destinations for the active docs pack (k3ui UI vs k3ux UX). */
-export function navDestinationsForProduct(product: 'k3ui' | 'k3ux'): NavDestination[] {
-  if (product === 'k3ux') {
-    /* UX: Démarrage (Pack CTA lives there) + components + animations + resources. */
-    return NAV_DESTINATIONS.filter(
-      (d) =>
-        d.id === 'quick-start' ||
-        d.id === 'components' ||
-        d.id === 'animations' ||
-        d.id === 'resources',
-    );
-  }
-  /* UI: no animations / resources (those live on k3ux). Pack is via Démarrage. */
-  return NAV_DESTINATIONS.filter((d) => d.id !== 'animations' && d.id !== 'resources');
+/**
+ * Rail destinations — unified doc (k3ui + k3ux in one catalog).
+ * `product` kept for call-site compat; ignored.
+ */
+export function navDestinationsForProduct(_product?: 'k3ui' | 'k3ux'): NavDestination[] {
+  return [...NAV_DESTINATIONS];
 }
 
 export function isComponentCategory(category: string): boolean {

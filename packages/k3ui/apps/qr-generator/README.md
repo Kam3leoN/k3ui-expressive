@@ -37,10 +37,10 @@ Hosted separately from the playground docs:
 | Playground / docs | https://k3ui-expressive.vercel.app |
 | This QR app | https://k3ui-apps-qr-generator.vercel.app |
 
-Vercel project **`k3ui-apps-qr-generator`** (Root Directory = `apps/qr-generator`, see `vercel.json` here):
+Vercel project **`k3ui-apps-qr-generator`** (Root Directory = `packages/k3ui/apps/qr-generator`, see `vercel.json` here):
 
-- Install: clone sibling `k3ux-expressive` → `../k3ux`, then `npm ci` (+ `k3ux` deps) — Vite aliases `@k3ux` to that tree
-- Build: `cd ../.. && npm run build:qr`
+- Install: `npm ci` at the monorepo root — installs k3ui and k3ux; Vite aliases `@k3ux` to `packages/k3ux`
+- Build: `npm run build:qr` at the monorepo root
 - Output: `dist`
 - `base: './'` so assets resolve on any path
 

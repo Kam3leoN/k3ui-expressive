@@ -5,4 +5,4 @@
 (globalThis as typeof globalThis & { window?: Window }).window ??= globalThis as unknown as Window;
 (window as Window & { K3UI_MANUAL?: boolean }).K3UI_MANUAL = true;
 
-export * from '../../K3ui/src/index.js';
+export * from '../../k3ui/src/index.js';

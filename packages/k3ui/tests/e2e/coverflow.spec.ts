@@ -28,15 +28,22 @@ test('side covers are hit-testable and come to the centre on click', async ({ pa
   const flow = await open(page);
   const box = (await flow.boundingBox())!;
   const y = box.y + box.height * 0.3;
+  /* Just past the centred cover's right edge — on a phone the centred cover is wider
+     than a fixed fraction of the flow, so a fixed offset would land on it. */
+  const x = await flow.evaluate((el) => {
+    const f = el.getBoundingClientRect();
+    const a = el.querySelector('k3-coverflow-item[active]')!.getBoundingClientRect();
+    return Math.min(a.right + 8, f.right - 4);
+  });
   const right = await page.evaluate(
     ([x, y]) => {
       const item = document.elementFromPoint(x, y)?.closest('k3-coverflow-item');
       return item ? [...item.parentElement!.children].indexOf(item) : -1;
     },
-    [box.x + box.width / 2 + box.width * 0.2, y],
+    [x, y],
   );
   expect(right).toBeGreaterThan(0);
-  await page.mouse.click(box.x + box.width / 2 + box.width * 0.2, y);
+  await page.mouse.click(x, y);
   await expect.poll(() => index(page)).toBe(right);
 });
 
@@ -56,6 +63,8 @@ test('drag with momentum moves several covers; the release click is swallowed', 
 test('lightbox: the centred cover opens its image over a scrim (top layer, no dialog, no new tab)', async ({ page }) => {
   const flow = await open(page);
   await setMode(page, 'lightbox');
+  /* The toolbar click may scroll the page (phones): bring the flow back first. */
+  await flow.scrollIntoViewIfNeeded();
   const box = (await flow.boundingBox())!;
   await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.3);
   const lb = flow.locator('.lightbox');
@@ -153,7 +162,7 @@ test('no horizontal overflow on a phone', async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 
-test('vertical via toolbar: click below, drag up, ↑ ↓, arrows, bullets, wheel and lightbox', async ({ page }) => {
+test('vertical via toolbar: click below, drag up, ↑ ↓, arrows, bullets, wheel and lightbox', async ({ page, isMobile }) => {
   const flow = await open(page);
   await page.locator('#cf-orient k3-button[value="vertical"]').click();
   await expect(flow).toHaveAttribute('orientation', 'vertical');
@@ -202,8 +211,18 @@ test('vertical via toolbar: click below, drag up, ↑ ↓, arrows, bullets, whee
   await expect.poll(idx).toBe(after);
   await flow.locator('.bullet').nth(0).click();
   await expect.poll(idx).toBe(0);
-  await page.mouse.move(x, cy);
-  await page.mouse.wheel(0, 130);
+  /* The bullet click may scroll the page (phones): re-measure the centre. */
+  await flow.scrollIntoViewIfNeeded();
+  const box2 = (await flow.boundingBox())!;
+  const x2 = box2.x + box2.width / 2;
+  const cy2 = box2.y + box2.height / 2;
+  if (isMobile) {
+    /* Mobile emulation dispatches no wheel events (no wheel on a phone): use a bullet. */
+    await flow.locator('.bullet').nth(2).click();
+  } else {
+    await page.mouse.move(x2, cy2);
+    await page.mouse.wheel(0, 130);
+  }
   await expect.poll(idx).toBe(2);
   /* Active bullet 3× taller */
   const heights = await flow.locator('.bullet').evaluateAll((els) =>
@@ -214,7 +233,7 @@ test('vertical via toolbar: click below, drag up, ↑ ↓, arrows, bullets, whee
   const t = await flow.locator('k3-coverflow-item').nth(3).evaluate((el) => (el as HTMLElement).style.transform);
   expect(t).toMatch(/^translate3d\(0(px)?, [\d.]+px, -[\d.]+px\) rotateX\(60/);
   /* Lightbox from the vertical flow */
-  await page.mouse.click(x, cy);
+  await page.mouse.click(x2, cy2);
   await expect(flow.locator('.lightbox')).toBeVisible();
   await page.keyboard.press('ArrowDown');
   await expect.poll(idx).toBe(3);

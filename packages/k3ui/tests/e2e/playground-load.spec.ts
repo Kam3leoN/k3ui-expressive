@@ -29,7 +29,7 @@ test('home: hero + stats ready, every doc page stamped after boot', async ({ pag
   await page.goto('/');
   await ready(page, 'home');
   await expect(page.locator('#home-hero-title')).toBeVisible();
-  await expect(page.locator('#product-switch')).toBeVisible();
+  await expect(page.locator('#product-switch')).toHaveCount(0);
   /* Blurred Material orbs (Trainable-style) behind the hero */
   await expect(page.locator('#home-ambient .home-ambient__orb')).toHaveCount(4);
   await expect(page.locator('#home-ambient .home-ambient__shape')).toHaveCount(4);

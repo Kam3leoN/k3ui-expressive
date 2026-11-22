@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "git clone --depth 1 https://github.com/Kam3leoN/k3ux-expressive.git ../k3ux && ln -sfn \"$(pwd)\" ../K3ui && npm ci && npm --prefix ../k3ux ci",
+  "installCommand": "npm ci",
   "buildCommand": "npm run build:playground",
-  "outputDirectory": "playground/dist",
+  "outputDirectory": "packages/k3ui/playground/dist",
   "rewrites": [
     {
       "source": "/(.*)",

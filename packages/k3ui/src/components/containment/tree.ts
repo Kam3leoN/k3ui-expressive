@@ -150,7 +150,13 @@ export class K3Tree extends K3Element {
       });
     } else if (keyEv.key === 'Enter' || keyEv.key === ' ') {
       keyEv.preventDefault();
-      current.emit('k3-select-request', { item: current, value: current.value });
+      current.dispatchEvent(
+        new CustomEvent('k3-select-request', {
+          detail: { item: current, value: current.value },
+          bubbles: true,
+          composed: true,
+        }),
+      );
     }
   };
 

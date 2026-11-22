@@ -132,7 +132,7 @@
           if (/^#\/?(?!home$)[a-z0-9-]+$/i.test(location.hash)) {
             document.documentElement.setAttribute('data-k3-deeplink', '');
           }
-          /* Hero brand uses [data-doc-product] stacks — applyDocProduct toggles visibility. */
+          /* Unified catalog — k3ui + k3ux share one doc shell. */
         })(document.currentScript.parentElement);
       </script>
       <!-- Desktop / tablet ≥600dp: navigation rail (theme + motion at foot, like m3.material.io) -->
@@ -340,7 +340,7 @@
                 </k3-chip>
               </div>
               <h1 id="home-hero-title" class="hero-title">
-                <span class="hero-title__stack" data-doc-product="k3ui">
+                <span class="hero-title__stack">
                   <span class="hero-title__line" data-i18n="playground.hero.title.k3ui"
                     >Material K3ui</span
                   >
@@ -348,22 +348,10 @@
                     >Expressive</span
                   >
                 </span>
-                <span class="hero-title__stack" data-doc-product="k3ux" hidden>
-                  <span class="hero-title__line" data-i18n="playground.hero.title.k3ux"
-                    >Material K3ux</span
-                  >
-                  <span class="hero-title__accent" data-i18n="playground.hero.title.accent"
-                    >Expressive</span
-                  >
-                </span>
               </h1>
-              <p class="hero-lead" data-doc-product="k3ui" data-i18n="playground.lead">
-                Build thoughtful, beautiful interfaces with Material 3 Expressive Web Components.
-                Use them anywhere the web goes.
-              </p>
-              <p class="hero-lead" data-doc-product="k3ux" hidden data-i18n="playground.lead.k3ux">
-                Decorative UX animations companion — confetti, text effects, holographic cards
-                (k3ux.js on top of k3ui).
+              <p class="hero-lead" data-i18n="playground.lead">
+                Build thoughtful, beautiful interfaces with Material 3 Expressive Web Components —
+                including optional K3ux UX animations. Use them anywhere the web goes.
               </p>
               <div class="home-hero-banner__actions">
                 <k3-button variant="filled" size="md" data-nav="quick-start"
@@ -421,27 +409,6 @@
               K3ui in numbers
             </h2>
           </section>
-          <header class="section-head home-hero">
-            <div class="product-switch">
-              <k3-button-group
-                id="product-switch"
-                variant="connected"
-                shape="round"
-                selection="single"
-                size="xl"
-                sync
-                required
-                label="K3ui / K3ux"
-              >
-                <k3-button variant="tonal" value="k3ui" data-product-switch="k3ui" selected
-                  >K3ui</k3-button
-                >
-                <k3-button variant="tonal" value="k3ux" data-product-switch="k3ux"
-                  >K3ux</k3-button
-                >
-              </k3-button-group>
-            </div>
-          </header>
           <!-- Thoughtful by design — theming · a11y · developer (home) -->
           <section
             class="home-thoughtful"
@@ -816,17 +783,11 @@
           <header class="section-head">
             <p class="comp-category" data-i18n="doc.nav.quick-start">Quick Start</p>
             <h1 data-i18n="doc.quick-start.title">Quick Start</h1>
-            <p data-doc-product="k3ui" data-i18n="doc.quick-start.blurb">
-              Install and use K3ui web components in Angular, React, Vue, or plain HTML.
+            <p data-i18n="doc.quick-start.blurb">
+              Install K3ui web components (and optional K3ux UX) in Angular, React, Vue, or plain HTML.
             </p>
-            <p data-doc-product="k3ux" hidden data-i18n="doc.quick-start.blurb.k3ux">
-              Add the optional K3ux companion for decorative animations on top of K3ui.
-            </p>
-            <p class="doc-intro" data-doc-product="k3ui" data-i18n="doc.quick-start.intro">
-              Pick a path that matches your stack. CDN for a quick try in plain HTML, npm when you already have a bundler, or the framework notes for Angular, React, and Vue. After install, call K3UI.init once, import k3ui.css, and register only the components you use so first paint stays light.
-            </p>
-            <p class="doc-intro" data-doc-product="k3ux" hidden data-i18n="doc.quick-start.intro.k3ux">
-              Install k3ui first (UI + tokens), then add k3ux for animation custom elements. Same tags (`k3-text-bounce`, `k3-holo-card`…) — they simply live in the companion package.
+            <p class="doc-intro" data-i18n="doc.quick-start.intro">
+              Pick a path that matches your stack. CDN for a quick try in plain HTML, npm when you already have a bundler, or the framework notes for Angular, React, and Vue. After install, call K3UI.init once, import k3ui.css, and register only the components you use so first paint stays light. Add k3ux when you need decorative animations (`k3-text-bounce`, `k3-holo-card`…).
             </p>
             <div class="qs-chips" aria-label="Tags">
               <k3-chip data-i18n="doc.quick-start.chip.m3">Material 3</k3-chip>
@@ -835,7 +796,7 @@
             </div>
           </header>
 
-          <div class="qs-grid k3-layout-grid" data-doc-product="k3ui">
+          <div class="qs-grid k3-layout-grid">
             <section class="qs-card qs-card--pack" style="grid-column: span 12">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon notranslate" translate="no" lang="zxx" data-k3-icon="inventory_2" aria-hidden="true"></span>
@@ -959,7 +920,7 @@ import 'k3ui/k3ui.css';
             </section>
           </div>
 
-          <div class="qs-grid k3-layout-grid" data-doc-product="k3ux" hidden>
+          <div class="qs-grid k3-layout-grid qs-grid--k3ux">
             <section class="qs-card qs-card--pack" style="grid-column: span 12">
               <header class="qs-card-head">
                 <span class="ms qs-card-icon notranslate" translate="no" lang="zxx" data-k3-icon="inventory_2" aria-hidden="true"></span>

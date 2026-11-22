@@ -1,0 +1,32 @@
+{
+  "name": "k3-expressive",
+  "private": true,
+  "description": "Monorepo — k3ui (Material 3 Expressive web components) + k3ux (UX companion). Each package is published on its own.",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/k3ui",
+    "packages/k3ux"
+  ],
+  "engines": {
+    "node": ">=18.18"
+  },
+  "overrides": {
+    "@material/material-color-utilities": "file:packages/k3ui/vendor/material-color-utilities"
+  },
+  "scripts": {
+    "dev": "npm run dev -w k3ui",
+    "dev:k3ux": "npm run dev -w k3ux",
+    "lint": "npm run lint --workspaces",
+    "test": "npm run test --workspaces",
+    "build": "npm run build -w k3ui && npm run build -w k3ux",
+    "build:lazy": "npm run build:lazy -w k3ui && npm run build:lazy -w k3ux",
+    "build:playground": "npm run build:playground -w k3ui",
+    "build:qr": "npm run build:qr -w k3ui",
+    "test:e2e": "npm run test:e2e -w k3ui",
+    "check": "npm run lint && npm test && npm run build",
+    "pack:dry": "npm pack --dry-run -w k3ui && npm pack --dry-run -w k3ux",
+    "release:k3ui": "npm publish -w k3ui",
+    "release:k3ux": "npm publish -w k3ux"
+  }
+}

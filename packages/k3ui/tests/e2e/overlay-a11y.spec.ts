@@ -24,7 +24,9 @@ async function openPage(page: Page, route: string, tag: string): Promise<void> {
 test.describe('k3-dialog keyboard & ARIA', () => {
   test('focus enters, Tab cycles inside, Escape closes and restores focus', async ({ page }) => {
     await openPage(page, 'dialog', 'k3-dialog');
-    await page.locator('#btn-dialog').click();
+    /* Click the visible button: the host is stretched wider than the pill, and a click on
+       its empty area does not focus anything to restore. */
+    await page.locator('#btn-dialog button').click();
     const panel = page.locator('#dlg').getByRole('alertdialog');
     await expect(panel).toBeVisible();
     /* Accessible name comes from the headline slot */

@@ -1,5 +1,10 @@
 import { defineConfig } from 'vitest/config';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { createRequire } from 'node:module';
+
+/* Workspace install: Lit is hoisted to the monorepo root, so resolve it instead of
+   hard-coding <package>/node_modules/lit. */
+const litRoot = dirname(createRequire(import.meta.url).resolve('lit'));
 
 export default defineConfig({
   resolve: {
@@ -8,7 +13,7 @@ export default defineConfig({
       /* Thin peer surface — not the full k3ui catalog. */
       k3ui: resolve(__dirname, 'tests/k3ui-shim.ts'),
       /* One Lit copy for k3ux + shimmed k3ui sources. */
-      lit: resolve(__dirname, 'node_modules/lit'),
+      lit: litRoot,
     },
   },
   test: {

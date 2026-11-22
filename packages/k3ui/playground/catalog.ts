@@ -1,6 +1,7 @@
 /**
  * Docs catalog — one entry per component (material.io /components style).
- * `product` scopes UI (k3ui) vs UX animations (k3ux) in the shared Vercel doc.
+ * `product` marks which npm package owns the CE (`k3ux` → badge / pack section).
+ * The playground doc is a **unified** catalog (no UI/UX product switch).
  */
 export type DocProduct = 'k3ui' | 'k3ux';
 
@@ -28,20 +29,17 @@ export const DOC_CATEGORIES = [
   'Resources',
 ] as const;
 
+/** @deprecated Doc is unified — kept for pack URL / legacy callers. */
 let activeDocProduct: DocProduct = 'k3ui';
 
+/** @deprecated Prefer {@link catalogEntryProduct} on each entry. */
 export function getDocProduct(): DocProduct {
   return activeDocProduct;
 }
 
+/** @deprecated No-op for nav/catalog; pack builder no longer remounts on this. */
 export function setDocProduct(product: DocProduct): void {
-  if (activeDocProduct === product) return;
   activeDocProduct = product;
-  byCategory.clear();
-}
-
-function matchesDocProduct(c: DocComponent): boolean {
-  return (c.product ?? 'k3ui') === activeDocProduct;
 }
 
 /**
@@ -940,13 +938,10 @@ const byCategory = new Map<string, readonly DocComponent[]>();
 
 /** Components in a category, sorted Family → Type (alpha). Fresh array, memoized sort. */
 export function componentsInCategory(category: string): DocComponent[] {
-  const cacheKey = `${activeDocProduct}:${category}`;
-  let sorted = byCategory.get(cacheKey);
+  let sorted = byCategory.get(category);
   if (!sorted) {
-    sorted = DOC_COMPONENTS.filter((c) => c.category === category && matchesDocProduct(c)).sort(
-      compareDocTitle,
-    );
-    byCategory.set(cacheKey, sorted);
+    sorted = DOC_COMPONENTS.filter((c) => c.category === category).sort(compareDocTitle);
+    byCategory.set(category, sorted);
   }
   return [...sorted];
 }
@@ -975,13 +970,12 @@ export function orderedComponents(): DocComponent[] {
 
 export function findComponent(id: string): DocComponent | undefined {
   const canonical = resolvePageId(id);
-  return DOC_COMPONENTS.find((c) => c.id === canonical && matchesDocProduct(c));
+  return DOC_COMPONENTS.find((c) => c.id === canonical);
 }
 
-/** Any product — used when switching packs so deep links can flip the switch. */
+/** @deprecated Alias of {@link findComponent} — catalog is unified. */
 export function findComponentAnyProduct(id: string): DocComponent | undefined {
-  const canonical = resolvePageId(id);
-  return DOC_COMPONENTS.find((c) => c.id === canonical);
+  return findComponent(id);
 }
 
 export function neighborComponents(id: string): {
@@ -1064,26 +1058,25 @@ export type CatalogSearchScope = 'active' | 'all';
 
 /**
  * Flat matches for appbar suggestions / command palette.
- * `scope: 'all'` searches both k3ui and k3ux (active pack first).
+ * Unified catalog — `scope` kept for API compat (`active` ≡ full non-Styles list).
  */
 export function catalogSearchHits(
   t: (key: string) => string,
   filter: string,
   limit = 12,
-  scope: CatalogSearchScope = 'all',
+  _scope: CatalogSearchScope = 'all',
 ): DocComponent[] {
   const q = filter.trim();
   if (!q) return [];
-  const active = getDocProduct();
-  const pool =
-    scope === 'all'
-      ? DOC_COMPONENTS.filter((c) => c.category !== 'Styles' && c.category !== 'Resources')
-      : orderedComponents();
+  const pool = DOC_COMPONENTS.filter(
+    (c) => c.category !== 'Styles' && c.category !== 'Resources',
+  );
 
   const matched = pool.filter((c) => catalogEntryMatches(c, c.category, q, t));
   matched.sort((a, b) => {
-    const ap = (a.product ?? 'k3ui') === active ? 0 : 1;
-    const bp = (b.product ?? 'k3ui') === active ? 0 : 1;
+    /* k3ui first, then k3ux — stable within category. */
+    const ap = catalogEntryProduct(a) === 'k3ui' ? 0 : 1;
+    const bp = catalogEntryProduct(b) === 'k3ui' ? 0 : 1;
     if (ap !== bp) return ap - bp;
     const cat = a.category.localeCompare(b.category);
     if (cat !== 0) return cat;

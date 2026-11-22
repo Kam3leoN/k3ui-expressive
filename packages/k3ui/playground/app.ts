@@ -49,9 +49,7 @@ import {
   orderedComponents,
   neighborComponents,
   findComponent,
-  findComponentAnyProduct,
   resolvePageId,
-  getDocProduct,
   setDocProduct,
   DOC_COMPONENTS,
   type DocProduct,
@@ -1225,7 +1223,7 @@ function syncPrimaryItems(host: HTMLElement): ShellNavItem[] {
     items.push(el);
   }
 
-  const visible = new Set(navDestinationsForProduct(getDocProduct()).map((d) => d.id));
+  const visible = new Set(navDestinationsForProduct().map((d) => d.id));
   NAV_DESTINATIONS.forEach((dest, i) => {
     const el = items[i]!;
     el.hidden = !visible.has(dest.id);
@@ -2117,6 +2115,7 @@ function ensureK3ux(): Promise<void> {
   return k3uxReady;
 }
 
+/** When k3ux sibling is unavailable, hide UX-only chrome / demos still marked k3ux. */
 function hideK3uxProductChrome(): void {
   document.querySelectorAll<HTMLElement>('[data-product-switch="k3ux"]').forEach((el) => {
     el.hidden = true;
@@ -2125,6 +2124,7 @@ function hideK3uxProductChrome(): void {
   document.querySelectorAll<HTMLElement>('[data-doc-product="k3ux"]').forEach((el) => {
     el.hidden = true;
   });
+  document.getElementById('product-switch')?.closest<HTMLElement>('.product-switch')?.remove();
 }
 
 function k3uxRegistry(): K3uxRegistry | null {
@@ -2159,74 +2159,52 @@ async function registerPresentK3Tags(tags: string[]): Promise<void> {
   if (uxTags.length) await ux!.registerAll(uxTags);
 }
 
-function syncProductSwitchButtons(product: DocProduct): void {
-  document.querySelectorAll<HTMLElement>('[data-product-switch]').forEach((btn) => {
-    const on = btn.dataset.productSwitch === product;
-    if (on) btn.setAttribute('selected', '');
-    else btn.removeAttribute('selected');
-  });
-}
-
-/** Keep `?product=` in sync so Pack / deep links follow the home switch (not a stale k3ux). */
-function syncProductInUrl(product: DocProduct): void {
+/** Unified doc — show both k3ui and k3ux chrome (unless sibling missing). */
+function applyUnifiedDocChrome(): void {
+  setDocProduct('k3ui');
+  docStore.set(DocKeys.docProduct, 'k3ui');
+  document.documentElement.dataset.k3DocProduct = 'unified';
+  /* Drop leftover `?product=` from the old dual-pack switch. */
   const url = new URL(location.href);
-  if (product === 'k3ux') url.searchParams.set('product', 'k3ux');
-  else url.searchParams.delete('product');
-  const next = `${url.pathname}${url.search}${url.hash}`;
-  if (`${location.pathname}${location.search}${location.hash}` !== next) {
-    history.replaceState(null, '', next);
+  if (url.searchParams.has('product')) {
+    url.searchParams.delete('product');
+    history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
   }
-}
-
-function applyDocProduct(product: DocProduct, opts?: { navigateHome?: boolean }): void {
-  const prev = getDocProduct();
-  const changed = prev !== product;
-  setDocProduct(product);
-  docStore.set(DocKeys.docProduct, product);
-  document.documentElement.dataset.k3DocProduct = product;
-  syncProductInUrl(product);
-  document.querySelectorAll<HTMLElement>('[data-doc-product]').forEach((el) => {
-    el.hidden = el.dataset.docProduct !== product;
+  document.querySelectorAll<HTMLElement>('[data-doc-product="k3ui"]').forEach((el) => {
+    el.hidden = false;
   });
-  syncProductSwitchButtons(product);
-  /* Hero title uses [data-doc-product] stacks — do not wipe children with textContent. */
-  if (changed) {
-    buildPrimaryNav();
-    buildNavMenu();
-    if (currentPageId() === 'pack') void ensurePackPageMounted(true);
-  } else {
-    /* First paint / same pack — still sync switch chrome. */
-    buildPrimaryNav();
+  if (k3uxSibling) {
+    document.querySelectorAll<HTMLElement>('[data-doc-product="k3ux"]').forEach((el) => {
+      el.hidden = false;
+    });
   }
-  if (opts?.navigateHome && changed && currentPageId() !== 'home') {
-    location.hash = '#/';
-  }
+  document.getElementById('product-switch')?.closest<HTMLElement>('.product-switch, .home-hero')?.remove();
+  buildPrimaryNav();
 }
 
-function syncProductForPage(pageId: string): void {
-  const articleId = articlePageId(pageId);
-  const comp = findComponentAnyProduct(articleId);
-  if (!comp) return;
-  const pack = comp.product ?? 'k3ui';
-  if (pack !== getDocProduct()) applyDocProduct(pack);
+/** Inject / refresh « Requires k3ux » chip under the page title. */
+function syncPageProductBadge(pageId: string): void {
+  const page = document.querySelector<HTMLElement>(
+    `.comp-page[data-page="${CSS.escape(pageId)}"]`,
+  );
+  const head = page?.querySelector('.section-head');
+  if (!head) return;
+  head.querySelectorAll('[data-product-badge]').forEach((n) => n.remove());
+  const comp = findComponent(pageId);
+  if (!comp || catalogEntryProduct(comp) !== 'k3ux') return;
+  const h1 = head.querySelector('h1');
+  const badge = document.createElement('k3-chip');
+  badge.setAttribute('data-product-badge', 'k3ux');
+  badge.setAttribute('variant', 'suggestion');
+  badge.setAttribute('data-i18n', 'doc.badge.requiresK3ux');
+  badge.textContent = 'Requires k3ux';
+  badge.classList.add('doc-product-badge');
+  if (h1?.nextSibling) h1.parentElement?.insertBefore(badge, h1.nextSibling);
+  else head.append(badge);
 }
 
 function wireProductSwitch(): void {
-  const group = document.getElementById('product-switch');
-  const apply = (next: DocProduct | undefined): void => {
-    if (!next || (next !== 'k3ui' && next !== 'k3ux') || next === getDocProduct()) return;
-    if (next === 'k3ux' && !k3uxSibling) return;
-    applyDocProduct(next, { navigateHome: true });
-    if (next === 'k3ux') void ensureK3ux();
-  };
-  group?.addEventListener('k3-change', ((e: CustomEvent<{ values?: string[] }>) => {
-    apply(e.detail?.values?.[0] as DocProduct | undefined);
-  }) as EventListener);
-  group?.querySelectorAll<HTMLElement>('[data-product-switch]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      apply(btn.dataset.productSwitch as DocProduct | undefined);
-    });
-  });
+  /* Product switch removed — unified catalog. */
 }
 
 /** Fill `#doc-search` suggestions — both packs, with k3ui/k3ux chips + auto switch. */
@@ -2276,7 +2254,6 @@ async function updateDocSearchSuggestions(query: string): Promise<void> {
   list.setAttribute('selection', 'single');
   list.setAttribute('hide-selection-indicator', '');
 
-  const active = getDocProduct();
   for (const c of hits) {
     const pack = catalogEntryProduct(c);
     const item = document.createElement('k3-list-item');
@@ -2310,12 +2287,11 @@ async function updateDocSearchSuggestions(query: string): Promise<void> {
     const chip = document.createElement('k3-chip');
     chip.slot = 'trailing';
     chip.setAttribute('variant', 'suggestion');
-    if (pack === active) chip.setAttribute('selected', '');
+    if (pack === 'k3ux') chip.setAttribute('selected', '');
     chip.setAttribute('data-product-chip', pack);
     chip.classList.add('doc-search-product-chip');
     chip.textContent = pack === 'k3ux' ? 'k3ux' : 'k3ui';
     chip.setAttribute('aria-label', pack === 'k3ux' ? 'K3ux' : 'K3ui');
-    /* Chip is decorative — row click handles navigation / pack switch. */
     chip.style.pointerEvents = 'none';
     item.append(chip);
 
@@ -2323,11 +2299,7 @@ async function updateDocSearchSuggestions(query: string): Promise<void> {
       clearSuggestions();
       const input = search as HTMLElement & { value?: string };
       if (input) input.value = '';
-      /* Switch pack first so nav / catalog match the target page. */
-      if (pack !== getDocProduct()) {
-        if (pack === 'k3ux') void ensureK3ux();
-        applyDocProduct(pack);
-      }
+      if (pack === 'k3ux') void ensureK3ux();
       location.hash = `#/${c.id}`;
     });
 
@@ -2434,7 +2406,6 @@ function armRailSponsorsSelection(rail: HTMLElement, primary: ShellNavItem[]): v
 
 function showPage(id: string): void {
   const articleId = articlePageId(id);
-  syncProductForPage(articleId);
   /* Canonicalize URL when alias / legacy hash was used */
   if (articleId !== id) {
     const next = `#/${articleId}`;
@@ -2471,6 +2442,7 @@ function showPage(id: string): void {
   /* Rebuild menu contents (closed) — rail click opens via buildNavMenu({ open: true }) */
   buildNavMenu();
   syncDocNav(resolvedId);
+  syncPageProductBadge(resolvedId);
   const scroll = document.querySelector('.shell-scroll');
   if (scroll) scroll.scrollTop = 0;
   else window.scrollTo(0, 0);
@@ -3517,30 +3489,24 @@ async function ensureDocTables(pageId?: string): Promise<void> {
   applyPlaygroundI18n();
 }
 
-/** Pack builder lives in the shell — mount / remount when product changes. */
+/** Pack builder lives in the shell — unified k3ui then k3ux checklist. */
 let packPageDisposer: (() => void) | null = null;
-let packPageProduct: DocProduct | null = null;
 
 async function ensurePackPageMounted(force = false): Promise<void> {
   const root = document.getElementById('pack-app');
   if (!root) return;
-  const product = getDocProduct();
-  if (!force && packPageDisposer && packPageProduct === product) return;
+  if (!force && packPageDisposer) return;
   packPageDisposer?.();
   packPageDisposer = null;
-  packPageProduct = product;
   await registry.registerAll(['k3-checkbox', 'k3-button', 'k3-button-group']);
+  if (k3uxSibling) await ensureK3ux();
   const { mountPackBuilder } = await import('./pack/mount.js');
   const locale = document.documentElement.lang?.toLowerCase().startsWith('fr') ? 'fr' : 'en';
   packPageDisposer = await mountPackBuilder(root, {
-    product,
+    product: 'k3ui',
     embedded: true,
+    unified: true,
     locale,
-    onProductChange: (next) => {
-      if (next === getDocProduct()) return;
-      applyDocProduct(next);
-      if (next === 'k3ux') void ensureK3ux();
-    },
   });
 }
 
@@ -3845,20 +3811,9 @@ async function boot(): Promise<void> {
     applyAdaptiveShell();
     containerOn = docStore.get(DocKeys.uiContainer, true);
     applyContainerLayout();
-    const qProduct = new URLSearchParams(location.search).get('product');
-    const savedProduct = docStore.get<DocProduct>(DocKeys.docProduct, 'k3ui');
     if (!k3uxSibling) hideK3uxProductChrome();
-    const bootProduct: DocProduct = (() => {
-      const want =
-        qProduct === 'k3ux' || qProduct === 'k3ui'
-          ? qProduct
-          : savedProduct === 'k3ux'
-            ? 'k3ux'
-            : 'k3ui';
-      return k3uxSibling ? want : 'k3ui';
-    })();
-    applyDocProduct(bootProduct);
-    if (getDocProduct() === 'k3ux') void ensureK3ux();
+    else void ensureK3ux();
+    applyUnifiedDocChrome();
     void primeSoundFx();
     wireProductSwitch();
     buildPrimaryNav();
@@ -3934,7 +3889,7 @@ async function boot(): Promise<void> {
       }
       unmountShowcaseDoc();
       /* Load k3ux module when visiting a UX page (even before scanning tags). */
-      if (K3UX_PAGES.has(articleId) || getDocProduct() === 'k3ux') {
+      if (K3UX_PAGES.has(articleId)) {
         await ensureK3ux();
       }
       if (articleId === 'pack') {
@@ -4711,10 +4666,7 @@ function wireCommandPalette(): void {
     if (nav) {
       const pack = nav[1] as DocProduct;
       const id = nav[2]!;
-      if (pack !== getDocProduct()) {
-        if (pack === 'k3ux') void ensureK3ux();
-        applyDocProduct(pack);
-      }
+      if (pack === 'k3ux') void ensureK3ux();
       location.hash = `#/${id}`;
     }
   }) as EventListener);
@@ -5708,6 +5660,7 @@ type SparkleMouseHost = HTMLElement & {
   intensity?: number;
   colors?: string[];
   isRunning?: boolean;
+  disabled?: boolean;
 };
 
 type SparkleFieldEl = HTMLElement & { value?: string };

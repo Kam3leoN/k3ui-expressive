@@ -116,24 +116,49 @@ export function formatHash(tags: readonly string[]): string {
  * Selection from the SPA URL (`?components=…#/pack`) or a legacy pack.html hash.
  */
 export function parseLocationSelection(manifest: Manifest, loc: Location = location): string[] {
-  const fromQuery = loc.searchParams?.get?.('components') ?? new URLSearchParams(loc.search).get('components');
+  const fromQuery = new URLSearchParams(loc.search).get('components');
   if (fromQuery) return known(manifest, fromQuery.split(/[\s+,]+/).filter(Boolean));
   if (/components=/i.test(loc.hash)) return parseHash(loc.hash, manifest);
   return [];
 }
 
-/** Shareable SPA link: `/?components=select+dialog#/pack` (+ `product=k3ux` when needed). */
+/**
+ * Shareable SPA link: `/?components=select+dialog#/pack`.
+ * Legacy `product=k3ux` is omitted in the unified builder (both packs on one page).
+ */
 export function formatPackHref(
   tags: readonly string[],
-  product: PackProduct = 'k3ui',
+  _product: PackProduct | 'unified' = 'k3ui',
   origin = '',
 ): string {
   const params = new URLSearchParams();
-  if (product === 'k3ux') params.set('product', 'k3ux');
   if (tags.length) params.set('components', tags.map((t) => t.replace(/^k3-/, '')).join(' '));
   const q = params.toString().replace(/%20/g, '+');
   const base = origin ? `${origin.replace(/\/$/, '')}/` : '/';
   return `${base}${q ? `?${q}` : ''}#/pack`;
+}
+
+/** Tags from the URL that appear in either manifest (k3ui first, then k3ux). */
+export function parseLocationSelectionDual(
+  ui: Manifest,
+  ux: Manifest | null,
+  loc: Location = location,
+): string[] {
+  const fromQuery = new URLSearchParams(loc.search).get('components');
+  const names = fromQuery
+    ? fromQuery.split(/[\s+,]+/).filter(Boolean)
+    : /components=/i.test(loc.hash)
+      ? (new URLSearchParams(loc.hash.replace(/^#/, '')).get('components') ?? '')
+          .split(/[\s+,]+/)
+          .filter(Boolean)
+      : [];
+  const uiTags = Object.keys(ui.components).filter((t) =>
+    names.map(normalizeTag).includes(t),
+  );
+  const uxTags = ux
+    ? Object.keys(ux.components).filter((t) => names.map(normalizeTag).includes(t))
+    : [];
+  return [...uiTags, ...uxTags];
 }
 
 export function resolveSelection(manifest: Manifest, names: Iterable<string>): Selection {

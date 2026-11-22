@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { createRequire } from 'node:module';
 import { HAS_K3UX, K3UX_SRC } from '../../scripts/k3ux-sibling.mjs';
 
 const root = resolve(__dirname);
 const k3src = resolve(__dirname, '../../src');
-const litRoot = resolve(__dirname, '../../node_modules/lit');
+/* Workspace install: Lit is hoisted to the monorepo root. */
+const litRoot = dirname(createRequire(import.meta.url).resolve('lit'));
 
 const k3uxAliases = HAS_K3UX
   ? [
@@ -13,14 +15,14 @@ const k3uxAliases = HAS_K3UX
     ]
   : [];
 
-const fsAllow = [resolve(__dirname, '../..')];
+const fsAllow = [resolve(__dirname, '../..'), resolve(__dirname, '../../../..')];
 if (HAS_K3UX) fsAllow.push(resolve(__dirname, '../../../k3ux'));
 
 export default defineConfig({
   root,
   publicDir: false,
   resolve: {
-    /* One Lit graph for app + sibling k3ux (peer lit lives in k3ui node_modules). */
+    /* One Lit graph for app + sibling k3ux (Lit is hoisted to the monorepo root). */
     dedupe: ['lit', 'lit-html', 'lit-element', '@lit/reactive-element'],
     alias: [
       { find: '@k3ui', replacement: k3src },
@@ -40,24 +42,11 @@ export default defineConfig({
       allow: fsAllow,
     },
   },
-  preview: {
-    port: 4174,
-    strictPort: true,
-    host: true,
+  build: {
+    outDir: resolve(__dirname, 'dist'),
+    emptyOutDir: true,
+    sourcemap: true,
+    target: 'es2022',
   },
   base: './',
-  build: {
-    outDir: resolve(root, 'dist'),
-    emptyOutDir: true,
-    target: 'es2022',
-    cssMinify: true,
-    sourcemap: false,
-  },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        api: 'modern-compiler',
-      },
-    },
-  },
 });

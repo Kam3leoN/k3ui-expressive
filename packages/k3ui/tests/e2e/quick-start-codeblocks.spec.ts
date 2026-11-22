@@ -13,7 +13,7 @@ test.describe('Quick Start codeblocks', () => {
   test('k3ui install uses NPM/PNPM tabs without qs-code card or phantom H-scroll', async ({
     page,
   }) => {
-    const product = page.locator('#page-quick-start [data-doc-product="k3ui"]');
+    const product = page.locator('#page-quick-start .qs-grid[data-doc-product="k3ui"]');
     await expect(product).toBeVisible();
 
     const install = product.locator('.qs-section').filter({
@@ -49,7 +49,7 @@ test.describe('Quick Start codeblocks', () => {
   });
 
   test('copy tooltip opens without clipping the chrome', async ({ page }) => {
-    const product = page.locator('#page-quick-start [data-doc-product="k3ui"]');
+    const product = page.locator('#page-quick-start .qs-grid[data-doc-product="k3ui"]');
     const pm = product.locator('.qs-section k3-codeblock').first();
     await expect(pm).toBeVisible();
 

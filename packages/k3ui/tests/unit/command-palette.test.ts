@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { init } from '../../src/index.js';
+import type { K3CommandPalette } from '../../src/components/containment/command-palette.js';
 
 describe('k3-command-palette', () => {
   it('opens with k3-dialog and focuses search', async () => {
@@ -9,13 +10,7 @@ describe('k3-command-palette', () => {
       theme: { mode: 'light' },
     });
 
-    const el = document.createElement('k3-command-palette') as HTMLElement & {
-      show: () => Promise<boolean>;
-      hide: () => Promise<boolean>;
-      open: boolean;
-      items: { value: string; label: string }[] | null;
-      updateComplete: Promise<unknown>;
-    };
+    const el = document.createElement('k3-command-palette') as K3CommandPalette;
     el.placeholder = 'Jump…';
     document.body.appendChild(el);
     await el.updateComplete;

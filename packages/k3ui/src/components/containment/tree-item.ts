@@ -21,7 +21,7 @@ export class K3TreeItem extends K3Element {
   @state() private hasChildren = false;
 
   private childItems(): HTMLElement[] {
-    return [...this.querySelectorAll(':scope > k3-tree-item')];
+    return [...this.querySelectorAll(':scope > k3-tree-item')] as HTMLElement[];
   }
 
   private syncChildren(): void {

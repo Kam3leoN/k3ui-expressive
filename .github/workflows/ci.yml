@@ -5,50 +5,56 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # Lint + build + unit tests for both workspaces (k3ui, k3ux) in one install.
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Clone sibling k3ux
-        run: |
-          git clone --depth 1 https://github.com/Kam3leoN/k3ux-expressive.git ../k3ux
-          ln -sfn "$(pwd)" ../K3ui
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm --prefix ../k3ux ci
       - run: npm run lint
-      - run: npm test
+      # Build before the tests: some k3ui unit tests read dist/lazy.
       - run: npm run build
+      - run: npm test
       - run: npm run build:playground
       - run: npm run build:qr
+      # Each package must still pack on its own (what npm publish ships).
+      - run: npm run pack:dry
 
   e2e:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Clone sibling k3ux
-        run: |
-          git clone --depth 1 https://github.com/Kam3leoN/k3ux-expressive.git ../k3ux
-          ln -sfn "$(pwd)" ../K3ui
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm --prefix ../k3ux ci
       - run: npx playwright install --with-deps chromium
-      # pack-builder (+ k3ux) reads the on-demand builds
-      - run: npm run build:lazy
-      - run: npm --prefix ../k3ux run build:lazy
+      # pack-builder (+ k3ux) reads the on-demand builds and dist/k3ui.css · dist/k3ux.css
+      - run: npm run build
       # Keyboard / ARIA / forms / performance / memory / stress / visual / mobile (Chromium)
       - run: npm run test:e2e
         env:
           CI: '1'
           K3UI_E2E_MOBILE: '1'
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: packages/k3ui/playwright-report
+          retention-days: 7
 
   # Same specs on Firefox + WebKit — informative until they have been green once.
   e2e-cross-browser:
@@ -56,19 +62,13 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: Clone sibling k3ux
-        run: |
-          git clone --depth 1 https://github.com/Kam3leoN/k3ux-expressive.git ../k3ux
-          ln -sfn "$(pwd)" ../K3ui
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm --prefix ../k3ux ci
       - run: npx playwright install --with-deps chromium firefox webkit
-      - run: npm run build:lazy
-      - run: npm --prefix ../k3ux run build:lazy
+      - run: npm run build
       - run: npm run test:e2e
         env:
           CI: '1'

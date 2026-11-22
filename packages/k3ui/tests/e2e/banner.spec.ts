@@ -81,7 +81,8 @@ test.describe('k3-banner', () => {
       return {
         hostHeight: br.height,
         spacerOk: ar.top >= br.height - 1,
-        railOk: rr == null || rr.top >= br.height - 2,
+        /* Compact layouts hide the rail (display: none → empty box). */
+        railOk: rr == null || rr.height === 0 || rr.top >= br.height - 2,
       };
     });
     expect(layout).toBeTruthy();

@@ -189,7 +189,7 @@ export class K3Search extends K3Element {
         this.shadowRoot?.querySelector('.panel > slot') as HTMLSlotElement | null
       )?.assignedElements()[0];
     if (!(el instanceof HTMLElement)) return;
-    const { scrollTop, scrollHeight, clientHeight } = el;
+    const { scrollHeight, clientHeight } = el;
     if (scrollHeight <= clientHeight + 1) {
       e.preventDefault();
       e.stopPropagation();

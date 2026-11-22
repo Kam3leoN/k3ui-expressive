@@ -252,7 +252,9 @@ describe('k3-nav-rail', () => {
     Object.defineProperty(end, 'propertyName', { value: 'width' });
     el.dispatchEvent(end);
     await el.updateComplete;
-    await Promise.all(items.map((i) => (i as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete));
+    await Promise.all(
+      items.map((i) => (i as unknown as { updateComplete: Promise<unknown> }).updateComplete),
+    );
     /* finishCollapseLayout clears the flag after items reflect vertical */
     await Promise.resolve();
     await Promise.resolve();

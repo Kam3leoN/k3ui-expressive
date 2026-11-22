@@ -47,15 +47,15 @@ describe('home hero morph', () => {
     for (const el of host.querySelectorAll<HTMLElement>('.home-hero-morph__shape')) {
       expect(HOME_SHAPE_NAMES).toContain(el.dataset.shape);
     }
-    expect(host.querySelector('.home-hero-morph__shape--back')?.dataset.shape).toBe(
-      HERO_LAYER_START.back,
-    );
-    expect(host.querySelector('.home-hero-morph__shape--mid')?.dataset.shape).toBe(
-      HERO_LAYER_START.mid,
-    );
-    expect(host.querySelector('.home-hero-morph__shape--front')?.dataset.shape).toBe(
-      HERO_LAYER_START.front,
-    );
+    expect(
+      (host.querySelector('.home-hero-morph__shape--back') as HTMLElement | null)?.dataset.shape,
+    ).toBe(HERO_LAYER_START.back);
+    expect(
+      (host.querySelector('.home-hero-morph__shape--mid') as HTMLElement | null)?.dataset.shape,
+    ).toBe(HERO_LAYER_START.mid);
+    expect(
+      (host.querySelector('.home-hero-morph__shape--front') as HTMLElement | null)?.dataset.shape,
+    ).toBe(HERO_LAYER_START.front);
   });
 
   it('is idempotent', () => {

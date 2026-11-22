@@ -20,6 +20,12 @@ function loadLib() {
   for (const c of candidates) {
     if (fs.existsSync(c)) return require(c);
   }
+  /* npm workspaces hoist dependencies to the monorepo root. */
+  try {
+    return require('material-shapes-ts');
+  } catch {
+    /* fall through */
+  }
   throw new Error('material-shapes-ts not found — install it or use .temp/shapes-export');
 }
 
