@@ -218,7 +218,10 @@ describe('k3-nav-rail', () => {
     const cssText = sheet.map((s) => s.cssText ?? '').join('\n');
     expect(cssText).toMatch(/layout='xr'/);
     expect(cssText).toContain('--k3-nav-rail-xr-radius');
-    expect(cssText).toContain('--k3-sys-elevation-level3');
+    /* XR orbiter: no 2D shadow (surface color only) */
+    expect(cssText).toMatch(
+      /layout='xr'[\s\S]*?\.rail\s*\{[\s\S]*?box-shadow:\s*none/,
+    );
   });
 
   it('xr fab-placement spatialized lifts FAB outside the pill', async () => {

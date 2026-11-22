@@ -1,6 +1,6 @@
 /**
- * Docs Showcase — rail parent between Styles and Sponsors.
- * Hub (`#/showcase`) = overview nav cards · children = live pricing / login / dialer.
+ * Docs Showcase — under Démarrage hub (rail secondary menu).
+ * Hub (`#/showcase`) = overview nav cards · children = live demos.
  */
 import { html, render, type TemplateResult } from 'lit';
 import { i18n } from '@k3ui/i18n/index.js';
@@ -13,13 +13,19 @@ import {
 import { mountDialer } from '../apps/showcase/src/pages/dialer.js';
 import { mountPricing } from '../apps/showcase/src/pages/pricing.js';
 import { mountLogin } from '../apps/showcase/src/pages/login.js';
+import { mountClocks } from '../apps/showcase/src/pages/clocks.js';
+import { mountPomodoro } from '../apps/showcase/src/pages/pomodoro.js';
 import '../apps/showcase/src/pages.css';
 
 export type ShowcasePageId =
   | 'showcase'
   | 'showcase-pricing'
   | 'showcase-login'
-  | 'showcase-dialer';
+  | 'showcase-dialer'
+  | 'showcase-clocks'
+  | 'showcase-pomodoro'
+  /** @deprecated hash alias → showcase-clocks */
+  | 'showcase-widgets';
 
 const SHOWCASE_TAGS = [
   'k3-button',
@@ -58,7 +64,10 @@ export function isShowcasePage(id: string): id is ShowcasePageId {
     id === 'showcase' ||
     id === 'showcase-pricing' ||
     id === 'showcase-login' ||
-    id === 'showcase-dialer'
+    id === 'showcase-dialer' ||
+    id === 'showcase-clocks' ||
+    id === 'showcase-pomodoro' ||
+    id === 'showcase-widgets'
   );
 }
 
@@ -67,7 +76,7 @@ export function showcaseRequiredTags(): readonly string[] {
 }
 
 interface HubCard {
-  id: 'pricing' | 'login' | 'dialer';
+  id: 'pricing' | 'login' | 'dialer' | 'clocks' | 'pomodoro';
   href: string;
   featured?: boolean;
   titleKey: string;
@@ -76,7 +85,8 @@ interface HubCard {
   components: readonly string[];
 }
 
-const HUB_CARDS: readonly HubCard[] = [
+/** Hub overview cards — clocks ≠ pomodoro (never one “Widgets Lucid” card). */
+export const HUB_CARDS: readonly HubCard[] = [
   {
     id: 'pricing',
     href: '#/showcase-pricing',
@@ -111,6 +121,20 @@ const HUB_CARDS: readonly HubCard[] = [
     titleKey: 'doc.showcase.card.dialer.title',
     tagKey: 'doc.showcase.card.dialer.tag',
     components: ['k3-chip', 'k3-icon-button', 'k3-snackbar', 'k3-list', 'shape'],
+  },
+  {
+    id: 'clocks',
+    href: '#/showcase-clocks',
+    titleKey: 'doc.showcase.card.clocks.title',
+    tagKey: 'doc.showcase.card.clocks.tag',
+    components: ['analog', 'digital', 'shape', 'pill', 'numerals'],
+  },
+  {
+    id: 'pomodoro',
+    href: '#/showcase-pomodoro',
+    titleKey: 'doc.showcase.card.pomodoro.title',
+    tagKey: 'doc.showcase.card.pomodoro.tag',
+    components: ['pomodoro', 'shape', 'k3-button-group'],
   },
 ];
 
@@ -192,7 +216,7 @@ function mountHub(root: HTMLElement): void {
   render(
     html`
       <div class="showcase-hub">
-        <div class="showcase-hub__grid k3-layout-grid k3-demo-cols-3">
+        <div class="showcase-hub__grid k3-layout-grid k3-demo-cols-2">
           ${HUB_CARDS.map((c) => hubCard(c))}
         </div>
       </div>
@@ -201,7 +225,10 @@ function mountHub(root: HTMLElement): void {
   );
 }
 
-function mountLivePage(root: HTMLElement, which: 'pricing' | 'login' | 'dialer'): void {
+function mountLivePage(
+  root: HTMLElement,
+  which: 'pricing' | 'login' | 'dialer' | 'clocks' | 'pomodoro',
+): void {
   mountDemoBannerChrome();
   render(
     html`
@@ -232,13 +259,19 @@ function mountLivePage(root: HTMLElement, which: 'pricing' | 'login' | 'dialer')
       ? mountLogin(host)
       : which === 'dialer'
         ? mountDialer(host)
-        : mountPricing(host);
+        : which === 'clocks'
+          ? mountClocks(host)
+          : which === 'pomodoro'
+            ? mountPomodoro(host)
+            : mountPricing(host);
 }
 
 /** Mount hub or live child into the matching page root. */
 export function mountShowcaseDoc(pageId: string = 'showcase'): void {
   ensureCatalogs();
-  const id = isShowcasePage(pageId) ? pageId : 'showcase';
+  /* Legacy #/showcase-widgets → clocks */
+  const raw = isShowcasePage(pageId) ? pageId : 'showcase';
+  const id = raw === 'showcase-widgets' ? 'showcase-clocks' : raw;
   const rootId =
     id === 'showcase-pricing'
       ? 'showcase-pricing-root'
@@ -246,13 +279,19 @@ export function mountShowcaseDoc(pageId: string = 'showcase'): void {
         ? 'showcase-login-root'
         : id === 'showcase-dialer'
           ? 'showcase-dialer-root'
-          : 'showcase-root';
+          : id === 'showcase-clocks'
+            ? 'showcase-clocks-root'
+            : id === 'showcase-pomodoro'
+              ? 'showcase-pomodoro-root'
+              : 'showcase-root';
   const root = document.getElementById(rootId);
   if (!root) return;
 
   if (id === 'showcase-pricing') mountLivePage(root, 'pricing');
   else if (id === 'showcase-login') mountLivePage(root, 'login');
   else if (id === 'showcase-dialer') mountLivePage(root, 'dialer');
+  else if (id === 'showcase-clocks') mountLivePage(root, 'clocks');
+  else if (id === 'showcase-pomodoro') mountLivePage(root, 'pomodoro');
   else mountHub(root);
 
   if (!localeBound) {
@@ -276,6 +315,8 @@ export function unmountShowcaseDoc(): void {
     'showcase-pricing-root',
     'showcase-login-root',
     'showcase-dialer-root',
+    'showcase-clocks-root',
+    'showcase-pomodoro-root',
   ]) {
     const root = document.getElementById(id);
     if (root) render(null, root);

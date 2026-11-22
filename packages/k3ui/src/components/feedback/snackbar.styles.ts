@@ -705,27 +705,42 @@ export const snackbarStyles = css`
       translate 200ms ${EMPHASIZED_ACCELERATE},
       opacity 150ms linear 50ms;
   }
-  /* Expressive — gooey circle pop, then width stretch; leave as droplet */
-  :host-context([data-k3-motion='fluid']) .bar[data-mode='expressive'] {
-    transform: scale(0.72, 0.32);
+  /*
+   * Expressive — fluid gooey (metaballs). The bar keeps its CSS width spring
+   * but turns transparent: the .goo SVG layer (blur + alpha threshold, driven
+   * by snackbar-goo.ts) draws the container — edge puddle, rising drop that
+   * pinches off, bar body, swollen end bulbs. Slide / swipe exits and drag
+   * keep their own recipes (no data-goo override there).
+   */
+  .bar[data-goo] {
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+    isolation: isolate;
   }
-  :host-context([data-k3-motion='fluid']) .bar[data-mode='expressive'][data-phase='icon'] {
-    transform: scale(1, 1);
-    animation: k3-snackbar-fluid-in ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST} both;
-  }
-  :host-context([data-k3-motion='fluid'])
-    .bar[data-mode='expressive'][data-phase='expanded'],
-  :host-context([data-k3-motion='fluid'])
-    .bar[data-mode='expressive'][data-phase='collapsing'] {
-    transform: scale(1, 1);
-  }
-  :host-context([data-k3-motion='fluid'])
-    .bar[data-mode='expressive'][data-phase='leaving']:not([data-exit='swipe']) {
-    transform: scale(0.7, 0.3);
-    animation: k3-snackbar-fluid-out ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST} forwards;
+  .bar[data-mode='expressive'][data-goo]:not([data-exit]):not([data-drag]) {
+    opacity: 1;
+    transform: none;
+    translate: 0 0;
     transition:
-      translate 250ms ${EMPHASIZED_ACCELERATE},
-      opacity 150ms linear 100ms;
+      width ${DUR_SPATIAL_DEFAULT} ${SPRING_SPATIAL_DEFAULT},
+      translate ${DUR_SPATIAL_DEFAULT} ${SPRING_SPATIAL_DEFAULT};
+  }
+  /* Icon / brand wait for the drop to reach the circle */
+  .bar[data-mode='expressive'][data-goo][data-phase='icon'] .leading,
+  .bar[data-mode='expressive'][data-goo][data-phase='icon'] .brand {
+    transition-delay: 380ms;
+  }
+  .goo {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    fill: var(--_container);
+    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.3)) drop-shadow(0 4px 8px rgb(0 0 0 / 0.15));
   }
   @keyframes k3-snackbar-fluid-in {
     0% {

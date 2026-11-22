@@ -17,6 +17,8 @@ import {
   type ArmNavHandle,
 } from './nav-selection.js';
 import { navRailStyles } from './nav-rail.styles.js';
+import { NavRailCurve } from './nav-rail-curve.js';
+import { isFluidMotionActive } from '../../motion/fluid.js';
 
 /** Width / destination layout */
 export type NavRailSize = 'compact' | 'large';
@@ -25,8 +27,8 @@ export type NavRailSize = 'compact' | 'large';
  * (@see https://m3.material.io/components/navigation-rail/specs).
  * - `modal` (default) — overlays content; flush to the start edge; end-side corners only
  * - `standard` — beside content; no inset sheet (flush rail, no inner container radius)
- * - `xr` — spatial / XR orbiter: elevated floating pill, inset from the screen edge
- *   (@see https://bug-on-m3.vercel.app/components/navigation-rail)
+ * - `xr` — spatial / XR orbiter: floating pill, inset from the screen edge
+ *   (@see https://m3.material.io/foundations/xr/components/nav-rail)
  */
 export type NavRailLayout = 'standard' | 'modal' | 'xr';
 /** @deprecated use `layout` */
@@ -55,8 +57,8 @@ const WIDTH_SETTLE_FALLBACK_MS = 700;
  * - **position** `start` · `center` · `bottom` — leading destinations group
  * - Slots **leading** (or default) · **trailing** (bottom + divider) · **fab**
  *
- * Compact + expanded use elevation level 1 (no end border); XR uses a higher
- * floating elevation and full pill corners.
+ * Compact + expanded use elevation level 1 (no end border); XR uses surface
+ * color + full pill corners (no 2D shadow — XR elevation is Z-depth / color).
  * Expand/collapse morph mirrors Android NavigationRailView:
  * dual labels crossfade (200ms) + width decelerate (500ms); items stay
  * `layout=horizontal` during collapse flight, then settle to vertical.
@@ -110,6 +112,8 @@ export class K3NavRail extends K3Element {
   /** True while expand width spring is in flight (`data-morphing=in`). */
   private expanding = false;
   private collapseTimer = 0;
+  /** Fluid: curved opening edge during the width flight (all layouts). */
+  private readonly curve = new NavRailCurve(this, () => this.curveSurface());
   /** Slot `fab` content — tracked via slotchange (hasSlot is false on first paint). */
   @state() private hasFab = false;
   /** Slot `trailing` / deprecated `foot`. */
@@ -273,6 +277,19 @@ export class K3NavRail extends K3Element {
     });
   }
 
+  /** Element painting the rail surface — `.xr-shell` when spatialized, else `.rail`. */
+  private curveSurface(): HTMLElement | null {
+    const spatialized =
+      this.resolvedLayout() === 'xr' && this.fabPlacement === 'spatialized';
+    return this.renderRoot.querySelector<HTMLElement>(spatialized ? '.xr-shell' : '.rail');
+  }
+
+  /** Fluid scheme: opening edge curves (outward on expand, inward on collapse). */
+  private startCurve(): void {
+    if (!isFluidMotionActive()) return;
+    this.curve.start(this.morphSettleMs() + 200);
+  }
+
   /** Flip collapsed ↔ expanded (collapsible toggle). */
   private setExpanded(next: boolean): void {
     if (this.isExpanded() === next) return;
@@ -294,6 +311,7 @@ export class K3NavRail extends K3Element {
       if (this.mode === 'expanded') this.mode = 'compact';
       this.armCollapseSettle();
     }
+    this.startCurve();
     emitLifecycle(this, 'change-end', { source: 'user', expanded: next });
     this.emit('k3-expand', { expanded: next });
   }
@@ -411,6 +429,7 @@ export class K3NavRail extends K3Element {
   override disconnectedCallback(): void {
     this.arm?.cancel();
     this.clearCollapseArm();
+    this.curve.stop();
     super.disconnectedCallback();
   }
 
@@ -461,12 +480,14 @@ export class K3NavRail extends K3Element {
         <slot name="fab" @slotchange=${this.syncFabSlot}></slot>
       </div>
     `;
+    /* Fluid curved edge — lives in the element that paints the surface */
+    const edge = html`<span class="edge" aria-hidden="true"></span>`;
     /* Spatialized: FAB orbiter above the pill; toggle stays inside the shell. */
     const body = spatialized
-      ? html`${fab}<div class="xr-shell" part="xr-shell">${toggle}${destinations}</div>`
+      ? html`${fab}<div class="xr-shell" part="xr-shell">${edge}${toggle}${destinations}</div>`
       : xr
-        ? html`${toggle}${fab}<div class="xr-shell" part="xr-shell">${destinations}</div>`
-        : html`${toggle}${fab}${destinations}`;
+        ? html`${edge}${toggle}${fab}<div class="xr-shell" part="xr-shell">${destinations}</div>`
+        : html`${edge}${toggle}${fab}${destinations}`;
     return html`<nav
       class="rail"
       part="container"

@@ -148,6 +148,40 @@ export const menuStyles: CSSResultGroup = [
     box-shadow: var(--k3-menu-elev);
     pointer-events: none;
   }
+  /* Fluid curved free edge during scaleY enter/exit — room past free edge only */
+  .edge {
+    position: absolute;
+    z-index: -1;
+    background: inherit;
+    pointer-events: none;
+    opacity: 0;
+    clip-path: inset(50%);
+  }
+  :host([data-curve]) .panel {
+    isolation: isolate;
+    overflow: visible;
+  }
+  :host([data-curve]) .edge {
+    opacity: 1;
+  }
+  :host([data-curve-edge='block-end']) .edge {
+    inset-inline: 0;
+    inset-block-start: 0;
+    width: auto;
+    height: calc(100% + 3rem);
+  }
+  :host([data-curve-edge='block-start']) .edge {
+    inset-inline: 0;
+    inset-block-end: 0;
+    width: auto;
+    height: calc(100% + 3rem);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .edge {
+      opacity: 0 !important;
+      clip-path: inset(50%) !important;
+    }
+  }
   /*
    * Select / exposed dropdown — flush with the field even before JS fit
    * (avoids a 7rem-wide absolute flash that paints under the next field).

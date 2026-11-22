@@ -32,7 +32,12 @@ describe('nav destinations — unified catalog', () => {
       'material-symbols',
       'sponsors',
     ]);
-    expect(START_HUB_PAGES.find((p) => p.id === 'showcase')?.dividerBefore).toBe(true);
+    /* Gap before meta pages (Symbols · Sponsors); Showcase stays with Pack */
+    expect(START_HUB_PAGES.find((p) => p.id === 'showcase')?.dividerBefore).toBeUndefined();
+    expect(START_HUB_PAGES.find((p) => p.id === 'material-symbols')?.dividerBefore).toBe(
+      true,
+    );
+    expect(START_HUB_PAGES.find((p) => p.id === 'showcase')?.icon).toBe('dashboard');
     expect(isStartHubPage('home')).toBe(false);
     /* Accueil leaf matches pageId home even when URL was historically `#/`. */
     expect(START_HUB_PAGES[0]?.id).toBe('home');
@@ -42,6 +47,8 @@ describe('nav destinations — unified catalog', () => {
     expect(destinationForPage('pack', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('showcase', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('showcase-pricing', () => undefined)?.id).toBe('quick-start');
+    expect(destinationForPage('showcase-clocks', () => undefined)?.id).toBe('quick-start');
+    expect(destinationForPage('showcase-pomodoro', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('sponsors', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('material-symbols', () => undefined)?.id).toBe('quick-start');
     expect(isStartHubPage('sponsors')).toBe(true);

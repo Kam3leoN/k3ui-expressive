@@ -1074,6 +1074,7 @@ function setLocale(locale: PlaygroundLocale): void {
   docStore.set(DocKeys.uiLocale, locale);
   document.documentElement.lang = meta.htmlLang;
   syncLocaleMenu();
+  void import('./shell-chrome.js').then((m) => m.remountShellPosterClock(meta.htmlLang));
 }
 
 function navMode(): 'bar' | 'rail' {
@@ -3831,6 +3832,7 @@ async function boot(): Promise<void> {
     void import('./home-stats/mount.js').then((m) => m.mountHomeStats());
     void import('./home-lift-cta/mount.js').then((m) => m.mountHomeLiftCta());
     void import('./home-about/mount.js').then((m) => m.mountHomeAbout());
+    void import('./shell-chrome.js').then((m) => m.mountShellChrome());
 
     applyAdaptiveShell();
     containerOn = docStore.get(DocKeys.uiContainer, true);

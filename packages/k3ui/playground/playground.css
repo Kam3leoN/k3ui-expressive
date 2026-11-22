@@ -1101,6 +1101,107 @@ k3-top-app-bar.shell-appbar[blur] {
   gap: 0.15rem;
 }
 
+/*
+ * Shell poster clock — under the app bar, top-end (Barlow OFL).
+ * Same scale as lucid-clock-m3: clamp figures, line-height 0.8.
+ */
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('./fonts/Barlow-Light.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/Barlow-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./fonts/Barlow-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('./fonts/Barlow-Black.ttf') format('truetype');
+}
+.shell-poster-clock.poster-clock {
+  position: absolute;
+  z-index: 18;
+  top: calc(var(--k3-banner-offset, 0px) + 4.25rem);
+  inset-inline-end: max(var(--k3-layout-full-gap, 1.25rem), 1rem);
+  margin: 0;
+  pointer-events: none;
+  color: var(--k3-sys-color-primary);
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0;
+}
+.shell-poster-clock .poster-clock__time {
+  display: grid;
+  justify-items: center;
+  font-family: 'Barlow', var(--k3-ref-typeface-brand, system-ui, sans-serif);
+  font-size: clamp(4rem, 9vw, 7rem);
+  line-height: 0.8;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.shell-poster-clock .poster-clock__row {
+  display: flex;
+}
+.shell-poster-clock .poster-clock__digit {
+  display: inline-grid;
+  overflow: hidden;
+  padding-block: 0.04em;
+}
+.shell-poster-clock .poster-clock__glyph {
+  grid-area: 1 / 1;
+}
+.shell-poster-clock .poster-clock__glyph.is-entering {
+  animation: k3-poster-digit-in var(--k3-sys-motion-duration-spatial-default, 500ms)
+    var(--k3-sys-motion-easing-spatial, var(--k3-sys-motion-easing-expressive-spatial)) both;
+}
+.shell-poster-clock .poster-clock__glyph.is-leaving {
+  animation: k3-poster-digit-out 200ms
+    var(--k3-sys-motion-easing-emphasized-accelerate, cubic-bezier(0.3, 0, 0.8, 0.15)) both;
+}
+.shell-poster-clock .poster-clock__date {
+  display: none;
+}
+@keyframes k3-poster-digit-in {
+  from {
+    transform: translateY(-0.55em);
+    opacity: 0;
+  }
+}
+@keyframes k3-poster-digit-out {
+  to {
+    transform: translateY(0.45em);
+    opacity: 0;
+  }
+}
+@media (max-width: 599px) {
+  .shell-poster-clock.poster-clock {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shell-poster-clock .poster-clock__glyph.is-entering,
+  .shell-poster-clock .poster-clock__glyph.is-leaving {
+    animation: none !important;
+  }
+}
+
 /* Settings side sheet — edge scrollbar + balanced button grids */
 .settings-sheet {
   --k3-settings-sheet-width: min(22rem, 100vw); /* 352dp — fits 3 cols without h-scroll */
@@ -1717,24 +1818,86 @@ k3-avatar [slot='badge'].ms {
 .home-hero-banner__chips k3-chip {
   --k3-chip-container-shape: 999px;
 }
-.home-hero-banner .hero-title {
+.home-hero-banner .hero-title,
+.home-hero-banner .hero-title.word-cycle {
   margin: 0;
   line-height: 0.95;
   letter-spacing: -0.03em;
   font-size: clamp(2.75rem, 8vw, 5.25rem);
   font-weight: 900;
   color: var(--k3-sys-color-on-surface);
+  display: grid;
+  justify-items: start;
+  gap: 0.12em;
+  text-wrap: balance;
 }
-.home-hero-banner .hero-title__stack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-.home-hero-banner .hero-title__line {
+.home-hero-banner .hero-title__line,
+.home-hero-banner .word-cycle__line {
+  display: block;
   color: var(--k3-sys-color-on-surface);
 }
-.home-hero-banner .hero-title__accent {
-  color: var(--k3-sys-color-primary);
+/* Lucid word-cycle pill — primary surface, springs width per word */
+.home-hero-banner .hero-title__accent,
+.home-hero-banner .word-cycle__pill {
+  position: relative;
+  display: inline-grid;
+  align-items: center;
+  height: 1.16em;
+  padding: 0 0.28em;
+  border-radius: 0.34em;
+  background: var(--k3-sys-color-primary);
+  color: var(--k3-sys-color-on-primary);
+  overflow: hidden;
+  max-width: 100%;
+  white-space: nowrap;
+  transform-origin: 0 50%;
+  font-weight: 800;
+  transition:
+    width var(--k3-sys-motion-duration-spatial-slow, 650ms)
+      var(--k3-sys-motion-easing-spatial-slow, var(--k3-sys-motion-easing-expressive-spatial-slow)),
+    background-color var(--k3-sys-motion-duration-effects-default, 200ms)
+      var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects)),
+    color var(--k3-sys-motion-duration-effects-default, 200ms)
+      var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects));
+}
+.home-hero-banner .word-cycle__word {
+  grid-area: 1 / 1;
+  display: inline-block;
+  line-height: 1;
+  padding-bottom: 0.06em;
+}
+.home-hero-banner .word-cycle__word.is-entering {
+  animation: k3-word-cycle-in var(--k3-sys-motion-duration-spatial-slow, 650ms)
+    var(--k3-sys-motion-easing-spatial-slow, var(--k3-sys-motion-easing-expressive-spatial-slow)) both;
+}
+.home-hero-banner .word-cycle__word.is-leaving {
+  animation: k3-word-cycle-out 240ms
+    var(--k3-sys-motion-easing-emphasized-accelerate, cubic-bezier(0.3, 0, 0.8, 0.15)) both;
+}
+.home-hero-banner .word-cycle__measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+}
+@keyframes k3-word-cycle-in {
+  from {
+    transform: translateY(105%) rotate(var(--tilt, 6deg)) scale(0.9);
+  }
+}
+@keyframes k3-word-cycle-out {
+  to {
+    transform: translateY(-90%) scale(0.92);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-banner .word-cycle__pill {
+    transition: none !important;
+  }
+  .home-hero-banner .word-cycle__word.is-entering,
+  .home-hero-banner .word-cycle__word.is-leaving {
+    animation: none !important;
+  }
 }
 .home-hero-banner .hero-lead {
   max-width: 42ch;

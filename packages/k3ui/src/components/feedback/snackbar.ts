@@ -25,6 +25,7 @@ import {
 } from './snackbar-queue.js';
 import { PauseableTimeout } from './snackbar-timer.js';
 import { applyChromeInset } from './snackbar-chrome.js';
+import { SnackbarGoo, GOO_TIMING } from './snackbar-goo.js';
 
 /** Horizontal placement on the anchored edge. */
 export type SnackbarPosition = 'auto' | 'center' | 'start' | 'end';
@@ -102,6 +103,8 @@ const TIMING = {
   fluidLeave: 420,
   /** Fluid collapse width spring (~610 spatial-default is long; keep snappy) */
   fluidCollapse: 500,
+  /** Fluid gooey expressive — drop falls back into the edge (snackbar-goo.ts) */
+  gooLeave: GOO_TIMING.leave,
   settle: 450, // swipe too short → spring back
   pop: 450, // icon pop at the end of loading
   minResume: 1500, // floor after hover / focus pause
@@ -234,13 +237,20 @@ export class K3Snackbar extends K3Element {
   @state() private dragX = 0;
   @state() private dragY = 0;
   @state() private dragOpacity = 1;
+  /** Fluid gooey layer (fluid scheme + expressive, front, not reduced). */
+  @state() private goo = false;
 
   @query('.bar') private barEl?: HTMLElement;
   @query('.label') private labelEl?: HTMLElement;
   @query('.action') private actionEl?: HTMLElement;
+  @query('.goo') private gooEl?: SVGSVGElement;
 
   private readonly portal = new LayerPortal();
   private readonly dismissTimer = new PauseableTimeout(() => void this.hide('auto'));
+  private readonly gooFx = new SnackbarGoo(
+    () => this.barEl,
+    () => this.gooEl,
+  );
   private chromeRo?: ResizeObserver;
   private onWinResize?: () => void;
   private reduced = false;
@@ -273,6 +283,7 @@ export class K3Snackbar extends K3Element {
     if (!this.portal.isElevating) {
       this.teardownChrome();
       this.dismissTimer.clear();
+      this.gooFx.stop();
       snackbarQueue.cancel(this);
       this.portal.clearHome();
     }
@@ -461,6 +472,11 @@ export class K3Snackbar extends K3Element {
     this.measureStack();
     this.updateLineCount();
     if (this.stacked || this.autoStacked) this.effMode = 'standard';
+    this.goo =
+      !this.reduced &&
+      !this.enterBehind &&
+      this.effMode === 'expressive' &&
+      isFluidMotionScheme();
     await this.updateComplete;
     this.hug = this.measureHug();
     await this.updateComplete;
@@ -473,9 +489,11 @@ export class K3Snackbar extends K3Element {
       this.phase = 'expanded';
     } else {
       this.phase = 'icon';
+      if (this.goo) this.gooFx.enter(this.edge);
       await sleep(TIMING.iconHold);
       if (this.phase !== 'icon') return; /* closed meanwhile */
       this.phase = 'expanded';
+      if (this.goo) this.gooFx.stretch();
     }
     this.startTimer();
   }
@@ -524,8 +542,14 @@ export class K3Snackbar extends K3Element {
       return;
     }
     this.phase = 'collapsing';
+    if (this.goo) this.gooFx.stretch(0.18);
     await sleep(fluid ? TIMING.fluidCollapse : TIMING.collapse);
     this.phase = 'leaving';
+    if (this.goo) {
+      this.gooFx.leave();
+      await sleep(TIMING.gooLeave);
+      return;
+    }
     await sleep(fluid ? TIMING.fluidLeave : TIMING.leave);
   }
 
@@ -535,6 +559,8 @@ export class K3Snackbar extends K3Element {
     const ok = await runOpenClose(this, 'close', () => this.playExit(source), { source });
     if (ok) {
       this.teardownChrome();
+      this.gooFx.stop();
+      this.goo = false;
       this.phase = 'hidden';
       this.exitKind = null;
       this.hovering = false;
@@ -756,6 +782,35 @@ export class K3Snackbar extends K3Element {
     }
   }
 
+  /** Goo layer — shapes only, drawn by SnackbarGoo (blur + alpha threshold). */
+  private renderGoo() {
+    return html`<svg class="goo" part="goo" aria-hidden="true" focusable="false">
+      <defs>
+        <filter
+          id="k3-snackbar-goo"
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
+          color-interpolation-filters="sRGB"
+        >
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0"></feGaussianBlur>
+          <feColorMatrix
+            type="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
+          ></feColorMatrix>
+        </filter>
+      </defs>
+      <g class="goo-bodies">
+        <ellipse class="puddle"></ellipse>
+        <circle class="drop"></circle>
+        <rect class="body"></rect>
+        <circle class="tip"></circle>
+        <circle class="tip"></circle>
+      </g>
+    </svg>`;
+  }
+
   override render() {
     if (this.phase === 'hidden') return nothing;
     const stacked = this.stacked || this.autoStacked;
@@ -786,6 +841,7 @@ export class K3Snackbar extends K3Element {
         data-variant=${this.variant}
         data-leading=${kind ?? nothing}
         ?data-brand=${this.hasBrand}
+        ?data-goo=${this.goo}
         data-enter=${this.enterBehind ? 'behind' : nothing}
         data-exit=${this.exitKind ?? nothing}
         data-drag=${this.dragState ?? nothing}
@@ -800,6 +856,7 @@ export class K3Snackbar extends K3Element {
         @focusout=${this.onBarFocusOut}
         @keydown=${this.onKeyDown}
       >
+        ${this.goo ? this.renderGoo() : nothing}
         ${this.hasBrand
           ? html`<img class="brand" part="brand" src=${this.brandIcon} alt="" aria-hidden="true" />`
           : nothing}

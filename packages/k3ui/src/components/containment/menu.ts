@@ -12,6 +12,7 @@ import {
   resolveFocusNavKey,
   haptic,
 } from '../../core/index.js';
+import { FluidEdgeCurve, isFluidMotionActive } from '../../motion/index.js';
 import { hostReset } from '../_shared.js';
 import type { K3MenuItem } from './menu-item.js';
 import { markMenuTreeEdges } from './menu-edges.js';
@@ -184,6 +185,30 @@ export class K3Menu extends K3Element {
   private _pointerIgnoreUntil = 0;
   private _fitListening = false;
   private _fitRo: ResizeObserver | null = null;
+  /** Fluid: free-edge curve during scaleY enter/exit (nav-rail recipe). */
+  private curve: FluidEdgeCurve | null = null;
+
+  private menuCurveEdge(): 'block-start' | 'block-end' {
+    const panel = this.panelEl();
+    if (panel?.getAttribute('data-flip') === 'above') return 'block-start';
+    if (this.position.startsWith('top')) return 'block-start';
+    return 'block-end';
+  }
+
+  private startCurve(ms = 520): void {
+    if (!isFluidMotionActive()) return;
+    this.stopCurve();
+    this.curve = new FluidEdgeCurve(this, () => this.panelEl(), {
+      measure: 'rect',
+      edge: this.menuCurveEdge(),
+    });
+    this.curve.start(ms);
+  }
+
+  private stopCurve(): void {
+    this.curve?.stop();
+    this.curve = null;
+  }
 
   // ── DOM helpers ───────────────────────────────────────────────────────────
 
@@ -342,9 +367,13 @@ export class K3Menu extends K3Element {
             this.fitPanel();
             this._enterLock = true;
             try {
+              /* After .open paint — curve tracks scaleY enter (rect measure) */
+              await afterPaint();
+              this.startCurve(520);
               const panel = this.panelEl();
               if (panel) await waitForMotion(panel);
             } finally {
+              this.stopCurve();
               this._enterLock = false;
             }
           }
@@ -375,12 +404,16 @@ export class K3Menu extends K3Element {
           if (!fast && this.open) {
             this.setAttribute('data-closing', '');
             await this.updateComplete;
+            await afterPaint();
+            this.startCurve(520);
             const panel = this.panelEl();
             if (panel) await waitForMotion(panel);
+            this.stopCurve();
           }
           this.open = false;
           this.visible = false;
           this.removeAttribute('data-closing');
+          this.stopCurve();
           await this.updateComplete;
           this.syncMatchWidthPopover(false);
           this.clearFit();
@@ -753,6 +786,7 @@ export class K3Menu extends K3Element {
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.stopCurve();
     this.clearHoverClose();
     this.clearFit();
     document.removeEventListener('pointerdown', this.onDocPointer, true);
@@ -784,6 +818,7 @@ export class K3Menu extends K3Element {
         role=${this.panelRole === 'listbox' ? 'listbox' : 'menu'}
         tabindex="-1"
       >
+        <span class="edge" aria-hidden="true"></span>
         <div class="list k3-scroll" part="list">
           <slot></slot>
         </div>

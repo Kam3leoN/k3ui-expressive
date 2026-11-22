@@ -4,8 +4,10 @@ import { demoBanner } from './demo-chrome.js';
 import { mountDialer } from './pages/dialer.js';
 import { mountPricing } from './pages/pricing.js';
 import { mountLogin } from './pages/login.js';
+import { mountClocks } from './pages/clocks.js';
+import { mountPomodoro } from './pages/pomodoro.js';
 
-export type Route = 'pricing' | 'login' | 'dialer';
+export type Route = 'pricing' | 'login' | 'dialer' | 'clocks' | 'pomodoro';
 
 const t = (key: string) => i18n.t(key);
 
@@ -13,6 +15,8 @@ export function parseRoute(hash = location.hash): Route {
   const raw = (hash.replace(/^#\/?/, '') || 'pricing').split('?')[0];
   if (raw === 'login') return 'login';
   if (raw === 'dialer') return 'dialer';
+  if (raw === 'clocks' || raw === 'widgets') return 'clocks';
+  if (raw === 'pomodoro') return 'pomodoro';
   return 'pricing';
 }
 
@@ -50,6 +54,22 @@ export function mountApp(root: HTMLElement): () => void {
                 size="sm"
                 ?selected=${route === 'dialer'}
                 >${t('showcase.nav.dialer')}</k3-button
+              >
+            </a>
+            <a href="#/clocks" aria-current=${route === 'clocks' ? 'page' : undefined}>
+              <k3-button
+                variant=${route === 'clocks' ? 'filled' : 'text'}
+                size="sm"
+                ?selected=${route === 'clocks'}
+                >${t('showcase.nav.clocks')}</k3-button
+              >
+            </a>
+            <a href="#/pomodoro" aria-current=${route === 'pomodoro' ? 'page' : undefined}>
+              <k3-button
+                variant=${route === 'pomodoro' ? 'filled' : 'text'}
+                size="sm"
+                ?selected=${route === 'pomodoro'}
+                >${t('showcase.nav.pomodoro')}</k3-button
               >
             </a>
             <k3-button-group
@@ -90,7 +110,11 @@ export function mountApp(root: HTMLElement): () => void {
         ? mountLogin(host)
         : route === 'dialer'
           ? mountDialer(host)
-          : mountPricing(host);
+          : route === 'clocks'
+            ? mountClocks(host)
+            : route === 'pomodoro'
+              ? mountPomodoro(host)
+              : mountPricing(host);
   };
 
   const onHash = (): void => paint();

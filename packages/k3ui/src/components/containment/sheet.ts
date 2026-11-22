@@ -16,12 +16,14 @@ import {
   haptic,
   edgeScrollbarStyles,
   isRtl as readRtl,
+  waitForMotion,
   type DragController,
   type DragDetail,
   FocusTrap,
 } from '../../core/index.js';
 import { overlayStack } from '../../core/overlay-stack.js';
 import { enterSheetBottom, enterSheetSide } from '../../motion/enter.js';
+import { FluidEdgeCurve, isFluidMotionActive } from '../../motion/index.js';
 import { i18n } from '../../i18n/index.js';
 import { hostReset } from '../_shared.js';
 import {
@@ -66,7 +68,8 @@ export class K3Sheet extends K3Element {
     hostReset,
     edgeScrollbarStyles,
     /*
-     * Edge-pinned scale + spatial-fast overshoot (same spring as menus).
+     * Edge-pinned scaleY/X + spatial-fast (same as expressive for all schemes).
+     * Fluid adds free-edge gooey curve only — no height/width jelly squash.
      * Never translate→0 with overshoot — that lifts the sheet off the edge.
      */
     enterSheetBottom('.sheet.bottom'),
@@ -113,6 +116,60 @@ export class K3Sheet extends K3Element {
       }
       .sheet.open {
         pointer-events: auto;
+      }
+      /*
+       * Fluid curved free edge (same recipe as nav-rail) — visual size from
+       * getBoundingClientRect while scale enter/exit runs.
+       */
+      /*
+       * Fluid lens — always positioned (no display flash). Room extends only
+       * past the free edge (data-curve-edge); coords match fluid-edge-curve.
+       */
+      .edge {
+        position: absolute;
+        z-index: -1;
+        background: inherit;
+        pointer-events: none;
+        opacity: 0;
+        clip-path: inset(50%);
+      }
+      :host([data-curve]) .sheet {
+        position: fixed;
+        isolation: isolate;
+        overflow: visible;
+      }
+      :host([data-curve]) .edge {
+        opacity: 1;
+      }
+      :host([data-curve-edge='inline-end']) .edge {
+        inset-block: 0;
+        inset-inline-start: 0;
+        width: calc(100% + 3rem);
+        height: auto;
+      }
+      :host([data-curve-edge='inline-start']) .edge {
+        inset-block: 0;
+        inset-inline-end: 0;
+        width: calc(100% + 3rem);
+        height: auto;
+      }
+      :host([data-curve-edge='block-end']) .edge {
+        inset-inline: 0;
+        inset-block-start: 0;
+        width: auto;
+        height: calc(100% + 3rem);
+      }
+      :host([data-curve-edge='block-start']) .edge {
+        inset-inline: 0;
+        inset-block-end: 0;
+        width: auto;
+        height: calc(100% + 3rem);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .edge {
+          opacity: 0 !important;
+          clip-path: inset(50%) !important;
+        }
       }
       .sheet.dragging {
         /* Inline translate owns transform — kill scale transition morph */
@@ -401,6 +458,29 @@ export class K3Sheet extends K3Element {
   private readonly trap = new FocusTrap();
   /** Modal behaviours (focus trap, Escape stack, scroll lock) are live. */
   private modalActive = false;
+  /** Fluid: free-edge curve during scale enter/exit (nav-rail recipe). */
+  private curve: FluidEdgeCurve | null = null;
+
+  private curveEdge(): 'block-start' | 'inline-end' | 'inline-start' {
+    if (this.placement === 'bottom') return 'block-start';
+    /* Side: free edge faces the page (opposite the docked screen edge). */
+    return this.side === 'start' ? 'inline-end' : 'inline-start';
+  }
+
+  private startCurve(ms = 600): void {
+    if (!isFluidMotionActive()) return;
+    this.stopCurve();
+    this.curve = new FluidEdgeCurve(this, () => this.sheetEl ?? null, {
+      measure: 'rect',
+      edge: this.curveEdge(),
+    });
+    this.curve.start(ms);
+  }
+
+  private stopCurve(): void {
+    this.curve?.stop();
+    this.curve = null;
+  }
 
   /**
    * Modal sheet: focus enters the panel, Tab cycles inside it (slotted
@@ -461,6 +541,8 @@ export class K3Sheet extends K3Element {
       await afterPaint();
       this.visible = true;
       await this.updateComplete;
+      /* Curve with the scale flight — must start the same frame .open paints */
+      this.startCurve(620);
     })().finally(() => {
       this.enterPromise = null;
     });
@@ -509,6 +591,10 @@ export class K3Sheet extends K3Element {
         /* Kick FAB/STT hide before enter — fades during elevate/paint (no await). */
         markSheetChromeOpening(this);
         await this.playEnter();
+        if (this.sheetEl && isFluidMotionActive()) {
+          await waitForMotion(this.sheetEl, 620);
+        }
+        this.stopCurve();
         this.activateModal();
       },
       { source: 'api' },
@@ -531,13 +617,20 @@ export class K3Sheet extends K3Element {
       this,
       'close',
       async () => {
-        this.open = false;
-        this.visible = false;
         this.dragging = false;
         this.settling = false;
         this.clearDragTransform();
         this.deactivateModal(true);
         if (source === 'drag') haptic.light();
+        /* Drop .open so exit scale runs, then curve tracks the shrinking box */
+        this.open = false;
+        this.visible = false;
+        await this.updateComplete;
+        if (this.sheetEl && isFluidMotionActive() && source !== 'drag') {
+          this.startCurve(620);
+          await waitForMotion(this.sheetEl, 620);
+        }
+        this.stopCurve();
       },
       { source },
     );
@@ -764,6 +857,7 @@ export class K3Sheet extends K3Element {
     this.drag = null;
     /* Reparent to body fires disconnect — keep host + home markers */
     if (!this.elevating) {
+      this.stopCurve();
       this.deactivateModal(true);
       unregisterSheetChromeHost(this);
       this.homeParent = null;
@@ -777,7 +871,11 @@ export class K3Sheet extends K3Element {
     if (changed.has('open')) {
       if (this.open && !this.visible) {
         markSheetChromeOpening(this);
-        void this.playEnter().then(() => {
+        void this.playEnter().then(async () => {
+          if (this.sheetEl && isFluidMotionActive()) {
+            await waitForMotion(this.sheetEl, 620);
+          }
+          this.stopCurve();
           if (this.open && this.isConnected) this.activateModal();
           requestAnimationFrame(() => recomputeSheetChromeShift());
         });
@@ -840,6 +938,7 @@ export class K3Sheet extends K3Element {
         ?inert=${!this.visible}
         data-draggable=${this.draggable ? 'true' : 'false'}
       >
+        <span class="edge" aria-hidden="true"></span>
         ${isBottom && this.draggable
           ? html`<div
               class="handle"

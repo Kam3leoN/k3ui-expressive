@@ -217,14 +217,14 @@ export const START_HUB_PAGES: StartHubPage[] = [
   },
   {
     id: 'showcase',
-    icon: 'apps',
+    icon: 'dashboard',
     labelKey: 'doc.nav.showcase',
-    dividerBefore: true,
   },
   {
     id: 'material-symbols',
     icon: 'mood',
     labelKey: 'doc.nav.resources.material-symbols',
+    dividerBefore: true,
   },
   {
     id: 'sponsors',
@@ -239,6 +239,9 @@ const SHOWCASE_PAGE_IDS = new Set([
   'showcase-pricing',
   'showcase-login',
   'showcase-dialer',
+  'showcase-clocks',
+  'showcase-pomodoro',
+  'showcase-widgets',
 ]);
 
 /** Pages that arm the Démarrage primary destination (not Accueil / home). */

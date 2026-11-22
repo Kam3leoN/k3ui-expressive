@@ -268,6 +268,16 @@
           </div>
         </k3-top-app-bar>
 
+        <!-- Shell poster clock (Barlow) — persistent under the app bar (top-end) -->
+        <figure class="poster-clock shell-poster-clock" id="shell-poster-clock">
+          <time class="poster-clock__time" data-clock-time>
+            <span class="poster-clock__row" data-clock-hours aria-hidden="true"></span>
+            <span class="poster-clock__row" data-clock-minutes aria-hidden="true"></span>
+          </time>
+          <!-- data-clock-date kept for PosterClock API; hidden in shell CSS -->
+          <figcaption class="poster-clock__date" data-clock-date hidden></figcaption>
+        </figure>
+
         <!-- Scrollport only — keeps app bar above sheet/scrim (fixed) -->
         <div class="shell-scroll k3-scroll">
         <!-- Boot + SPA page load — first paint is this veil; app clears it when ready -->
@@ -332,15 +342,22 @@
                   <span>v1.2.7</span>
                 </k3-chip>
               </div>
-              <h1 id="home-hero-title" class="hero-title">
-                <span class="hero-title__stack">
-                  <span class="hero-title__line" data-i18n="playground.hero.title.k3ui"
-                    >Material K3ui</span
-                  >
-                  <span class="hero-title__accent" data-i18n="playground.hero.title.accent"
-                    >Expressive</span
-                  >
-                </span>
+              <h1
+                id="home-hero-title"
+                class="hero-title word-cycle"
+                aria-label="Material K3ui — Expressive Design"
+              >
+                <span
+                  class="hero-title__line word-cycle__line"
+                  data-i18n="playground.hero.title.k3ui"
+                  >Material K3ui</span
+                >
+                <span
+                  class="hero-title__accent word-cycle__pill"
+                  aria-hidden="true"
+                  data-words="Expressive Design|Goey Animation|35 Shapes|Material You|Multi Component|100% Gratuit"
+                  >100% Gratuit</span
+                >
               </h1>
               <p class="hero-lead" data-i18n="playground.lead">
                 Build thoughtful, beautiful interfaces with Material 3 Expressive Web Components —
@@ -16511,7 +16528,7 @@ static styles = [
             <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
             <h1 data-i18n="doc.showcase.title">Showcase</h1>
             <p data-i18n="doc.showcase.blurb">
-              Live UI patterns — pricing and login composed with k3ui.
+              Live UI patterns — pricing, login, T9 dialer, clocks and Pomodoro composed with k3ui.
             </p>
             <p class="doc-intro" data-i18n="doc.showcase.intro">
               Pick a composition to explore. Each card opens a full live page built with the same
@@ -16576,6 +16593,44 @@ static styles = [
             </p>
           </header>
           <div id="showcase-dialer-root" class="showcase-root"></div>
+        </article>
+
+        <article class="comp-page" data-page="showcase-clocks" id="page-showcase-clocks" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
+            <div class="section-head__title-row">
+              <h1 data-i18n="doc.showcase.clocks.title">Clocks</h1>
+              <span
+                class="showcase-stack-badge"
+                translate="no"
+                data-i18n="doc.showcase.stack.k3ui"
+                >k3ui</span
+              >
+            </div>
+            <p data-i18n="doc.showcase.clocks.blurb">
+              Analog · digital · shape · pill · numerals — on Material 3 tokens.
+            </p>
+          </header>
+          <div id="showcase-clocks-root" class="showcase-root"></div>
+        </article>
+
+        <article class="comp-page" data-page="showcase-pomodoro" id="page-showcase-pomodoro" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
+            <div class="section-head__title-row">
+              <h1 data-i18n="doc.showcase.pomodoro.title">Pomodoro</h1>
+              <span
+                class="showcase-stack-badge"
+                translate="no"
+                data-i18n="doc.showcase.stack.k3ui"
+                >k3ui</span
+              >
+            </div>
+            <p data-i18n="doc.showcase.pomodoro.blurb">
+              Focus, short breaks, long break — separate card from the clocks.
+            </p>
+          </header>
+          <div id="showcase-pomodoro-root" class="showcase-root"></div>
         </article>
 
         <!-- STYLES: COLOR — ROLES -->

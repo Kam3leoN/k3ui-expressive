@@ -26,6 +26,12 @@ export {
   type FluidShape,
   type FluidPressHandle,
 } from './fluid.js';
+export {
+  FLUID_EDGE_CURVE,
+  FluidEdgeCurve,
+  type FluidCurveEdge,
+  type FluidEdgeCurveOptions,
+} from './fluid-edge-curve.js';
 export { FluidPressController } from './fluid-press-controller.js';
 export { easings, type NamedEasing } from './easings.js';
 export {

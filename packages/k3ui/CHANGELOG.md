@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Changed — Navigation rail fluid motion (`k3-nav-rail`)
+
+- `data-k3-motion="fluid"`: expand / collapse curves the opening edge instead of the scale jelly — anchored at its end corners, the middle bows outward on expand and inward on collapse (sag follows edge velocity, max 28 px and 12 % of the curved span)
+- Same behaviour for every layout: `standard`, `modal`, `xr` contained (`.rail`) and `xr` spatialized (`.xr-shell`), LTR and RTL; follows the live end-corner radii (modal 0 → 28, xr pill 48)
+- Shared `FluidEdgeCurve` (`motion/fluid-edge-curve.ts`); rail wrapper `nav-rail-curve.ts`; nothing is set at rest; off under reduced motion and non-fluid schemes
+
+### Changed — Sheet / menu fluid edge (`k3-sheet`, `k3-menu`)
+
+- Same curved free-edge under `data-k3-motion="fluid"` during scale enter/exit (visual size via `getBoundingClientRect`)
+- Bottom sheets / menus bow the free block edge; side sheets bow the page-facing inline edge
+- Unchanged: non-fluid schemes, drag dismiss, reduced motion
+
+### Changed — Snackbar fluid motion (`k3-snackbar`)
+
+- `data-k3-motion="fluid"` + `mode="expressive"`: gooey metaball motion replaces the scale jelly — the screen edge swells, a drop rises and pinches off into the circle, the bar stretches with swollen end bulbs, then drops back into the edge on close
+- New `snackbar-goo.ts` (SVG blur + alpha threshold, springs from `springPhysics.fluid`); the filter is removed at rest so the bar keeps crisp edges
+- Unchanged: standard mode, stacked / behind arrivals, slide and swipe exits, reduced motion
+
 ### Added — Status (`k3-status`)
 
 - Tonal status chip with overhanging icon circle — boolean (`true`/`false`) or variants success · error · warning · info · neutral

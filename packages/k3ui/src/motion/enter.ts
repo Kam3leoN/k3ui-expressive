@@ -8,7 +8,7 @@
  * | Snackbar | scaleY from bottom | standard (no bounce) — M3E |
  * | Dialog basic | scaleY from center | spatial-fast; fluid = swell/squash keyframes |
  * | Dialog fullscreen | translateY | spatial default (mild overshoot) |
- * | Sheet | scaleY/X from docked edge | spatial-fast; fluid = jelly closed→open |
+ * | Sheet | scaleY/X from docked edge | spatial-fast (all schemes); fluid adds free-edge curve |
  *
  * Under `data-k3-motion=fluid`, soft springs remap via CSS vars + gooey keyframes.
  *
@@ -401,9 +401,6 @@ export function enterSheetBottom(baseSelector: string): CSSResult {
         opacity ${motionEffectsFast},
         transform ${motionSheetExit};
     }
-    :host-context([data-k3-motion='fluid']) ${base}:not(.open) {
-      transform: scale(1.04, 0.72);
-    }
     ${base}.open {
       opacity: 1;
     }
@@ -413,9 +410,6 @@ export function enterSheetBottom(baseSelector: string): CSSResult {
       transition:
         opacity ${motionEffectsFast},
         transform ${motionSheetEnter};
-    }
-    :host-context([data-k3-motion='fluid']) ${base}.open:not(.dragging):not(.settling) {
-      transform: scale(1, 1);
     }
     @media (prefers-reduced-motion: reduce) {
       ${base}:not(.open),
@@ -444,9 +438,6 @@ export function enterSheetSide(baseSelector: string): CSSResult {
         opacity ${motionEffectsFast},
         transform ${motionSheetExit};
     }
-    :host-context([data-k3-motion='fluid']) ${base}:not(.open) {
-      transform: scale(0.72, 1.04);
-    }
     ${base}.open {
       opacity: 1;
     }
@@ -455,9 +446,6 @@ export function enterSheetSide(baseSelector: string): CSSResult {
       transition:
         opacity ${motionEffectsFast},
         transform ${motionSheetEnter};
-    }
-    :host-context([data-k3-motion='fluid']) ${base}.open:not(.dragging):not(.settling) {
-      transform: scale(1, 1);
     }
     @media (prefers-reduced-motion: reduce) {
       ${base}:not(.open),

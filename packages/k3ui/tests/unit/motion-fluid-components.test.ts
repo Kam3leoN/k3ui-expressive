@@ -25,9 +25,13 @@ describe('fluid motion on overlay / chrome components', () => {
     expect(text).toContain("data-k3-motion='fluid'");
     expect(text).toContain('scale(1.1, 0.5)');
     expect(text).toContain('scale(1.14, 0.68)');
+    /* Expressive: metaball goo layer instead of the scale jelly */
+    expect(text).toContain('.bar[data-goo]');
+    expect(text).toContain('.goo');
+    expect(text).not.toContain('scale(0.72, 0.32)');
   });
 
-  it('dialog / sheet ship fluid jelly; menus keep scaleY for all schemes', () => {
+  it('dialog keeps fluid jelly; sheet / menus share scale enter (fluid = edge curve)', () => {
     const dialog = cssText(enterDialogMotion('.panel.basic', '.panel.basic.open'));
     expect(dialog).toContain('k3-dialog-enter-fluid');
     expect(dialog).toContain("data-k3-motion='fluid'");
@@ -49,12 +53,16 @@ describe('fluid motion on overlay / chrome components', () => {
     expect(flyout).toContain(':host([data-closing]) .flyout[data-placed]');
     expect(flyout).not.toContain("data-k3-motion='fluid'");
 
+    /* Sheets: same expressive scaleY/X — no fluid height jelly; gooey is FluidEdgeCurve */
     const bottom = cssText(enterSheetBottom('.sheet.bottom'));
-    expect(bottom).toContain("data-k3-motion='fluid'");
-    expect(bottom).toContain('scale(1.04, 0.72)');
+    expect(bottom).toContain('scaleY(0.8)');
+    expect(bottom).not.toContain('scale(1.04, 0.72)');
+    expect(bottom).not.toContain("data-k3-motion='fluid'");
 
     const side = cssText(enterSheetSide('.sheet.side'));
-    expect(side).toContain('scale(0.72, 1.04)');
+    expect(side).toContain('scaleX(0.8)');
+    expect(side).not.toContain('scale(0.72, 1.04)');
+    expect(side).not.toContain("data-k3-motion='fluid'");
   });
 
   it('tooltip and nav-rail prefer scheme aliases over expressive hardcodes', () => {
@@ -70,19 +78,35 @@ describe('fluid motion on overlay / chrome components', () => {
       'utf8',
     );
     expect(rail).toMatch(/--k3-nav-rail-ease:[\s\S]*?--k3-sys-motion-easing-spatial/);
-    expect(rail).toContain('k3-nav-rail-fluid-in');
-    expect(rail).toContain('k3-nav-rail-fluid-out');
-    expect(rail).toContain("data-k3-motion='fluid'");
-    /* Full-flight morph (not 1-frame data-expanding) */
-    expect(rail).toContain("data-morphing='in'");
-    expect(rail).toContain("data-morphing='out'");
-    /* Collapse must settle at identity — ending at scale(0.9) snapped on clear */
-    expect(rail).toContain('k3-nav-rail-fluid-out');
-    expect(rail).not.toContain('scale(0.9, 1.03)');
-    expect(rail).toMatch(/100%\s*\{\s*transform:\s*scale\(1,\s*1\)/);
-    /* Spatialized jellies .xr-shell only — never both (double-scale) */
-    expect(rail).toContain("fab-placement='spatialized'][data-morphing='in']");
-    expect(rail).toContain('.xr-shell');
+    /* Fluid: curved opening edge (nav-rail-curve.ts), no scale jelly */
+    expect(rail).not.toContain('k3-nav-rail-fluid-in');
+    expect(rail).not.toContain('scale(0.88, 1.04)');
+    expect(rail).toContain(':host([data-curve]) .edge');
+    expect(rail).toContain(':host([data-curve]) .xr-shell');
+    expect(rail).toContain('background: inherit');
+    const railTs = readFileSync(
+      resolve(__dirname, '../../src/components/navigation/nav-rail.ts'),
+      'utf8',
+    );
+    expect(railTs).toContain('isFluidMotionActive()');
+    /* Spatialized curves .xr-shell (the pill), otherwise .rail */
+    expect(railTs).toContain("spatialized ? '.xr-shell' : '.rail'");
+
+    const sheet = readFileSync(
+      resolve(__dirname, '../../src/components/containment/sheet.ts'),
+      'utf8',
+    );
+    expect(sheet).toContain('FluidEdgeCurve');
+    expect(sheet).toContain("measure: 'rect'");
+    expect(sheet).toContain('class="edge"');
+
+    const menu = readFileSync(
+      resolve(__dirname, '../../src/components/containment/menu.ts'),
+      'utf8',
+    );
+    expect(menu).toContain('FluidEdgeCurve');
+    expect(menu).toContain('startCurve');
+    expect(menu).toContain('class="edge"');
 
     const navItem = readFileSync(
       resolve(__dirname, '../../src/components/navigation/nav-item.ts'),

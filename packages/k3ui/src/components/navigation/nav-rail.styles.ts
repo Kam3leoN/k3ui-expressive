@@ -12,6 +12,8 @@ import { css, type CSSResultGroup } from 'lit';
  * Expand keeps that same X (offsets stay on the compact track) so icons do
  * not slide — the rail grows and row labels reveal beside the pill.
  * Modal chrome only while expanded (compact = straight end edge).
+ * Fluid scheme: the opening edge curves during the width flight (see
+ * nav-rail-curve.ts) instead of a scale jelly.
  *
  * @see https://m3.material.io/components/navigation-rail/guidelines
  * @see https://m3.material.io/styles/motion/overview/how-it-works
@@ -172,9 +174,9 @@ export const navRailStyles: CSSResultGroup = css`
   }
 
   /*
-   * XR / Spatial — elevated floating orbiter
+   * XR / Spatial — floating orbiter (surface color, no 2D shadow — XR uses Z
+   * depth + color, not elevation shadows).
    * (@see https://m3.material.io/foundations/xr/components/nav-rail)
-   * (@see https://bug-on-m3.vercel.app/components/navigation-rail)
    *
    * Offset uses logical inline-start (mirrors in RTL). Not flush to the edge.
    * Shell playground may zero host margin and set inset-inline-start itself.
@@ -199,7 +201,7 @@ export const navRailStyles: CSSResultGroup = css`
     gap: var(--k3-sys-spacing-space100, 0.5rem);
     padding: var(--k3-sys-spacing-space200, 0.75rem) var(--k3-nav-rail-pad-inline);
     background: var(--k3-nav-rail-bg, var(--k3-sys-color-surface-container));
-    box-shadow: var(--k3-nav-rail-elevation, var(--k3-sys-elevation-level3));
+    box-shadow: none;
     border-start-start-radius: var(--k3-nav-rail-radius, var(--k3-nav-rail-xr-radius));
     border-start-end-radius: var(--k3-nav-rail-radius, var(--k3-nav-rail-xr-radius));
     border-end-start-radius: var(--k3-nav-rail-radius, var(--k3-nav-rail-xr-radius));
@@ -241,7 +243,7 @@ export const navRailStyles: CSSResultGroup = css`
     .xr-shell {
     padding: var(--k3-sys-spacing-space200, 0.75rem) var(--k3-nav-rail-pad-inline);
     background: var(--k3-nav-rail-bg, var(--k3-sys-color-surface-container));
-    box-shadow: var(--k3-nav-rail-elevation, var(--k3-sys-elevation-level3));
+    box-shadow: none;
     border-radius: var(--k3-nav-rail-radius, var(--k3-nav-rail-xr-radius));
   }
 
@@ -487,57 +489,37 @@ export const navRailStyles: CSSResultGroup = css`
   }
 
   /*
-   * Fluid gooey — all layouts (modal / standard / xr).
-   * Tied to data-morphing (full width spring), not the 1-frame data-expanding tuck.
-   * Animate ONE surface only: .rail normally; .xr-shell when spatialized
-   * (avoid double-scale — shell lives inside .rail).
-   * Both keyframes settle at identity so clearing data-morphing never snaps.
+   * Fluid curved edge — all layouts (standard / modal / xr contained /
+   * xr spatialized). During the width flight (data-morphing in / out,
+   * data-curve set by nav-rail-curve.ts) the opening edge stays anchored at
+   * its end corners and its middle leads: outward on expand, inward on
+   * collapse. Outward = .edge lens (inherits the surface background); inward =
+   * clip-path on the surface. Nothing is set at rest.
    */
-  :host-context([data-k3-motion='fluid']):host([data-morphing='in']:not([fab-placement='spatialized']))
-    .rail {
-    transform-origin: left center;
-    animation: k3-nav-rail-fluid-in var(--k3-nav-rail-motion) var(--k3-nav-rail-ease) both;
+  /*
+   * .edge stays in the tree (no display toggle → no paint flash). Hidden via
+   * opacity until data-curve; room always past inline-end (RTL flips via
+   * inset-inline-start).
+   */
+  .edge {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: calc(100% + 3rem); /* FLUID_EDGE_CURVE.room */
+    z-index: -1;
+    background: inherit;
+    pointer-events: none;
+    opacity: 0;
+    clip-path: inset(50%);
   }
-  :host-context([data-k3-motion='fluid']):host([data-morphing='out']:not([fab-placement='spatialized']))
-    .rail {
-    transform-origin: left center;
-    animation: k3-nav-rail-fluid-out var(--k3-nav-rail-motion) var(--k3-nav-rail-ease) both;
+  :host([data-curve]) .rail,
+  :host([data-curve]) .xr-shell {
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
   }
-  :host-context([data-k3-motion='fluid']):host([fab-placement='spatialized'][data-morphing='in'])
-    .xr-shell {
-    transform-origin: left center;
-    animation: k3-nav-rail-fluid-in var(--k3-nav-rail-motion) var(--k3-nav-rail-ease) both;
-  }
-  :host-context([data-k3-motion='fluid']):host([fab-placement='spatialized'][data-morphing='out'])
-    .xr-shell {
-    transform-origin: left center;
-    animation: k3-nav-rail-fluid-out var(--k3-nav-rail-motion) var(--k3-nav-rail-ease) both;
-  }
-  :host-context([data-k3-motion='fluid']):host(:dir(rtl)):host([data-morphing]:not([fab-placement='spatialized']))
-    .rail,
-  :host-context([data-k3-motion='fluid']):host(:dir(rtl)):host([fab-placement='spatialized'][data-morphing])
-    .xr-shell {
-    transform-origin: right center;
-  }
-  @keyframes k3-nav-rail-fluid-in {
-    from {
-      transform: scale(0.88, 1.04);
-    }
-    to {
-      transform: scale(1, 1);
-    }
-  }
-  /* Collapse jelly — peak mid-flight, settle at rest (no end snap). */
-  @keyframes k3-nav-rail-fluid-out {
-    0% {
-      transform: scale(1, 1);
-    }
-    40% {
-      transform: scale(0.92, 1.04);
-    }
-    100% {
-      transform: scale(1, 1);
-    }
+  :host([data-curve]) .edge {
+    opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -548,10 +530,9 @@ export const navRailStyles: CSSResultGroup = css`
     .fab {
       transition: none;
     }
-    :host-context([data-k3-motion='fluid']):host([data-morphing]) .rail,
-    :host-context([data-k3-motion='fluid']):host([data-morphing]) .xr-shell {
-      animation: none !important;
-      transform: none;
+    .edge {
+      opacity: 0 !important;
+      clip-path: inset(50%) !important;
     }
     ::slotted(k3-fab),
     ::slotted(.rail-fab-compact),

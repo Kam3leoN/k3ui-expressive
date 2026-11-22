@@ -1,6 +1,7 @@
 # k3ui Showcase (sample app)
 
-Live UI patterns — **pricing**, **login**, and more — composed with k3ui.
+Live UI patterns — **pricing**, **login**, **T9 dialer**, **Lucid widgets**
+(analog + Poster clocks, Pomodoro) — composed with k3ui.
 Not part of the published `k3ui` package.
 
 ## Run
@@ -26,7 +27,7 @@ pages.
 
 ## Stack
 
-- Hash routes: `#/pricing` · `#/login`
+- Hash routes: `#/pricing` · `#/login` · `#/dialer` · `#/widgets`
 - Imports `@k3ui/*` via Vite aliases to `../../src`
 - Locale strings: `src/i18n/{en,fr}.json` via `i18n.extend()`
 - Material Symbols: Google Fonts subset in `index.html`
