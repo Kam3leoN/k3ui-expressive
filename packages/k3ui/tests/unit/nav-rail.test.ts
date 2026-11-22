@@ -26,6 +26,22 @@ describe('k3-nav-rail', () => {
     expect(el.position).toBe('start');
   });
 
+  it('uses M3 Expressive widths — collapsed 96dp, expanded 280dp (220–360)', () => {
+    const sheet = (K3NavRail as unknown as { styles: Array<{ cssText?: string }> }).styles;
+    const cssText = sheet.map((s) => s.cssText ?? '').join('\n');
+    /* md.comp.nav-rail.collapsed.container.width */
+    expect(cssText).toMatch(/--k3-nav-rail-compact:\s*6rem/);
+    /* md.comp.nav-rail.collapsed.narrow.container.width */
+    expect(cssText).toMatch(/--k3-nav-rail-narrow:\s*5rem/);
+    /* Default expanded + clamp to token min/max */
+    expect(cssText).toMatch(/--k3-nav-rail-expanded:\s*17\.5rem/);
+    expect(cssText).toMatch(/--k3-nav-rail-expanded-min:\s*13\.75rem/);
+    expect(cssText).toMatch(/--k3-nav-rail-expanded-max:\s*22\.5rem/);
+    expect(cssText).toMatch(
+      /size='large'[\s\S]*?--k3-nav-rail-width:\s*clamp\(\s*var\(--k3-nav-rail-expanded-min\)/,
+    );
+  });
+
   it('maps deprecated appearance attribute onto layout', async () => {
     el.appearance = 'standard';
     await el.updateComplete;
@@ -66,43 +82,41 @@ describe('k3-nav-rail', () => {
   it('FAB slot prefers single extended morph without opacity crossfade', () => {
     const sheet = (K3NavRail as unknown as { styles: Array<{ cssText?: string }> }).styles;
     const cssText = sheet.map((s) => s.cssText ?? '').join('\n');
-    expect(cssText).toMatch(/\.fab\.has[\s\S]*?justify-items:\s*start/);
-    /* Compact-track center — same collapsed ↔ expanded (expand baseline) */
+    /* Collapsed centers the FAB; expanded pins to compact track */
+    expect(cssText).toMatch(/\.fab\.has[\s\S]*?justify-items:\s*center/);
     expect(cssText).toContain('--k3-nav-rail-center-fab');
     expect(cssText).toMatch(
-      /\.fab\s*\{[\s\S]*?padding-inline-start:\s*var\(--k3-nav-rail-center-fab\)/,
+      /size='large'[\s\S]*?padding-inline-start:\s*var\(--k3-nav-rail-center-fab\)/,
     );
-    expect(cssText).toContain('justify-self: start');
     expect(cssText).toContain(":host:has(k3-extended-fab[slot='fab'])");
     expect(cssText).not.toMatch(
       /::slotted\(k3-extended-fab\)[\s\S]{0,200}opacity:\s*0/,
     );
   });
 
-  it('toggle stays centered on compact track with FAB and destinations', () => {
+  it('toggle is centered when collapsed and pinned on expand morph', () => {
     const sheet = (K3NavRail as unknown as { styles: Array<{ cssText?: string }> }).styles;
     const cssText = sheet.map((s) => s.cssText ?? '').join('\n');
     expect(cssText).toContain('--k3-nav-rail-center-toggle');
+    /* Collapsed — true center */
+    expect(cssText).toMatch(/\.toggle\s*\{[\s\S]*?margin-inline:\s*auto/);
+    expect(cssText).toMatch(/\.toggle\s*\{[\s\S]*?align-self:\s*center/);
+    /* Expanded / morph — pin to compact track */
     expect(cssText).toMatch(
-      /\.toggle\s*\{[\s\S]*?margin-inline-start:\s*var\(--k3-nav-rail-center-toggle\)/,
+      /data-collapsing[\s\S]*?\.toggle[\s\S]*?margin-inline-start:\s*var\(--k3-nav-rail-center-toggle\)/,
     );
-    /* No expanded override that would slide icons to the start edge */
-    expect(cssText).not.toMatch(
-      /size='large'[\s\S]{0,80}\.toggle[\s\S]{0,80}margin-inline-start:\s*0/,
-    );
-    expect(cssText).not.toMatch(/data-collapsing\][\s\S]{0,40}\.toggle/);
   });
 
-  it('uses expressive spatial overshoot on expand and decelerate on collapse', () => {
+  it('uses scheme-aware spatial on expand and effects on collapse', () => {
     const sheet = (K3NavRail as unknown as { styles: Array<{ cssText?: string }> }).styles;
     const cssText = sheet.map((s) => s.cssText ?? '').join('\n');
     /* Compact / collapse destination */
     expect(cssText).toMatch(
-      /:host\s*\{[\s\S]*?--k3-nav-rail-ease:\s*var\(\s*--k3-sys-motion-easing-emphasized-decelerate/,
+      /:host\s*\{[\s\S]*?--k3-nav-rail-ease:\s*var\(\s*--k3-sys-motion-easing-effects/,
     );
-    /* Expanded / expand destination — Android overshoot */
+    /* Expanded / expand destination — scheme spatial (fluid / expressive) */
     expect(cssText).toMatch(
-      /size='large'[\s\S]*?--k3-nav-rail-ease:\s*var\(\s*--k3-sys-motion-easing-expressive-spatial/,
+      /size='large'[\s\S]*?--k3-nav-rail-ease:\s*var\(\s*--k3-sys-motion-easing-spatial/,
     );
   });
 
@@ -187,6 +201,45 @@ describe('k3-nav-rail', () => {
     expect(cssText).not.toContain('calc(100% - 1.5rem)');
   });
 
+  it('xr layout renders a floating pill shell and accepts spatial alias', async () => {
+    el.layout = 'xr';
+    await el.updateComplete;
+    const rail = el.shadowRoot!.querySelector('.rail') as HTMLElement;
+    expect(rail.getAttribute('data-layout')).toBe('xr');
+    expect(rail.getAttribute('data-fab-placement')).toBe('contained');
+    expect(el.shadowRoot!.querySelector('.xr-shell')).toBeTruthy();
+
+    el.setAttribute('layout', 'spatial');
+    await el.updateComplete;
+    expect(el.layout).toBe('xr');
+    expect(rail.getAttribute('data-layout')).toBe('xr');
+
+    const sheet = (K3NavRail as unknown as { styles: Array<{ cssText?: string }> }).styles;
+    const cssText = sheet.map((s) => s.cssText ?? '').join('\n');
+    expect(cssText).toMatch(/layout='xr'/);
+    expect(cssText).toContain('--k3-nav-rail-xr-radius');
+    expect(cssText).toContain('--k3-sys-elevation-level3');
+  });
+
+  it('xr fab-placement spatialized lifts FAB outside the pill', async () => {
+    el.layout = 'xr';
+    el.fabPlacement = 'spatialized';
+    el.collapsible = true;
+    el.innerHTML = `
+      <k3-extended-fab slot="fab" class="rail-fab-extended">Create</k3-extended-fab>
+      <k3-nav-item label="Home"></k3-nav-item>
+    `;
+    await el.updateComplete;
+    const rail = el.shadowRoot!.querySelector('.rail') as HTMLElement;
+    expect(rail.getAttribute('data-fab-placement')).toBe('spatialized');
+    const shell = el.shadowRoot!.querySelector('.xr-shell') as HTMLElement;
+    expect(shell).toBeTruthy();
+    /* Toggle stays inside the pill; FAB orbiter is a sibling before the shell */
+    expect(shell.querySelector('.toggle')).toBeTruthy();
+    expect(shell.querySelector('.fab')).toBeNull();
+    expect(rail.querySelector(':scope > .fab')).toBeTruthy();
+  });
+
   it('modal expanded CSS docks to the start edge (end radii + elev-1)', () => {
     const sheet = (K3NavRail as unknown as { styles: Array<{ cssText?: string }> }).styles;
     const cssText = sheet.map((s) => s.cssText ?? '').join('\n');
@@ -198,25 +251,26 @@ describe('k3-nav-rail', () => {
     expect(cssText).not.toContain('--k3-sys-elevation-level2');
   });
 
-  it('pins rail destination icons with compact inset (no collapse recenter)', async () => {
+  it('centers collapsed destinations; expanded keeps compact-track inset', async () => {
     const { K3NavItem } = await import('../../src/components/navigation/nav-item.js');
     const cssText = (
       K3NavItem as unknown as { styles: Array<{ cssText?: string }> }
     ).styles
       .map((s) => s.cssText ?? '')
       .join('\n');
+    /* Collapsed — true center in the rail column */
+    expect(cssText).toMatch(
+      /layout='vertical'[\s\S]*?host-context\(k3-nav-rail\) \.item[\s\S]*?align-items:\s*center/,
+    );
+    /* Expanded — pin to compact-track inset (expand baseline, no L/R slide) */
     expect(cssText).toContain('--k3-nav-icon-inset');
-    expect(cssText).toContain('padding-inline-start: var(--k3-nav-icon-inset)');
-    /* Pill centered in compact track (expand baseline) */
+    expect(cssText).toMatch(
+      /layout='horizontal'[\s\S]*?host-context\(k3-nav-rail\) \.item[\s\S]*?padding-inline-start:\s*var\(--k3-nav-icon-inset\)/,
+    );
     expect(cssText).toContain('(var(--k3-nav-icon-track) - var(--k3-nav-pill-w)) / 2');
     expect(cssText).toContain('--k3-nav-rail-item-min-height');
-    expect(cssText).toMatch(
-      /host-context\(k3-nav-rail\) \.item[\s\S]*?min-height:\s*var\(--k3-nav-rail-item-min-height/,
-    );
     /* Icon lead margin keeps glyph (and badge) centered in the 56dp column */
     expect(cssText).toContain('calc((var(--k3-nav-pill-w) - 1.5rem) / 2)');
-    /* Stack label centered on the pill axis */
-    expect(cssText).toMatch(/label--stack[\s\S]*?--k3-nav-icon-track/);
     expect(cssText).toMatch(/label--stack[\s\S]*?white-space:\s*nowrap/);
     expect(cssText).toMatch(/label--stack[\s\S]*?text-overflow:\s*ellipsis/);
     /* Collapse must not re-center the item in a still-wide rail */
@@ -278,14 +332,70 @@ describe('k3-nav-rail', () => {
     toggle.click();
     /* Sync: expanding flag + horizontal before release */
     expect(el.hasAttribute('data-expanding')).toBe(true);
+    expect(el.getAttribute('data-morphing')).toBe('in');
     await el.updateComplete;
     await Promise.all(items.map((i) => i.updateComplete));
     expect(items.every((i) => i.layout === 'horizontal')).toBe(true);
 
     await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
     expect(el.hasAttribute('data-expanding')).toBe(false);
+    /* Full width spring still morphing (fluid jelly / scheme settle). */
+    expect(el.getAttribute('data-morphing')).toBe('in');
     expect(el.size).toBe('large');
+
+    const end = new Event('transitionend');
+    Object.defineProperty(end, 'propertyName', { value: 'width' });
+    el.dispatchEvent(end);
+    expect(el.hasAttribute('data-morphing')).toBe(false);
   });
+
+  it.each(['modal', 'standard', 'xr'] as const)(
+    'expand/collapse morph works for layout=%s under fluid scheme',
+    async (layout) => {
+      document.documentElement.setAttribute('data-k3-motion', 'fluid');
+      el.collapsible = true;
+      el.layout = layout;
+      el.size = 'compact';
+      el.expanded = false;
+      if (layout === 'xr') el.fabPlacement = 'spatialized';
+      await el.updateComplete;
+
+      const items = [...el.querySelectorAll('k3-nav-item')] as Array<
+        HTMLElement & { updateComplete: Promise<unknown> }
+      >;
+      const toggle = el.shadowRoot!.querySelector('.toggle') as HTMLButtonElement;
+      toggle.click();
+      expect(el.getAttribute('data-morphing')).toBe('in');
+      expect(el.size).toBe('large');
+      await el.updateComplete;
+      await Promise.all(items.map((i) => i.updateComplete));
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+      const expandEnd = new Event('transitionend');
+      Object.defineProperty(expandEnd, 'propertyName', { value: 'width' });
+      el.dispatchEvent(expandEnd);
+      expect(el.hasAttribute('data-morphing')).toBe(false);
+
+      toggle.click();
+      expect(el.getAttribute('data-morphing')).toBe('out');
+      expect(el.hasAttribute('data-collapsing')).toBe(true);
+      expect(el.size).toBe('compact');
+
+      const collapseEnd = new Event('transitionend');
+      Object.defineProperty(collapseEnd, 'propertyName', { value: 'width' });
+      el.dispatchEvent(collapseEnd);
+      /* finishCollapseLayout is async — wait until morph flags clear */
+      for (let i = 0; i < 20 && el.hasAttribute('data-collapsing'); i++) {
+        await el.updateComplete;
+        await Promise.all(items.map((n) => n.updateComplete));
+        await Promise.resolve();
+      }
+      expect(el.hasAttribute('data-collapsing')).toBe(false);
+      expect(el.hasAttribute('data-morphing')).toBe(false);
+
+      document.documentElement.removeAttribute('data-k3-motion');
+    },
+  );
 
   it('accepts deprecated foot slot as trailing', async () => {
     el.querySelectorAll('[slot="trailing"]').forEach((n) => n.remove());

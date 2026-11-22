@@ -3,12 +3,14 @@
  *
  * | Surface | Motion | Spring / easing |
  * |---|---|---|
- * | Menu / flyout / date·time picker | scaleY expand | expressive spatial fast (bounce) |
+ * | Menu / flyout / date·time picker | scaleY expand | spatial-fast (all schemes; no fluid droplet) |
  * | FAB menu items (separate) | scaleX + stagger | same FastSpatial tokens — not this helper |
  * | Snackbar | scaleY from bottom | standard (no bounce) — M3E |
- * | Dialog basic | scaleY from center | expressive spatial fast (same bounce as menus) |
- * | Dialog fullscreen | translateY | expressive spatial default (mild overshoot) |
- * | Sheet | scaleY/X from docked edge | expressive spatial fast (bounce, edge-pinned) |
+ * | Dialog basic | scaleY from center | spatial-fast; fluid = swell/squash keyframes |
+ * | Dialog fullscreen | translateY | spatial default (mild overshoot) |
+ * | Sheet | scaleY/X from docked edge | spatial-fast; fluid = jelly closed→open |
+ *
+ * Under `data-k3-motion=fluid`, soft springs remap via CSS vars + gooey keyframes.
  *
  * @see https://m3.material.io/styles/motion/transitions
  * @see https://m3.material.io/styles/motion/overview/how-it-works
@@ -69,9 +71,22 @@ export const enterDialogBasicKeyframes = css`
       transform: translate(-50%, -50%) scaleY(1);
     }
   }
+  /* Fluid — swell from slightly below, soft squash (droplet arrival). */
+  @keyframes k3-dialog-enter-fluid {
+    from {
+      transform: translate(-50%, calc(-50% + 0.75rem)) scale(0.94, 0.78);
+    }
+    to {
+      transform: translate(-50%, -50%) scale(1, 1);
+    }
+  }
 `;
 
-/** Shared keyframe — spring easing supplies the bounce (no mid stops). */
+/**
+ * Shared keyframe — spring easing supplies the bounce (no mid stops).
+ * Menus / flyouts / docked pickers use this for all schemes (incl. fluid):
+ * gooey droplet open/close looked wrong; spatial tokens still remap under fluid.
+ */
 export const enterScaleYKeyframes = css`
   @keyframes k3-enter-scale-y {
     from {
@@ -92,10 +107,18 @@ export interface EnterScaleYOptions {
    * that are the positioned surface themselves.
    */
   openTransform?: 'none' | 'scaleY(1)';
+  /**
+   * Exit surface while `data-closing` is set (keep open class/attr until
+   * `waitForMotion` resolves). Default targets the open selector when it is
+   * a simple descendant; flyouts use `[data-placed]` while place clears later.
+   */
+  closingSelector?: string;
 }
 
 /**
  * Closed → open scaleY enter (menus, flyouts, dropdown panels).
+ *
+ * Same recipe under expressive / fluid / standard (scheme remaps spatial tokens).
  *
  * @example
  * ```ts
@@ -105,6 +128,18 @@ export interface EnterScaleYOptions {
  * ];
  * ```
  */
+/** Exit target while host has `data-closing` (menus keep `.open` / `[data-placed]`). */
+function defaultClosingSelector(closedSelector: string, openSelector: string): string {
+  /* openSelector already scoped with :host([…]) — do not nest another :host */
+  if (openSelector.trimStart().startsWith(':host')) {
+    if (openSelector.includes('[data-placed]')) {
+      return `:host([data-closing]) ${closedSelector}[data-placed]`;
+    }
+    return `:host([data-closing]) ${closedSelector}`;
+  }
+  return `:host([data-closing]) ${openSelector}`;
+}
+
 export function enterScaleY(
   closedSelector: string,
   openSelector: string,
@@ -112,6 +147,8 @@ export function enterScaleY(
 ): CSSResult {
   const origin = options.origin ?? 'top center';
   const openTransform = options.openTransform ?? 'none';
+  const closing =
+    options.closingSelector ?? defaultClosingSelector(closedSelector, openSelector);
   return css`
     ${enterScaleYKeyframes}
     ${unsafeCSS(closedSelector)} {
@@ -129,15 +166,29 @@ export function enterScaleY(
       transition: opacity ${motionEffectsFast};
       animation: k3-enter-scale-y ${motionSpatialFast} backwards;
     }
+    /* Exit — keep open class/attr + data-closing until waitForMotion */
+    ${unsafeCSS(closing)} {
+      opacity: 0;
+      transform: scaleY(0.8);
+      animation: none;
+      transition:
+        opacity ${motionEffectsFast},
+        transform ${motionSpatialFast};
+    }
     @media (prefers-reduced-motion: reduce) {
       ${unsafeCSS(closedSelector)},
-      ${unsafeCSS(openSelector)} {
+      ${unsafeCSS(openSelector)},
+      ${unsafeCSS(closing)} {
         transition: none !important;
         animation: none !important;
       }
       ${unsafeCSS(openSelector)} {
         transform: none;
         opacity: 1;
+      }
+      ${unsafeCSS(closing)} {
+        transform: scaleY(0.8);
+        opacity: 0;
       }
     }
   `;
@@ -314,6 +365,10 @@ export function enterDialogMotion(
       transition: opacity ${motionEffectsFast};
       animation: k3-dialog-enter-basic ${motionDialogEnter} backwards;
     }
+    :host-context([data-k3-motion='fluid']) ${unsafeCSS(openSelector)} {
+      transform: translate(-50%, -50%) scale(1, 1);
+      animation-name: k3-dialog-enter-fluid;
+    }
     @media (prefers-reduced-motion: reduce) {
       ${unsafeCSS(panelSelector)},
       ${unsafeCSS(openSelector)} {
@@ -346,6 +401,9 @@ export function enterSheetBottom(baseSelector: string): CSSResult {
         opacity ${motionEffectsFast},
         transform ${motionSheetExit};
     }
+    :host-context([data-k3-motion='fluid']) ${base}:not(.open) {
+      transform: scale(1.04, 0.72);
+    }
     ${base}.open {
       opacity: 1;
     }
@@ -355,6 +413,9 @@ export function enterSheetBottom(baseSelector: string): CSSResult {
       transition:
         opacity ${motionEffectsFast},
         transform ${motionSheetEnter};
+    }
+    :host-context([data-k3-motion='fluid']) ${base}.open:not(.dragging):not(.settling) {
+      transform: scale(1, 1);
     }
     @media (prefers-reduced-motion: reduce) {
       ${base}:not(.open),
@@ -383,6 +444,9 @@ export function enterSheetSide(baseSelector: string): CSSResult {
         opacity ${motionEffectsFast},
         transform ${motionSheetExit};
     }
+    :host-context([data-k3-motion='fluid']) ${base}:not(.open) {
+      transform: scale(0.72, 1.04);
+    }
     ${base}.open {
       opacity: 1;
     }
@@ -391,6 +455,9 @@ export function enterSheetSide(baseSelector: string): CSSResult {
       transition:
         opacity ${motionEffectsFast},
         transform ${motionSheetEnter};
+    }
+    :host-context([data-k3-motion='fluid']) ${base}.open:not(.dragging):not(.settling) {
+      transform: scale(1, 1);
     }
     @media (prefers-reduced-motion: reduce) {
       ${base}:not(.open),

@@ -743,7 +743,7 @@ tags.addEventListener('k3-change', () => console.log(tags.value));`,
   },
   'app-bar': {
     components: ['k3-top-app-bar'],
-    html: `<k3-top-app-bar headline="ScreenBox"></k3-top-app-bar>`,
+    html: `<k3-top-app-bar elevated blur>ScreenBox</k3-top-app-bar>`,
   },
   'footer-bar': {
     components: ['k3-footer-bar', 'k3-button'],
@@ -761,7 +761,7 @@ tags.addEventListener('k3-change', () => console.log(tags.value));`,
   },
   'navigation-bar': {
     components: ['k3-nav-bar', 'k3-nav-item'],
-    html: `<k3-nav-bar>
+    html: `<k3-nav-bar appearance="xr" layout="vertical">
   <k3-nav-item selected label="Home">${MS('home')}</k3-nav-item>
   <k3-nav-item label="Search">${MS('search')}</k3-nav-item>
 </k3-nav-bar>`,

@@ -3,6 +3,7 @@ import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { K3Element, focusRingStyles, emitLifecycle } from '../../core/index.js';
 import { slotHasContent } from '../../core/slots.js';
+import { FluidPressController } from '../../motion/fluid-press-controller.js';
 import { hostReset } from '../_shared.js';
 import K3Ripple from './ripple.js';
 
@@ -22,6 +23,10 @@ export type ButtonShape = 'round' | 'square';
  * Round radius = height/2 so CSS can interpolate smoothly (no 9999px jump).
  */
 export class K3Button extends K3Element {
+  private readonly _fluidPress = new FluidPressController(this, () =>
+    this.shadowRoot?.querySelector<HTMLElement>('.container'),
+  );
+
   static override styles = [
     hostReset,
     focusRingStyles,
@@ -212,9 +217,9 @@ export class K3Button extends K3Element {
         min-width: max-content;
         transition:
           grid-template-columns var(--k3-sys-motion-duration-spatial-fast)
-            var(--k3-sys-motion-easing-expressive-spatial),
+            var(--k3-sys-motion-easing-spatial-fast, var(--k3-sys-motion-easing-spatial)),
           opacity var(--k3-sys-motion-duration-effects-fast)
-            var(--k3-sys-motion-easing-expressive-effects);
+            var(--k3-sys-motion-easing-effects-fast, var(--k3-sys-motion-easing-effects));
       }
       .label-clip {
         overflow: visible;

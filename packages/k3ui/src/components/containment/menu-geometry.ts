@@ -25,6 +25,8 @@ export interface FlyoutPlace {
   top: string;
   origin: FlyoutOrigin;
   zIndex: number;
+  /** When set, flyout scrolls (content taller than the viewport). */
+  maxHeight: string;
 }
 
 /**
@@ -129,8 +131,15 @@ export function computeSubmenuFlyoutPlace(opts: {
     }
   }
 
+  /*
+   * Prefer item top; shift up if needed. When content is taller than the
+   * viewport, cap height so the flyout scrolls instead of clipping
+   * (Inputs / long category flyouts).
+   */
+  const maxH = Math.max(MENU_MIN_H, vh - 2 * edge);
+  const usedH = Math.min(flyoutH, maxH);
   let top = itemR.top;
-  if (top + flyoutH > vh - edge) top = Math.max(edge, vh - edge - flyoutH);
+  if (top + usedH > vh - edge) top = Math.max(edge, vh - edge - usedH);
   if (top < edge) top = edge;
 
   return {
@@ -139,6 +148,7 @@ export function computeSubmenuFlyoutPlace(opts: {
     top: `${Math.round(top)}px`,
     origin,
     zIndex: 70 + depth,
+    maxHeight: flyoutH > maxH ? `${Math.round(maxH)}px` : '',
   };
 }
 
@@ -153,7 +163,8 @@ export function applyFlyoutPlace(
     placed &&
     flyout.style.left === place.left &&
     flyout.style.right === place.right &&
-    flyout.style.top === place.top
+    flyout.style.top === place.top &&
+    flyout.style.maxHeight === place.maxHeight
   ) {
     return false;
   }
@@ -161,6 +172,8 @@ export function applyFlyoutPlace(
   flyout.style.right = place.right;
   flyout.style.top = place.top;
   flyout.style.zIndex = String(place.zIndex);
+  flyout.style.maxHeight = place.maxHeight;
+  flyout.classList.toggle('k3-scroll', Boolean(place.maxHeight));
   flyout.dataset.origin = place.origin;
   if (reveal) flyout.setAttribute('data-placed', '');
   return true;
@@ -174,4 +187,6 @@ export function clearFlyoutPlace(flyout: HTMLElement): void {
   flyout.style.left = '';
   flyout.style.right = '';
   flyout.style.zIndex = '';
+  flyout.style.maxHeight = '';
+  flyout.classList.remove('k3-scroll');
 }

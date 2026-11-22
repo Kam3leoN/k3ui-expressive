@@ -98,10 +98,19 @@ const TIMING = {
   swipeOut: 220,
   standardLeave: 200,
   reducedLeave: 150,
+  /** Fluid gooey — spatial-fast out (~405) + buffer */
+  fluidLeave: 420,
+  /** Fluid collapse width spring (~610 spatial-default is long; keep snappy) */
+  fluidCollapse: 500,
   settle: 450, // swipe too short → spring back
   pop: 450, // icon pop at the end of loading
   minResume: 1500, // floor after hover / focus pause
 } as const;
+
+function isFluidMotionScheme(): boolean {
+  if (typeof document === 'undefined') return false;
+  return document.documentElement.getAttribute('data-k3-motion') === 'fluid';
+}
 
 /** Swipe to dismiss — 48 dp like before, touch / pen only. */
 const SWIPE = { slop: 8, distance: 48, velocity: 0.5 } as const;
@@ -490,6 +499,7 @@ export class K3Snackbar extends K3Element {
 
   private async playExit(source: string): Promise<void> {
     this.enterBehind = false;
+    const fluid = isFluidMotionScheme();
     if (source === 'drag' && this.exitKind === 'swipe') {
       this.dragState = null;
       this.phase = 'leaving';
@@ -498,19 +508,25 @@ export class K3Snackbar extends K3Element {
     }
     if (this.reduced || this.effMode === 'standard') {
       this.phase = 'leaving';
-      await sleep(this.reduced ? TIMING.reducedLeave : TIMING.standardLeave);
+      await sleep(
+        this.reduced
+          ? TIMING.reducedLeave
+          : fluid
+            ? TIMING.fluidLeave
+            : TIMING.standardLeave,
+      );
       return;
     }
     if (this.stackSlideExit) {
       this.exitKind = 'slide';
       this.phase = 'leaving';
-      await sleep(TIMING.slideOut);
+      await sleep(fluid ? TIMING.fluidLeave : TIMING.slideOut);
       return;
     }
     this.phase = 'collapsing';
-    await sleep(TIMING.collapse);
+    await sleep(fluid ? TIMING.fluidCollapse : TIMING.collapse);
     this.phase = 'leaving';
-    await sleep(TIMING.leave);
+    await sleep(fluid ? TIMING.fluidLeave : TIMING.leave);
   }
 
   async hide(source: 'user' | 'api' | 'auto' | 'drag' = 'api'): Promise<boolean> {

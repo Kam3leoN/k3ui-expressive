@@ -43,7 +43,7 @@ export {
  * - `system` — `prefers-color-scheme` (OS)
  */
 export type ColorMode = 'light' | 'dark' | 'auto' | 'system';
-export type MotionScheme = 'expressive' | 'standard';
+export type MotionScheme = 'expressive' | 'standard' | 'fluid';
 
 /** Auto mode daylight window (local hours, inclusive start / exclusive end). */
 /** `auto` mode: light from 07:00 (inclusive) to 18:00 (exclusive), local time. */

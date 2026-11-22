@@ -8,6 +8,7 @@ import {
   emitLifecycle,
   hasNamedSlot,
 } from '../../core/index.js';
+import { FluidPressController } from '../../motion/fluid-press-controller.js';
 import { hostReset } from '../_shared.js';
 import K3Ripple from './ripple.js';
 import {
@@ -48,6 +49,10 @@ if (!customElements.get('k3-ripple')) {
  * @see https://m3.material.io/components/icon-buttons/accessibility
  */
 export class K3IconButton extends K3Element {
+  private readonly _fluidPress = new FluidPressController(this, () =>
+    this.shadowRoot?.querySelector<HTMLElement>('.container'),
+  );
+
   static override styles = [hostReset, focusRingStyles, iconButtonStyles];
 
   @property({ reflect: true }) variant: IconButtonVariant =

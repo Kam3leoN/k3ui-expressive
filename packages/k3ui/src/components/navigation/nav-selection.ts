@@ -2,7 +2,7 @@ import type { K3NavItem } from './nav-item.js';
 
 /**
  * Destinations under a nav host (bar / rail).
- * `data-nav-aux` items are managed outside `host.active` (e.g. shell Sponsors).
+ * `data-nav-aux` items are managed outside `host.active` (optional aux destinations).
  */
 export function queryNavItems(host: HTMLElement): K3NavItem[] {
   return [...host.querySelectorAll<K3NavItem>('k3-nav-item:not([data-nav-aux])')];
@@ -10,7 +10,7 @@ export function queryNavItems(host: HTMLElement): K3NavItem[] {
 
 /**
  * Destinations for density / layout sync (expand ↔ collapse morph).
- * Includes default-slot, `data-nav-aux` (Sponsors), and trailing/foot items.
+ * Includes default-slot, `data-nav-aux`, and trailing/foot items.
  */
 export function queryNavItemsForLayout(host: HTMLElement): K3NavItem[] {
   return [...host.querySelectorAll<K3NavItem>(':scope > k3-nav-item')];

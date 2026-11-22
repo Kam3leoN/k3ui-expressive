@@ -1,5 +1,5 @@
 :root {
-  --doc-rail: 6.5rem; /* nav-rail compact 104dp — full “Containment” / “Components” */
+  --doc-rail: 6rem; /* nav-rail compact 96dp M3E */
   --doc-pad: clamp(1.25rem, 3vw, 2.5rem);
   --doc-bar-h: 4.5rem;
   /* Snackbar elevates to body — 16 dp float off the window edge (not sticky) */
@@ -309,7 +309,7 @@ k3-dialog:not(:defined):not([open]) {
 }
 k3-nav-rail:not(:defined) {
   display: block;
-  inline-size: 6.5rem; /* --k3-nav-rail-width — 104dp */
+  inline-size: 6rem; /* --k3-nav-rail-width — 96dp M3E */
   overflow: hidden;
 }
 .app[data-nav='bar'] k3-nav-bar:not(:defined) {
@@ -372,13 +372,70 @@ k3-nav-rail:not(:defined) {
 }
 
 /*
+ * XR / Spatial compact shell — M3 SpatialNavigationBar orbiter
+ * (@see https://m3.material.io/foundations/xr/components/nav-bar)
+ * Bottom-centered floating pill; content full-bleed under the orbiter.
+ */
+.app[data-nav='bar']:has(#nav-bar[appearance='xr']),
+.app[data-nav='bar']:has(#nav-bar[appearance='spatial']) {
+  --k3-shell-xr-bar-offset: 1.5rem; /* 24dp */
+  /* Prefer live measure (--k3-nav-chrome-inset-block-end) + content gap */
+  --k3-shell-xr-bar-gutter: calc(
+    var(--k3-nav-chrome-inset-block-end, calc(1.5rem + 4rem)) + 0.75rem
+  );
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: 'content';
+  position: relative;
+  background: transparent;
+}
+.app[data-nav='bar']:has(#nav-bar[appearance='xr']) .shell-bar,
+.app[data-nav='bar']:has(#nav-bar[appearance='spatial']) .shell-bar {
+  position: absolute;
+  grid-area: unset;
+  left: 50%;
+  right: auto;
+  bottom: var(--k3-shell-xr-bar-offset);
+  transform: translateX(-50%);
+  width: auto;
+  max-width: calc(100% - 2 * var(--k3-shell-xr-bar-offset));
+  z-index: 30;
+  background: transparent;
+  pointer-events: none;
+}
+.app[data-nav='bar']:has(#nav-bar[appearance='xr']) #nav-bar,
+.app[data-nav='bar']:has(#nav-bar[appearance='spatial']) #nav-bar {
+  pointer-events: auto;
+  /* Shell owns the bottom offset — drop host margin to avoid double inset */
+  margin-block-end: 0;
+}
+.app[data-nav='bar']:has(#nav-bar[appearance='xr']) .shell-content,
+.app[data-nav='bar']:has(#nav-bar[appearance='spatial']) .shell-content {
+  background: transparent;
+  /* Clear the floating orbiter so last content stays reachable */
+  padding-bottom: var(--k3-shell-xr-bar-gutter);
+}
+body:has(.app[data-nav='bar']:has(#nav-bar[appearance='xr'])),
+body:has(.app[data-nav='bar']:has(#nav-bar[appearance='spatial'])) {
+  --k3-snackbar-inset-block-end: calc(
+    var(--k3-shell-xr-bar-gutter, 6.25rem) + var(--k3-snackbar-inset, 1rem)
+  );
+}
+
+/*
  * Compact nav-bar (64dp) — lift fixed FAB / scroll-to-top 16dp above the bar.
  * Var must live on <html>: shell chrome (stt / fab-menu) is a sibling of .app,
  * so .app[data-nav] alone never reaches them.
  * bottom = edge(16) + inset(64 + safe-area) → 16dp clear of the bar.
+ * XR: inset includes the 24dp orbiter float.
  */
 html:has(.app[data-nav='bar']) {
   --k3-nav-chrome-inset-block-end: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+html:has(.app[data-nav='bar']:has(#nav-bar[appearance='xr'])),
+html:has(.app[data-nav='bar']:has(#nav-bar[appearance='spatial'])) {
+  --k3-nav-chrome-inset-block-end: calc(
+    1.5rem + 4rem + env(safe-area-inset-bottom, 0px)
+  );
 }
 html:has(.app[data-nav='rail']) {
   --k3-nav-chrome-inset-block-end: 0px;
@@ -405,6 +462,71 @@ html:has(.app[data-nav='rail']) {
   grid-row: 1;
   z-index: 30;
 }
+/*
+ * XR / Spatial shell — M3 XR orbiters float over a full-bleed spatial panel
+ * (@see https://m3.material.io/foundations/xr/components/nav-rail):
+ * - panel bg / ambient extend under the rail (no white gutter strip)
+ * - rail is offset from the inline-start edge (logical — flips in RTL),
+ *   never sticky/flush to the physical left or right border
+ * - app bar spans edge-to-edge; expand overlays without reflow
+ */
+.app[data-nav='rail']:has(#nav-rail[layout='xr']) {
+  --k3-shell-xr-rail-offset: 1.5rem; /* 24dp float off the panel edge */
+  --k3-shell-xr-rail-gutter: calc(
+    var(--k3-shell-xr-rail-offset) + 6rem + 0.75rem
+  ); /* offset + compact 96 + gap */
+  /*
+   * --doc-rail stays 0 in XR so full-bleed surfaces (home-ambient) paint
+   * under the orbiter — never a white gutter strip. Text padding uses
+   * --k3-shell-xr-rail-gutter instead.
+   */
+  --doc-rail: 0px;
+  grid-template-columns: minmax(0, 1fr);
+  position: relative;
+  background: transparent;
+}
+.app[data-nav='rail']:has(#nav-rail[layout='xr']) .shell-rail {
+  /* Orbiter — absolute float, logical start inset (RTL → inline-end) */
+  position: absolute;
+  inset-inline-start: var(--k3-shell-xr-rail-offset);
+  inset-inline-end: auto;
+  top: 0;
+  bottom: 0;
+  margin-block: auto;
+  margin-inline: 0; /* host XR margin disabled — shell owns offset */
+  height: fit-content;
+  max-height: calc(100% - 2.5rem);
+  /* Keep component width token (96/280) — width:auto broke toggle centering */
+  width: var(--k3-nav-rail-width, 6rem);
+  align-self: center;
+  z-index: 30;
+  pointer-events: auto;
+}
+.app[data-nav='rail']:has(#nav-rail[layout='xr']) .shell-content {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  /* Transparent — home-ambient paints the spatial panel under the rail */
+  background: transparent;
+}
+/* App bar = full panel width; never tracks rail expand (no modal bleed) */
+.app[data-nav='rail']:has(#nav-rail[layout='xr']) .shell-appbar {
+  /* Keep absolute overlay when blur — do not reset to relative (kills glass) */
+  z-index: 20 !important;
+}
+.app[data-nav='rail']:has(#nav-rail[layout='xr']) .shell-appbar:not([blur]) {
+  position: relative !important;
+  inset: auto !important;
+}
+.app[data-nav='rail']:has(#nav-rail[layout='xr']) .shell-scroll {
+  background: transparent;
+}
+/* Snackbar still clears the floating orbiter */
+body:has(.app[data-nav='rail']:has(#nav-rail[layout='xr'])) {
+  --k3-snackbar-inset-inline-start: calc(
+    1.5rem + 6rem + 0.75rem + var(--k3-snackbar-inset)
+  );
+}
 .app[data-nav='rail'] .shell-content {
   grid-column: 2;
   grid-row: 1;
@@ -419,6 +541,10 @@ html:has(.app[data-nav='rail']) {
   overflow: visible;
   display: flex;
   flex-direction: column;
+}
+/* Body text clears the compact XR orbiter; expand overlays without reflow */
+.app[data-nav='rail']:has(#nav-rail[layout='xr']) .shell-scroll > .main {
+  padding-inline-start: var(--k3-shell-xr-rail-gutter);
 }
 
 /*
@@ -499,6 +625,28 @@ html[data-k3-booting] .doc-page-loading {
   color: var(--k3-sys-color-on-surface-variant, #49454f);
 }
 
+/*
+ * Compact home FAB — visible only with nav-bar (<600).
+ * Mirrors rail extended-FAB Accueil; 16dp edge + nav-chrome lift (M3).
+ */
+k3-fab.shell-home-fab {
+  display: none;
+  position: fixed;
+  inset-inline-start: 1rem; /* 16dp */
+  inset-inline-end: auto;
+  bottom: calc(1rem + var(--k3-nav-chrome-inset-block-end, 0px));
+  z-index: 1100;
+  transition: bottom var(--k3-sys-motion-duration-medium2, 300ms)
+    var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.2, 0, 0, 1));
+}
+html:has(.app[data-nav='bar']) k3-fab.shell-home-fab {
+  display: inline-flex;
+}
+/* Hide on Accueil — already home (rail FAB stays for brand consistency ≥600) */
+html:has(.app[data-nav='bar']):has(#page-home:not([hidden])) k3-fab.shell-home-fab {
+  display: none;
+}
+
 /* Shell chrome — scroll-to-top sits left of fixed FAB menu (edge 16 + FAB 56 + gap 16) */
 k3-scroll-to-top.shell-stt {
   z-index: 1090;
@@ -531,6 +679,12 @@ k3-fab-menu.shell-github-menu {
 }
 .shell-nav-menu::part(menu) {
   min-width: 12rem; /* ~192 — secondary dest labels */
+  /*
+   * No artificial 28rem list cap — Animations / long flat lists were
+   * scrolling while free viewport space remained below. Viewport docking
+   * in fitMenuPanel owns the max-height instead.
+   */
+  --k3-menu-list-max-h: none;
   /* Snappier than default short4 — rail secondary should feel instant */
   transition-duration: var(--k3-sys-motion-duration-short2, 100ms);
 }
@@ -668,6 +822,12 @@ k3-fab-menu.shell-github-menu {
   padding-block-end: 0.5rem;
   padding-inline: 1.5rem 0.5rem; /* 24dp start · room for 3dp bar */
   overflow: visible;
+}
+/* Démarrage hub — gap before Showcase / meta leaves */
+.shell-sheet-divider {
+  margin-block-start: var(--k3-sys-spacing-space100, 0.5rem);
+  padding-block-start: var(--k3-sys-spacing-space100, 0.5rem);
+  border-block-start: 1px solid var(--k3-sys-color-outline-variant);
 }
 .shell-sheet-nav {
   display: flex;
@@ -816,12 +976,6 @@ k3-fab-menu.shell-github-menu {
   z-index: 2;
   overflow: visible;
 }
-/* Sponsors — last default-slot destination (same chrome as peers; pin in app.ts) */
-.rail-sponsors {
-  flex: 0 0 auto;
-  width: 100%;
-  align-self: stretch;
-}
 .rail-ver-chip {
   pointer-events: none;
   flex-shrink: 0;
@@ -842,7 +996,12 @@ k3-fab-menu.shell-github-menu {
   flex-shrink: 0;
 }
 
-/* Docs app bar — below rail (30); outside scrollport */
+/*
+ * Docs app bar — below rail (30).
+ * With [blur]: overlay the scrollport so ambient + content paint behind the
+ * glass (backdrop-filter is a no-op when the bar is a flex sibling above
+ * the scroll and only opaque surface sits behind it).
+ */
 k3-top-app-bar.shell-appbar {
   position: relative;
   z-index: 20 !important; /* beat :host { z-index: 10 } */
@@ -850,6 +1009,19 @@ k3-top-app-bar.shell-appbar {
   margin-block-end: 0;
   /* Let search focus shadow paint outside the 64dp row */
   overflow: visible;
+}
+k3-top-app-bar.shell-appbar[blur] {
+  --k3-appbar-blur: 16px;
+  --k3-appbar-blur-fill: 72%;
+  position: absolute;
+  inset-inline: 0;
+  top: var(--k3-banner-offset, 0px);
+  width: 100%;
+  flex-shrink: 0;
+}
+.shell-content:has(> .shell-appbar[blur]) > .shell-scroll {
+  /* Clear the overlaid 64dp bar so first content stays reachable */
+  padding-block-start: 4rem;
 }
 .shell-appbar::part(container) {
   overflow: visible;
@@ -861,7 +1033,7 @@ k3-top-app-bar.shell-appbar {
  * --k3-shell-rail-inline-size tracks getBoundingClientRect via ResizeObserver.
  */
 .app[data-nav='rail']:has(#nav-rail[layout='modal']) .shell-appbar::part(container) {
-  --k3-shell-appbar-modal-bleed: var(--k3-shell-rail-inline-size, 6.5rem);
+  --k3-shell-appbar-modal-bleed: var(--k3-shell-rail-inline-size, 6rem);
   margin-inline-start: calc(-1 * var(--k3-shell-appbar-modal-bleed));
   width: calc(100% + var(--k3-shell-appbar-modal-bleed));
   box-sizing: border-box;
@@ -1912,9 +2084,23 @@ html[data-k3-color-mode='dark'] .home-ambient {
     );
   animation: home-ambient-drift 30s ease-in-out infinite alternate;
 }
-/* Keep clear of the sticky rail; bar mode uses full width */
+/*
+ * Modal/standard — ambient clears the docked rail column (--doc-rail).
+ * XR — full-bleed under the orbiter (selector on #nav-rail, no nested :has).
+ */
 html:has(.app[data-nav='rail']) .home-ambient {
-  left: var(--doc-rail);
+  left: auto;
+  right: auto;
+  inset-inline-start: var(--doc-rail);
+  inset-inline-end: 0;
+}
+html:has(#nav-rail[layout='xr']) .home-ambient {
+  inset: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
 }
 .home-ambient[hidden] {
   display: none !important;
@@ -2812,6 +2998,38 @@ html[data-k3-reduce-motion] .home-ambient__spin {
   height: 100%;
   min-height: 32rem;
   display: block;
+}
+/* XR stage — room for inset floating pill + optional spatialized FAB */
+.surface-rail[data-layout='xr'] {
+  display: grid;
+  place-items: center start;
+  min-inline-size: 12rem;
+  padding: var(--k3-sys-spacing-space300, 1.5rem);
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      color-mix(in srgb, var(--k3-sys-color-primary) 12%, transparent),
+      transparent 55%
+    ),
+    var(--k3-sys-color-surface-container-low);
+}
+.surface-rail[data-layout='xr'] k3-nav-rail {
+  height: fit-content;
+  min-height: 0;
+  margin: 0; /* host XR inset handled by component; stage already pads */
+}
+/* XR nav-bar demo — bottom-centered orbiter (overrides rail stage start align) */
+.surface-rail[data-layout='xr']:has(k3-nav-bar) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 8rem;
+  padding-block-end: var(--k3-sys-spacing-space200, 0.75rem);
+  overflow: visible;
+}
+.surface-rail[data-layout='xr']:has(k3-nav-bar) k3-nav-bar {
+  margin-block-end: 0;
 }
 
 /* Doc API tables — Specs / Properties / Methods / … via <k3-table> */
@@ -5314,6 +5532,246 @@ html[data-k3-reduce-motion] .home-lift-cta__spin {
 }
 
 /* Styles → Motion visual playground (spatial + effects presets) */
+.motion-scheme-bar {
+  width: 100%;
+}
+.motion-scheme-group {
+  width: min(100%, 22rem);
+}
+.motion-scheme-group::part(container) {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Styles → Motion — Expressive-like springs chart + fluid switch demo */
+/* Springs chart — Expressive docs/motion card */
+.motion-springs-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space600, 1.5rem);
+  padding: var(--k3-sys-spacing-space500, 1.25rem) var(--k3-sys-spacing-space600, 1.5rem);
+  overflow: visible;
+  border: 1px solid var(--k3-sys-color-outline-variant);
+  border-radius: var(--k3-sys-shape-corner-extra-large, 1.75rem);
+  background: var(--k3-sys-color-surface);
+  box-sizing: border-box;
+}
+.motion-springs-chart__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--k3-sys-spacing-space300, 0.75rem);
+}
+.motion-springs-chart__scheme {
+  margin: 0;
+  font: var(--k3-sys-typescale-title-medium-weight, 500)
+    var(--k3-sys-typescale-title-medium-size, 1rem) / 1.4
+    var(--k3-sys-typescale-title-medium-font, inherit);
+  color: var(--k3-sys-color-on-surface);
+}
+[data-motion-scheme-label] {
+  color: var(--k3-sys-color-primary);
+  font-weight: 600;
+  text-transform: lowercase;
+}
+.motion-springs-chart__hint {
+  display: block;
+  margin-top: 0.15rem;
+  font: var(--k3-sys-typescale-body-small-weight, 400)
+    var(--k3-sys-typescale-body-small-size, 0.75rem) / 1.35
+    var(--k3-sys-typescale-body-small-font, inherit);
+  color: var(--k3-sys-color-on-surface-variant);
+}
+.motion-springs-chart__body {
+  width: 100%;
+  align-items: stretch;
+}
+.motion-springs-case {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space300, 0.75rem);
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+.motion-springs-case > h3 {
+  margin: 0;
+  font: var(--k3-sys-typescale-label-large-weight, 500)
+    var(--k3-sys-typescale-label-large-size, 0.875rem) / 1.25
+    var(--k3-sys-typescale-label-large-font, inherit);
+  color: var(--k3-sys-color-on-surface);
+  text-transform: lowercase;
+}
+.motion-springs-svg {
+  display: block;
+  width: 100%;
+  height: clamp(7.5rem, 22vw, 9.5rem);
+}
+.motion-springs-grid {
+  stroke: var(--k3-sys-color-outline-variant);
+  stroke-width: 1;
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.motion-springs-grid--target {
+  stroke-dasharray: 4 4;
+}
+.motion-springs-path {
+  fill: none;
+  stroke: var(--k3-sys-color-primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.motion-springs-path--fast {
+  stroke-opacity: 1;
+}
+.motion-springs-path--default {
+  stroke-opacity: 0.6;
+}
+.motion-springs-path--slow {
+  stroke-opacity: 0.32;
+}
+
+/* Legend tracks — Expressive: label | pill track + bead | ms */
+.motion-springs-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--k3-sys-spacing-space200, 0.5rem);
+}
+.motion-springs-legend > li {
+  display: flex;
+  align-items: center;
+  gap: var(--k3-sys-spacing-space300, 0.75rem);
+}
+.motion-springs-legend__label {
+  flex: 0 0 4rem;
+  font: var(--k3-sys-typescale-label-medium-weight, 500)
+    var(--k3-sys-typescale-label-medium-size, 0.75rem) / 1.25
+    var(--k3-sys-typescale-label-medium-font, inherit);
+  color: var(--k3-sys-color-on-surface-variant);
+  text-transform: lowercase;
+}
+.motion-springs-legend__ms {
+  flex: 0 0 3.5rem;
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--k3-sys-color-on-surface-variant);
+}
+.motion-springs-track {
+  position: relative;
+  flex: 1 1 auto;
+  height: 2rem; /* 32 — taller track */
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-surface-container);
+}
+.motion-springs-track__bead {
+  position: absolute;
+  top: 0.25rem; /* 4 */
+  left: 0.25rem;
+  width: 1.5rem; /* 24 — larger bead */
+  height: 1.5rem;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-primary);
+  will-change: left;
+}
+.motion-springs-track__bead--fast {
+  opacity: 1;
+}
+.motion-springs-track__bead--default {
+  opacity: 0.6;
+}
+.motion-springs-track__bead--slow {
+  opacity: 0.32;
+}
+@keyframes k3-spring-demo {
+  100% {
+    left: calc(100% - 1.75rem); /* 28 — pad + bead */
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion-springs-track__bead {
+    animation: none !important;
+    left: calc(100% - 1.75rem);
+  }
+}
+
+/* Fluid switches — Expressive docs/motion (h-16 track, size-12 handle) */
+.motion-fluid-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--k3-sys-spacing-space400, 1rem);
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+  border: none;
+}
+.motion-fluid-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--k3-sys-spacing-space200, 0.5rem);
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+.motion-fluid-stage {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 4rem; /* 64 — Expressive h-16 */
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--k3-sys-shape-corner-full);
+  background: var(--k3-sys-color-surface-container);
+  cursor: pointer;
+  overflow: visible;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.motion-fluid-stage:focus-visible {
+  outline: 2px solid var(--k3-sys-color-primary);
+  outline-offset: 2px;
+}
+.motion-fluid-handle {
+  position: absolute;
+  top: 0.5rem; /* 8 */
+  left: 0.5rem;
+  width: 3rem; /* 48 — size-12 */
+  height: 3rem;
+  border-radius: 24px; /* off = circle; JS morphs early toward medium */
+  background: var(--k3-sys-color-primary);
+  will-change: transform, border-radius, background-color;
+  transform-origin: center center;
+  pointer-events: none;
+  transition: none; /* shape/color driven in rAF with travel */
+}
+.motion-fluid-label {
+  font: var(--k3-sys-typescale-label-large-weight, 500)
+    var(--k3-sys-typescale-label-large-size, 0.875rem) / 1.25
+    var(--k3-sys-typescale-label-large-font, inherit);
+  color: var(--k3-sys-color-on-surface-variant);
+  text-transform: lowercase;
+}
+.motion-fluid-label-sub {
+  color: var(--k3-sys-color-on-surface-variant);
+  font-weight: 400;
+  opacity: 0.85;
+}
 .demo-case-stage--motion {
   display: flex;
   align-items: stretch;

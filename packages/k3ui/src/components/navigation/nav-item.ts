@@ -53,10 +53,10 @@ export class K3NavItem extends K3Element {
          * Active indicator appear (click) — M3: jump ~40% then spring to 100%
          * + fast opacity; not the 500ms width morph.
          */
-        --k3-nav-indicator-motion: var(--k3-sys-motion-duration-medium2, 300ms)
+        --k3-nav-indicator-motion: var(--k3-sys-motion-duration-spatial-fast, 350ms)
           var(
-            --k3-sys-motion-easing-expressive-spatial,
-            cubic-bezier(0.38, 1.21, 0.22, 1)
+            --k3-sys-motion-easing-spatial-fast,
+            var(--k3-sys-motion-easing-spatial, cubic-bezier(0.38, 1.21, 0.22, 1))
           );
         --k3-nav-indicator-fade: var(--k3-sys-motion-duration-short2, 100ms) linear;
         --k3-nav-pill-effects: var(--k3-sys-motion-duration-effects-default, 200ms)
@@ -221,6 +221,10 @@ export class K3NavItem extends K3Element {
         opacity: 1;
         background-color: var(--k3-sys-color-secondary-container);
       }
+      /* Fluid — indicator settles as a droplet (not flat scaleX only). */
+      :host-context([data-k3-motion='fluid']) .shell.selected::after {
+        transform: scale(1, 1);
+      }
 
       /* First match springs from 40% + faded (M3 indicator enter) */
       @starting-style {
@@ -235,6 +239,14 @@ export class K3NavItem extends K3Element {
           transform: scaleX(0.4);
           opacity: 0;
           background-color: transparent;
+        }
+        :host-context([data-k3-motion='fluid']) .shell.selected::after {
+          transform: scale(0.5, 1.12);
+        }
+        :host-context([data-k3-motion='fluid']) .item:hover .shell::before,
+        :host-context([data-k3-motion='fluid']) .item:focus-visible .shell::before,
+        :host-context([data-k3-motion='fluid']) .shell.highlight::before {
+          transform: scale(0.5, 1.1);
         }
       }
 
@@ -439,7 +451,7 @@ export class K3NavItem extends K3Element {
       :host([layout='vertical']):host-context(k3-nav-rail) {
         --k3-nav-icon-track: var(
           --k3-nav-rail-content,
-          calc(var(--k3-nav-rail-compact, 6.5rem) - 1rem)
+          calc(var(--k3-nav-rail-compact, 6rem) - 1rem)
         );
         --k3-nav-icon-inset: max(
           0px,
@@ -459,21 +471,37 @@ export class K3NavItem extends K3Element {
         ) {
         --k3-nav-pill-motion: var(--k3-sys-motion-duration-spatial-default, 500ms)
           var(
-            --k3-sys-motion-easing-expressive-spatial,
-            cubic-bezier(0.38, 1.21, 0.22, 1)
+            --k3-sys-motion-easing-spatial,
+            var(--k3-sys-motion-easing-expressive-spatial, cubic-bezier(0.38, 1.21, 0.22, 1))
           );
       }
-      :host([layout='horizontal']):host-context(k3-nav-rail) .item,
+      /*
+       * Collapsed (vertical) — true center in the rail column (M3E).
+       * Expanded (horizontal) — pin to compact-track inset so icons keep the
+       * same X while the pill grows (Android expand baseline).
+       */
       :host([layout='vertical']):host-context(k3-nav-rail) .item {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: none;
+        min-height: var(--k3-nav-rail-item-min-height, 4rem);
+        margin-inline: 0;
+        gap: 0.25rem; /* 4dp icon→label */
+        padding-block: 0;
+        padding-inline: 0;
+        box-sizing: border-box;
+      }
+      :host([layout='horizontal']):host-context(k3-nav-rail) .item {
         flex-direction: column;
         align-items: flex-start;
         justify-content: center;
         width: 100%;
         max-width: none;
-        /* M3E collapsedItemMinHeight 64dp · expanded 56dp (via rail token) */
         min-height: var(--k3-nav-rail-item-min-height, 4rem);
         margin-inline: 0;
-        gap: 0.25rem; /* 4dp icon→label inside destination */
+        gap: 0.25rem;
         padding-block: 0;
         padding-inline-start: var(--k3-nav-icon-inset);
         padding-inline-end: var(--k3-nav-icon-inset);
@@ -503,11 +531,22 @@ export class K3NavItem extends K3Element {
       :host([layout='vertical']):host-context(k3-nav-rail) .icon {
         margin-inline-start: calc((var(--k3-nav-pill-w) - 1.5rem) / 2);
       }
-      /*
-       * Stack label — full compact track, centered on the 56dp pill
-       * (same axis as icon). One line; ellipsis only if still too long.
-       */
-      :host([layout='vertical']):host-context(k3-nav-rail) .label--stack,
+      /* Collapsed stack label — full column, centered under the pill */
+      :host([layout='vertical']):host-context(k3-nav-rail) .label--stack {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        margin-inline: 0;
+        padding-inline: 0.125rem;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: normal;
+        line-height: 1rem;
+        max-height: 1rem;
+      }
+      /* Expand/collapse flight — stack label stays on compact track */
       :host([layout='horizontal']):host-context(k3-nav-rail) .label--stack {
         box-sizing: border-box;
         width: var(--k3-nav-icon-track);

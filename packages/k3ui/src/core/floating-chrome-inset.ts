@@ -14,6 +14,14 @@ export const FLOATING_CHROME_INSET_INLINE_END_VAR =
   '--k3-floating-chrome-inset-inline-end';
 export const FLOATING_CHROME_INSET_INLINE_START_VAR =
   '--k3-floating-chrome-inset-inline-start';
+/**
+ * Compact nav-bar lift for corner FAB / STT
+ * (`bottom: edge(16) + var(--k3-nav-chrome-inset-block-end)`).
+ * Value = distance from viewport bottom to the **top** of the bar so the FAB
+ * clears the chrome by the M3 16dp edge margin.
+ * @see https://m3.material.io/components/navigation-bar/guidelines
+ */
+export const NAV_CHROME_INSET_BLOCK_END_VAR = '--k3-nav-chrome-inset-block-end';
 
 /** Peers that may occupy a bottom corner. */
 export const FLOATING_CHROME_PEER_SELECTOR = [
@@ -126,6 +134,31 @@ function measureSide(side: FloatingChromeSide): number {
   });
 
   return Math.max(0, Math.round(reserved));
+}
+
+/**
+ * Distance (px) from the viewport bottom to the top of `#nav-bar` / `k3-nav-bar`.
+ * Used so fixed FAB menus sit **16dp above** the bar (docked or XR orbiter).
+ */
+export function measureNavChromeInsetBlockEnd(
+  bar: HTMLElement | null | undefined = document.getElementById('nav-bar'),
+  vh: number = typeof window !== 'undefined' ? window.innerHeight : 0,
+): number {
+  if (!(bar instanceof HTMLElement)) return 0;
+  const r = bar.getBoundingClientRect();
+  if (r.height < 1 && r.width < 1) return 0;
+  return Math.max(0, Math.round(vh - r.top));
+}
+
+/** Write `--k3-nav-chrome-inset-block-end` from the live nav-bar box. */
+export function syncNavChromeInsetBlockEnd(
+  root: HTMLElement = document.documentElement,
+  bar?: HTMLElement | null,
+): number {
+  const el = bar ?? document.getElementById('nav-bar');
+  const px = measureNavChromeInsetBlockEnd(el);
+  root.style.setProperty(NAV_CHROME_INSET_BLOCK_END_VAR, `${px}px`);
+  return px;
 }
 
 /** Measure reserved inline-end space (px). */

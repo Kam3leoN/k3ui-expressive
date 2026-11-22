@@ -139,34 +139,46 @@ export const fabMenuItemStyles = css`
 
   /*
    * Spatial + effects in parallel (Compose expandHorizontally + fadeIn).
-   * Overshoot lives in Expressive fast spatial easing — NOT mid-keyframes
+   * Overshoot lives in scheme spatial-fast easing — NOT mid-keyframes
    * (double-bounce). Effects easing never overshoots (opacity).
+   * Fluid: jelly open (thin+tall droplet → settle) via alternate keyframes.
    * @see https://m3.material.io/styles/motion/overview/specs (web conversion)
    */
   :host([data-phase='opening']) .item {
     opacity: 1;
     transform: scaleX(1);
     animation:
-      k3-fab-menu-item-in-spatial ${FabMenuSpecs.spatialEnterMs}ms
+      k3-fab-menu-item-in-spatial var(--k3-sys-motion-duration-spatial-fast, ${FabMenuSpecs.spatialEnterMs}ms)
         var(--k3-sys-motion-easing-spatial-fast, ${spatialEnterEasing}) both,
-      k3-fab-menu-item-in-fade ${FabMenuSpecs.effectsMs}ms
+      k3-fab-menu-item-in-fade var(--k3-sys-motion-duration-effects-fast, ${FabMenuSpecs.effectsMs}ms)
         var(--k3-sys-motion-easing-effects-fast, ${effectsEasing}) both;
     animation-delay: var(--k3-fab-menu-item-delay, 0ms), var(--k3-fab-menu-item-delay, 0ms);
   }
 
+  /* Fluid jelly open — stretch along travel (X) with soft Y squash settle */
+  :host([data-phase='opening']):host-context([data-k3-motion='fluid']) .item {
+    transform: scale(1, 1);
+    animation-name: k3-fab-menu-item-in-spatial-fluid, k3-fab-menu-item-in-fade;
+  }
+
   /*
-   * Exit = same FastSpatial spring as menus (enterScaleY close → scaleY(0.8)).
+   * Exit = same FastSpatial spring as menus (enterScaleY close → scaleX(0.8)).
    * Settle to 0.8 (not 0) so overshoot stays readable; hard-collapse in closed.
    */
   :host([data-phase='closing']) .item {
     opacity: 0;
     transform: scaleX(0.8);
     animation:
-      k3-fab-menu-item-out-spatial ${FabMenuSpecs.spatialExitMs}ms
+      k3-fab-menu-item-out-spatial var(--k3-sys-motion-duration-spatial-fast, ${FabMenuSpecs.spatialExitMs}ms)
         var(--k3-sys-motion-easing-spatial-fast, ${spatialExitEasing}) both,
-      k3-fab-menu-item-out-fade ${FabMenuSpecs.effectsMs}ms
+      k3-fab-menu-item-out-fade var(--k3-sys-motion-duration-effects-fast, ${FabMenuSpecs.effectsMs}ms)
         var(--k3-sys-motion-easing-effects-fast, ${effectsEasing}) both;
     animation-delay: var(--k3-fab-menu-item-delay, 0ms), var(--k3-fab-menu-item-delay, 0ms);
+  }
+
+  :host([data-phase='closing']):host-context([data-k3-motion='fluid']) .item {
+    transform: scale(0.72, 1.06);
+    animation-name: k3-fab-menu-item-out-spatial-fluid, k3-fab-menu-item-out-fade;
   }
 
   @keyframes k3-fab-menu-item-in-spatial {
@@ -175,6 +187,15 @@ export const fabMenuItemStyles = css`
     }
     to {
       transform: scaleX(1);
+    }
+  }
+  /* Droplet: start thin + tall, settle to rest (soft spring supplies wobble). */
+  @keyframes k3-fab-menu-item-in-spatial-fluid {
+    from {
+      transform: scale(0.001, 1.12);
+    }
+    to {
+      transform: scale(1, 1);
     }
   }
   @keyframes k3-fab-menu-item-in-fade {
@@ -191,6 +212,14 @@ export const fabMenuItemStyles = css`
     }
     to {
       transform: scaleX(0.8);
+    }
+  }
+  @keyframes k3-fab-menu-item-out-spatial-fluid {
+    from {
+      transform: scale(1, 1);
+    }
+    to {
+      transform: scale(0.72, 1.06);
     }
   }
   @keyframes k3-fab-menu-item-out-fade {

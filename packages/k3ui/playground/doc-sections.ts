@@ -1162,11 +1162,12 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     theming: [
       ['size', 'small|medium|large', 'Bar height'],
       ['elevated / scrolled', 'surface-container', 'Scroll fill'],
-      ['sticky', 'blur mix', 'Pinned top'],
+      ['blur', 'glass mix', 'Backdrop blur'],
+      ['sticky', 'position sticky', 'Pinned top'],
     ],
     keyboard: { na: 'Actions are slotted controls — host has no keyboard API' },
     focus: 'doc.app-bar.focus',
-    motion: { na: 'Static bar — sticky is CSS only' },
+    motion: { na: 'Static bar — sticky / blur are CSS only' },
     a11y: 'doc.app-bar.a11y',
     versions: 'doc.app-bar.versions.blurb',
   },
@@ -1202,6 +1203,7 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
   'navigation-bar': {
     theming: [
       ['layout', 'vertical|horizontal', 'Item arrangement'],
+      ['appearance', 'standard|xr', 'Chrome (xr = spatial orbiter)'],
       ['surface', 'surface-container', 'Bar fill'],
     ],
     keyboard: { na: 'Destinations are slotted k3-nav-item — host has no keyboard API' },
@@ -1214,8 +1216,10 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
   },
   'navigation-rail': {
     theming: [
-      ['size', 'compact|large', 'Width / destination layout'],
-      ['layout', 'modal|standard', 'Expanded chrome'],
+      ['size', 'compact|large', '96dp · 280dp (220–360)'],
+      ['narrow', 'boolean', 'Collapsed 80dp'],
+      ['layout', 'modal|standard|xr', 'Chrome (xr = spatial pill)'],
+      ['fab-placement', 'contained|spatialized', 'XR FAB orbiter'],
       ['position', 'start|center|bottom', 'Leading group'],
     ],
     keyboard: { na: 'Destinations are slotted k3-nav-item — host has no keyboard API' },

@@ -28,8 +28,8 @@ export function spatialDefaultTiming(element: Element): {
   const durationTok =
     style.getPropertyValue('--k3-sys-motion-duration-spatial-default').trim() || '500ms';
   const easing =
-    style.getPropertyValue('--k3-sys-motion-easing-expressive-spatial').trim() ||
     style.getPropertyValue('--k3-sys-motion-easing-spatial').trim() ||
+    style.getPropertyValue('--k3-sys-motion-easing-expressive-spatial').trim() ||
     'cubic-bezier(0.38, 1.21, 0.22, 1)';
   return {
     duration: parseMotionToken(durationTok).duration,
@@ -46,9 +46,9 @@ export function spatialFastTiming(element: Element): {
   const durationTok =
     style.getPropertyValue('--k3-sys-motion-duration-spatial-fast').trim() || '350ms';
   const easing =
-    style.getPropertyValue('--k3-sys-motion-easing-expressive-spatial-fast').trim() ||
     style.getPropertyValue('--k3-sys-motion-easing-spatial-fast').trim() ||
-    style.getPropertyValue('--k3-sys-motion-easing-expressive-spatial').trim() ||
+    style.getPropertyValue('--k3-sys-motion-easing-spatial').trim() ||
+    style.getPropertyValue('--k3-sys-motion-easing-expressive-spatial-fast').trim() ||
     'cubic-bezier(0.42, 1.67, 0.21, 0.9)';
   return {
     duration: parseMotionToken(durationTok).duration,

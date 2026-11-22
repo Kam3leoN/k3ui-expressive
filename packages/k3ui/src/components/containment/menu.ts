@@ -317,6 +317,7 @@ export class K3Menu extends K3Element {
         'open',
         async () => {
           this.normalizeGaps();
+          this.removeAttribute('data-closing');
           this.visible = true;
           if (fast) {
             this.open = true;
@@ -365,13 +366,22 @@ export class K3Menu extends K3Element {
         'close',
         async () => {
           this._enterLock = false;
-          this.open = false;
-          this.visible = false;
           this.removeAttribute('data-submenu-open');
           this.openSubmenuItems().forEach((i) => i.closeSubmenu());
+          /*
+           * Keep `.open` while data-closing so enterScaleY exit (fluid-out /
+           * spring collapse) can play, then drop open/visible.
+           */
+          if (!fast && this.open) {
+            this.setAttribute('data-closing', '');
+            await this.updateComplete;
+            const panel = this.panelEl();
+            if (panel) await waitForMotion(panel);
+          }
+          this.open = false;
+          this.visible = false;
+          this.removeAttribute('data-closing');
           await this.updateComplete;
-          const panel = this.panelEl();
-          if (panel && !fast) await waitForMotion(panel);
           this.syncMatchWidthPopover(false);
           this.clearFit();
           this.positioningAnchor = null;

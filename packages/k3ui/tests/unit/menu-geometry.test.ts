@@ -31,6 +31,20 @@ describe('computeSubmenuFlyoutPlace', () => {
     expect(place.origin).toBe('start');
     expect(place.top).toBe('200px');
     expect(place.zIndex).toBe(70);
+    expect(place.maxHeight).toBe('');
+  });
+
+  it('caps maxHeight and enables scroll when flyout taller than viewport', () => {
+    const place = computeSubmenuFlyoutPlace({
+      itemRect: new DOMRect(100, 100, 180, 48),
+      panelRect: new DOMRect(100, 80, 200, 400),
+      flyoutW: 160,
+      flyoutH: 900,
+      rtl: false,
+      depth: 0,
+    });
+    expect(place.maxHeight).toBe(`${600 - 16}px`);
+    expect(Number.parseInt(place.top, 10)).toBe(8);
   });
 
   it('flips to left (end origin) when LTR end room is tight', () => {
@@ -95,25 +109,37 @@ describe('applyFlyoutPlace / clearFlyoutPlace', () => {
       top: '120px',
       origin: 'start' as const,
       zIndex: 70,
+      maxHeight: '',
     };
     expect(applyFlyoutPlace(flyout, place, true)).toBe(true);
     expect(flyout.getAttribute('data-placed')).toBe('');
     expect(flyout.style.left).toBe('300px');
     expect(flyout.dataset.origin).toBe('start');
+    expect(flyout.classList.contains('k3-scroll')).toBe(false);
     expect(applyFlyoutPlace(flyout, place, true)).toBe(false);
   });
 
   it('clearFlyoutPlace removes imperative styles', () => {
     applyFlyoutPlace(
       flyout,
-      { left: '10px', right: 'auto', top: '20px', origin: 'end', zIndex: 72 },
+      {
+        left: '10px',
+        right: 'auto',
+        top: '20px',
+        origin: 'end',
+        zIndex: 72,
+        maxHeight: '400px',
+      },
       true,
     );
+    expect(flyout.classList.contains('k3-scroll')).toBe(true);
     clearFlyoutPlace(flyout);
     expect(flyout.hasAttribute('data-placed')).toBe(false);
     expect(flyout.hasAttribute('data-origin')).toBe(false);
     expect(flyout.style.left).toBe('');
     expect(flyout.style.zIndex).toBe('');
+    expect(flyout.style.maxHeight).toBe('');
+    expect(flyout.classList.contains('k3-scroll')).toBe(false);
   });
 });
 

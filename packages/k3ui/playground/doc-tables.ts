@@ -2224,6 +2224,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['size', "'small'|'medium'|'large'", 'small', 'Bar height'],
       ['align', "'start'|'center'", 'start', 'Title align (small)'],
       ['sticky', 'boolean', 'false', 'position sticky'],
+      ['blur', 'boolean', 'false', 'Translucent fill + backdrop blur'],
       ['elevated', 'boolean', 'false', 'Scroll fill'],
       ['subtitle', 'string', "''", 'Medium/large subtitle'],
     ],
@@ -2252,12 +2253,24 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
   'navigation-rail': {
     properties: [
       ['active', 'number', '0', 'Active index'],
-      ['size', "'compact'|'large'", 'compact', 'Width'],
+      ['size', "'compact'|'large'", 'compact', 'Width — compact 96dp · large 280dp (clamped 220–360)'],
+      ['narrow', 'boolean', 'false', 'Collapsed only — 80dp narrow token instead of 96dp'],
       ['expanded', 'boolean', 'false', 'Large layout (synced with size)'],
       ['collapsible', 'boolean', 'false', 'menu / menu_open toggle'],
-      ['layout', "'modal'|'standard'", 'modal', 'Expanded chrome — modal (edge-docked, end radii, elev-1) · standard (flush, no sheet)'],
+      [
+        'layout',
+        "'modal'|'standard'|'xr'",
+        'modal',
+        'Chrome — modal (edge-docked, end radii, elev-1) · standard (flush) · xr (spatial floating pill). Alias: spatial → xr',
+      ],
+      [
+        'fabPlacement',
+        "'contained'|'spatialized'",
+        'contained',
+        'XR only — FAB inside the pill or floating above as a separate orbiter (attribute: fab-placement)',
+      ],
       ['position', "'start'|'center'|'bottom'", 'start', 'Leading destinations group alignment'],
-      ['appearance', "'modal'|'standard'", 'modal', 'Deprecated alias of layout'],
+      ['appearance', "'modal'|'standard'|'xr'", 'modal', 'Deprecated alias of layout'],
     ],
     events: [
       ['k3-change', '{ index }', 'Selection'],
@@ -2410,7 +2423,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
         'MCU scheme (Content = Noph default)',
       ],
       ['theme.contrast', "'default'|'medium'|'high'", 'default', 'MCU contrastLevel 0 / 0.5 / 1'],
-      ['theme.motion', "'expressive'|'standard'", 'expressive', 'Motion scheme'],
+      ['theme.motion', "'expressive'|'standard'|'fluid'", 'expressive', 'Motion scheme'],
     ],
     options: [
       ['locale', 'LocaleCode', 'detect', 'i18n locale'],
@@ -2525,7 +2538,7 @@ export const INIT_SECTION: DocTableSection = {
       'MCU scheme variant',
     ],
     ['theme.contrast', "'default'|'medium'|'high'", 'default', 'MCU contrastLevel 0 / 0.5 / 1'],
-    ['theme.motion', "'expressive'|'standard'", 'expressive', 'Motion tokens'],
+    ['theme.motion', "'expressive'|'standard'|'fluid'", 'expressive', 'Motion tokens'],
     ['components', "'all'|string[]", 'all', 'Which CE to register'],
     ['debug', 'boolean|{level}', 'false', 'Verbose logger'],
     ['haptic', 'boolean', 'true', 'Mobile vibrate'],

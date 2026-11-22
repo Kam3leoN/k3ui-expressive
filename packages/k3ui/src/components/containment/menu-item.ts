@@ -4,6 +4,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import {
   K3Element,
   stateLayerStyles,
+  edgeScrollbarStyles,
   hasNamedSlot,
   waitForMotion,
   afterFrames,
@@ -40,7 +41,7 @@ import { canHoverOpen } from './menu.types.js';
  * @see https://m3.material.io/components/menus/specs
  */
 export class K3MenuItem extends K3Element {
-  static override styles = [hostReset, stateLayerStyles, menuItemStyles];
+  static override styles = [hostReset, stateLayerStyles, edgeScrollbarStyles, menuItemStyles];
 
   // ── Public API ────────────────────────────────────────────────────────────
 
@@ -302,6 +303,7 @@ export class K3MenuItem extends K3Element {
         if (el !== this) el.closeSubmenu();
       }
     }
+    this.removeAttribute('data-closing');
     this._placeScheduled = true;
     this.submenuOpen = true;
     markMenuItemEdges(this);
@@ -316,12 +318,14 @@ export class K3MenuItem extends K3Element {
       el.closeSubmenu();
     });
     this._placeScheduled = false;
+    /* data-closing + keep [data-placed] so enterScaleY fluid-out / spring exit runs */
+    this.setAttribute('data-closing', '');
     this.submenuOpen = false;
     this.emit('k3-submenu', { value: this.value, open: false });
-    /* Keep top/left while exit scale/fade runs, then clear */
     const flyout = this.flyoutEl();
     void waitForMotion(flyout ?? this).then(() => {
       if (flyout) clearFlyoutPlace(flyout);
+      this.removeAttribute('data-closing');
     });
   }
 

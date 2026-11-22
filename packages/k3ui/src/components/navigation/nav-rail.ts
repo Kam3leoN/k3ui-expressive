@@ -25,45 +25,61 @@ export type NavRailSize = 'compact' | 'large';
  * (@see https://m3.material.io/components/navigation-rail/specs).
  * - `modal` (default) — overlays content; flush to the start edge; end-side corners only
  * - `standard` — beside content; no inset sheet (flush rail, no inner container radius)
+ * - `xr` — spatial / XR orbiter: elevated floating pill, inset from the screen edge
+ *   (@see https://bug-on-m3.vercel.app/components/navigation-rail)
  */
-export type NavRailLayout = 'standard' | 'modal';
+export type NavRailLayout = 'standard' | 'modal' | 'xr';
 /** @deprecated use `layout` */
 export type NavRailAppearance = NavRailLayout;
 /** Leading destinations group alignment */
 export type NavRailPosition = 'start' | 'center' | 'bottom';
+/**
+ * FAB placement when `layout="xr"`.
+ * - `contained` (default) — FAB inside the floating pill
+ * - `spatialized` — FAB floats above the pill (separate orbiter)
+ */
+export type NavRailFabPlacement = 'contained' | 'spatialized';
 /** @deprecated use size / expanded */
 export type NavRailMode = 'compact' | 'expanded';
 
 /** Fallback if `transitionend` is skipped (tab backgrounded / display:none). */
-const WIDTH_SETTLE_FALLBACK_MS = 560;
+const WIDTH_SETTLE_FALLBACK_MS = 700;
 
 /**
  * Navigation rail — mid/expanded windows (≥600dp).
  *
- * - **size** `compact` (104dp, icon above label) · `large` (expanded rows)
+ * - **size** `compact` (96dp M3E, icon above label) · `large` (280dp rows, 220–360)
  * - **expanded** mirrors large — toggle via **collapsible** (`menu` / `menu_open`)
- * - **layout** `modal` (default, edge-docked + end radii) · `standard` (flush, no sheet)
+ * - **layout** `modal` (default) · `standard` · `xr` (spatial floating pill)
+ * - **fab-placement** `contained` · `spatialized` (XR only)
  * - **position** `start` · `center` · `bottom` — leading destinations group
  * - Slots **leading** (or default) · **trailing** (bottom + divider) · **fab**
  *
- * Compact + expanded use elevation level 1 (no end border).
+ * Compact + expanded use elevation level 1 (no end border); XR uses a higher
+ * floating elevation and full pill corners.
  * Expand/collapse morph mirrors Android NavigationRailView:
  * dual labels crossfade (200ms) + width decelerate (500ms); items stay
  * `layout=horizontal` during collapse flight, then settle to vertical.
  * Extended FAB morphs via `data-rail-collapsed`.
  *
  * @see https://m3.material.io/components/navigation-rail/guidelines
+ * @see https://bug-on-m3.vercel.app/components/navigation-rail
  * @see https://github.com/material-components/material-components-android/blob/master/lib/java/com/google/android/material/navigationrail/NavigationRailView.java
  */
 export class K3NavRail extends K3Element {
   static override styles = [hostReset, stateLayerStyles, navRailStyles];
 
   @property({ type: Number }) active = 0;
-  /** compact (104) · large (expanded row items) */
+  /** compact (96dp) · large (280dp expanded, clamped 220–360) */
   @property({ reflect: true }) size: NavRailSize = 'compact';
   /**
-   * Expanded chrome: `modal` (default) · `standard`.
-   * Modal = edge-docked, end radii · Standard = flush rail, no inset sheet.
+   * Collapsed only — use the narrow 80dp token instead of 96dp
+   * (`md.comp.nav-rail.collapsed.narrow.container.width`).
+   */
+  @property({ type: Boolean, reflect: true }) narrow = false;
+  /**
+   * Chrome: `modal` (default) · `standard` · `xr` (spatial floating pill).
+   * Alias attribute value `spatial` maps to `xr`.
    */
   @property({ reflect: true }) layout: NavRailLayout = 'modal';
   /**
@@ -72,6 +88,11 @@ export class K3NavRail extends K3Element {
   @property({ attribute: 'appearance' }) appearance: NavRailAppearance | null = null;
   /** Leading destinations alignment: start · center · bottom */
   @property({ reflect: true }) position: NavRailPosition = 'start';
+  /**
+   * XR only — FAB inside the pill (`contained`) or floating above (`spatialized`).
+   */
+  @property({ reflect: true, attribute: 'fab-placement' })
+  fabPlacement: NavRailFabPlacement = 'contained';
   /**
    * Expanded rail (large destinations + extended FAB).
    * Synced with `size="large"` / deprecated `mode="expanded"`.
@@ -86,11 +107,21 @@ export class K3NavRail extends K3Element {
   private arm: ArmNavHandle | null = null;
   /** True while collapse width spring is in flight (`data-collapsing` reflected). */
   private collapsing = false;
+  /** True while expand width spring is in flight (`data-morphing=in`). */
+  private expanding = false;
   private collapseTimer = 0;
   /** Slot `fab` content — tracked via slotchange (hasSlot is false on first paint). */
   @state() private hasFab = false;
   /** Slot `trailing` / deprecated `foot`. */
   @state() private hasTrailing = false;
+
+  /** Width spring ms for the active motion scheme (+ buffer). Covers fluid 610ms. */
+  private morphSettleMs(): number {
+    const raw = getComputedStyle(this).getPropertyValue('--k3-nav-rail-motion').trim();
+    const ms = Number.parseFloat(raw);
+    if (Number.isFinite(ms) && ms > 0) return Math.ceil(ms + 120);
+    return WIDTH_SETTLE_FALLBACK_MS;
+  }
 
   /** Layout width — `size` (+ deprecated `mode`) is the source of truth. */
   private resolvedSize(): NavRailSize {
@@ -102,7 +133,10 @@ export class K3NavRail extends K3Element {
   }
 
   private resolvedLayout(): NavRailLayout {
-    return this.layout === 'standard' ? 'standard' : 'modal';
+    const raw = (this.layout || 'modal') as string;
+    if (raw === 'standard') return 'standard';
+    if (raw === 'xr' || raw === 'spatial') return 'xr';
+    return 'modal';
   }
 
   private clearCollapseTimer(): void {
@@ -111,19 +145,50 @@ export class K3NavRail extends K3Element {
     this.collapseTimer = 0;
   }
 
-  private clearCollapseArm(): void {
-    this.collapsing = false;
-    this.removeAttribute('data-collapsing');
+  /** Clear expand/collapse flight flags (+ optional width listener). */
+  private clearMorphFlags(opts?: { keepCollapsing?: boolean }): void {
+    if (!opts?.keepCollapsing) {
+      this.collapsing = false;
+      this.removeAttribute('data-collapsing');
+    }
+    this.expanding = false;
     this.removeAttribute('data-stack-in');
     this.removeAttribute('data-expanding');
+    this.removeAttribute('data-morphing');
     this.removeEventListener('transitionend', this.onWidthTransitionEnd);
     this.clearCollapseTimer();
   }
 
+  private clearCollapseArm(): void {
+    this.clearMorphFlags();
+  }
+
   private onWidthTransitionEnd = (e: TransitionEvent): void => {
     if (e.target !== this || e.propertyName !== 'width') return;
-    this.settleCollapse();
+    if (this.collapsing) this.settleCollapse();
+    else if (this.expanding) this.settleExpand();
   };
+
+  /** End expand flight — drop fluid jelly / morph flags after width spring. */
+  private settleExpand(): void {
+    if (!this.expanding) return;
+    this.removeEventListener('transitionend', this.onWidthTransitionEnd);
+    this.clearCollapseTimer();
+    this.expanding = false;
+    this.removeAttribute('data-morphing');
+    this.removeAttribute('data-expanding');
+  }
+
+  private async waitNavItemsPainted(): Promise<void> {
+    await this.updateComplete;
+    await Promise.all(
+      queryNavItemsForLayout(this).map((el) =>
+        'updateComplete' in el
+          ? (el as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete
+          : Promise.resolve(),
+      ),
+    );
+  }
 
   /**
    * Finish collapse: flip to vertical while `data-collapsing` still holds the
@@ -140,43 +205,34 @@ export class K3NavRail extends K3Element {
   private async finishCollapseLayout(): Promise<void> {
     if (!this.isExpanded()) {
       this.syncItemLayout();
-      await Promise.all(
-        queryNavItemsForLayout(this).map((el) =>
-          'updateComplete' in el
-            ? (el as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete
-            : Promise.resolve(),
-        ),
-      );
+      await this.waitNavItemsPainted();
     }
     if (this.isExpanded()) return;
     this.collapsing = false;
     this.removeAttribute('data-collapsing');
     this.removeAttribute('data-stack-in');
+    this.removeAttribute('data-morphing');
   }
 
   /**
-   * Collapse — keep horizontal layout during flight so dual labels can
-   * crossfade (Android: Fade out expanded + Fade in collapsed, then ChangeBounds).
-   * `data-collapsing` tucks the shell; settle flips to vertical.
-   * Stack label: one paint at “from below”, then `data-stack-in` rises + fades.
+   * Collapse flight — keep items horizontal for dual-label crossfade
+   * (Android: fade expanded → fade collapsed, then ChangeBounds).
+   * `data-stack-in` releases the stack-label rise after one tucked paint.
    */
   private armCollapseSettle(): void {
     if (prefersReducedMotion()) {
-      this.collapsing = false;
-      this.removeAttribute('data-collapsing');
-      this.removeAttribute('data-stack-in');
-      this.removeAttribute('data-expanding');
+      this.clearMorphFlags();
       this.syncItemLayout();
       return;
     }
+    this.setAttribute('data-morphing', 'out');
     this.removeEventListener('transitionend', this.onWidthTransitionEnd);
     this.addEventListener('transitionend', this.onWidthTransitionEnd);
     this.clearCollapseTimer();
     this.collapseTimer = window.setTimeout(
       () => this.settleCollapse(),
-      WIDTH_SETTLE_FALLBACK_MS,
+      this.morphSettleMs(),
     );
-    /* Paint stacked label at translateY(4dp) + opacity 0, then release rise. */
     this.removeAttribute('data-stack-in');
     void this.offsetWidth;
     requestAnimationFrame(() => {
@@ -185,33 +241,34 @@ export class K3NavRail extends K3Element {
   }
 
   /**
-   * Expand — paint tucked start (`data-expanding` + horizontal layout), wait for
-   * Lit to commit, then release so width morph + label crossfade can run.
+   * Expand flight — paint tucked start (`data-expanding` + horizontal),
+   * commit Lit, then release tuck so width spring + label crossfade run.
+   * `data-morphing=in` lasts the full width spring (fluid jelly / scheme settle).
    */
   private async armExpandMorph(): Promise<void> {
-    this.collapsing = false;
-    this.removeAttribute('data-collapsing');
-    this.removeEventListener('transitionend', this.onWidthTransitionEnd);
-    this.clearCollapseTimer();
+    this.clearMorphFlags();
+    this.expanding = true;
+    this.setAttribute('data-morphing', 'in');
     this.setAttribute('data-expanding', '');
     this.size = 'large';
     this.expanded = true;
     this.syncItemLayout();
+    this.syncFabMorph(true, false);
     if (prefersReducedMotion()) {
-      this.removeAttribute('data-expanding');
+      this.settleExpand();
       return;
     }
-    await this.updateComplete;
-    await Promise.all(
-      queryNavItemsForLayout(this).map((el) =>
-        'updateComplete' in el
-          ? (el as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete
-          : Promise.resolve(),
-      ),
-    );
-    /* Force a tucked paint frame before releasing the morph. */
+    await this.waitNavItemsPainted();
     void this.offsetWidth;
+    this.removeEventListener('transitionend', this.onWidthTransitionEnd);
+    this.addEventListener('transitionend', this.onWidthTransitionEnd);
+    this.clearCollapseTimer();
+    this.collapseTimer = window.setTimeout(
+      () => this.settleExpand(),
+      this.morphSettleMs(),
+    );
     requestAnimationFrame(() => {
+      /* Release tuck frame — morphing stays until width spring ends. */
       if (this.isExpanded()) this.removeAttribute('data-expanding');
     });
   }
@@ -223,16 +280,18 @@ export class K3NavRail extends K3Element {
     if (next) {
       void this.armExpandMorph();
     } else {
-      /* Arm collapsing BEFORE size change so updated() skips vertical sync. */
+      /* Arm collapsing before size change so updated() skips vertical sync. */
+      this.expanding = false;
       this.collapsing = true;
       this.removeAttribute('data-stack-in');
-      this.setAttribute('data-collapsing', '');
       this.removeAttribute('data-expanding');
+      this.removeAttribute('data-morphing');
+      this.setAttribute('data-collapsing', '');
+      /* Lock FAB from the still-expanded paint, then shrink the rail. */
+      this.syncFabMorph(true, true);
       this.size = 'compact';
       this.expanded = false;
       if (this.mode === 'expanded') this.mode = 'compact';
-      /* Lock FAB px width while still painted expanded — then spring to 56dp. */
-      this.syncFabMorph();
       this.armCollapseSettle();
     }
     emitLifecycle(this, 'change-end', { source: 'user', expanded: next });
@@ -247,7 +306,7 @@ export class K3NavRail extends K3Element {
 
   private syncItemLayout(): void {
     const layout = this.resolvedSize() === 'large' ? 'horizontal' : 'vertical';
-    /* Include data-nav-aux (Sponsors) — excluded from selection, not from layout */
+    /* Include data-nav-aux — excluded from selection, not from layout */
     for (const el of queryNavItemsForLayout(this)) el.layout = layout;
   }
 
@@ -291,9 +350,10 @@ export class K3NavRail extends K3Element {
   /**
    * Drive extended-FAB rail morph (pill ↔ square) via setRailCollapsed.
    * @param animate false on first paint so compact boot isn’t a flash morph
+   * @param collapsed override — pass explicitly during expand/collapse flight
+   *   before `size` flips (FAB must measure while still painted expanded)
    */
-  private syncFabMorph(animate = true): void {
-    const collapsed = !this.isExpanded();
+  private syncFabMorph(animate = true, collapsed = !this.isExpanded()): void {
     for (const el of this.querySelectorAll<HTMLElement>(':scope > [slot="fab"]')) {
       if (!this.isRailMorphFab(el)) continue;
       const fab = el as HTMLElement & {
@@ -312,7 +372,11 @@ export class K3NavRail extends K3Element {
       this.size = this.expanded ? 'large' : 'compact';
     }
     if (changed.has('appearance') && !changed.has('layout') && this.appearance) {
-      this.layout = this.appearance;
+      this.layout = this.appearance === 'spatial' ? 'xr' : this.appearance;
+    }
+    /* Accept layout="spatial" as an XR alias. */
+    if (changed.has('layout') && (this.layout as string) === 'spatial') {
+      this.layout = 'xr';
     }
   }
 
@@ -353,37 +417,29 @@ export class K3NavRail extends K3Element {
   override render() {
     const large = this.isExpanded();
     const chrome = this.resolvedLayout();
+    const xr = chrome === 'xr';
+    const fabPlacement = xr ? this.fabPlacement : 'contained';
+    const spatialized = xr && fabPlacement === 'spatialized';
     const toggleLabel = large ? 'Collapse navigation' : 'Expand navigation';
-    return html`<nav
-      class="rail"
-      part="container"
-      data-size=${this.resolvedSize()}
-      data-layout=${chrome}
-      data-appearance=${chrome}
-      data-position=${this.position}
-      @click=${this.onClick}
-    >
-      ${this.collapsible
-        ? html`<button
-            type="button"
-            class="toggle k3-state-layer"
-            part="toggle"
-            aria-label=${toggleLabel}
-            aria-expanded=${large ? 'true' : 'false'}
-            @click=${this.onToggle}
-          >
-            <span
-              class="toggle-icon notranslate"
-              translate="no"
-              lang="zxx"
-              data-k3-icon="menu_open"
-              aria-hidden="true"
-            ></span>
-          </button>`
-        : nothing}
-      <div class="fab ${this.hasFab ? 'has' : ''}" part="fab">
-        <slot name="fab" @slotchange=${this.syncFabSlot}></slot>
-      </div>
+    const toggle = this.collapsible
+      ? html`<button
+          type="button"
+          class="toggle k3-state-layer"
+          part="toggle"
+          aria-label=${toggleLabel}
+          aria-expanded=${large ? 'true' : 'false'}
+          @click=${this.onToggle}
+        >
+          <span
+            class="toggle-icon notranslate"
+            translate="no"
+            lang="zxx"
+            data-k3-icon="menu_open"
+            aria-hidden="true"
+          ></span>
+        </button>`
+      : nothing;
+    const destinations = html`
       <div
         class="destinations"
         part="destinations"
@@ -399,6 +455,29 @@ export class K3NavRail extends K3Element {
         <slot name="trailing" @slotchange=${this.syncTrailingSlot}></slot>
         <slot name="foot" @slotchange=${this.syncTrailingSlot}></slot>
       </div>
+    `;
+    const fab = html`
+      <div class="fab ${this.hasFab ? 'has' : ''}" part="fab">
+        <slot name="fab" @slotchange=${this.syncFabSlot}></slot>
+      </div>
+    `;
+    /* Spatialized: FAB orbiter above the pill; toggle stays inside the shell. */
+    const body = spatialized
+      ? html`${fab}<div class="xr-shell" part="xr-shell">${toggle}${destinations}</div>`
+      : xr
+        ? html`${toggle}${fab}<div class="xr-shell" part="xr-shell">${destinations}</div>`
+        : html`${toggle}${fab}${destinations}`;
+    return html`<nav
+      class="rail"
+      part="container"
+      data-size=${this.resolvedSize()}
+      data-layout=${chrome}
+      data-appearance=${chrome}
+      data-position=${this.position}
+      data-fab-placement=${xr ? fabPlacement : nothing}
+      @click=${this.onClick}
+    >
+      ${body}
     </nav>`;
   }
 }

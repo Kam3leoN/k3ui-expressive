@@ -1,4 +1,32 @@
-export { springs, motionCss } from './springs.js';
+export { springs, springPhysics, motionCss, type MotionSchemeName } from './springs.js';
+export {
+  springAt,
+  springDuration,
+  springEasing,
+  springToLinear,
+  stepSpring,
+  springSettled,
+  type Spring,
+  type SpringState,
+} from './spring.js';
+export {
+  fluidTokens,
+  restPose,
+  restShape,
+  shapeSpring,
+  targetStretch,
+  leanFor,
+  clampStretch,
+  poseTransform,
+  readFluidTokens,
+  isFluidMotionActive,
+  attachFluidPress,
+  type FluidTokens,
+  type FluidPose,
+  type FluidShape,
+  type FluidPressHandle,
+} from './fluid.js';
+export { FluidPressController } from './fluid-press-controller.js';
 export { easings, type NamedEasing } from './easings.js';
 export {
   motionSpatialFast,

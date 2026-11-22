@@ -315,10 +315,18 @@ export const menuItemStyles: CSSResultGroup = [
     display: flex;
     flex-direction: column;
     gap: var(--k3-menu-flyout-gap, 0.125rem); /* 2 · 0 baseline */
-    overflow: hidden; /* clip full-bleed hover to surface radius */
+    overflow-x: hidden;
+    overflow-y: hidden; /* clip hover radii; .k3-scroll unlocks Y when capped */
     visibility: hidden;
     pointer-events: none;
     transition: visibility 0s linear var(--k3-sys-motion-duration-spatial-fast);
+    --k3-scroll-track-inset: var(
+      --k3-menu-surface-radius,
+      var(--k3-sys-shape-corner-large, 1rem)
+    );
+  }
+  .flyout.k3-scroll {
+    overflow-y: auto;
   }
   .flyout[data-origin='end'] {
     transform-origin: top right;

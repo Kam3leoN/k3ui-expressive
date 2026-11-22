@@ -5,8 +5,9 @@
 
 type RailEl = HTMLElement & {
   size: 'compact' | 'large';
-  layout: 'modal' | 'standard';
+  layout: 'modal' | 'standard' | 'xr';
   position: 'start' | 'center' | 'bottom';
+  fabPlacement: 'contained' | 'spatialized';
   collapsible: boolean;
   expanded: boolean;
 };
@@ -26,6 +27,7 @@ export function wireNavRailLab(): void {
   const layoutSel = document.getElementById('nr-layout') as SelectEl | null;
   const positionSel = document.getElementById('nr-position') as SelectEl | null;
   const sizeSel = document.getElementById('nr-size') as SelectEl | null;
+  const fabPlacementSel = document.getElementById('nr-fab-placement') as SelectEl | null;
   const collapsibleSw = document.getElementById('nr-collapsible') as SwitchEl | null;
   const fabSw = document.getElementById('nr-fab') as SwitchEl | null;
   const trailingSw = document.getElementById('nr-trailing') as SwitchEl | null;
@@ -42,8 +44,17 @@ export function wireNavRailLab(): void {
 
   const syncStage = (): void => {
     const size = isLarge() ? 'large' : 'compact';
-    stage.dataset.layout = rail.layout === 'standard' ? 'standard' : 'modal';
+    const layout =
+      rail.layout === 'standard' || rail.layout === 'xr' ? rail.layout : 'modal';
+    stage.dataset.layout = layout;
     stage.dataset.size = size;
+    stage.dataset.fabPlacement = layout === 'xr' ? rail.fabPlacement : '';
+    if (fabPlacementSel) {
+      fabPlacementSel.hidden = layout !== 'xr';
+      if (layout === 'xr' && fabPlacementSel.value !== rail.fabPlacement) {
+        fabPlacementSel.value = rail.fabPlacement;
+      }
+    }
     if (sizeSel && sizeSel.value !== size) {
       syncingSizeSel = true;
       sizeSel.value = size;
@@ -85,7 +96,11 @@ export function wireNavRailLab(): void {
   };
 
   const applyControls = (opts?: { sizeFromSel?: boolean }): void => {
-    if (layoutSel?.value === 'standard' || layoutSel?.value === 'modal') {
+    if (
+      layoutSel?.value === 'standard' ||
+      layoutSel?.value === 'modal' ||
+      layoutSel?.value === 'xr'
+    ) {
       rail.layout = layoutSel.value;
     }
     if (
@@ -94,6 +109,12 @@ export function wireNavRailLab(): void {
       positionSel?.value === 'bottom'
     ) {
       rail.position = positionSel.value;
+    }
+    if (
+      fabPlacementSel?.value === 'contained' ||
+      fabPlacementSel?.value === 'spatialized'
+    ) {
+      rail.fabPlacement = fabPlacementSel.value;
     }
     if (sizeSel?.value === 'compact' || sizeSel?.value === 'large') {
       setSize(sizeSel.value, opts?.sizeFromSel === true);
@@ -106,6 +127,7 @@ export function wireNavRailLab(): void {
 
   layoutSel?.addEventListener('k3-change', () => applyControls());
   positionSel?.addEventListener('k3-change', () => applyControls());
+  fabPlacementSel?.addEventListener('k3-change', () => applyControls());
   sizeSel?.addEventListener('k3-change', () => {
     if (syncingSizeSel) return;
     applyControls({ sizeFromSel: true });

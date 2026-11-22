@@ -9,6 +9,190 @@
   --k3-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
   --k3-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
 
+  /*
+   * Fluid — soft springs as CSS `linear()` (sampled from spring physics).
+   * Shape stretch / jelly needs JS (`attachFluidPress` / FluidPressController).
+   * @see https://expressive.grenishrai.pro/docs/motion
+   */
+  --k3-sys-motion-easing-fluid-spatial-fast: linear(
+    0,
+    0.0193,
+    0.0692,
+    0.1395,
+    0.2218,
+    0.3099,
+    0.3989,
+    0.4854,
+    0.5668,
+    0.6415,
+    0.7088,
+    0.7681,
+    0.8195,
+    0.8633,
+    0.9,
+    0.9302,
+    0.9546,
+    0.974,
+    0.9889,
+    1.0001,
+    1.0082,
+    1.0138,
+    1.0173,
+    1.0192,
+    1.0199,
+    1.0197,
+    1.0188,
+    1.0174,
+    1.0158,
+    1.0141,
+    1.0123,
+    1.0106,
+    1.0089,
+    1.0074,
+    1.0061,
+    1.0048,
+    1.0038,
+    1.0029,
+    1.0021,
+    1.0015,
+    1
+  );
+  --k3-sys-motion-easing-fluid-spatial: linear(
+    0,
+    0.0207,
+    0.0734,
+    0.1466,
+    0.2313,
+    0.3207,
+    0.41,
+    0.4958,
+    0.5756,
+    0.6483,
+    0.713,
+    0.7696,
+    0.8184,
+    0.8597,
+    0.8942,
+    0.9225,
+    0.9455,
+    0.9637,
+    0.9779,
+    0.9887,
+    0.9968,
+    1.0026,
+    1.0065,
+    1.009,
+    1.0105,
+    1.011,
+    1.011,
+    1.0106,
+    1.0099,
+    1.009,
+    1.008,
+    1.007,
+    1.006,
+    1.0051,
+    1.0043,
+    1.0035,
+    1.0028,
+    1.0022,
+    1.0018,
+    1.0013,
+    1
+  );
+  --k3-sys-motion-easing-fluid-spatial-slow: linear(
+    0,
+    0.0212,
+    0.0747,
+    0.1484,
+    0.2328,
+    0.3213,
+    0.4091,
+    0.4929,
+    0.5705,
+    0.6409,
+    0.7035,
+    0.7583,
+    0.8055,
+    0.8456,
+    0.8793,
+    0.9072,
+    0.9301,
+    0.9485,
+    0.9632,
+    0.9748,
+    0.9837,
+    0.9905,
+    0.9955,
+    0.9991,
+    1.0017,
+    1.0033,
+    1.0043,
+    1.0049,
+    1.005,
+    1.0049,
+    1.0047,
+    1.0043,
+    1.0039,
+    1.0034,
+    1.003,
+    1.0026,
+    1.0022,
+    1.0018,
+    1.0015,
+    1.0012,
+    1
+  );
+  --k3-sys-motion-easing-fluid-effects: linear(
+    0,
+    0.0229,
+    0.0788,
+    0.1532,
+    0.2361,
+    0.3208,
+    0.403,
+    0.4802,
+    0.5509,
+    0.6146,
+    0.6711,
+    0.7207,
+    0.7638,
+    0.801,
+    0.8329,
+    0.8601,
+    0.8832,
+    0.9027,
+    0.9191,
+    0.9329,
+    0.9445,
+    0.9541,
+    0.9621,
+    0.9688,
+    0.9743,
+    0.9789,
+    0.9827,
+    0.9858,
+    0.9884,
+    0.9905,
+    0.9922,
+    0.9936,
+    0.9948,
+    0.9958,
+    0.9965,
+    0.9972,
+    0.9977,
+    0.9981,
+    0.9985,
+    0.9988,
+    1
+  );
+
+  /* Fluid shape tuning — Expressive docs/motion Tuning */
+  --k3-fluid-viscosity: 0.045;
+  --k3-fluid-max-stretch: 0.3;
+  --k3-fluid-squash: 0.07;
+  --k3-fluid-wobble: 0.32;
+
   --k3-sys-motion-duration-short1: 50ms;
   --k3-sys-motion-duration-short2: 100ms;
   --k3-sys-motion-duration-short3: 150ms;
@@ -68,6 +252,28 @@
   --k3-sys-motion-duration-effects-fast: 100ms;
   --k3-sys-motion-duration-effects-default: 150ms;
   --k3-sys-motion-duration-effects-slow: 200ms;
+}
+
+/* Fluid scheme — soft springs + droplet shape (springs.ts fluid.*) */
+:root[data-k3-motion='fluid'] {
+  --k3-sys-motion-easing-spatial-fast: var(--k3-sys-motion-easing-fluid-spatial-fast);
+  --k3-sys-motion-easing-spatial: var(--k3-sys-motion-easing-fluid-spatial);
+  --k3-sys-motion-easing-spatial-slow: var(--k3-sys-motion-easing-fluid-spatial-slow);
+  --k3-sys-motion-easing-effects: var(--k3-sys-motion-easing-fluid-effects);
+  --k3-sys-motion-easing-effects-fast: var(--k3-sys-motion-easing-fluid-effects);
+  --k3-sys-motion-easing-active: var(--k3-sys-motion-easing-fluid-spatial);
+  --k3-sys-motion-duration-spatial-fast: 405ms;
+  --k3-sys-motion-duration-spatial-default: 610ms;
+  --k3-sys-motion-duration-spatial-slow: 836ms;
+  --k3-sys-motion-duration-effects-fast: 247ms;
+  --k3-sys-motion-duration-effects-default: 349ms;
+  --k3-sys-motion-duration-effects-slow: 487ms;
+}
+
+/* rAF owns transform while fluid press jelly is active */
+[data-fluid] {
+  transition-property: background-color, color, border-color, box-shadow, border-radius,
+    opacity, filter, outline-color !important;
 }
 
 /* OS preference OR explicit opt-out via data-k3-reduce-motion (docs toggle) */

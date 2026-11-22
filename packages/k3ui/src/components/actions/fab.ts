@@ -2,6 +2,7 @@ import { html, css, unsafeCSS, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { K3Element, stateLayerStyles, focusRingStyles, emitLifecycle } from '../../core/index.js';
+import { FluidPressController } from '../../motion/fluid-press-controller.js';
 import { hostReset } from '../_shared.js';
 import { fabHide, fabShow, fabVisibilityCss } from './fab-visibility.js';
 
@@ -12,6 +13,10 @@ import { fabHide, fabShow, fabVisibilityCss } from './fab-visibility.js';
  * Visibility: {@link show} / {@link hide} (scale + fade, like Android FAB).
  */
 export class K3Fab extends K3Element {
+  private readonly _fluidPress = new FluidPressController(this, () =>
+    this.shadowRoot?.querySelector<HTMLElement>('.fab'),
+  );
+
   static override styles = [
     hostReset,
     stateLayerStyles,

@@ -2,11 +2,14 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   FLOATING_CHROME_INSET_INLINE_END_VAR,
   FLOATING_CHROME_INSET_INLINE_START_VAR,
+  NAV_CHROME_INSET_BLOCK_END_VAR,
   isBottomEndFloatingChrome,
   isBottomFloatingChrome,
   measureFloatingChromeInsetInlineEnd,
   measureFloatingChromeInsetInlineStart,
+  measureNavChromeInsetBlockEnd,
   syncFloatingChromeInsets,
+  syncNavChromeInsetBlockEnd,
 } from '../../src/core/floating-chrome-inset.js';
 
 describe('floating-chrome-inset', () => {
@@ -131,5 +134,21 @@ describe('floating-chrome-inset', () => {
     expect(
       document.documentElement.style.getPropertyValue(FLOATING_CHROME_INSET_INLINE_START_VAR),
     ).toBe('72px');
+  });
+
+  it('measures nav-bar chrome inset as viewport-bottom → bar top (FAB 16dp clearance)', () => {
+    expect(measureNavChromeInsetBlockEnd(null)).toBe(0);
+
+    const bar = document.createElement('k3-nav-bar');
+    document.body.appendChild(bar);
+    /* XR orbiter: 24dp float + 64dp bar → top at 800 - 24 - 64 = 712 */
+    mockRect(bar, { left: 40, top: 712, width: 320, height: 64, right: 360, bottom: 776 });
+    expect(measureNavChromeInsetBlockEnd(bar, 800)).toBe(88); /* 24 + 64 */
+
+    const px = syncNavChromeInsetBlockEnd(document.documentElement, bar);
+    expect(px).toBe(88);
+    expect(
+      document.documentElement.style.getPropertyValue(NAV_CHROME_INSET_BLOCK_END_VAR),
+    ).toBe('88px');
   });
 });

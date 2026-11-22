@@ -125,9 +125,12 @@
           var medium = matchMedia('(min-width: 600px) and (max-width: 839.98px)').matches;
           app.setAttribute('data-nav', bar ? 'bar' : 'rail');
           app.setAttribute('data-size', medium ? 'medium' : bar ? 'compact' : 'expanded');
+          /* XR shell bar (appearance=xr) floats 24dp — match applyAdaptiveShell(). */
           document.documentElement.style.setProperty(
             '--k3-nav-chrome-inset-block-end',
-            bar ? 'calc(4rem + env(safe-area-inset-bottom, 0px))' : '0px',
+            bar
+              ? 'calc(1.5rem + 4rem + env(safe-area-inset-bottom, 0px))'
+              : '0px',
           );
           if (/^#\/?(?!home$)[a-z0-9-]+$/i.test(location.hash)) {
             document.documentElement.setAttribute('data-k3-deeplink', '');
@@ -140,7 +143,7 @@
         id="nav-rail"
         class="shell-rail"
         size="compact"
-        layout="modal"
+        layout="xr"
         collapsible
         aria-label="Primary"
       >
@@ -154,16 +157,6 @@
           <span class="ms" slot="icon">home</span>
           <span data-i18n="playground.rail.home">Accueil</span>
         </k3-extended-fab>
-        <k3-nav-item
-          id="rail-sponsors"
-          class="rail-sponsors"
-          icon="favorite"
-          href="#/sponsors"
-          layout="vertical"
-          data-nav-aux
-          data-i18n-label="playground.nav.sponsors"
-          label="Sponsors"
-        ></k3-nav-item>
         <div slot="trailing" class="rail-foot">
           <k3-status
             id="ver"
@@ -177,7 +170,7 @@
       </k3-nav-rail>
 
       <div class="shell-content">
-        <k3-top-app-bar id="shell-appbar" class="shell-appbar" size="small" elevated>
+        <k3-top-app-bar id="shell-appbar" class="shell-appbar" size="small" elevated blur>
           <k3-search
             id="doc-search"
             class="shell-search"
@@ -10876,8 +10869,8 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <h2 data-i18n="doc.section.examples">Examples</h2>
             </header>
             <header class="section-head sub">
-              <h3 data-i18n="doc.app-bar.option.size">size / align / sticky</h3>
-              <p data-i18n="doc.app-bar.option.size.desc">small · medium · large flexible; align on small; sticky pin.</p>
+              <h3 data-i18n="doc.app-bar.option.size">size / align / sticky / blur</h3>
+              <p data-i18n="doc.app-bar.option.size.desc">small · medium · large flexible; align on small; sticky pin; blur glass.</p>
             </header>
 <div class="surface stack gap-lg">
             <ol class="variant-guide">
@@ -10930,7 +10923,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             <header class="section-head sub"><h3 data-i18n="playground.demo.section.app-bar.sticky-top">Sticky top</h3></header>
             <p class="hint">Scroll the pane — the bar stays pinned to the top.</p>
             <div class="sticky-demo">
-              <k3-top-app-bar size="small" sticky elevated>
+              <k3-top-app-bar size="small" sticky elevated blur>
                 <k3-icon-button slot="leading" label="Back"
                   ><span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="arrow_back" aria-hidden="true"></span></k3-icon-button
                 >
@@ -11140,10 +11133,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             <p class="comp-category" data-i18n="doc.nav.navigation">Navigation</p>
             <h1 data-i18n="doc.nav-rail.title">Navigation Rail</h1>
             <p data-i18n="doc.nav-rail.blurb">
-              Mid / expanded (≥600dp). Modal/standard · leading/trailing · position start/center/bottom.
+              Mid / expanded (≥600dp). Modal/standard/xr · leading/trailing · position start/center/bottom.
             </p>
             <p class="doc-intro" data-i18n="doc.nav-rail.intro">
-              Navigation rails suit mid-width and expanded layouts (≥600 dp). Collapse or expand destinations, optionally lead with a FAB, and use menu / menu_open when the rail can hide. Expanded layout defaults to modal (edge-docked, end-side radii, elevation-1); use layout="standard" for a flush rail with no inset sheet. Put secondary actions in slot="trailing" (divider). Align the leading group with position="start|center|bottom".
+              Navigation rails suit mid-width and expanded layouts (≥600 dp). Collapse or expand destinations, optionally lead with a FAB, and use menu / menu_open when the rail can hide. Expanded layout defaults to modal (edge-docked, end-side radii, elevation-1); use layout="standard" for a flush rail with no inset sheet, or layout="xr" for a spatial floating pill. Put secondary actions in slot="trailing" (divider). Align the leading group with position="start|center|bottom". On XR, fab-placement="contained|spatialized" places the FAB inside the pill or as a separate orbiter above it.
             </p>
           </header>
 
@@ -11153,7 +11146,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             </header>
             <header class="section-head sub">
               <h3 data-i18n="doc.nav-rail.option.lab">size / layout / position</h3>
-              <p data-i18n="doc.nav-rail.option.lab.desc">compact|large · modal|standard · start|center|bottom · collapsible · FAB · trailing.</p>
+              <p data-i18n="doc.nav-rail.option.lab.desc">compact|large · modal|standard|xr · start|center|bottom · fab-placement · collapsible · FAB · trailing.</p>
             </header>
 <div class="demo-block" data-demo-enhance="off">
             <h3 data-i18n="doc.nav-rail.section.lab">Playground</h3>
@@ -11222,6 +11215,18 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 >
                   <k3-menu-item value="modal" data-i18n="doc.nav-rail.lab.layout.modal">Modal</k3-menu-item>
                   <k3-menu-item value="standard" data-i18n="doc.nav-rail.lab.layout.standard">Standard</k3-menu-item>
+                  <k3-menu-item value="xr" data-i18n="doc.nav-rail.lab.layout.xr">XR (Spatial)</k3-menu-item>
+                </k3-select>
+                <k3-select
+                  id="nr-fab-placement"
+                  variant="outlined"
+                  value="contained"
+                  label="FAB placement"
+                  data-i18n-label="doc.nav-rail.lab.fabPlacement"
+                  hidden
+                >
+                  <k3-menu-item value="contained" data-i18n="doc.nav-rail.lab.fabPlacement.contained">Contained</k3-menu-item>
+                  <k3-menu-item value="spatialized" data-i18n="doc.nav-rail.lab.fabPlacement.spatialized">Spatialized</k3-menu-item>
                 </k3-select>
                 <k3-select
                   id="nr-position"
@@ -11269,7 +11274,7 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             <header class="section-head sub">
               <h2 data-i18n="doc.section.versions">Versions</h2>
             </header>
-            <p data-i18n="doc.nav-rail.versions.blurb">Compact vs large; modal vs standard expanded chrome.</p>
+            <p data-i18n="doc.nav-rail.versions.blurb">Compact vs large; modal, standard, or XR (spatial) chrome.</p>
           </div>
 
 </article>
@@ -11304,14 +11309,14 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 <span class="pill-num">2</span><span class="variant-label">horizontal</span>
               </li>
             </ol>
-            <p class="hint">Vertical — 56×32 on icon. Same expand as the rail destinations (hover under, select on top).</p>
+            <p class="hint" data-i18n="doc.nav-bar.hint.vertical">Vertical — 56×32 on icon. Same expand as the rail destinations (hover under, select on top).</p>
             <k3-nav-bar layout="vertical" active="0">
               <k3-nav-item icon="home" label="Home"></k3-nav-item>
               <k3-nav-item icon="search" label="Browse"></k3-nav-item>
               <k3-nav-item icon="radio" label="Radio"></k3-nav-item>
               <k3-nav-item icon="library_music" label="Library"></k3-nav-item>
             </k3-nav-bar>
-            <p class="hint">Horizontal — 40dp pill, icon + label vertically centered.</p>
+            <p class="hint" data-i18n="doc.nav-bar.hint.horizontal">Horizontal — 40dp pill, icon + label vertically centered.</p>
             <k3-nav-bar layout="horizontal" active="0">
               <k3-nav-item icon="home" label="Home"></k3-nav-item>
               <k3-nav-item icon="search" label="Browse"></k3-nav-item>
@@ -11319,6 +11324,30 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
               <k3-nav-item icon="library_music" label="Library"></k3-nav-item>
             </k3-nav-bar>
           </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.nav-bar.option.appearance">appearance</h3>
+              <p data-i18n="doc.nav-bar.option.appearance.desc">standard (docked) · xr (spatial orbiter; alias spatial).</p>
+            </header>
+            <div class="surface stack gap-lg surface-rail" data-layout="xr">
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="doc.nav-bar.lab.appearance.xr"
+                    >XR (Spatial)</span
+                  >
+                </li>
+              </ol>
+              <p class="hint" data-i18n="doc.nav-bar.hint.xr">
+                Bottom-centered elevated pill — Android SpatialNavigationBar (24dp inset).
+              </p>
+              <k3-nav-bar layout="vertical" appearance="xr" active="0">
+                <k3-nav-item icon="home" label="Home"></k3-nav-item>
+                <k3-nav-item icon="search" label="Browse"></k3-nav-item>
+                <k3-nav-item icon="radio" label="Radio"></k3-nav-item>
+                <k3-nav-item icon="library_music" label="Library"></k3-nav-item>
+              </k3-nav-bar>
+            </div>
           </div>
 
           <div class="surface stack gap-md">
@@ -17390,250 +17419,277 @@ K3UI.theme.apply({ seed: '#3F51B5', mode: 'auto', variant: 'tonalspot' });
             <p class="comp-category" data-i18n="doc.nav.styles">Styles</p>
             <h1 data-i18n="doc.motion.title">Motion</h1>
             <p data-i18n="doc.motion.blurb">
-              Expressive spatial &amp; effects — durations, easings, reduced-motion.
+              Expressive · Standard · Fluid — springs, durations, easings, reduced-motion.
             </p>
             <p class="doc-intro" data-i18n="doc.motion.intro">
-              Motion tokens cover Expressive spatial and effects durations, easings, and springs. Honor prefers-reduced-motion and data-k3-reduce-motion so animations ease or disable. Use motion to clarify hierarchy — not to decorate every state change.
+              Motion is physics: springs instead of fixed durations. Spatial springs move things and
+              may overshoot; effects springs fade and recolor without overshoot. Set data-k3-motion
+              or theme.motion. Honor prefers-reduced-motion and data-k3-reduce-motion.
             </p>
           </header>
           <div class="demo-block">
-            <h2 data-i18n="doc.motion.section.demo">Playground</h2>
-            <p data-i18n="doc.motion.section.demo.blurb">
-              Six duration presets — cubic-bezier curve plus a travelling dot. Click a card to replay.
+            <h2 data-i18n="doc.motion.section.springs">Springs</h2>
+            <p data-i18n="doc.motion.section.springs.blurb">
+              A spring is stiffness + damping ratio. Spatial moves position, size, shape (may
+              overshoot); effects change color and opacity (never overshoot). Fast · default ·
+              slow.
             </p>
+            <div class="row wrap gap-sm items-center motion-scheme-bar">
+              <k3-button-group
+                id="motion-scheme-group"
+                class="motion-scheme-group"
+                variant="connected"
+                equal-width
+                size="xs"
+                selection="single"
+                aria-label="Motion scheme"
+                data-i18n-aria-label="doc.motion.scheme.aria"
+              >
+                <k3-button data-motion-scheme="standard" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.motion.standard">Standard</span>
+                </k3-button>
+                <k3-button data-motion-scheme="expressive" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.motion.expressive">Expressive</span>
+                </k3-button>
+                <k3-button data-motion-scheme="fluid" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.motion.fluid">Fluid</span>
+                </k3-button>
+              </k3-button-group>
+            </div>
+
             <div
-              id="motion-playground"
-              class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-3"
+              id="motion-springs-chart"
+              class="motion-springs-chart"
               data-demo-enhance="off"
             >
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--motion">
-                  <button
-                    type="button"
-                    class="motion-card"
-                    data-motion="spatial-fast"
-                    data-duration-var="--k3-sys-motion-duration-spatial-fast"
-                    data-easing-var="--k3-sys-motion-easing-spatial-fast"
+              <div class="motion-springs-chart__head">
+                <p class="motion-springs-chart__scheme">
+                  <span data-i18n="doc.motion.scheme.label">Scheme</span>:
+                  <span data-motion-scheme-label data-scheme="expressive">expressive</span>
+                  <span class="motion-springs-chart__hint" data-i18n="doc.motion.scheme.hint"
+                    >Change it with Customize → Motion.</span
                   >
-                    <span class="motion-card__head">
-                      <span class="motion-card__title" data-i18n="doc.motion.preset.spatial-fast"
-                        >Spatial fast</span
-                      >
-                      <span class="motion-card__ms" data-motion-ms></span>
-                    </span><span class="motion-card__plot">
-                      <svg
-                        class="motion-card__curve"
-                        viewBox="0 -80 100 190"
-                        preserveAspectRatio="none"
-                        aria-hidden="true"
-                      >
-                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
-                        <path class="motion-card__curve-path" d="" />
-                      </svg>
-                      <span class="motion-card__bead" aria-hidden="true"></span>
-                    </span>
-                    <code class="motion-card__token">duration-spatial-fast</code>
-                  </button>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">1</span>
+                </p>
+                <k3-button data-motion-replay size="sm" variant="tonal">
+                  <span data-i18n="doc.motion.replay">Replay</span>
+                </k3-button>
               </div>
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--motion">
-                  <button
-                    type="button"
-                    class="motion-card"
-                    data-motion="spatial-default"
-                    data-duration-var="--k3-sys-motion-duration-spatial-default"
-                    data-easing-var="--k3-sys-motion-easing-spatial"
+              <div class="motion-springs-chart__body k3-layout-grid k3-demo-cols-2">
+                <div class="motion-springs-case" data-spring-kind="spatial">
+                  <h3 data-i18n="doc.motion.kind.spatial">spatial</h3>
+                  <svg
+                    class="motion-springs-svg"
+                    viewBox="-4 -16 328 152"
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label="spatial spring curves"
                   >
-                    <span class="motion-card__head">
-                      <span class="motion-card__title" data-i18n="doc.motion.preset.spatial-default"
-                        >Spatial default</span
+                    <line class="motion-springs-grid motion-springs-grid--target" x1="0" x2="320" y1="0" y2="0" />
+                    <line class="motion-springs-grid" x1="0" x2="320" y1="120" y2="120" />
+                    <polyline
+                      data-spring-path="spatial-fast"
+                      class="motion-springs-path motion-springs-path--fast"
+                      fill="none"
+                      points=""
+                    />
+                    <polyline
+                      data-spring-path="spatial-default"
+                      class="motion-springs-path motion-springs-path--default"
+                      fill="none"
+                      points=""
+                    />
+                    <polyline
+                      data-spring-path="spatial-slow"
+                      class="motion-springs-path motion-springs-path--slow"
+                      fill="none"
+                      points=""
+                    />
+                  </svg>
+                  <ul class="motion-springs-legend">
+                    <li>
+                      <span class="motion-springs-legend__label" data-i18n="doc.motion.speed.fast"
+                        >fast</span
                       >
-                      <span class="motion-card__ms" data-motion-ms></span>
-                    </span><span class="motion-card__plot">
-                      <svg
-                        class="motion-card__curve"
-                        viewBox="0 -80 100 190"
-                        preserveAspectRatio="none"
-                        aria-hidden="true"
+                      <div class="motion-springs-track">
+                        <span
+                          class="motion-springs-track__bead motion-springs-track__bead--fast"
+                          data-spring-bead="spatial-fast"
+                          aria-hidden="true"
+                        ></span>
+                      </div>
+                      <span class="motion-springs-legend__ms" data-spring-ms="spatial-fast"></span>
+                    </li>
+                    <li>
+                      <span class="motion-springs-legend__label" data-i18n="doc.motion.speed.default"
+                        >default</span
                       >
-                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
-                        <path class="motion-card__curve-path" d="" />
-                      </svg>
-                      <span class="motion-card__bead" aria-hidden="true"></span>
-                    </span>
-                    <code class="motion-card__token">duration-spatial-default</code>
-                  </button>
+                      <div class="motion-springs-track">
+                        <span
+                          class="motion-springs-track__bead motion-springs-track__bead--default"
+                          data-spring-bead="spatial-default"
+                          aria-hidden="true"
+                        ></span>
+                      </div>
+                      <span class="motion-springs-legend__ms" data-spring-ms="spatial-default"></span>
+                    </li>
+                    <li>
+                      <span class="motion-springs-legend__label" data-i18n="doc.motion.speed.slow"
+                        >slow</span
+                      >
+                      <div class="motion-springs-track">
+                        <span
+                          class="motion-springs-track__bead motion-springs-track__bead--slow"
+                          data-spring-bead="spatial-slow"
+                          aria-hidden="true"
+                        ></span>
+                      </div>
+                      <span class="motion-springs-legend__ms" data-spring-ms="spatial-slow"></span>
+                    </li>
+                  </ul>
                 </div>
-                <span class="demo-case-num" aria-hidden="true">2</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--motion">
-                  <button
-                    type="button"
-                    class="motion-card"
-                    data-motion="spatial-slow"
-                    data-duration-var="--k3-sys-motion-duration-spatial-slow"
-                    data-easing-var="--k3-sys-motion-easing-spatial-slow"
+                <div class="motion-springs-case" data-spring-kind="effects">
+                  <h3 data-i18n="doc.motion.kind.effects">effects</h3>
+                  <svg
+                    class="motion-springs-svg"
+                    viewBox="-4 -16 328 152"
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label="effects spring curves"
                   >
-                    <span class="motion-card__head">
-                      <span class="motion-card__title" data-i18n="doc.motion.preset.spatial-slow"
-                        >Spatial slow</span
+                    <line class="motion-springs-grid motion-springs-grid--target" x1="0" x2="320" y1="0" y2="0" />
+                    <line class="motion-springs-grid" x1="0" x2="320" y1="120" y2="120" />
+                    <polyline
+                      data-spring-path="effects-fast"
+                      class="motion-springs-path motion-springs-path--fast"
+                      fill="none"
+                      points=""
+                    />
+                    <polyline
+                      data-spring-path="effects-default"
+                      class="motion-springs-path motion-springs-path--default"
+                      fill="none"
+                      points=""
+                    />
+                    <polyline
+                      data-spring-path="effects-slow"
+                      class="motion-springs-path motion-springs-path--slow"
+                      fill="none"
+                      points=""
+                    />
+                  </svg>
+                  <ul class="motion-springs-legend">
+                    <li>
+                      <span class="motion-springs-legend__label" data-i18n="doc.motion.speed.fast"
+                        >fast</span
                       >
-                      <span class="motion-card__ms" data-motion-ms></span>
-                    </span><span class="motion-card__plot">
-                      <svg
-                        class="motion-card__curve"
-                        viewBox="0 -80 100 190"
-                        preserveAspectRatio="none"
-                        aria-hidden="true"
+                      <div class="motion-springs-track">
+                        <span
+                          class="motion-springs-track__bead motion-springs-track__bead--fast"
+                          data-spring-bead="effects-fast"
+                          aria-hidden="true"
+                        ></span>
+                      </div>
+                      <span class="motion-springs-legend__ms" data-spring-ms="effects-fast"></span>
+                    </li>
+                    <li>
+                      <span class="motion-springs-legend__label" data-i18n="doc.motion.speed.default"
+                        >default</span
                       >
-                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
-                        <path class="motion-card__curve-path" d="" />
-                      </svg>
-                      <span class="motion-card__bead" aria-hidden="true"></span>
-                    </span>
-                    <code class="motion-card__token">duration-spatial-slow</code>
-                  </button>
+                      <div class="motion-springs-track">
+                        <span
+                          class="motion-springs-track__bead motion-springs-track__bead--default"
+                          data-spring-bead="effects-default"
+                          aria-hidden="true"
+                        ></span>
+                      </div>
+                      <span class="motion-springs-legend__ms" data-spring-ms="effects-default"></span>
+                    </li>
+                    <li>
+                      <span class="motion-springs-legend__label" data-i18n="doc.motion.speed.slow"
+                        >slow</span
+                      >
+                      <div class="motion-springs-track">
+                        <span
+                          class="motion-springs-track__bead motion-springs-track__bead--slow"
+                          data-spring-bead="effects-slow"
+                          aria-hidden="true"
+                        ></span>
+                      </div>
+                      <span class="motion-springs-legend__ms" data-spring-ms="effects-slow"></span>
+                    </li>
+                  </ul>
                 </div>
-                <span class="demo-case-num" aria-hidden="true">3</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--motion">
-                  <button
-                    type="button"
-                    class="motion-card"
-                    data-motion="effects-fast"
-                    data-duration-var="--k3-sys-motion-duration-effects-fast"
-                    data-easing-var="--k3-sys-motion-easing-effects-fast"
-                  >
-                    <span class="motion-card__head">
-                      <span class="motion-card__title" data-i18n="doc.motion.preset.effects-fast"
-                        >Effects fast</span
-                      >
-                      <span class="motion-card__ms" data-motion-ms></span>
-                    </span><span class="motion-card__plot">
-                      <svg
-                        class="motion-card__curve"
-                        viewBox="0 -80 100 190"
-                        preserveAspectRatio="none"
-                        aria-hidden="true"
-                      >
-                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
-                        <path class="motion-card__curve-path" d="" />
-                      </svg>
-                      <span class="motion-card__bead" aria-hidden="true"></span>
-                    </span>
-                    <code class="motion-card__token">duration-effects-fast</code>
-                  </button>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">4</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--motion">
-                  <button
-                    type="button"
-                    class="motion-card"
-                    data-motion="effects-default"
-                    data-duration-var="--k3-sys-motion-duration-effects-default"
-                    data-easing-var="--k3-sys-motion-easing-effects"
-                  >
-                    <span class="motion-card__head">
-                      <span
-                        class="motion-card__title"
-                        data-i18n="doc.motion.preset.effects-default"
-                        >Effects default</span
-                      >
-                      <span class="motion-card__ms" data-motion-ms></span>
-                    </span><span class="motion-card__plot">
-                      <svg
-                        class="motion-card__curve"
-                        viewBox="0 -80 100 190"
-                        preserveAspectRatio="none"
-                        aria-hidden="true"
-                      >
-                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
-                        <path class="motion-card__curve-path" d="" />
-                      </svg>
-                      <span class="motion-card__bead" aria-hidden="true"></span>
-                    </span>
-                    <code class="motion-card__token">duration-effects-default</code>
-                  </button>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">5</span>
-              </div>
-              <div class="demo-case">
-                <div class="demo-case-stage demo-case-stage--motion">
-                  <button
-                    type="button"
-                    class="motion-card"
-                    data-motion="effects-slow"
-                    data-duration-var="--k3-sys-motion-duration-effects-slow"
-                    data-easing-var="--k3-sys-motion-easing-effects"
-                  >
-                    <span class="motion-card__head">
-                      <span class="motion-card__title" data-i18n="doc.motion.preset.effects-slow"
-                        >Effects slow</span
-                      >
-                      <span class="motion-card__ms" data-motion-ms></span>
-                    </span><span class="motion-card__plot">
-                      <svg
-                        class="motion-card__curve"
-                        viewBox="0 -80 100 190"
-                        preserveAspectRatio="none"
-                        aria-hidden="true"
-                      >
-                        <path class="motion-card__curve-grid" d="M0 100 H100 M0 0 V100" />
-                        <path class="motion-card__curve-path" d="" />
-                      </svg>
-                      <span class="motion-card__bead" aria-hidden="true"></span>
-                    </span>
-                    <code class="motion-card__token">duration-effects-slow</code>
-                  </button>
-                </div>
-                <span class="demo-case-num" aria-hidden="true">6</span>
               </div>
             </div>
-            <ol class="variant-guide">
-              <li>
-                <span class="pill-num">1</span
-                ><span class="variant-label" data-i18n="doc.motion.preset.spatial-fast"
-                  >Spatial fast</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">2</span
-                ><span class="variant-label" data-i18n="doc.motion.preset.spatial-default"
-                  >Spatial default</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">3</span
-                ><span class="variant-label" data-i18n="doc.motion.preset.spatial-slow"
-                  >Spatial slow</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">4</span
-                ><span class="variant-label" data-i18n="doc.motion.preset.effects-fast"
-                  >Effects fast</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">5</span
-                ><span class="variant-label" data-i18n="doc.motion.preset.effects-default"
-                  >Effects default</span
-                >
-              </li>
-              <li>
-                <span class="pill-num">6</span
-                ><span class="variant-label" data-i18n="doc.motion.preset.effects-slow"
-                  >Effects slow</span
-                >
-              </li>
-            </ol>
           </div>
+
+          <div class="demo-block">
+            <h2 data-i18n="doc.motion.section.fluid">Fluid</h2>
+            <p data-i18n="doc.motion.section.fluid.blurb">
+              Fluid treats elements like droplets: stretch with speed, press jelly, touch
+              response, gooey arrivals. Flip a switch to compare schemes — fluid elongates
+              the handle along travel then wobbles back.
+            </p>
+            <div
+              id="motion-fluid-demo"
+              class="motion-fluid-demo"
+              data-demo-enhance="off"
+            >
+              <div class="motion-fluid-row" data-fluid-scheme="expressive">
+                <span class="motion-fluid-label" data-i18n="playground.ctrl.motion.expressive"
+                  >expressive</span
+                >
+                <button
+                  type="button"
+                  class="motion-fluid-stage"
+                  role="switch"
+                  aria-checked="false"
+                  aria-label="Expressive switch"
+                  data-i18n-aria-label="doc.motion.fluid.aria.expressive"
+                >
+                  <span class="motion-fluid-handle" aria-hidden="true"></span>
+                </button>
+              </div>
+              <div class="motion-fluid-row" data-fluid-scheme="standard">
+                <span class="motion-fluid-label" data-i18n="playground.ctrl.motion.standard"
+                  >standard</span
+                >
+                <button
+                  type="button"
+                  class="motion-fluid-stage"
+                  role="switch"
+                  aria-checked="false"
+                  aria-label="Standard switch"
+                  data-i18n-aria-label="doc.motion.fluid.aria.standard"
+                >
+                  <span class="motion-fluid-handle" aria-hidden="true"></span>
+                </button>
+              </div>
+              <div class="motion-fluid-row" data-fluid-scheme="fluid">
+                <span class="motion-fluid-label">
+                  <span data-i18n="playground.ctrl.motion.fluid">fluid</span>
+                  <span class="motion-fluid-label-sub" data-i18n="doc.motion.fluid.motion"
+                    >· motion</span
+                  >
+                </span>
+                <button
+                  type="button"
+                  class="motion-fluid-stage"
+                  role="switch"
+                  aria-checked="false"
+                  aria-label="Fluid switch"
+                  data-i18n-aria-label="doc.motion.fluid.aria.fluid"
+                >
+                  <span class="motion-fluid-handle" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+            <p class="hint" data-i18n="doc.motion.fluid.momentum">
+              Momentum carries over: flip a switch back mid-motion and the handle turns around
+              smoothly instead of restarting.
+            </p>
+          </div>
+
           <div class="surface surface-flush stack gap-lg">
             <div id="motion-scale" class="token-scale" aria-label="Motion tokens"></div>
             <k3-codeblock language="css" code=".panel {
@@ -17761,8 +17817,14 @@ K3UI.theme.apply({ seed: '#3F51B5', mode: 'auto', variant: 'tonalspot' });
         </div>
       </div>
 
-      <!-- Phone &lt;600dp: navigation bar -->
-      <k3-nav-bar id="nav-bar" class="shell-bar" layout="vertical" aria-label="Primary"></k3-nav-bar>
+      <!-- Phone &lt;600dp: navigation bar (XR orbiter mirrors rail layout="xr") -->
+      <k3-nav-bar
+        id="nav-bar"
+        class="shell-bar"
+        layout="vertical"
+        appearance="xr"
+        aria-label="Primary"
+      ></k3-nav-bar>
     </div>
 
     <!--
@@ -18139,6 +18201,9 @@ K3UI.theme.apply({ seed: '#3F51B5', mode: 'auto', variant: 'tonalspot' });
                 <k3-button data-settings-motion="expressive" size="xs" variant="tonal">
                   <span data-i18n="playground.ctrl.motion.expressive">Expressive</span>
                 </k3-button>
+                <k3-button data-settings-motion="fluid" size="xs" variant="tonal">
+                  <span data-i18n="playground.ctrl.motion.fluid">Fluid</span>
+                </k3-button>
               </k3-button-group>
               <div class="settings-row settings-row--switch">
                 <span class="settings-label" data-i18n="playground.ctrl.motion.animations"
@@ -18273,7 +18338,28 @@ K3UI.theme.apply({ seed: '#3F51B5', mode: 'auto', variant: 'tonalspot' });
       </div>
     </k3-sheet>
 
-    <!-- Shell chrome — bottom-end: scroll-to-top (left) · FAB menu GitHub (right) -->
+    <!--
+      Shell chrome:
+      - compact bar: FAB Accueil (start) — mirrors rail FAB home
+      - all: scroll-to-top · FAB menu GitHub (end)
+    -->
+    <k3-fab
+      id="shell-home-fab"
+      class="shell-home-fab"
+      size="default"
+      variant="primary"
+      aria-label="Home"
+      data-i18n-aria-label="playground.rail.home"
+    >
+      <span
+        slot="icon"
+        class="ms notranslate"
+        translate="no"
+        lang="zxx"
+        data-k3-icon="home"
+        aria-hidden="true"
+      ></span>
+    </k3-fab>
     <k3-scroll-to-top
       class="shell-stt"
       variant="primary"

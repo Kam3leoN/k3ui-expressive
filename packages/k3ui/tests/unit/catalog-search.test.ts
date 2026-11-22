@@ -26,20 +26,18 @@ const t = (key: string) => {
 };
 
 describe('catalog showcase rail', () => {
-  it('exposes Showcase as a parent destination between Styles and Resources', () => {
+  it('keeps Showcase off the primary rail (Démarrage hub leaf)', () => {
     const ids = NAV_DESTINATIONS.map((d) => d.id);
-    const styles = ids.indexOf('styles');
-    const showcase = ids.indexOf('showcase');
-    const resources = ids.indexOf('resources');
-    expect(showcase).toBeGreaterThan(styles);
-    expect(showcase).toBeLessThan(resources);
-    expect(NAV_DESTINATIONS[showcase]?.href).toBe('#/showcase');
+    expect(ids).not.toContain('showcase');
+    expect(ids).not.toContain('resources');
+    expect(ids).toContain('quick-start');
+    expect(destinationForPage('showcase', () => undefined)?.id).toBe('quick-start');
   });
 
-  it('keeps showcase pages on the Showcase rail item', () => {
-    expect(destinationForPage('showcase', () => undefined)?.id).toBe('showcase');
-    expect(destinationForPage('showcase-pricing', () => undefined)?.id).toBe('showcase');
-    expect(destinationForPage('showcase-login', () => undefined)?.id).toBe('showcase');
+  it('keeps showcase pages on the Démarrage hub', () => {
+    expect(destinationForPage('showcase', () => undefined)?.id).toBe('quick-start');
+    expect(destinationForPage('showcase-pricing', () => undefined)?.id).toBe('quick-start');
+    expect(destinationForPage('showcase-login', () => undefined)?.id).toBe('quick-start');
   });
 
   it('is not listed under Utilities catalog', () => {

@@ -45,11 +45,11 @@ test('home: hero + stats ready, every doc page stamped after boot', async ({ pag
   await expect(page.locator('#home-lift-cta .home-lift-cta__blob')).toHaveCount(2);
   await expect(page.locator('#home-lift-cta k3-button[data-nav="quick-start"]')).toBeVisible();
   await expect(page.locator('#home-lift-cta k3-button[data-nav="pack"]')).toBeVisible();
-  /* Sponsors live on their own page — not on home */
+  /* Sponsors live on their own page — not on home; reached via Démarrage hub */
   await expect(page.locator('#page-home #sponsors-root')).toHaveCount(0);
-  /* Rail destinations: Sponsors sits just above the trailing divider */
-  await expect(page.locator('#nav-rail #rail-sponsors')).toBeVisible();
-  await expect(page.locator('#nav-rail #rail-sponsors')).not.toHaveAttribute('slot', 'trailing');
+  await expect(page.locator('#nav-rail #rail-sponsors')).toHaveCount(0);
+  /* Five primary destinations (M3 max) — no Showcase / Resources top-level */
+  await expect(page.locator('#nav-rail > k3-nav-item:not([slot])')).toHaveCount(5);
   const ver = page.locator('#nav-rail .rail-foot #ver');
   await expect(ver).toBeVisible();
   await expect(ver).toHaveJSProperty('localName', 'k3-status');
@@ -62,7 +62,60 @@ test('home: hero + stats ready, every doc page stamped after boot', async ({ pag
   expect(await page.evaluate(() => (window as unknown as { __cls: number }).__cls)).toBeLessThan(0.05);
 });
 
-test('sponsors page: rail trailing opens the cells grid', async ({ page }) => {
+test('XR shell: app bar full-bleed left and stable on rail expand', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  await ready(page, 'home');
+  const rail = page.locator('#nav-rail');
+  await expect(rail).toHaveAttribute('layout', 'xr');
+  const appbar = page.locator('#shell-appbar');
+  await expect(appbar).not.toHaveAttribute('sticky', '');
+
+  const before = await page.evaluate(() => {
+    const bar = document.getElementById('shell-appbar')!;
+    const r = document.getElementById('nav-rail') as HTMLElement & { size: string };
+    return {
+      barLeft: bar.getBoundingClientRect().left,
+      railPos: getComputedStyle(r).position,
+      size: r.size,
+    };
+  });
+  expect(before.barLeft).toBeLessThanOrEqual(1);
+  expect(before.railPos).toBe('absolute');
+
+  /* Ambient full-bleed under the orbiter (no white gutter strip) */
+  const ambient = await page.evaluate(() => {
+    const el = document.getElementById('home-ambient');
+    if (!el) return null;
+    const cs = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    return {
+      insetStart: cs.insetInlineStart,
+      left: r.left,
+      width: r.width,
+      viewW: window.innerWidth,
+    };
+  });
+  expect(ambient).toBeTruthy();
+  expect(ambient!.left).toBeLessThanOrEqual(1);
+  expect(ambient!.width).toBeGreaterThanOrEqual(ambient!.viewW - 2);
+
+  /* Orbiter floats off the inline-start edge (not flush) */
+  const railLeft = await rail.evaluate((el) => el.getBoundingClientRect().left);
+  expect(railLeft).toBeGreaterThan(8);
+
+  await rail.locator('.toggle').click();
+  await page.waitForFunction(
+    () => (document.getElementById('nav-rail') as HTMLElement & { size: string }).size === 'large',
+  );
+  const after = await page.evaluate(() => {
+    const bar = document.getElementById('shell-appbar')!;
+    return { barLeft: bar.getBoundingClientRect().left };
+  });
+  expect(after.barLeft).toBe(before.barLeft);
+});
+
+test('sponsors page: Démarrage hub stays active on the cells grid', async ({ page }) => {
   await page.goto('/#/sponsors');
   await ready(page, 'sponsors');
   await expect(page.locator('#page-sponsors')).toBeVisible();
@@ -71,7 +124,11 @@ test('sponsors page: rail trailing opens the cells grid', async ({ page }) => {
   await expect(page.locator('#sponsors-root .sponsor-wall-cell--mega')).toHaveCount(15);
   await expect(page.locator('#sponsors-root .sponsor-wall-cell--mega-lg')).toHaveCount(5);
   await expect(page.locator('#sponsors-root .sponsor-wall-cell--mega-sm')).toHaveCount(10);
-  await expect(page.locator('#rail-sponsors')).toHaveAttribute('active', '');
+  /* First primary item = Démarrage (hub) */
+  await expect(page.locator('#nav-rail > k3-nav-item:not([slot])').first()).toHaveAttribute(
+    'active',
+    '',
+  );
 });
 
 test('deep link: veil instead of a flash of the home page, no layout shift', async ({ page }) => {

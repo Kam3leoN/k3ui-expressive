@@ -245,7 +245,17 @@ function placeSide(
     return { top, left: Math.round(left) };
   }
 
-  const top = dockTopWithMaxHeight(panel, tr.top, ph, vh);
+  /*
+   * Prefer align to the trigger top. If the panel would overflow below,
+   * shift up to use space above (same idea as submenu flyouts) so long
+   * flat lists (e.g. Animations) are not capped mid-viewport while free
+   * space remains under the menu.
+   */
+  let preferredTop = tr.top;
+  if (preferredTop + ph > vh - EDGE) {
+    preferredTop = Math.max(EDGE, vh - EDGE - ph);
+  }
+  const top = dockTopWithMaxHeight(panel, preferredTop, ph, vh);
   return { top, left: Math.round(left) };
 }
 

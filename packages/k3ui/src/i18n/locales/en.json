@@ -143,6 +143,7 @@
   "playground.ctrl.motion.scheme": "Motion",
   "playground.ctrl.motion.expressive": "Expressive",
   "playground.ctrl.motion.standard": "Standard",
+  "playground.ctrl.motion.fluid": "Fluid",
   "playground.ctrl.motion.animations": "Animations",
   "playground.ctrl.snow": "Snow",
   "playground.ctrl.sparkle": "Sparkle",

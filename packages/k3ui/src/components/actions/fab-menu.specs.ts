@@ -305,13 +305,28 @@ export function fabMenuClampMaxHeightPx(
   return contentH + FabMenuScrollBleedYDp * 2;
 }
 
+/** Spatial-fast ms for the active `data-k3-motion` scheme (expressive / standard / fluid). */
+export function fabMenuSpatialMs(phase: 'opening' | 'closing' = 'opening'): number {
+  const fallback =
+    phase === 'opening' ? FabMenuSpecs.spatialEnterMs : FabMenuSpecs.spatialExitMs;
+  if (typeof document === 'undefined') return fallback;
+  const scheme = document.documentElement.getAttribute('data-k3-motion');
+  if (scheme === 'fluid') return springs.fluid.spatial.fast.durationMs;
+  if (scheme === 'standard') return springs.standard.spatial.fast.durationMs;
+  return fallback;
+}
+
 export function fabMenuMaxDurationMs(phase: 'opening' | 'closing', count: number): number {
   const n = Math.max(count, 1);
   const step =
     phase === 'opening' ? FabMenuSpecs.staggerEnterMs : FabMenuSpecs.staggerExitMs;
-  const spatial =
-    phase === 'opening' ? FabMenuSpecs.spatialEnterMs : FabMenuSpecs.spatialExitMs;
-  const itemsMs = (n - 1) * step + Math.max(spatial, FabMenuSpecs.effectsMs) + 16;
+  const spatial = fabMenuSpatialMs(phase);
+  const effects =
+    typeof document !== 'undefined' &&
+    document.documentElement.getAttribute('data-k3-motion') === 'fluid'
+      ? springs.fluid.effects.fast.durationMs
+      : FabMenuSpecs.effectsMs;
+  const itemsMs = (n - 1) * step + Math.max(spatial, effects) + 16;
   /* Closing: also wait for trigger icon crossfade (size morph). */
   if (phase === 'closing') {
     return Math.max(itemsMs, FabMenuSpecs.closeTriggerMs + 16);

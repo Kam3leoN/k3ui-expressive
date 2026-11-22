@@ -185,13 +185,82 @@ export const RESOURCE_PAGES: ResourcePage[] = [
   },
 ];
 
+/** Leaf under the Démarrage hub (secondary menu / compact sheet). */
+export interface StartHubPage {
+  id: string;
+  icon: string;
+  labelKey: string;
+  /** Insert a surface gap before this item (after Pack → meta pages). */
+  dividerBefore?: boolean;
+}
+
+/**
+ * Démarrage hub — Accueil · Quick Start · Pack · Showcase · Symbols · Sponsors.
+ * Primary rail/bar only keep 5 destinations (M3 nav-bar max).
+ * Accueil mirrors the rail FAB for compact bar / secondary menu parity.
+ */
+export const START_HUB_PAGES: StartHubPage[] = [
+  {
+    id: 'home',
+    icon: 'home',
+    labelKey: 'playground.rail.home',
+  },
+  {
+    id: 'quick-start',
+    icon: 'rocket_launch',
+    labelKey: 'doc.quick-start.title',
+  },
+  {
+    id: 'pack',
+    icon: 'inventory_2',
+    labelKey: 'doc.nav.pack',
+  },
+  {
+    id: 'showcase',
+    icon: 'apps',
+    labelKey: 'doc.nav.showcase',
+    dividerBefore: true,
+  },
+  {
+    id: 'material-symbols',
+    icon: 'mood',
+    labelKey: 'doc.nav.resources.material-symbols',
+  },
+  {
+    id: 'sponsors',
+    icon: 'favorite',
+    labelKey: 'playground.nav.sponsors',
+  },
+];
+
+/** Showcase demo hashes — keep Démarrage active. */
+const SHOWCASE_PAGE_IDS = new Set([
+  'showcase',
+  'showcase-pricing',
+  'showcase-login',
+  'showcase-dialer',
+]);
+
+/** Pages that arm the Démarrage primary destination (not Accueil / home). */
+export function isStartHubPage(pageId: string): boolean {
+  if (pageId === 'home') return false;
+  if (pageId === 'quick-start' || pageId === 'pack' || pageId === 'sponsors') return true;
+  if (SHOWCASE_PAGE_IDS.has(pageId)) return true;
+  if (RESOURCE_PAGES.some((p) => p.id === pageId)) return true;
+  return false;
+}
+
+/**
+ * Primary destinations — 5 max (M3 nav-bar).
+ * Démarrage is a hub (empty href → secondary menu / sheet).
+ */
 export const NAV_DESTINATIONS: NavDestination[] = [
   {
     id: 'quick-start',
     category: 'Quick start',
     icon: 'rocket_launch',
     labelKey: 'doc.nav.quick-start',
-    href: '#/quick-start',
+    href: '',
   },
   {
     id: 'components',
@@ -221,20 +290,6 @@ export const NAV_DESTINATIONS: NavDestination[] = [
     labelKey: 'doc.nav.styles',
     href: '',
   },
-  {
-    id: 'showcase',
-    category: 'Showcase',
-    icon: 'apps',
-    labelKey: 'doc.nav.showcase',
-    href: '#/showcase',
-  },
-  {
-    id: 'resources',
-    category: 'Resources',
-    icon: 'inventory_2',
-    labelKey: 'doc.nav.resources',
-    href: '',
-  },
 ];
 
 /**
@@ -254,17 +309,8 @@ export function destinationForPage(
   categoryOf: (id: string) => string | undefined,
 ): NavDestination | null {
   if (pageId === 'home') return null;
-  if (pageId === 'quick-start' || pageId === 'pack') {
-    /* Pack is reached from Démarrage — keep that rail item active. */
+  if (isStartHubPage(pageId)) {
     return NAV_DESTINATIONS.find((d) => d.id === 'quick-start') ?? null;
-  }
-  if (
-    pageId === 'showcase' ||
-    pageId === 'showcase-pricing' ||
-    pageId === 'showcase-login' ||
-    pageId === 'showcase-dialer'
-  ) {
-    return NAV_DESTINATIONS.find((d) => d.id === 'showcase') ?? null;
   }
   /* Legacy Color hashes share the Styles destination */
   if (
@@ -287,8 +333,9 @@ export function destinationForPage(
   if (cat === 'Animation') {
     return NAV_DESTINATIONS.find((d) => d.id === 'animations') ?? null;
   }
+  /* Resources (Material Symbols) live under the Démarrage hub */
   if (cat === 'Resources') {
-    return NAV_DESTINATIONS.find((d) => d.id === 'resources') ?? null;
+    return NAV_DESTINATIONS.find((d) => d.id === 'quick-start') ?? null;
   }
   if (isComponentCategory(cat)) {
     return NAV_DESTINATIONS.find((d) => d.id === 'components') ?? null;

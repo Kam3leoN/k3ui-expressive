@@ -127,7 +127,7 @@ const SCHEMA: Schema = {
   theme: {
     seed: (v) => typeof v === 'string' && /^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(v),
     mode: oneOf('light', 'dark', 'auto', 'system'),
-    motion: oneOf('expressive', 'standard'),
+    motion: oneOf('expressive', 'standard', 'fluid'),
     variant: oneOf('tonalspot', 'vibrant', 'fidelity', 'expressive', 'monochrome', 'neutral', 'rainbow', 'fruitsalad'),
     contrast: oneOf('default', 'medium', 'high', 'auto'),
     specVersion: oneOf('2021', '2025'),

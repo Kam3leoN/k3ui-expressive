@@ -11,6 +11,7 @@ export type AppBarAlign = 'start' | 'center';
 /**
  * Top app bar — small · medium flexible · large flexible (M3 Expressive).
  * `sticky` pins to the top of the scrollport.
+ * `blur` (property `blurred`) — translucent fill + backdrop blur.
  */
 export class K3TopAppBar extends K3Element {
   static override styles = [
@@ -22,6 +23,8 @@ export class K3TopAppBar extends K3Element {
         --k3-appbar-h: 4rem; /* 64 small */
         --k3-appbar-title-size: var(--k3-sys-typescale-title-large-size);
         --k3-appbar-title-weight: 400;
+        --k3-appbar-blur: 16px;
+        --k3-appbar-blur-fill: 72%;
       }
       :host([size='medium']) {
         --k3-appbar-h: 7rem; /* 112 flexible */
@@ -66,21 +69,37 @@ export class K3TopAppBar extends K3Element {
         background: var(--k3-sys-color-surface-container);
         box-shadow: none; /* M3: fill, not drop shadow */
       }
-      :host([sticky]) .bar {
-        background: color-mix(
-          in srgb,
-          var(--k3-sys-color-surface) 92%,
-          transparent
-        );
-        backdrop-filter: blur(12px);
+      /* Glass / frosted — host [blur] (property blurred; keeps Element.blur()) */
+      :host([blur]) {
+        background: transparent;
       }
-      :host([sticky][elevated]) .bar,
-      :host([sticky][scrolled]) .bar {
+      :host([blur]) .bar {
         background: color-mix(
           in srgb,
-          var(--k3-sys-color-surface-container) 92%,
+          var(--k3-sys-color-surface) var(--k3-appbar-blur-fill, 72%),
           transparent
         );
+        backdrop-filter: blur(var(--k3-appbar-blur, 16px));
+        -webkit-backdrop-filter: blur(var(--k3-appbar-blur, 16px));
+      }
+      :host([blur][elevated]) .bar,
+      :host([blur][scrolled]) .bar {
+        background: color-mix(
+          in srgb,
+          var(--k3-sys-color-surface-container) var(--k3-appbar-blur-fill, 72%),
+          transparent
+        );
+      }
+      @media (prefers-reduced-transparency: reduce) {
+        :host([blur]) .bar {
+          backdrop-filter: none;
+          -webkit-backdrop-filter: none;
+          background: var(--k3-sys-color-surface);
+        }
+        :host([blur][elevated]) .bar,
+        :host([blur][scrolled]) .bar {
+          background: var(--k3-sys-color-surface-container);
+        }
       }
       .leading {
         grid-column: 1;
@@ -175,6 +194,12 @@ export class K3TopAppBar extends K3Element {
   @property({ reflect: true }) align: AppBarAlign = 'start';
   @property({ type: Boolean, reflect: true }) elevated = false;
   @property({ type: Boolean, reflect: true }) sticky = false;
+  /**
+   * Translucent surface + backdrop blur (HTML attribute: `blur`).
+   * Named `blurred` so it does not override `HTMLElement.blur()`.
+   */
+  @property({ type: Boolean, reflect: true, attribute: 'blur' })
+  blurred = false;
   /** Optional subtitle (medium / large flexible) */
   @property() subtitle = '';
 

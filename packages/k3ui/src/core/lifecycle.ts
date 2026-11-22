@@ -46,7 +46,7 @@ export function prefersReducedMotion(): boolean {
 }
 
 /**
- * Expressive spatial motion (springs / scale enter).
+ * Expressive / fluid spatial motion (springs / scale enter / jelly).
  * False when reduced-motion OR `data-k3-motion="standard"` (brut / strongly reduced).
  */
 export function allowsExpressiveMotion(): boolean {

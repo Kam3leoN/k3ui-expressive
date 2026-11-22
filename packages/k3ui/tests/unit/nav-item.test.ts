@@ -90,7 +90,7 @@ describe('k3-nav-item dual labels (Android expand/collapse)', () => {
       /--k3-nav-pill-motion:[\s\S]*?--k3-sys-motion-easing-emphasized-decelerate/,
     );
     expect(cssText).toMatch(
-      /not\(\[data-collapsing\]\)[\s\S]*?--k3-nav-pill-motion:[\s\S]*?expressive-spatial/,
+      /not\(\[data-collapsing\]\)[\s\S]*?--k3-nav-pill-motion:[\s\S]*?--k3-sys-motion-easing-spatial/,
     );
   });
 

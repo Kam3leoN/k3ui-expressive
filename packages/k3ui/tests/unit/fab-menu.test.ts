@@ -4,6 +4,7 @@ import {
   FabMenuSpecs,
   fabMenuItemDelayMs,
   fabMenuMaxDurationMs,
+  fabMenuSpatialMs,
   fabMenuIsTrailingRight,
   fabMenuResolveSide,
   fabMenuEstimateHeightDp,
@@ -12,6 +13,8 @@ import {
   fabMenuFindClipElement,
   fabMenuViewportChromeBounds,
 } from '../../src/components/actions/fab-menu.specs.js';
+import { fabMenuItemStyles } from '../../src/components/actions/fab-menu-item.styles.js';
+import { springs } from '../../src/motion/springs.js';
 
 describe('fab-menu specs', () => {
   it('uses Compose stagger + FastSpatial / FastEffects durations', () => {
@@ -36,16 +39,36 @@ describe('fab-menu specs', () => {
   });
 
   it('waits max(spatial, effects) + stagger + 1 frame', () => {
+    document.documentElement.removeAttribute('data-k3-motion');
     const ms = fabMenuMaxDurationMs('opening', 3);
     expect(ms).toBe(2 * 35 + 350 + 16);
   });
 
   it('close uses FastSpatial like menus (not short effects-only exit)', () => {
+    document.documentElement.removeAttribute('data-k3-motion');
     expect(FabMenuSpecs.spatialExitMs).toBe(FabMenuSpecs.spatialEnterMs);
     expect(FabMenuSpecs.spatialExitEasing).toBe(FabMenuSpecs.spatialEnterEasing);
     const itemsOnly = 2 * 25 + Math.max(FabMenuSpecs.spatialExitMs, FabMenuSpecs.effectsMs) + 16;
     const ms = fabMenuMaxDurationMs('closing', 3);
     expect(ms).toBe(Math.max(itemsOnly, FabMenuSpecs.closeTriggerMs + 16));
+  });
+
+  it('uses fluid spatial-fast duration when data-k3-motion=fluid', () => {
+    document.documentElement.setAttribute('data-k3-motion', 'fluid');
+    expect(fabMenuSpatialMs('opening')).toBe(springs.fluid.spatial.fast.durationMs);
+    const ms = fabMenuMaxDurationMs('opening', 3);
+    expect(ms).toBe(
+      2 * 35 + Math.max(springs.fluid.spatial.fast.durationMs, springs.fluid.effects.fast.durationMs) + 16,
+    );
+    document.documentElement.removeAttribute('data-k3-motion');
+  });
+
+  it('ships jelly open/close keyframes for fluid fab-menu items', () => {
+    const text = String((fabMenuItemStyles as { cssText?: string }).cssText ?? fabMenuItemStyles);
+    expect(text).toContain('k3-fab-menu-item-in-spatial-fluid');
+    expect(text).toContain('k3-fab-menu-item-out-spatial-fluid');
+    expect(text).toContain("data-k3-motion='fluid'");
+    expect(text).toContain('scale(0.001, 1.12)');
   });
 
   it('maps trailing edge for LTR / RTL', () => {

@@ -1,18 +1,24 @@
 import { css, unsafeCSS } from 'lit';
 
 /*
- * M3 Expressive spring tokens converted exactly to CSS `linear()` (Compose
- * MotionScheme.expressive): spatial fast 0.6 / 800 (~390 ms), spatial default
- * 0.8 / 380 (~450 ms), effects default 1.0 / 1600 (~240 ms).
+ * Scheme-aware springs — follow data-k3-motion (expressive / standard / fluid)
+ * via --k3-sys-motion-* aliases (remap in _motion.scss).
  */
 const SPRING_SPATIAL_FAST = unsafeCSS(
-  'linear(0, 0.0564, 0.1827, 0.3506, 0.5191, 0.6762, 0.816, 0.922, 0.9996, 1.0528, 1.0813, 1.0926, 1.091, 1.0813, 1.0672, 1.0508, 1.0356, 1.0221, 1.0107, 1.0025, 0.9968, 0.9932, 0.9916, 0.9913, 0.992, 0.9932, 0.9946, 0.9962, 0.9975, 0.9986, 0.9995, 1.0001, 1)',
+  'var(--k3-sys-motion-easing-spatial-fast, var(--k3-sys-motion-easing-spatial))',
 );
 const SPRING_SPATIAL_DEFAULT = unsafeCSS(
-  'linear(0, 0.0335, 0.1133, 0.2183, 0.333, 0.4472, 0.5541, 0.6498, 0.7326, 0.802, 0.8587, 0.9037, 0.9385, 0.9647, 0.9836, 0.9968, 1.0055, 1.0106, 1.0134, 1.0144, 1.0142, 1.0132, 1.0118, 1.0101, 1.0085, 1.0069, 1.0054, 1.0042, 1.0031, 1.0023, 1.0016, 1.001, 1)',
+  'var(--k3-sys-motion-easing-spatial, var(--k3-sys-motion-easing-expressive-spatial))',
 );
 const SPRING_EFFECTS_DEFAULT = unsafeCSS(
-  'linear(0, 0.0398, 0.1268, 0.2335, 0.3364, 0.4414, 0.5363, 0.6194, 0.6861, 0.7464, 0.7964, 0.8349, 0.8686, 0.8959, 0.9178, 0.9342, 0.9483, 0.9595, 0.9677, 0.9748, 0.9803, 0.9847, 0.9879, 0.9906, 0.9927, 0.9942, 0.9955, 0.9965, 0.9973, 0.9979, 0.9984, 0.9987, 1)',
+  'var(--k3-sys-motion-easing-effects, var(--k3-sys-motion-easing-expressive-effects))',
+);
+const DUR_SPATIAL_FAST = unsafeCSS('var(--k3-sys-motion-duration-spatial-fast, 350ms)');
+const DUR_SPATIAL_DEFAULT = unsafeCSS(
+  'var(--k3-sys-motion-duration-spatial-default, 500ms)',
+);
+const DUR_EFFECTS_DEFAULT = unsafeCSS(
+  'var(--k3-sys-motion-duration-effects-default, 200ms)',
 );
 const FAST_OUT_SLOW_IN = unsafeCSS('cubic-bezier(0.4, 0, 0.2, 1)');
 const EMPHASIZED_ACCELERATE = unsafeCSS('cubic-bezier(0.3, 0, 0.8, 0.15)');
@@ -93,8 +99,8 @@ export const snackbarStyles = css`
     transform-origin: center bottom;
     opacity: calc(1 - var(--_depth, 0) * var(--k3-snackbar-stack-opacity-step));
     transition:
-      transform 450ms ${SPRING_SPATIAL_DEFAULT},
-      opacity 240ms ${SPRING_EFFECTS_DEFAULT};
+      transform ${DUR_SPATIAL_DEFAULT} ${SPRING_SPATIAL_DEFAULT},
+      opacity ${DUR_EFFECTS_DEFAULT} ${SPRING_EFFECTS_DEFAULT};
   }
   :host([data-depth][edge='top']) {
     transform: translateY(calc(var(--_depth, 0) * var(--k3-snackbar-stack-peek)))
@@ -184,7 +190,7 @@ export const snackbarStyles = css`
     opacity: 0;
     transform: scale(0.8);
     transition:
-      translate 450ms ${SPRING_SPATIAL_DEFAULT},
+      translate ${DUR_SPATIAL_DEFAULT} ${SPRING_SPATIAL_DEFAULT},
       opacity 150ms linear,
       transform 150ms ${FAST_OUT_SLOW_IN};
   }
@@ -268,10 +274,10 @@ export const snackbarStyles = css`
     transform: scale(0.3);
     will-change: width, transform;
     transition:
-      translate 450ms ${SPRING_SPATIAL_DEFAULT},
-      width 450ms ${SPRING_SPATIAL_DEFAULT},
-      transform 390ms ${SPRING_SPATIAL_FAST},
-      opacity 240ms ${SPRING_EFFECTS_DEFAULT};
+      translate ${DUR_SPATIAL_DEFAULT} ${SPRING_SPATIAL_DEFAULT},
+      width ${DUR_SPATIAL_DEFAULT} ${SPRING_SPATIAL_DEFAULT},
+      transform ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST},
+      opacity ${DUR_EFFECTS_DEFAULT} ${SPRING_EFFECTS_DEFAULT};
   }
   .bar[data-mode='expressive'][data-leading='avatar'] {
     padding-inline-start: calc(
@@ -317,7 +323,7 @@ export const snackbarStyles = css`
   .bar[data-mode='expressive'] .leading {
     transform: scale(0);
     transition:
-      transform 390ms ${SPRING_SPATIAL_FAST},
+      transform ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST},
       opacity 150ms linear;
   }
   .bar[data-mode='expressive'][data-phase='icon'] .leading,
@@ -338,14 +344,14 @@ export const snackbarStyles = css`
     opacity: 1;
     transform: scale(1);
     transition:
-      transform 390ms ${SPRING_SPATIAL_FAST},
-      opacity 240ms ${SPRING_EFFECTS_DEFAULT};
+      transform ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST},
+      opacity ${DUR_EFFECTS_DEFAULT} ${SPRING_EFFECTS_DEFAULT};
     transition-delay: 120ms;
   }
   .bar[data-mode='expressive'] .brand {
     transform: scale(0);
     transition:
-      transform 390ms ${SPRING_SPATIAL_FAST},
+      transform ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST},
       opacity 150ms linear;
   }
   .bar[data-mode='expressive'][data-phase='icon'] .brand {
@@ -372,7 +378,7 @@ export const snackbarStyles = css`
   .bar[data-mode='expressive'][data-phase='expanded'] .text,
   .bar[data-mode='expressive'][data-phase='expanded'] .trailing {
     opacity: 1;
-    transition: opacity 240ms ${SPRING_EFFECTS_DEFAULT};
+    transition: opacity ${DUR_EFFECTS_DEFAULT} ${SPRING_EFFECTS_DEFAULT};
     transition-delay: 150ms;
   }
 
@@ -465,7 +471,7 @@ export const snackbarStyles = css`
 
   /* End of loading: the icon pops in with the fast spatial spring */
   .leading[data-pop] {
-    animation: k3-snackbar-pop 390ms ${SPRING_SPATIAL_FAST} both;
+    animation: k3-snackbar-pop ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST} both;
   }
   @keyframes k3-snackbar-pop {
     from {
@@ -605,8 +611,8 @@ export const snackbarStyles = css`
     translate: 0 var(--k3-snackbar-stack-peek);
     opacity: 0;
     transition:
-      translate 450ms ${SPRING_SPATIAL_DEFAULT},
-      opacity 240ms ${SPRING_EFFECTS_DEFAULT};
+      translate ${DUR_SPATIAL_DEFAULT} ${SPRING_SPATIAL_DEFAULT},
+      opacity ${DUR_EFFECTS_DEFAULT} ${SPRING_EFFECTS_DEFAULT};
     transition-delay: calc(max(var(--_depth, 1) - 1, 0) * 90ms);
   }
   .bar[data-enter='behind'][data-phase='expanded'] {
@@ -668,6 +674,82 @@ export const snackbarStyles = css`
     transition: none;
   }
 
+  /*
+   * Fluid gooey — open + close (edge-pinned jelly). Swipe / reduced keep
+   * their own recipes. Edge slide uses the CSS translate property (not transform).
+   */
+  :host-context([data-k3-motion='fluid']) .bar {
+    transform-origin: center bottom;
+  }
+  :host-context([data-k3-motion='fluid']):host([edge='top']) .bar {
+    transform-origin: center top;
+  }
+  /* Standard — droplet rest → stretch → settle */
+  :host-context([data-k3-motion='fluid']) .bar[data-mode='standard'] {
+    transform: scale(1.08, 0.62);
+  }
+  :host-context([data-k3-motion='fluid'])
+    .bar[data-mode='standard'][data-phase='expanded']:not([data-enter='behind']) {
+    transform: scale(1, 1);
+    animation: k3-snackbar-fluid-in ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST} both;
+  }
+  :host-context([data-k3-motion='fluid'])
+    .bar[data-mode='standard'][data-phase='expanded'][data-enter='behind'] {
+    transform: scale(1, 1);
+  }
+  :host-context([data-k3-motion='fluid'])
+    .bar[data-mode='standard'][data-phase='leaving']:not([data-exit='swipe']) {
+    transform: scale(1.06, 0.5);
+    animation: k3-snackbar-fluid-out ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST} forwards;
+    transition:
+      translate 200ms ${EMPHASIZED_ACCELERATE},
+      opacity 150ms linear 50ms;
+  }
+  /* Expressive — gooey circle pop, then width stretch; leave as droplet */
+  :host-context([data-k3-motion='fluid']) .bar[data-mode='expressive'] {
+    transform: scale(0.72, 0.32);
+  }
+  :host-context([data-k3-motion='fluid']) .bar[data-mode='expressive'][data-phase='icon'] {
+    transform: scale(1, 1);
+    animation: k3-snackbar-fluid-in ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST} both;
+  }
+  :host-context([data-k3-motion='fluid'])
+    .bar[data-mode='expressive'][data-phase='expanded'],
+  :host-context([data-k3-motion='fluid'])
+    .bar[data-mode='expressive'][data-phase='collapsing'] {
+    transform: scale(1, 1);
+  }
+  :host-context([data-k3-motion='fluid'])
+    .bar[data-mode='expressive'][data-phase='leaving']:not([data-exit='swipe']) {
+    transform: scale(0.7, 0.3);
+    animation: k3-snackbar-fluid-out ${DUR_SPATIAL_FAST} ${SPRING_SPATIAL_FAST} forwards;
+    transition:
+      translate 250ms ${EMPHASIZED_ACCELERATE},
+      opacity 150ms linear 100ms;
+  }
+  @keyframes k3-snackbar-fluid-in {
+    0% {
+      transform: scale(1.1, 0.5);
+    }
+    55% {
+      transform: scale(0.94, 1.1);
+    }
+    100% {
+      transform: scale(1, 1);
+    }
+  }
+  @keyframes k3-snackbar-fluid-out {
+    0% {
+      transform: scale(1, 1);
+    }
+    40% {
+      transform: scale(1.14, 0.68);
+    }
+    100% {
+      transform: scale(1.04, 0.42);
+    }
+  }
+
   /* ── Reduced motion (OS or data-k3-reduce-motion) ──────── */
   :host([data-reduce]) .bar,
   :host([data-reduce]) .leading,
@@ -677,6 +759,7 @@ export const snackbarStyles = css`
     transition: opacity 150ms linear !important;
     transform: none !important;
     translate: none !important;
+    animation: none !important;
   }
   :host([data-reduce]) .leading[data-pop] {
     animation: none;

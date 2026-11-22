@@ -9,6 +9,7 @@ import { yieldToMain } from '../src/core/yield.js';
 import {
   observeFloatingChromeInset,
   syncFloatingChromeInsetInlineEnd,
+  syncNavChromeInsetBlockEnd,
 } from '../src/core/floating-chrome-inset.js';
 import { catalog as COMPONENT_CATALOG } from '../src/registry/catalog.js';
 import { buildDynamicPalettes } from '../src/theme/palettes.js';
@@ -59,7 +60,7 @@ import {
   NAV_DESTINATIONS,
   navDestinationsForProduct,
   COMPONENT_MENU_GROUPS,
-  RESOURCE_PAGES,
+  START_HUB_PAGES,
   destinationForPage,
   iconForComponent,
 } from './nav-destinations.js';
@@ -99,6 +100,7 @@ import {
 import { armNavActive, navItemFromEvent } from '../src/components/navigation/nav-selection.js';
 import { wireSnackbarDemo } from './snackbar-demo.js';
 import { destroyPlaygroundLiveBanner, wireBannerDemo } from './banner-demo.js';
+import { wireMotionDemos, refreshMotionSpringChart } from './motion-demo.js';
 import type { K3NavItem } from '../src/components/navigation/nav-item.js';
 import type { DocComponent } from './catalog.js';
 import { canHoverOpen } from '../src/components/containment/menu.types.js';
@@ -196,7 +198,7 @@ let secondarySeed: string = (() => {
 
 let motionScheme: MotionScheme = (() => {
   const saved = docStore.get<string>(DocKeys.themeMotion, 'expressive');
-  return saved === 'standard' ? 'standard' : 'expressive';
+  return saved === 'standard' || saved === 'fluid' ? saved : 'expressive';
 })();
 const COLOR_VARIANTS: readonly ColorVariant[] = [
   'tonalspot',
@@ -670,6 +672,9 @@ function syncSettingsSheet(): void {
   document.querySelectorAll<HTMLElement>('[data-settings-motion]').forEach((el) => {
     syncSettingsToggle(el, el.getAttribute('data-settings-motion') === motionScheme);
   });
+  document.querySelectorAll<HTMLElement>('[data-motion-scheme]').forEach((el) => {
+    syncSettingsToggle(el, el.getAttribute('data-motion-scheme') === motionScheme);
+  });
 
     const dir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
   document.querySelectorAll<HTMLElement>('[data-settings-dir]').forEach((el) => {
@@ -1083,16 +1088,25 @@ function applyAdaptiveShell(): void {
   app?.setAttribute('data-nav', mode);
   app?.setAttribute('data-size', medium ? 'medium' : mode === 'bar' ? 'compact' : 'expanded');
 
-  /* Mirror on <html> — fixed shell chrome is outside .app and needs the inset. */
-  const root = document.documentElement;
-  if (mode === 'bar') {
-    root.style.setProperty(
-      '--k3-nav-chrome-inset-block-end',
-      'calc(4rem + env(safe-area-inset-bottom, 0px))',
-    );
-  } else {
-    root.style.setProperty('--k3-nav-chrome-inset-block-end', '0px');
+  const bar = document.getElementById('nav-bar') as
+    | (HTMLElement & { layout?: string; appearance?: string })
+    | null;
+  const rail = document.getElementById('nav-rail');
+  // Compact phone: vertical items; medium tablet with bar fallback would be horizontal —
+  // we use rail on tablet, so bar stays vertical for phone only.
+  if (bar) {
+    bar.layout = 'vertical';
+    /* Mirror rail XR chrome → SpatialNavigationBar when compact. */
+    const railXr =
+      rail?.getAttribute('layout') === 'xr' ||
+      rail?.getAttribute('layout') === 'spatial' ||
+      rail?.getAttribute('appearance') === 'xr' ||
+      rail?.getAttribute('appearance') === 'spatial';
+    bar.appearance = railXr ? 'xr' : 'standard';
   }
+
+  /* Mirror on <html> — fixed FAB / STT clear the live nav-bar top by 16dp (M3). */
+  syncShellNavChromeInset();
   syncShellRailInlineSize();
   syncShellFloatingChromeInset();
 
@@ -1104,16 +1118,40 @@ function applyAdaptiveShell(): void {
     });
   }
 
-  const bar = document.getElementById('nav-bar') as HTMLElement & { layout?: string } | null;
-  // Compact phone: vertical items; medium tablet with bar fallback would be horizontal —
-  // we use rail on tablet, so bar stays vertical for phone only.
-  if (bar) bar.layout = 'vertical';
   syncShellSecondarySurface(mode);
 }
 
 /**
+ * Lift fixed FAB menu / STT above the compact nav-bar.
+ * Measures the live bar top (docked or XR orbiter) so the M3 16dp edge gap
+ * is preserved even when the pill is taller than the 64dp token.
+ * @see https://m3.material.io/components/navigation-bar/guidelines
+ */
+function syncShellNavChromeInset(): void {
+  const root = document.documentElement;
+  if (navMode() !== 'bar') {
+    root.style.setProperty('--k3-nav-chrome-inset-block-end', '0px');
+    return;
+  }
+  const bar = document.getElementById('nav-bar');
+  const measured = syncNavChromeInsetBlockEnd(root, bar);
+  /* Pre-layout fallback — token heights until the bar paints. */
+  if (measured < 1) {
+    const xr =
+      bar?.getAttribute('appearance') === 'xr' ||
+      bar?.getAttribute('appearance') === 'spatial';
+    root.style.setProperty(
+      '--k3-nav-chrome-inset-block-end',
+      xr
+        ? 'calc(1.5rem + 4rem + env(safe-area-inset-bottom, 0px))'
+        : 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+    );
+  }
+}
+
+/**
  * Publish rail width on <html> so fixed sticky players stay in the content band
- * (compact 104dp · expanded 256dp) — never over the navigation-rail.
+ * (compact 96dp · expanded 280dp) — never over the navigation-rail.
  */
 function syncShellRailInlineSize(): void {
   const root = document.documentElement;
@@ -1122,6 +1160,22 @@ function syncShellRailInlineSize(): void {
     return;
   }
   const rail = document.getElementById('nav-rail');
+  /*
+   * XR orbiter — compact footprint only. Expand overlays the spatial panel
+   * (M3 XR) so chrome / sticky docks must not track the expanded width.
+   */
+  if (rail?.getAttribute('layout') === 'xr') {
+    const app = document.querySelector('.app');
+    const gutter = app
+      ? getComputedStyle(app).getPropertyValue('--k3-shell-xr-rail-gutter').trim()
+      : '';
+    /* Compact orbiter footprint only — expand overlays, does not push chrome */
+    root.style.setProperty(
+      '--k3-shell-rail-inline-size',
+      gutter || 'calc(1.5rem + 6rem + 0.75rem)',
+    );
+    return;
+  }
   const w = rail?.getBoundingClientRect().width ?? 0;
   root.style.setProperty('--k3-shell-rail-inline-size', `${Math.round(w)}px`);
 }
@@ -1152,7 +1206,7 @@ function componentCatalogCount(): number {
   );
 }
 
-/** Leaf count for a destination badge (utilities / animations / styles / resources). */
+/** Leaf count for a destination badge (utilities / animations / styles). */
 function destinationCatalogCount(destId: string): number {
   switch (destId) {
     case 'components':
@@ -1163,11 +1217,18 @@ function destinationCatalogCount(destId: string): number {
       return componentsInCategory('Animation').length;
     case 'styles':
       return componentsInCategory('Styles').length;
-    case 'resources':
-      return RESOURCE_PAGES.length;
     default:
       return 0;
   }
+}
+
+/** Hub leaf selected — Showcase keeps Démarrage + leaf highlight across demo pages. */
+function isStartHubLeafSelected(pageId: string, leafId: string): boolean {
+  if (leafId === 'home') return pageId === 'home' || pageId === '';
+  if (leafId === 'showcase') {
+    return pageId === 'showcase' || pageId.startsWith('showcase-');
+  }
+  return pageId === leafId;
 }
 
 /** Rail expanded → horizontal pills · compact rail / bar → vertical. */
@@ -1193,12 +1254,8 @@ function isSlottedNavItem(el: Element, host: HTMLElement): boolean {
   return false;
 }
 
-/**
- * Catalog destinations only — excludes slotted chrome and `#rail-sponsors`
- * (auxiliary destination, last before the trailing divider).
- */
+/** Catalog destinations only — excludes slotted chrome (fab / trailing). */
 function isShellPrimaryNavItem(el: Element, host: HTMLElement): boolean {
-  if (el.id === 'rail-sponsors') return false;
   return !isSlottedNavItem(el, host);
 }
 
@@ -1238,13 +1295,6 @@ function syncPrimaryItems(host: HTMLElement): ShellNavItem[] {
   return items;
 }
 
-/** Pin Sponsors as the last default-slot destination (above trailing divider). */
-function pinRailSponsorsAfterPrimary(rail: HTMLElement): void {
-  const sponsors = document.getElementById('rail-sponsors');
-  if (!sponsors || !rail.contains(sponsors)) return;
-  rail.appendChild(sponsors);
-}
-
 function armPrimarySelection(items: ShellNavItem[], activeIdx: number): void {
   armNavActive(items as unknown as K3NavItem[], activeIdx, true);
 }
@@ -1262,33 +1312,19 @@ function buildPrimaryNav(): void {
 
   const railItems = syncPrimaryItems(rail);
   const barItems = syncPrimaryItems(bar);
-  pinRailSponsorsAfterPrimary(rail);
-  const sponsors = railSponsorsItem();
-  if (sponsors) sponsors.layout = layoutForNavHost(rail);
 
-  const onSponsors = isSponsorsHash(pageId);
   const railHost = rail as HTMLElement & { active: number };
   const barHost = bar as HTMLElement & { active: number };
-  const catalogIdx = onSponsors ? -1 : activeIdx;
   const prevIdx = railHost.active;
-  const selectionChanged = prevIdx !== catalogIdx;
-  const needsArm = railItems.some((el, i) => el.active !== (i === catalogIdx));
+  const selectionChanged = prevIdx !== activeIdx;
+  const needsArm = railItems.some((el, i) => el.active !== (i === activeIdx));
 
-  /*
-   * Catalog index only (`data-nav-aux` Sponsors is outside queryNavItems).
-   * On Sponsors page, clear catalog via active=-1 then arm Sponsors like peers.
-   */
-  railHost.active = catalogIdx;
-  barHost.active = catalogIdx;
+  railHost.active = activeIdx;
+  barHost.active = activeIdx;
 
-  if (onSponsors) {
-    armRailSponsorsSelection(rail, railItems);
-  } else {
-    if (!selectionChanged && needsArm) {
-      armPrimarySelection(railItems, catalogIdx);
-      armPrimarySelection(barItems, catalogIdx);
-    }
-    syncRailSponsorsActive(false);
+  if (!selectionChanged && needsArm) {
+    armPrimarySelection(railItems, activeIdx);
+    armPrimarySelection(barItems, activeIdx);
   }
 }
 
@@ -1503,7 +1539,10 @@ function buildNavSheet(destId: string): void {
   const openDest = resolveSecondaryDest(destId);
   const pageId = currentPageId();
   const pageDest = destinationForPage(pageId, (id) => findComponent(id)?.category);
-  const selectCurrent = pageDest?.id === openDest.id;
+  /* Accueil lives under Démarrage but destinationForPage(home) is null. */
+  const selectCurrent =
+    pageDest?.id === openDest.id ||
+    (openDest.id === 'quick-start' && pageId === 'home');
   const pageCat =
     selectCurrent && openDest.id === 'components'
       ? findComponent(pageId)?.category
@@ -1705,16 +1744,18 @@ function buildNavSheet(destId: string): void {
       ul.append(li);
     }
     if (ul.childElementCount) nav.append(ul);
-  } else if (openDest.id === 'resources') {
+  } else if (openDest.id === 'quick-start') {
+    /* Démarrage hub — Quick Start · Pack · Showcase · Symbols · Sponsors */
     const ul = document.createElement('ul');
     ul.className = 'shell-sheet-nav';
-    for (const page of RESOURCE_PAGES) {
+    for (const page of START_HUB_PAGES) {
       const li = document.createElement('li');
+      if (page.dividerBefore) li.classList.add('shell-sheet-divider');
       const a = document.createElement('a');
       a.className = 'shell-sheet-link';
       a.href = `#/${page.id}`;
       a.dataset.value = page.id;
-      if (selectCurrent && pageId === page.id) {
+      if (selectCurrent && isStartHubLeafSelected(pageId, page.id)) {
         a.classList.add('is-active');
         a.setAttribute('aria-current', 'page');
       }
@@ -1808,7 +1849,10 @@ function fillNavMenu(destId?: string | null): {
   const pageId = currentPageId();
   builtNavMenuKey = navMenuKey(destId);
   const pageDest = destinationForPage(pageId, (id) => findComponent(id)?.category);
-  const selectCurrent = pageDest?.id === openDest.id;
+  /* Accueil lives under Démarrage but destinationForPage(home) is null. */
+  const selectCurrent =
+    pageDest?.id === openDest.id ||
+    (openDest.id === 'quick-start' && pageId === 'home');
   const pageCat =
     selectCurrent && openDest.id === 'components'
       ? findComponent(pageId)?.category
@@ -1895,14 +1939,18 @@ function fillNavMenu(destId?: string | null): {
         leafMenuItem(c, pageId, { selectCurrent }),
       ),
     );
-  } else if (openDest.id === 'resources') {
+  } else if (openDest.id === 'quick-start') {
+    /* Démarrage hub — Quick Start · Pack · Showcase · Symbols · Sponsors */
     menu.replaceChildren(
-      ...RESOURCE_PAGES.map((page) => {
+      ...START_HUB_PAGES.map((page) => {
         const item = document.createElement('k3-menu-item');
         item.setAttribute('value', page.id);
+        if (page.dividerBefore) item.setAttribute('divider', 'gap');
         item.append(menuItemIcon(page.icon), t(page.labelKey));
         appendEnSupporting(item, page.labelKey);
-        if (selectCurrent && pageId === page.id) item.setAttribute('selected', '');
+        if (selectCurrent && isStartHubLeafSelected(pageId, page.id)) {
+          item.setAttribute('selected', '');
+        }
         return item;
       }),
     );
@@ -1945,10 +1993,10 @@ function fillNavMenu(destId?: string | null): {
 
 /**
  * Secondary destinations in an M3E menu (rail / tablet+):
+ * - Démarrage → Quick Start · Pack · Showcase · Material Symbols · Sponsors
  * - Components → parent categories with child pages as submenu
  * - Utilities → flat list; Keyboard expands to Basics / Media
  * - Animations → flat list (text-bounce, icons-burst, …)
- * - Resources → Material Symbols browser (k3ux pack)
  * - Styles → flat list; Color expands to Roles / Palettes / Additional
  * - Components → Containment → Cards is a normal leaf on k3ui; on k3ux it expands to Holo · Lenticular · Scratch
  */
@@ -2374,42 +2422,17 @@ function waitNextPaint(): Promise<void> {
   });
 }
 
-function isSponsorsHash(id: string): boolean {
-  return id === 'sponsors';
-}
-
-function railSponsorsItem(): K3NavItem | null {
-  return document.getElementById('rail-sponsors') as K3NavItem | null;
-}
-
-/**
- * Arm / clear Sponsors with the same selected-pill path as catalog destinations
- * (`armNavActive` → clear → paint → arm).
- */
-function syncRailSponsorsActive(active: boolean): void {
-  const item = railSponsorsItem();
-  if (!item) return;
-  if (!active) {
-    if (item.active) item.active = false;
-    return;
-  }
-  armNavActive([item], 0, true);
-}
-
-/** Clear catalog destinations and arm Sponsors in one selection pass. */
-function armRailSponsorsSelection(rail: HTMLElement, primary: ShellNavItem[]): void {
-  const sponsors = railSponsorsItem();
-  if (!sponsors || !rail.contains(sponsors)) return;
-  sponsors.layout = layoutForNavHost(rail);
-  armNavActive([...primary, sponsors] as K3NavItem[], primary.length, true);
-}
-
 function showPage(id: string): void {
   const articleId = articlePageId(id);
   /* Canonicalize URL when alias / legacy hash was used */
   if (articleId !== id) {
     const next = `#/${articleId}`;
     if (location.hash !== next) history.replaceState(null, '', next);
+  }
+  /* Accueil — always write `#/home` (empty / `#/` / `#` were invisible in the bar). */
+  if (articleId === 'home') {
+    const h = location.hash;
+    if (h !== '#/home') history.replaceState(null, '', '#/home');
   }
   const pages = document.querySelectorAll<HTMLElement>('.comp-page');
   let found = false;
@@ -3045,6 +3068,7 @@ async function fillStyleTokenDemos(): Promise<void> {
   }
 
   wireMotionPlayground();
+  wireMotionDemos();
   wireTypographyPlayground();
   wireGridPlayground();
 
@@ -4031,24 +4055,6 @@ async function boot(): Promise<void> {
 
     const onPrimaryClick = (e: Event): void => {
       const host = e.currentTarget as HTMLElement;
-      const raw = navItemFromEvent(e, host);
-      /* Sponsors — same click → arm → navigate path as href destinations */
-      if (host.id === 'nav-rail' && raw?.id === 'rail-sponsors') {
-        e.preventDefault();
-        e.stopPropagation();
-        closeShellNavMenu();
-        const primary = [...host.querySelectorAll('k3-nav-item')].filter((el) =>
-          isShellPrimaryNavItem(el, host),
-        ) as ShellNavItem[];
-        (host as HTMLElement & { active: number }).active = -1;
-        armRailSponsorsSelection(host, primary);
-        if (location.hash === '#/sponsors') {
-          void navigateDocPage('sponsors', ensurePageComponents).then(() => buildPrimaryNav());
-        } else {
-          location.hash = '#/sponsors';
-        }
-        return;
-      }
       const hit = resolvePrimaryDest(host, e);
       if (!hit) return;
       const { item, dest } = hit;
@@ -4056,7 +4062,6 @@ async function boot(): Promise<void> {
       e.stopPropagation();
       if (dest.href) {
         closeShellNavMenu();
-        syncRailSponsorsActive(false);
         if (location.hash === dest.href || location.hash === dest.href.replace(/^#/, '#')) {
           void navigateDocPage(dest.id, ensurePageComponents).then(() => buildPrimaryNav());
         } else {
@@ -4167,6 +4172,23 @@ async function boot(): Promise<void> {
       });
     }
 
+    /* FAB 16dp above live nav-bar (docked / XR) — remeasure on resize. */
+    const shellBar = document.getElementById('nav-bar');
+    const syncBarChromeSoon = (): void => {
+      syncShellNavChromeInset();
+      requestAnimationFrame(() => syncShellNavChromeInset());
+    };
+    if (shellBar && typeof ResizeObserver === 'function') {
+      new ResizeObserver(() => syncShellNavChromeInset()).observe(shellBar);
+    }
+    if (shellBar && typeof MutationObserver === 'function') {
+      new MutationObserver(syncBarChromeSoon).observe(shellBar, {
+        attributes: true,
+        attributeFilter: ['appearance', 'layout'],
+      });
+    }
+    window.addEventListener('resize', syncBarChromeSoon, { passive: true });
+
     /* FAB menu + scroll-to-top → sticky audio end inset */
     observeFloatingChromeInset();
     syncShellFloatingChromeInset();
@@ -4214,27 +4236,38 @@ async function boot(): Promise<void> {
       const value = link.dataset.value;
       if (!value) return;
       e.preventDefault();
+      if (value === 'home') {
+        goHome();
+        return;
+      }
       const next = `#/${value}`;
       closeShellNavMenu();
+      callHide(shellNavSheet());
       if (location.hash === next) void navigateDocPage(value, ensurePageComponents);
       else location.hash = next;
     });
 
-    /* Rail header FAB → home */
+    /* Rail FAB + compact bar FAB + hub « Accueil » → #/home (URL écrite) */
     const goHome = (): void => {
       closeShellNavMenu();
-      if (location.hash === '#/' || location.hash === '' || location.hash === '#') {
+      callHide(shellNavSheet());
+      if (location.hash === '#/home') {
         void navigateDocPage('home', ensurePageComponents);
       } else {
-        location.hash = '#/';
+        location.hash = '#/home';
       }
     };
     document.getElementById('rail-fab')?.addEventListener('k3-click', goHome);
+    document.getElementById('shell-home-fab')?.addEventListener('k3-click', goHome);
 
     /* Secondary menu leaf items → navigate then close (ignore category parents) */
     document.getElementById('shell-nav-menu')?.addEventListener('k3-select', (e) => {
       const value = (e as CustomEvent<{ value?: string }>).detail?.value;
       if (!value || value.startsWith('cat-')) return;
+      if (value === 'home') {
+        goHome();
+        return;
+      }
       const next = `#/${value}`;
       closeShellNavMenu();
       if (location.hash === next) {
@@ -4439,18 +4472,26 @@ function wireShellChrome(): void {
     );
   });
 
-  document.getElementById('settings-motion-group')?.addEventListener('k3-change', (e) => {
-    const btn = (e as CustomEvent<{ selected?: HTMLElement }>).detail?.selected;
-    const scheme = btn?.getAttribute('data-settings-motion');
-    if (scheme === 'expressive' || scheme === 'standard') {
-      setMotionScheme(scheme);
-      void showFlash(
-        t('playground.settings.flash.motion', {
-          value: t(`playground.ctrl.motion.${scheme}`),
-        }),
-      );
-    }
-  });
+  const onMotionSchemePick = (attr: 'data-settings-motion' | 'data-motion-scheme') =>
+    (e: Event) => {
+      const btn = (e as CustomEvent<{ selected?: HTMLElement }>).detail?.selected;
+      const scheme = btn?.getAttribute(attr);
+      if (scheme === 'expressive' || scheme === 'standard' || scheme === 'fluid') {
+        setMotionScheme(scheme);
+        refreshMotionSpringChart();
+        void showFlash(
+          t('playground.settings.flash.motion', {
+            value: t(`playground.ctrl.motion.${scheme}`),
+          }),
+        );
+      }
+    };
+  document
+    .getElementById('settings-motion-group')
+    ?.addEventListener('k3-change', onMotionSchemePick('data-settings-motion'));
+  document
+    .getElementById('motion-scheme-group')
+    ?.addEventListener('k3-change', onMotionSchemePick('data-motion-scheme'));
 
   document.getElementById('settings-dir-group')?.addEventListener('k3-change', (e) => {
     const btn = (e as CustomEvent<{ selected?: HTMLElement }>).detail?.selected;
@@ -4639,7 +4680,7 @@ function wireCommandPalette(): void {
 
   const goHome = (): void => {
     void palette.hide?.();
-    location.hash = '#/';
+    location.hash = '#/home';
   };
 
   const goSettings = (): void => {

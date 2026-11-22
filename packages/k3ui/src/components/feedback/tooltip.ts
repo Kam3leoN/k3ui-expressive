@@ -141,13 +141,13 @@ export class K3Tooltip extends K3Element {
             calc(var(--k3-tooltip-ay) * var(--k3-tooltip-slide) * var(--k3-tooltip-enter))
           )
           scale(var(--k3-tooltip-scale));
-        /* Exit — slightly snappier */
+        /* Exit — effects / spatial aliases follow data-k3-motion (incl. fluid) */
         transition:
-          opacity var(--k3-sys-motion-duration-short4, 200ms)
-            var(--k3-sys-motion-easing-emphasized-accelerate, cubic-bezier(0.3, 0, 0.8, 0.15)),
-          transform var(--k3-sys-motion-duration-medium2, 300ms)
-            var(--k3-sys-motion-easing-emphasized-accelerate, cubic-bezier(0.3, 0, 0.8, 0.15)),
-          visibility 0ms linear var(--k3-sys-motion-duration-short4, 200ms);
+          opacity var(--k3-sys-motion-duration-effects-fast, 150ms)
+            var(--k3-sys-motion-easing-effects-fast, var(--k3-sys-motion-easing-effects)),
+          transform var(--k3-sys-motion-duration-spatial-fast, 350ms)
+            var(--k3-sys-motion-easing-spatial-fast, var(--k3-sys-motion-easing-spatial)),
+          visibility 0ms linear var(--k3-sys-motion-duration-effects-fast, 150ms);
       }
       /*
        * Floating — fixed (+ optional popover top-layer) so tips clear
@@ -400,10 +400,10 @@ export class K3Tooltip extends K3Element {
         --k3-tooltip-enter: 0;
         --k3-tooltip-scale: 1;
         transition:
-          opacity var(--k3-sys-motion-duration-short4, 200ms)
-            var(--k3-sys-motion-easing-expressive-effects, cubic-bezier(0.2, 0, 0, 1)),
+          opacity var(--k3-sys-motion-duration-effects-fast, 150ms)
+            var(--k3-sys-motion-easing-effects-fast, var(--k3-sys-motion-easing-effects)),
           transform var(--k3-sys-motion-duration-spatial-fast, 350ms)
-            var(--k3-sys-motion-easing-emphasized-decelerate, cubic-bezier(0.05, 0.7, 0.1, 1)),
+            var(--k3-sys-motion-easing-spatial-fast, var(--k3-sys-motion-easing-spatial)),
           visibility 0ms linear 0ms;
       }
       @starting-style {
