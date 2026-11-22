@@ -9,7 +9,7 @@
     "packages/k3ux"
   ],
   "engines": {
-    "node": ">=18.18"
+    "node": "22.x"
   },
   "overrides": {
     "@material/material-color-utilities": "file:packages/k3ui/vendor/material-color-utilities"
