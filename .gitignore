@@ -16,3 +16,6 @@ test-results/
 !*.example
 
 .patch-tmp/
+
+.vercel
+.env*
