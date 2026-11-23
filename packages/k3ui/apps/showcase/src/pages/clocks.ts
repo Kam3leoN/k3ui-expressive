@@ -5,9 +5,11 @@ import { PosterClock } from '../lucid/poster-clock.js';
 import { ShapeClock } from '../lucid/shape-clock.js';
 import { PillClock } from '../lucid/pill-clock.js';
 import { NumeralsClock } from '../lucid/numerals-clock.js';
+import { DateClock } from '../lucid/date-clock.js';
+import { ExpressiveDialClock } from '../lucid/expressive-dial-clock.js';
 import { pageTitleRow } from '../demo-chrome.js';
 
-/** Lucid clocks — analog · digital · shape · pill · numerals (MIT). */
+/** Showcase clocks — analog · digital · shape · pill · numerals · date · expressive dial. */
 const PAGE_STACK = 'k3ui' as const;
 
 const t = (key: string) => i18n.t(key);
@@ -18,6 +20,8 @@ export function mountClocks(host: HTMLElement): () => void {
   let shape: ShapeClock | undefined;
   let pill: PillClock | undefined;
   let numerals: NumeralsClock | undefined;
+  let dateClock: DateClock | undefined;
+  let dial: ExpressiveDialClock | undefined;
   /** Docs embed already shows the page title + blurb in `.section-head`. */
   const showTitle = !host.closest('.showcase-doc');
 
@@ -27,11 +31,15 @@ export function mountClocks(host: HTMLElement): () => void {
     shape?.stop();
     pill?.stop();
     numerals?.stop();
+    dateClock?.stop();
+    dial?.stop();
     analog = undefined;
     poster = undefined;
     shape = undefined;
     pill = undefined;
     numerals = undefined;
+    dateClock = undefined;
+    dial = undefined;
 
     render(
       html`
@@ -105,7 +113,7 @@ export function mountClocks(host: HTMLElement): () => void {
             </article>
           </div>
 
-          <div class="widget-grid k3-layout-grid k3-demo-cols-2">
+          <div class="widget-grid k3-layout-grid k3-demo-cols-3">
             <article class="widget-card">
               <header class="widget-card__head">
                 <h2 class="widget-card__title">${t('showcase.clocks.pill.title')}</h2>
@@ -139,6 +147,51 @@ export function mountClocks(host: HTMLElement): () => void {
                 </figure>
               </div>
             </article>
+
+            <article class="widget-card">
+              <header class="widget-card__head">
+                <h2 class="widget-card__title">${t('showcase.clocks.date.title')}</h2>
+                <p class="widget-card__hint">${t('showcase.clocks.date.hint')}</p>
+              </header>
+              <div class="widget-card__body">
+                <figure
+                  class="date-clock"
+                  data-date-clock
+                  role="img"
+                  aria-label=${t('showcase.clocks.date.aria')}
+                >
+                  <time class="date-clock__time" data-date-time>
+                    <span class="date-clock__digits" data-date-digits></span>
+                    <span class="date-clock__period" data-date-period></span>
+                  </time>
+                  <p class="date-clock__date" data-date-label></p>
+                </figure>
+              </div>
+            </article>
+          </div>
+
+          <div class="widget-grid k3-layout-grid k3-demo-cols-3">
+            <article class="widget-card">
+              <header class="widget-card__head">
+                <h2 class="widget-card__title">${t('showcase.clocks.dial.title')}</h2>
+                <p class="widget-card__hint">${t('showcase.clocks.dial.hint')}</p>
+              </header>
+              <div class="widget-card__body">
+                <figure
+                  class="expressive-dial-clock"
+                  data-expressive-dial
+                  role="timer"
+                  aria-label=${t('showcase.clocks.dial.aria')}
+                >
+                  <svg
+                    class="expressive-dial-clock__dial"
+                    data-expressive-dial-svg
+                    aria-hidden="true"
+                  ></svg>
+                  <time class="expressive-dial-clock__time" data-expressive-dial-time></time>
+                </figure>
+              </div>
+            </article>
           </div>
         </section>
       `,
@@ -151,6 +204,8 @@ export function mountClocks(host: HTMLElement): () => void {
     const shapeBtn = host.querySelector<HTMLButtonElement>('[data-shape-clock]');
     const pillRoot = host.querySelector<HTMLElement>('[data-pill-clock]');
     const numeralsSvg = host.querySelector<SVGSVGElement>('[data-numerals]');
+    const dateRoot = host.querySelector<HTMLElement>('[data-date-clock]');
+    const dialRoot = host.querySelector<HTMLElement>('[data-expressive-dial]');
 
     if (analogSvg) {
       analog = new AnalogClock(analogSvg, { locale });
@@ -172,6 +227,14 @@ export function mountClocks(host: HTMLElement): () => void {
       numerals = new NumeralsClock(numeralsSvg, { locale });
       numerals.start();
     }
+    if (dateRoot) {
+      dateClock = new DateClock(dateRoot, { locale });
+      dateClock.start();
+    }
+    if (dialRoot) {
+      dial = new ExpressiveDialClock(dialRoot, { locale });
+      dial.start();
+    }
   };
 
   paint();
@@ -185,6 +248,8 @@ export function mountClocks(host: HTMLElement): () => void {
     shape?.stop();
     pill?.stop();
     numerals?.stop();
+    dateClock?.stop();
+    dial?.stop();
     render(null, host);
   };
 }

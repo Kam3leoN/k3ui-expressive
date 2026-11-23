@@ -88,6 +88,7 @@ export const COMPONENT_ITEM_ICONS: Record<string, string> = {
   skeleton: 'dashboard',
   lazy: 'schedule',
   snackbar: 'info',
+  toast: 'notifications',
   alert: 'warning',
   banner: 'notifications',
   dialog: 'chat',
@@ -241,6 +242,9 @@ const SHOWCASE_PAGE_IDS = new Set([
   'showcase-dialer',
   'showcase-clocks',
   'showcase-pomodoro',
+  'showcase-calendar',
+  'showcase-todo',
+  'showcase-alarms',
   'showcase-widgets',
 ]);
 

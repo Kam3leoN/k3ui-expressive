@@ -52,6 +52,7 @@ const PAGE_TAGS: Record<string, string[]> = {
   skeleton: ['k3-skeleton'],
   lazy: ['k3-lazy'],
   snackbar: ['k3-snackbar'],
+  toast: ['k3-toast'],
   alert: ['k3-alert'],
   banner: ['k3-banner'],
   tooltip: ['k3-tooltip'],
@@ -136,6 +137,7 @@ export const PENDING_PAGES: string[] = CATALOG_IDS.filter(
     id !== 'skeleton' &&
     id !== 'lazy' &&
     id !== 'snackbar' &&
+    id !== 'toast' &&
     id !== 'alert' &&
     id !== 'banner' &&
     id !== 'tooltip' &&

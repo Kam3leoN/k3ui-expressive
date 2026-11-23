@@ -376,6 +376,13 @@ export const DOC_COMPONENTS: DocComponent[] = [
     blurbKey: 'doc.snackbar.blurb',
   },
   {
+    id: 'toast',
+    category: 'Feedback',
+    title: 'Toast',
+    titleKey: 'doc.toast.title',
+    blurbKey: 'doc.toast.blurb',
+  },
+  {
     id: 'alert',
     category: 'Feedback',
     title: 'Alert',
@@ -1021,7 +1028,8 @@ const CATALOG_KEYWORDS: Record<string, readonly string[]> = {
   list: ['listes', 'liste', 'lists'],
   dialog: ['dialogue', 'modal'],
   sheet: ['panneau', 'drawer'],
-  snackbar: ['toast'],
+  snackbar: ['toast', 'notification'],
+  toast: ['snackbar', 'notification', 'stack', 'promise'],
   tooltip: ['infobulle'],
   search: ['recherche'],
   kbd: ['clavier', 'keyboard', 'shortcut', 'raccourci'],

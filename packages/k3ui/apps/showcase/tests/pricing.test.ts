@@ -117,6 +117,7 @@ describe('showcase pages', () => {
       'k3-button',
       'k3-button-group',
       'k3-text-field',
+      'k3-counter',
       'k3-checkbox',
       'k3-chip',
       'k3-switch',

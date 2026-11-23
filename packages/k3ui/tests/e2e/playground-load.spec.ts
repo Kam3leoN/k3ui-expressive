@@ -62,57 +62,53 @@ test('home: hero + stats ready, every doc page stamped after boot', async ({ pag
   expect(await page.evaluate(() => (window as unknown as { __cls: number }).__cls)).toBeLessThan(0.05);
 });
 
-test('XR shell: app bar full-bleed left and stable on rail expand', async ({ page }) => {
+test('Modal shell: rail docked, app-bar bleed tracks expand', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
   await ready(page, 'home');
   const rail = page.locator('#nav-rail');
-  await expect(rail).toHaveAttribute('layout', 'xr');
+  await expect(rail).toHaveAttribute('layout', 'modal');
   const appbar = page.locator('#shell-appbar');
   await expect(appbar).not.toHaveAttribute('sticky', '');
 
   const before = await page.evaluate(() => {
-    const bar = document.getElementById('shell-appbar')!;
     const r = document.getElementById('nav-rail') as HTMLElement & { size: string };
+    const railBox = r.getBoundingClientRect();
+    const token = getComputedStyle(document.documentElement)
+      .getPropertyValue('--k3-shell-rail-inline-size')
+      .trim();
     return {
-      barLeft: bar.getBoundingClientRect().left,
+      railLeft: railBox.left,
+      railWidth: railBox.width,
       railPos: getComputedStyle(r).position,
       size: r.size,
+      token,
     };
   });
-  expect(before.barLeft).toBeLessThanOrEqual(1);
-  expect(before.railPos).toBe('absolute');
-
-  /* Ambient full-bleed under the orbiter (no white gutter strip) */
-  const ambient = await page.evaluate(() => {
-    const el = document.getElementById('home-ambient');
-    if (!el) return null;
-    const cs = getComputedStyle(el);
-    const r = el.getBoundingClientRect();
-    return {
-      insetStart: cs.insetInlineStart,
-      left: r.left,
-      width: r.width,
-      viewW: window.innerWidth,
-    };
-  });
-  expect(ambient).toBeTruthy();
-  expect(ambient!.left).toBeLessThanOrEqual(1);
-  expect(ambient!.width).toBeGreaterThanOrEqual(ambient!.viewW - 2);
-
-  /* Orbiter floats off the inline-start edge (not flush) */
-  const railLeft = await rail.evaluate((el) => el.getBoundingClientRect().left);
-  expect(railLeft).toBeGreaterThan(8);
+  /* Modal docks flush to the start edge (not XR float) */
+  expect(before.railLeft).toBeLessThanOrEqual(2);
+  expect(before.railPos).toBe('sticky');
+  expect(before.size).toBe('compact');
+  expect(before.railWidth).toBeGreaterThanOrEqual(80);
+  expect(parseFloat(before.token)).toBeGreaterThanOrEqual(80);
 
   await rail.locator('.toggle').click();
   await page.waitForFunction(
     () => (document.getElementById('nav-rail') as HTMLElement & { size: string }).size === 'large',
   );
   const after = await page.evaluate(() => {
-    const bar = document.getElementById('shell-appbar')!;
-    return { barLeft: bar.getBoundingClientRect().left };
+    const r = document.getElementById('nav-rail')!;
+    const token = getComputedStyle(document.documentElement)
+      .getPropertyValue('--k3-shell-rail-inline-size')
+      .trim();
+    return {
+      railWidth: r.getBoundingClientRect().width,
+      token: parseFloat(token),
+    };
   });
-  expect(after.barLeft).toBe(before.barLeft);
+  /* Expand grows the rail and the published shell token (app-bar bleed) */
+  expect(after.railWidth).toBeGreaterThan(before.railWidth + 40);
+  expect(after.token).toBeGreaterThan(parseFloat(before.token) + 40);
 });
 
 test('sponsors page: Démarrage hub stays active on the cells grid', async ({ page }) => {

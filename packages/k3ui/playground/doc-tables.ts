@@ -1953,6 +1953,35 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['dismiss', 'Close icon button'],
     ],
   },
+  toast: {
+    properties: [
+      [
+        'position',
+        "'bottom-right'|'bottom-left'|'bottom-center'",
+        'bottom-right',
+        'Corner the stack sits in',
+      ],
+      ['limit', 'number', '3', 'Max visible toasts — older fade until a slot frees'],
+      ['timeout', 'number', '5000', 'Default auto-dismiss ms (`0` = indefinite)'],
+    ],
+    methods: [
+      ['K3UI.toast.show', '(options) => Promise<string>', 'Any toast — returns id'],
+      ['K3UI.toast.info / success / warning / error', '(title, options?) => Promise<string>', 'Typed shorthands'],
+      ['K3UI.toast.promise', '(promise, states) => Promise<string>', 'Loading → success / error'],
+      ['K3UI.toast.dismiss', '(id?) => void', 'Close one toast, or all'],
+    ],
+    events: [],
+    slots: [],
+    'css-parts': [
+      ['viewport', 'Stack region'],
+      ['toast', 'One toast card'],
+      ['content', 'Inner flex row'],
+      ['title', 'Title text'],
+      ['description', 'Supporting text'],
+      ['action', 'Optional action button'],
+      ['close', 'Dismiss control'],
+    ],
+  },
   alert: {
     properties: [
       [
@@ -2224,7 +2253,7 @@ export const COMPONENT_API: Record<string, ComponentApiTables> = {
       ['size', "'small'|'medium'|'large'", 'small', 'Bar height'],
       ['align', "'start'|'center'", 'start', 'Title align (small)'],
       ['sticky', 'boolean', 'false', 'position sticky'],
-      ['blur', 'boolean', 'false', 'Translucent fill + backdrop blur'],
+      ['blurred', 'boolean', 'false', 'Translucent fill + backdrop blur (HTML attr: blur)'],
       ['elevated', 'boolean', 'false', 'Scroll fill'],
       ['subtitle', 'string', "''", 'Medium/large subtitle'],
     ],

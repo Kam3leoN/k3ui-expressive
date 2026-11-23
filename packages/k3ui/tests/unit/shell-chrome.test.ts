@@ -3,17 +3,24 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { mountShellChrome } from '../../playground/shell-chrome.js';
 
-describe('shell chrome (Poster clock + hero word-cycle)', () => {
+describe('shell chrome (Poster clock + hero accent)', () => {
   afterEach(() => {
     document.body.replaceChildren();
   });
 
-  it('index.html ships shell clock + hero word-cycle markup', () => {
+  it('index.html ships shell clock + static expressive hero accent', () => {
     const html = readFileSync(resolve(__dirname, '../../playground/index.html'), 'utf8');
+    const hero = html.slice(
+      html.indexOf('id="home-hero-title"'),
+      html.indexOf('</h1>', html.indexOf('id="home-hero-title"')) + 5,
+    );
     expect(html).toContain('id="shell-poster-clock"');
     expect(html).toContain('data-clock-hours');
-    expect(html).toContain('data-words="Expressive Design|Goey Animation|35 Shapes|Material You|Multi Component|100% Gratuit"');
-    expect(html).toContain('word-cycle__pill');
+    expect(hero).toContain('class="hero-title__accent"');
+    expect(hero).toContain('>expressive</span>');
+    expect(hero).not.toContain('data-words=');
+    expect(hero).not.toContain('Material You');
+    expect(hero).not.toContain('word-cycle__pill');
   });
 
   it('playground.css uses Barlow face + Lucid scale for the shell clock', () => {
@@ -26,7 +33,7 @@ describe('shell chrome (Poster clock + hero word-cycle)', () => {
     expect(css).toMatch(/\.shell-poster-clock \.poster-clock__date\s*\{\s*display:\s*none/);
   });
 
-  it('mountShellChrome starts the clock and word cycle when DOM is present', () => {
+  it('mountShellChrome starts the clock; static accent needs no word cycle', () => {
     document.body.innerHTML = `
       <figure class="poster-clock" id="shell-poster-clock">
         <time data-clock-time>
@@ -36,15 +43,14 @@ describe('shell chrome (Poster clock + hero word-cycle)', () => {
         <figcaption data-clock-date></figcaption>
       </figure>
       <h1 id="home-hero-title">
-        <span class="hero-title__accent word-cycle__pill"
-          data-words="Expressive Design|100% Gratuit">100% Gratuit</span>
+        <span class="hero-title__accent">expressive</span>
       </h1>
     `;
     expect(() => mountShellChrome()).not.toThrow();
     expect(document.querySelector('[data-clock-hours]')?.textContent?.length).toBeGreaterThan(0);
-    expect(
-      document.querySelector('#home-hero-title .word-cycle__word:not(.word-cycle__measure)')
-        ?.textContent,
-    ).toBe('100% Gratuit');
+    expect(document.querySelector('#home-hero-title .hero-title__accent')?.textContent).toBe(
+      'expressive',
+    );
+    expect(document.querySelector('.word-cycle__word')).toBeNull();
   });
 });

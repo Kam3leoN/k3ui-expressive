@@ -15,6 +15,9 @@ import { mountPricing } from '../apps/showcase/src/pages/pricing.js';
 import { mountLogin } from '../apps/showcase/src/pages/login.js';
 import { mountClocks } from '../apps/showcase/src/pages/clocks.js';
 import { mountPomodoro } from '../apps/showcase/src/pages/pomodoro.js';
+import { mountCalendar } from '../apps/showcase/src/pages/calendar.js';
+import { mountTodo } from '../apps/showcase/src/pages/todo.js';
+import { mountAlarms } from '../apps/showcase/src/pages/alarms.js';
 import '../apps/showcase/src/pages.css';
 
 export type ShowcasePageId =
@@ -24,6 +27,9 @@ export type ShowcasePageId =
   | 'showcase-dialer'
   | 'showcase-clocks'
   | 'showcase-pomodoro'
+  | 'showcase-calendar'
+  | 'showcase-todo'
+  | 'showcase-alarms'
   /** @deprecated hash alias → showcase-clocks */
   | 'showcase-widgets';
 
@@ -67,6 +73,9 @@ export function isShowcasePage(id: string): id is ShowcasePageId {
     id === 'showcase-dialer' ||
     id === 'showcase-clocks' ||
     id === 'showcase-pomodoro' ||
+    id === 'showcase-calendar' ||
+    id === 'showcase-todo' ||
+    id === 'showcase-alarms' ||
     id === 'showcase-widgets'
   );
 }
@@ -76,7 +85,7 @@ export function showcaseRequiredTags(): readonly string[] {
 }
 
 interface HubCard {
-  id: 'pricing' | 'login' | 'dialer' | 'clocks' | 'pomodoro';
+  id: 'pricing' | 'login' | 'dialer' | 'clocks' | 'pomodoro' | 'calendar' | 'todo' | 'alarms';
   href: string;
   featured?: boolean;
   titleKey: string;
@@ -85,7 +94,7 @@ interface HubCard {
   components: readonly string[];
 }
 
-/** Hub overview cards — clocks ≠ pomodoro (never one “Widgets Lucid” card). */
+/** Hub overview cards — one live UI per card. */
 export const HUB_CARDS: readonly HubCard[] = [
   {
     id: 'pricing',
@@ -127,14 +136,35 @@ export const HUB_CARDS: readonly HubCard[] = [
     href: '#/showcase-clocks',
     titleKey: 'doc.showcase.card.clocks.title',
     tagKey: 'doc.showcase.card.clocks.tag',
-    components: ['analog', 'digital', 'shape', 'pill', 'numerals'],
+    components: ['analog', 'digital', 'shape', 'pill', 'numerals', 'date', 'dial'],
   },
   {
     id: 'pomodoro',
     href: '#/showcase-pomodoro',
     titleKey: 'doc.showcase.card.pomodoro.title',
     tagKey: 'doc.showcase.card.pomodoro.tag',
-    components: ['pomodoro', 'shape', 'k3-button-group'],
+    components: ['pomodoro', 'countdown', 'stopwatch'],
+  },
+  {
+    id: 'calendar',
+    href: '#/showcase-calendar',
+    titleKey: 'doc.showcase.card.calendar.title',
+    tagKey: 'doc.showcase.card.calendar.tag',
+    components: ['month', 'week', 'today', 'day-tile', 'year-tile', 'pill', 'agenda'],
+  },
+  {
+    id: 'todo',
+    href: '#/showcase-todo',
+    titleKey: 'doc.showcase.card.todo.title',
+    tagKey: 'doc.showcase.card.todo.tag',
+    components: ['list', 'focus'],
+  },
+  {
+    id: 'alarms',
+    href: '#/showcase-alarms',
+    titleKey: 'doc.showcase.card.alarms.title',
+    tagKey: 'doc.showcase.card.alarms.tag',
+    components: ['k3-switch', 'days', '12h', '24h'],
   },
 ];
 
@@ -227,7 +257,7 @@ function mountHub(root: HTMLElement): void {
 
 function mountLivePage(
   root: HTMLElement,
-  which: 'pricing' | 'login' | 'dialer' | 'clocks' | 'pomodoro',
+  which: 'pricing' | 'login' | 'dialer' | 'clocks' | 'pomodoro' | 'calendar' | 'todo' | 'alarms',
 ): void {
   mountDemoBannerChrome();
   render(
@@ -263,7 +293,13 @@ function mountLivePage(
           ? mountClocks(host)
           : which === 'pomodoro'
             ? mountPomodoro(host)
-            : mountPricing(host);
+            : which === 'calendar'
+              ? mountCalendar(host)
+              : which === 'todo'
+                ? mountTodo(host)
+                : which === 'alarms'
+                  ? mountAlarms(host)
+                  : mountPricing(host);
 }
 
 /** Mount hub or live child into the matching page root. */
@@ -283,7 +319,13 @@ export function mountShowcaseDoc(pageId: string = 'showcase'): void {
             ? 'showcase-clocks-root'
             : id === 'showcase-pomodoro'
               ? 'showcase-pomodoro-root'
-              : 'showcase-root';
+              : id === 'showcase-calendar'
+                ? 'showcase-calendar-root'
+                : id === 'showcase-todo'
+                  ? 'showcase-todo-root'
+                  : id === 'showcase-alarms'
+                    ? 'showcase-alarms-root'
+                    : 'showcase-root';
   const root = document.getElementById(rootId);
   if (!root) return;
 
@@ -292,6 +334,9 @@ export function mountShowcaseDoc(pageId: string = 'showcase'): void {
   else if (id === 'showcase-dialer') mountLivePage(root, 'dialer');
   else if (id === 'showcase-clocks') mountLivePage(root, 'clocks');
   else if (id === 'showcase-pomodoro') mountLivePage(root, 'pomodoro');
+  else if (id === 'showcase-calendar') mountLivePage(root, 'calendar');
+  else if (id === 'showcase-todo') mountLivePage(root, 'todo');
+  else if (id === 'showcase-alarms') mountLivePage(root, 'alarms');
   else mountHub(root);
 
   if (!localeBound) {
@@ -317,6 +362,9 @@ export function unmountShowcaseDoc(): void {
     'showcase-dialer-root',
     'showcase-clocks-root',
     'showcase-pomodoro-root',
+    'showcase-calendar-root',
+    'showcase-todo-root',
+    'showcase-alarms-root',
   ]) {
     const root = document.getElementById(id);
     if (root) render(null, root);

@@ -3,11 +3,13 @@ import K3Button from '@k3ui/components/actions/button.js';
 import K3ButtonGroup from '@k3ui/components/actions/button-group.js';
 import K3IconButton from '@k3ui/components/actions/icon-button.js';
 import K3TextField from '@k3ui/components/inputs/text-field.js';
+import K3Counter from '@k3ui/components/inputs/counter.js';
 import K3Checkbox from '@k3ui/components/inputs/checkbox.js';
 import K3Chip from '@k3ui/components/inputs/chip.js';
 import K3Switch from '@k3ui/components/inputs/switch.js';
 import K3Banner from '@k3ui/components/feedback/banner.js';
 import K3Snackbar from '@k3ui/components/feedback/snackbar.js';
+import K3Toast from '@k3ui/components/feedback/toast.js';
 import K3Accordion from '@k3ui/components/containment/accordion.js';
 import K3ExpansionPanel from '@k3ui/components/containment/expansion-panel.js';
 import K3Divider from '@k3ui/components/containment/divider.js';
@@ -25,6 +27,7 @@ for (const [tag, ctor] of [
   ['k3-switch', K3Switch],
   ['k3-banner', K3Banner],
   ['k3-snackbar', K3Snackbar],
+  ['k3-toast', K3Toast],
   ['k3-accordion', K3Accordion],
   ['k3-expansion-panel', K3ExpansionPanel],
   ['k3-divider', K3Divider],

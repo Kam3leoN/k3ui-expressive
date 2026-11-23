@@ -23,9 +23,16 @@ export interface PomodoroPreset {
 export const PRESETS: readonly PomodoroPreset[] = [
   { key: "classic", name: "Classique", focus: 25, short: 5, long: 15, rounds: 4 },
   { key: "deep", name: "Travail profond", focus: 50, short: 10, long: 30, rounds: 3 },
-  { key: "sprint", name: "Sprint", focus: 15, short: 3, long: 10, rounds: 4 },
   { key: "long", name: "Longue haleine", focus: 90, short: 20, long: 30, rounds: 2 },
 ];
+
+export interface PomodoroCustom {
+  focus: number;
+  short: number;
+  rounds: number;
+}
+
+const DEFAULT_CUSTOM: PomodoroCustom = { focus: 1, short: 1, rounds: 1 };
 
 const LABELS: Record<Phase, string> = {
   idle: "Pomodoro",
@@ -36,6 +43,7 @@ const LABELS: Record<Phase, string> = {
 
 interface State {
   preset: string;
+  custom: PomodoroCustom;
   phase: Phase;
   round: number; // focus sessions finished in this set
   running: boolean;
@@ -58,8 +66,8 @@ export class Pomodoro {
     time: HTMLElement;
     dots: HTMLElement;
     toggle: HTMLButtonElement;
-    stop: HTMLButtonElement;
-    skip: HTMLButtonElement;
+    stop: HTMLElement & { disabled: boolean };
+    skip: HTMLElement & { disabled: boolean };
     status: HTMLElement;
     today: HTMLElement;
   };
@@ -88,8 +96,16 @@ export class Pomodoro {
     this.s = this.load();
 
     this.el.toggle.addEventListener("click", () => this.toggle());
-    this.el.stop.addEventListener("click", () => this.stop());
-    this.el.skip.addEventListener("click", () => this.advance(false));
+    this.el.stop.addEventListener("k3-click", () => {
+      // Gate on state — do not rely on host[disabled] (Lit updates the shadow
+      // button asynchronously, so a click right after start is swallowed).
+      if (this.idle) return;
+      this.stop();
+    });
+    this.el.skip.addEventListener("k3-click", () => {
+      if (this.idle) return;
+      this.advance(false);
+    });
     document.addEventListener("visibilitychange", () => !document.hidden && this.render());
 
     this.render(true);
@@ -100,7 +116,22 @@ export class Pomodoro {
     return this.preset.key;
   }
 
+  get custom(): PomodoroCustom {
+    return { ...this.s.custom };
+  }
+
   get preset(): PomodoroPreset {
+    if (this.s.preset === "custom") {
+      const c = this.s.custom;
+      return {
+        key: "custom",
+        name: "Custom",
+        focus: c.focus,
+        short: c.short,
+        long: Math.max(c.short * 3, c.short + 5),
+        rounds: c.rounds,
+      };
+    }
     return PRESETS.find((p) => p.key === this.s.preset) ?? PRESETS[0];
   }
 
@@ -108,6 +139,18 @@ export class Pomodoro {
   usePreset(key: string): void {
     if (this.s.phase !== "idle") return;
     this.s.preset = key;
+    this.save();
+    this.render(true);
+  }
+
+  /** Apply custom focus / pause / sessions — selects the custom preset. */
+  setCustom(focus: number, short: number, rounds: number): void {
+    if (this.s.phase !== "idle") return;
+    const f = clampInt(focus, 1, 180);
+    const s = clampInt(short, 1, 60);
+    const r = clampInt(rounds, 1, 12);
+    this.s.custom = { focus: f, short: s, rounds: r };
+    this.s.preset = "custom";
     this.save();
     this.render(true);
   }
@@ -137,6 +180,12 @@ export class Pomodoro {
     Object.assign(this.s, { phase: "idle", running: false, round: 0, left: 0, span: 0 });
     this.save();
     this.render(true);
+  }
+
+  /** Skip to the next phase (manual). */
+  skip(): void {
+    if (this.idle) return;
+    this.advance(false);
   }
 
   private minutes(phase: Phase): number {
@@ -215,8 +264,8 @@ export class Pomodoro {
     this.el.toggle.setAttribute("aria-label", running ? "Mettre en pause" : idle ? "Démarrer" : "Reprendre");
     this.el.toggle.querySelector("[data-icon=pause]")!.toggleAttribute("hidden", !running);
     this.el.toggle.querySelector("[data-icon=play]")!.toggleAttribute("hidden", running);
-    this.el.stop.disabled = idle;
-    this.el.skip.disabled = idle;
+    this.setSideDisabled(this.el.stop, idle);
+    this.setSideDisabled(this.el.skip, idle);
 
     // one dot per round; the one in hand stretches into a pill
     const rounds = this.preset.rounds;
@@ -236,6 +285,14 @@ export class Pomodoro {
 
     const n = this.s.day === today() ? this.s.doneToday : 0;
     this.el.today.textContent = n ? `${n} session${n > 1 ? "s" : ""} aujourd’hui` : "Aucune session aujourd’hui";
+  }
+
+  private setSideDisabled(el: HTMLElement & { disabled: boolean }, disabled: boolean): void {
+    // Keep the CE enabled so the shadow button stays clickable; style via data-inactive.
+    el.disabled = false;
+    el.removeAttribute("disabled");
+    el.setAttribute("aria-disabled", disabled ? "true" : "false");
+    el.toggleAttribute("data-inactive", disabled);
   }
 
   private announce(msg: string): void {
@@ -271,10 +328,31 @@ export class Pomodoro {
 
   // ---- storage --------------------------------------------------------------
   private load(): State {
-    const fresh: State = { preset: "classic", phase: "idle", round: 0, running: false, endsAt: 0, left: 0, span: 0, day: today(), doneToday: 0 };
+    const fresh: State = {
+      preset: "classic",
+      custom: { ...DEFAULT_CUSTOM },
+      phase: "idle",
+      round: 0,
+      running: false,
+      endsAt: 0,
+      left: 0,
+      span: 0,
+      day: today(),
+      doneToday: 0,
+    };
     try {
       const saved = JSON.parse(localStorage.getItem(STORE) ?? "null") as Partial<State> | null;
-      return saved ? { ...fresh, ...saved } : fresh;
+      if (!saved) return fresh;
+      const custom = {
+        ...DEFAULT_CUSTOM,
+        ...(saved.custom && typeof saved.custom === "object" ? saved.custom : {}),
+      };
+      const presetKey = saved.preset;
+      const preset =
+        presetKey === "custom" || PRESETS.some((p) => p.key === presetKey)
+          ? (presetKey as string)
+          : "classic";
+      return { ...fresh, ...saved, custom, preset };
     } catch {
       return fresh;
     }
@@ -297,4 +375,9 @@ export function clock(ms: number): string {
   const s = total % 60;
   const ss = String(s).padStart(2, "0");
   return h ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
+}
+
+function clampInt(n: number, min: number, max: number): number {
+  if (!Number.isFinite(n)) return min;
+  return Math.min(max, Math.max(min, Math.round(n)));
 }

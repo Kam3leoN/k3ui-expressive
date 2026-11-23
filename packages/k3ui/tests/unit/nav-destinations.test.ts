@@ -49,6 +49,9 @@ describe('nav destinations — unified catalog', () => {
     expect(destinationForPage('showcase-pricing', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('showcase-clocks', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('showcase-pomodoro', () => undefined)?.id).toBe('quick-start');
+    expect(destinationForPage('showcase-calendar', () => undefined)?.id).toBe('quick-start');
+    expect(destinationForPage('showcase-todo', () => undefined)?.id).toBe('quick-start');
+    expect(destinationForPage('showcase-alarms', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('sponsors', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('material-symbols', () => undefined)?.id).toBe('quick-start');
     expect(isStartHubPage('sponsors')).toBe(true);

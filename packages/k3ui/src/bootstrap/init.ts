@@ -22,6 +22,7 @@ import { overlayStack } from '../core/overlay-stack.js';
 import { yieldToMain } from '../core/yield.js';
 import { watchIconLigatures } from '../icons/ligature.js';
 import { showSnackbar, snackbarQueue } from '../components/feedback/snackbar-queue.js';
+import { showToast, toastManager } from '../components/feedback/toast.js';
 // Styles are imported from src/index.ts / playground — keep runtime free of CSS side-effects.
 
 /**
@@ -99,6 +100,7 @@ export interface K3UIGlobal {
     show: typeof showSnackbar;
     queue: typeof snackbarQueue;
   };
+  toast: typeof showToast & { manager: typeof toastManager };
   /** Syntax highlighting (private Prism instance, Okaidia tokens). */
   syntax: K3Syntax;
 }
@@ -295,6 +297,7 @@ async function runInit(input?: InitOptions): Promise<K3UIGlobal> {
     mouse,
     syntax,
     snackbar: { show: showSnackbar, queue: snackbarQueue },
+    toast: Object.assign(showToast, { manager: toastManager }),
   };
 
   if (typeof window !== 'undefined') {

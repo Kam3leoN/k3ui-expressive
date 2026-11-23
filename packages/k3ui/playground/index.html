@@ -125,11 +125,11 @@
           var medium = matchMedia('(min-width: 600px) and (max-width: 839.98px)').matches;
           app.setAttribute('data-nav', bar ? 'bar' : 'rail');
           app.setAttribute('data-size', medium ? 'medium' : bar ? 'compact' : 'expanded');
-          /* XR shell bar (appearance=xr) floats 24dp — match applyAdaptiveShell(). */
+          /* Standard shell bar — match applyAdaptiveShell() / syncShellNavChromeInset(). */
           document.documentElement.style.setProperty(
             '--k3-nav-chrome-inset-block-end',
             bar
-              ? 'calc(1.5rem + 4rem + env(safe-area-inset-bottom, 0px))'
+              ? 'calc(4rem + env(safe-area-inset-bottom, 0px))'
               : '0px',
           );
           if (/^#\/?(?!home$)[a-z0-9-]+$/i.test(location.hash)) {
@@ -143,7 +143,7 @@
         id="nav-rail"
         class="shell-rail"
         size="compact"
-        layout="xr"
+        layout="modal"
         collapsible
         aria-label="Primary"
       >
@@ -344,20 +344,15 @@
               </div>
               <h1
                 id="home-hero-title"
-                class="hero-title word-cycle"
-                aria-label="Material K3ui — Expressive Design"
+                class="hero-title"
+                aria-label="Material K3ui — expressive"
               >
                 <span
-                  class="hero-title__line word-cycle__line"
+                  class="hero-title__line"
                   data-i18n="playground.hero.title.k3ui"
                   >Material K3ui</span
                 >
-                <span
-                  class="hero-title__accent word-cycle__pill"
-                  aria-hidden="true"
-                  data-words="Expressive Design|Goey Animation|35 Shapes|Material You|Multi Component|100% Gratuit"
-                  >100% Gratuit</span
-                >
+                <span class="hero-title__accent" aria-hidden="true">expressive</span>
               </h1>
               <p class="hero-lead" data-i18n="playground.lead">
                 Build thoughtful, beautiful interfaces with Material 3 Expressive Web Components —
@@ -4878,6 +4873,93 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 ></k3-text-field>
               </div>
             </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.text-field.option.stepper">stepper</h3>
+              <p data-i18n="doc.text-field.option.stepper.desc">
+                Number field — trailing reset · − · + (hide native spinners).
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases demo-frame--stack k3-layout-grid"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-text-field
+                      class="tf-stepper-field"
+                      variant="outlined"
+                      type="number"
+                      value="1"
+                      data-tf-stepper
+                      data-i18n-label="playground.demo.text-field.stepper.label"
+                      suffix-text="min"
+                    >
+                      <k3-icon-button
+                        slot="trailing-icon"
+                        class="tf-step tf-step--reset"
+                        variant="standard"
+                        size="xs"
+                        width="narrow"
+                        hidden
+                        data-i18n-label="playground.demo.text-field.stepper.reset"
+                      >
+                        <span
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="restart_alt"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-icon-button>
+                      <k3-icon-button
+                        slot="trailing-icon"
+                        class="tf-step tf-step--dec"
+                        variant="standard"
+                        size="xs"
+                        width="narrow"
+                        disabled
+                        data-i18n-label="playground.demo.text-field.stepper.dec"
+                      >
+                        <span
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="remove"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-icon-button>
+                      <k3-icon-button
+                        slot="trailing-icon"
+                        class="tf-step tf-step--inc"
+                        variant="standard"
+                        size="xs"
+                        width="narrow"
+                        data-i18n-label="playground.demo.text-field.stepper.inc"
+                      >
+                        <span
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="add"
+                          aria-hidden="true"
+                        ></span>
+                      </k3-icon-button>
+                    </k3-text-field>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span
+                  ><span class="variant-label" data-i18n="playground.demo.text-field.stepper.guide"
+                    >reset · − · +</span
+                  >
+                </li>
+              </ol>
+            </div>
           </div>
 
           <div class="surface stack gap-lg">
@@ -8425,6 +8507,110 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 >Photo already has the label “travel.”</span
               >
             </k3-snackbar>
+          </div>
+        </article>
+
+        <!-- TOAST -->
+        <article class="comp-page" data-page="toast" id="page-toast" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.feedback">Feedback</p>
+            <h1 data-i18n="doc.toast.title">Toast</h1>
+            <p data-i18n="doc.toast.blurb">
+              Stacked toasts · type icons · action · promise · max 3 · swipe to dismiss.
+            </p>
+            <p class="doc-intro" data-i18n="doc.toast.intro">
+              Toasts are richer than a snackbar: several can pile up (max 3), each with a title,
+              optional description, type icon and optional action. They stack in a corner, fan out
+              on hover or focus, and can be swiped away. A promise toast shows progress then the
+              result. For a single brief message, prefer the snackbar.
+            </p>
+          </header>
+          <div class="surface surface-flush stack gap-lg" data-doc-examples>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.toast.option.types">Types</h3>
+              <p data-i18n="doc.toast.option.types.desc">
+                Success · info · warning · error · plain — icons use container roles.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-4" data-demo-enhance="off">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button id="btn-toast-success" variant="tonal">
+                      <span data-i18n="doc.toast.open.success">Success</span>
+                    </k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button id="btn-toast-info" variant="tonal">
+                      <span data-i18n="doc.toast.open.info">Info</span>
+                    </k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button id="btn-toast-warning" variant="tonal">
+                      <span data-i18n="doc.toast.open.warning">Warning</span>
+                    </k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button id="btn-toast-error" variant="tonal">
+                      <span data-i18n="doc.toast.open.error">Error + action</span>
+                    </k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">4</span>
+                </div>
+              </div>
+            </div>
+
+            <header class="section-head sub">
+              <h3 data-i18n="doc.toast.option.promise">Promise / stack</h3>
+              <p data-i18n="doc.toast.option.promise.desc">
+                Loading → success or error · stack up to 3 · extras wait in the queue.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-4" data-demo-enhance="off">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button id="btn-toast-plain" variant="outlined">
+                      <span data-i18n="doc.toast.open.plain">Plain</span>
+                    </k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button id="btn-toast-promise" variant="filled">
+                      <span data-i18n="doc.toast.open.promise">Promise</span>
+                    </k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button id="btn-toast-stack" variant="tonal">
+                      <span data-i18n="doc.toast.open.stack">Stack 4</span>
+                    </k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-button id="btn-toast-dismiss" variant="text">
+                      <span data-i18n="doc.toast.open.dismiss">Dismiss all</span>
+                    </k3-button>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">4</span>
+                </div>
+              </div>
+            </div>
           </div>
         </article>
 
@@ -16608,7 +16794,8 @@ static styles = [
               >
             </div>
             <p data-i18n="doc.showcase.clocks.blurb">
-              Analog · digital · shape · pill · numerals — on Material 3 tokens.
+              Analog · digital · shape · pill · numerals · date · Expressive dial — on Material 3
+              tokens.
             </p>
           </header>
           <div id="showcase-clocks-root" class="showcase-root"></div>
@@ -16627,10 +16814,67 @@ static styles = [
               >
             </div>
             <p data-i18n="doc.showcase.pomodoro.blurb">
-              Focus, short breaks, long break — separate card from the clocks.
+              Pomodoro · countdown · stopwatch — separate card from the clocks.
             </p>
           </header>
           <div id="showcase-pomodoro-root" class="showcase-root"></div>
+        </article>
+
+        <article class="comp-page" data-page="showcase-calendar" id="page-showcase-calendar" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
+            <div class="section-head__title-row">
+              <h1 data-i18n="doc.showcase.calendar.title">Calendar</h1>
+              <span
+                class="showcase-stack-badge"
+                translate="no"
+                data-i18n="doc.showcase.stack.k3ui"
+                >k3ui</span
+              >
+            </div>
+            <p data-i18n="doc.showcase.calendar.blurb">
+              Month · week · today · day tiles · pill · agenda — live calendar widgets.
+            </p>
+          </header>
+          <div id="showcase-calendar-root" class="showcase-root"></div>
+        </article>
+
+        <article class="comp-page" data-page="showcase-todo" id="page-showcase-todo" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
+            <div class="section-head__title-row">
+              <h1 data-i18n="doc.showcase.todo.title">To-do</h1>
+              <span
+                class="showcase-stack-badge"
+                translate="no"
+                data-i18n="doc.showcase.stack.k3ui"
+                >k3ui</span
+              >
+            </div>
+            <p data-i18n="doc.showcase.todo.blurb">
+              List · focus — live to-do widgets.
+            </p>
+          </header>
+          <div id="showcase-todo-root" class="showcase-root"></div>
+        </article>
+
+        <article class="comp-page" data-page="showcase-alarms" id="page-showcase-alarms" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.showcase">Showcase</p>
+            <div class="section-head__title-row">
+              <h1 data-i18n="doc.showcase.alarms.title">Alarms</h1>
+              <span
+                class="showcase-stack-badge"
+                translate="no"
+                data-i18n="doc.showcase.stack.k3ui"
+                >k3ui</span
+              >
+            </div>
+            <p data-i18n="doc.showcase.alarms.blurb">
+              Condensed time · weekdays · switch — live alarm cards.
+            </p>
+          </header>
+          <div id="showcase-alarms-root" class="showcase-root"></div>
         </article>
 
         <!-- STYLES: COLOR — ROLES -->
@@ -17872,12 +18116,12 @@ K3UI.theme.apply({ seed: '#3F51B5', mode: 'auto', variant: 'tonalspot' });
         </div>
       </div>
 
-      <!-- Phone &lt;600dp: navigation bar (XR orbiter mirrors rail layout="xr") -->
+      <!-- Phone &lt;600dp: navigation bar (mirrors rail — modal → standard chrome) -->
       <k3-nav-bar
         id="nav-bar"
         class="shell-bar"
         layout="vertical"
-        appearance="xr"
+        appearance="standard"
         aria-label="Primary"
       ></k3-nav-bar>
     </div>

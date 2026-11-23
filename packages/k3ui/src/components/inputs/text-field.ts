@@ -101,7 +101,14 @@ export class K3TextField extends K3Element {
   private get floated(): boolean {
     if (this.isStandard) return false;
     // date / time / datetime-local render a native mask — never under the label
-    return this.focused || !!this.value || TEMPORAL_FIELD_TYPES.has(this.type);
+    // prefix/suffix share the value row — keep label floated so they never overlap
+    return (
+      this.focused ||
+      !!this.value ||
+      !!this.prefixText ||
+      !!this.suffixText ||
+      TEMPORAL_FIELD_TYPES.has(this.type)
+    );
   }
 
   private get showPasswordToggle(): boolean {

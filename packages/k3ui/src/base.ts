@@ -57,6 +57,7 @@ import {
   bindMediaHotkeys,
 } from './core/index.js';
 import { showSnackbar, snackbarQueue } from './components/feedback/snackbar-queue.js';
+import { showToast, toastManager } from './components/feedback/toast.js';
 
 export {
   sanitizeHTML,
@@ -333,6 +334,17 @@ export {
   type SnackbarQueueBehavior,
 } from './components/feedback/snackbar-queue.js';
 export {
+  showToast,
+  toast,
+  toastManager,
+  ensureToastHost,
+  type ToastOptions,
+  type ToastType,
+  type ToastPosition,
+  type ToastAction,
+  type ToastApi,
+} from './components/feedback/toast.js';
+export {
   CoverflowSpecs,
   coverflowOffset,
   coverflowPose,
@@ -385,6 +397,7 @@ export const K3UI: K3UIGlobal = {
   mouse,
   syntax,
   snackbar: { show: showSnackbar, queue: snackbarQueue },
+  toast: Object.assign(showToast, { manager: toastManager }),
 };
 
 /**

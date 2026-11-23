@@ -6702,3 +6702,24 @@ k3-fab .ms-fill-icon {
     --k3-coverflow-height: 28rem;
   }
 }
+
+/* Text-field stepper demo — pack reset / − / + to paint size */
+.tf-stepper-field {
+  width: 100%;
+  max-width: none;
+  --k3-text-field-max-width: none;
+  --k3-text-field-input-min-width: 4ch;
+}
+
+.tf-stepper-field .tf-step {
+  flex: 0 0 auto;
+  width: 1.75rem !important;
+  min-width: 1.75rem !important;
+  height: 2rem !important;
+  min-height: 2rem !important;
+  margin-inline: -0.125rem;
+}
+
+.tf-stepper-field .tf-step--reset[hidden] {
+  display: none !important;
+}

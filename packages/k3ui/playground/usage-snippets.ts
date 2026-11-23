@@ -215,13 +215,26 @@ document.querySelector("k3-button-pad")?.addEventListener("k3-navigate", (e) => 
 </k3-shape-chip>`,
   },
   'text-field': {
-    components: ['k3-text-field'],
+    components: ['k3-text-field', 'k3-icon-button'],
     html: `<k3-text-field
   variant="outlined"
   label="Email"
   placeholder="name@domain.com"
   type="email"
-></k3-text-field>`,
+></k3-text-field>
+
+<!-- Number stepper — trailing reset · − · + -->
+<k3-text-field variant="outlined" type="number" label="Focus" suffix-text="min" value="1">
+  <k3-icon-button slot="trailing-icon" variant="standard" size="xs" width="narrow" label="Reset">
+    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="restart_alt" aria-hidden="true"></span>
+  </k3-icon-button>
+  <k3-icon-button slot="trailing-icon" variant="standard" size="xs" width="narrow" label="Decrease">
+    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="remove" aria-hidden="true"></span>
+  </k3-icon-button>
+  <k3-icon-button slot="trailing-icon" variant="standard" size="xs" width="narrow" label="Increase">
+    <span class="ms notranslate" translate="no" lang="zxx" data-k3-icon="add" aria-hidden="true"></span>
+  </k3-icon-button>
+</k3-text-field>`,
   },
   textarea: {
     components: ['k3-textarea'],
@@ -495,7 +508,7 @@ await K3UI.registry.registerWhen(document.querySelector("#comments"), "visible")
   snackbar: {
     components: ['k3-snackbar'],
     html: `<!-- Host once, then show via API -->
-<k3-snackbar id="toast" icon="check_circle" duration="2000" dismissible>Saved</k3-snackbar>`,
+<k3-snackbar id="snack" icon="check_circle" duration="2000" dismissible>Saved</k3-snackbar>`,
     jsExtra: `
 await window.K3UI.snackbar.show({ message: "Saved", icon: "check_circle", duration: 2000 });
 
@@ -510,6 +523,30 @@ await window.K3UI.snackbar.show({
     el.textContent = "Uploaded";
     el.loading = false;
   }),
+});`,
+  },
+  toast: {
+    components: ['k3-toast', 'k3-button'],
+    html: `<!-- Optional host (auto-mounted by the API) -->
+<k3-toast position="bottom-right" limit="3" timeout="5000"></k3-toast>`,
+    jsExtra: `
+const toast = window.K3UI.toast;
+
+await toast.success("Changes saved", { description: "Synced across devices." });
+await toast.error("Couldn't send", {
+  action: { label: "Retry", onClick: () => retry() },
+});
+
+// Stack max 3 — older fade until a slot frees
+await toast.info("One");
+await toast.info("Two");
+await toast.info("Three");
+await toast.warning("Four — queued behind");
+
+await toast.promise(upload(file), {
+  loading: "Uploading…",
+  success: (r) => \`Uploaded \${r.name}\`,
+  error: "Upload failed",
 });`,
   },
   alert: {

@@ -6,8 +6,19 @@ import { mountPricing } from './pages/pricing.js';
 import { mountLogin } from './pages/login.js';
 import { mountClocks } from './pages/clocks.js';
 import { mountPomodoro } from './pages/pomodoro.js';
+import { mountCalendar } from './pages/calendar.js';
+import { mountTodo } from './pages/todo.js';
+import { mountAlarms } from './pages/alarms.js';
 
-export type Route = 'pricing' | 'login' | 'dialer' | 'clocks' | 'pomodoro';
+export type Route =
+  | 'pricing'
+  | 'login'
+  | 'dialer'
+  | 'clocks'
+  | 'pomodoro'
+  | 'calendar'
+  | 'todo'
+  | 'alarms';
 
 const t = (key: string) => i18n.t(key);
 
@@ -17,6 +28,9 @@ export function parseRoute(hash = location.hash): Route {
   if (raw === 'dialer') return 'dialer';
   if (raw === 'clocks' || raw === 'widgets') return 'clocks';
   if (raw === 'pomodoro') return 'pomodoro';
+  if (raw === 'calendar') return 'calendar';
+  if (raw === 'todo') return 'todo';
+  if (raw === 'alarms') return 'alarms';
   return 'pricing';
 }
 
@@ -72,6 +86,30 @@ export function mountApp(root: HTMLElement): () => void {
                 >${t('showcase.nav.pomodoro')}</k3-button
               >
             </a>
+            <a href="#/calendar" aria-current=${route === 'calendar' ? 'page' : undefined}>
+              <k3-button
+                variant=${route === 'calendar' ? 'filled' : 'text'}
+                size="sm"
+                ?selected=${route === 'calendar'}
+                >${t('showcase.nav.calendar')}</k3-button
+              >
+            </a>
+            <a href="#/todo" aria-current=${route === 'todo' ? 'page' : undefined}>
+              <k3-button
+                variant=${route === 'todo' ? 'filled' : 'text'}
+                size="sm"
+                ?selected=${route === 'todo'}
+                >${t('showcase.nav.todo')}</k3-button
+              >
+            </a>
+            <a href="#/alarms" aria-current=${route === 'alarms' ? 'page' : undefined}>
+              <k3-button
+                variant=${route === 'alarms' ? 'filled' : 'text'}
+                size="sm"
+                ?selected=${route === 'alarms'}
+                >${t('showcase.nav.alarms')}</k3-button
+              >
+            </a>
             <k3-button-group
               variant="connected"
               shape="round"
@@ -114,7 +152,13 @@ export function mountApp(root: HTMLElement): () => void {
             ? mountClocks(host)
             : route === 'pomodoro'
               ? mountPomodoro(host)
-              : mountPricing(host);
+              : route === 'calendar'
+                ? mountCalendar(host)
+                : route === 'todo'
+                  ? mountTodo(host)
+                  : route === 'alarms'
+                    ? mountAlarms(host)
+                    : mountPricing(host);
   };
 
   const onHash = (): void => paint();

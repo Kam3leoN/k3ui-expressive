@@ -661,6 +661,28 @@ export const DOC_SECTIONS: Record<string, DocSections> = {
     a11y: 'doc.snackbar.a11y',
     versions: { na: 'One component — mode / variant are options; M3 queue is one-at-a-time' },
   },
+  'toast': {
+    theming: [
+      ['surface', 'surface-container-high + elevation 3', 'Card chrome'],
+      ['type icon', '40dp container roles', 'info · success · warning · error · loading'],
+      ['position', 'bottom-right|bottom-left|bottom-center', 'Logical corner (RTL-safe)'],
+      ['chrome inset', 'FAB menu · STT · scrollbar', 'Clears floating peers LTR + RTL'],
+      ['limit', '3 (default)', 'Max visible — older fade until a slot frees'],
+    ],
+    keyboard: [
+      ['Escape', 'Dismiss the front toast when the region is focused'],
+      ['Tab', 'Action and dismiss controls'],
+    ],
+    focus: 'doc.toast.focus',
+    motion: [
+      ['Enter / exit', 'Slide from below · fade', 'Spatial default'],
+      ['Stack', 'Peek + scale when collapsed · fan on hover/focus', 'Expressive stack'],
+      ['Swipe', 'Drag down or end ≥ 64 dp dismisses', 'Touch / pen'],
+      ['Reduced motion', 'Near-instant transitions · no spin', 'OS or data-k3-reduce-motion'],
+    ],
+    a11y: 'doc.toast.a11y',
+    versions: { na: 'One host — types / promise / stack are API options' },
+  },
   'alert': {
     theming: [
       ['variant', 'theme + semantic tones', 'Container + accent bar'],

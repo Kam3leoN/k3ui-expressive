@@ -624,7 +624,23 @@ export const textFieldStyles = css`
   input.control {
     flex: 1 1 0%;
     width: 0;
-    min-width: 26ch;
+    /* 26ch floors ISO date ranges; number/tel must not force that or suffix spills */
+    min-width: var(--k3-text-field-input-min-width, 26ch);
+  }
+  :host([type='number']) input.control,
+  :host([type='tel']) input.control {
+    min-width: var(--k3-text-field-input-min-width, 3ch);
+  }
+  /* Drop ugly native spinners — use trailing ± / app controls instead */
+  :host([type='number']) input.control {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  :host([type='number']) input.control::-webkit-outer-spin-button,
+  :host([type='number']) input.control::-webkit-inner-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
   }
   .control::placeholder {
     color: var(--k3-sys-color-on-surface-variant);

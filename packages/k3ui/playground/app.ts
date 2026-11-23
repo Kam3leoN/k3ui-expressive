@@ -99,6 +99,7 @@ import {
 } from './locale-flags.js';
 import { armNavActive, navItemFromEvent } from '../src/components/navigation/nav-selection.js';
 import { wireSnackbarDemo } from './snackbar-demo.js';
+import { wireToastDemo } from './toast-demo.js';
 import { destroyPlaygroundLiveBanner, wireBannerDemo } from './banner-demo.js';
 import { wireMotionDemos, refreshMotionSpringChart } from './motion-demo.js';
 import type { K3NavItem } from '../src/components/navigation/nav-item.js';
@@ -4307,6 +4308,7 @@ async function boot(): Promise<void> {
   await yieldToMain();
 
   wireSnackbarDemo();
+  wireToastDemo();
   wireBannerDemo();
 
   type DialogEl = HTMLElement & {
@@ -5033,6 +5035,7 @@ function wireDemoPages(): void {
   wireTextScrambleDemo();
   wireChartDemos();
   wireAudioPlayerDemoRights();
+  void import('./text-field-stepper-demo.js').then((m) => m.wireTextFieldStepperDemo());
 }
 
 /** Date picker demos — modal open, year bounds, weekday blackout (Noph coverage). */
