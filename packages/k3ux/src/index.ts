@@ -229,6 +229,12 @@ export {
   type RatingSize,
 } from './components/inputs/rating.js';
 export {
+  K3Thumbs,
+  ThumbsSpecs,
+  type ThumbsSize,
+  type ThumbsVote,
+} from './components/inputs/thumbs.js';
+export {
   K3Signature,
   SignatureSpecs,
 } from './components/inputs/signature.js';

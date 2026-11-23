@@ -79,6 +79,7 @@ export const COMPONENT_ITEM_ICONS: Record<string, string> = {
   signature: 'edit',
   slider: 'straighten',
   rating: 'star',
+  thumbs: 'thumb_up',
   'date-picker': 'calendar_today',
   'mood-calendar': 'sentiment_satisfied',
   'time-picker': 'schedule',

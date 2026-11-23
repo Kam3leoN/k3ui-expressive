@@ -11,8 +11,31 @@ export const cardStyles = css`
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    /* Host keeps ring outward; .card clips bleed media */
-    border-radius: var(--k3-sys-shape-corner-medium);
+    /*
+     * Host keeps ring outward; .card clips bleed media.
+     * Per-corner tokens (set by k3-card-set connected) fall back to medium.
+     */
+    border-start-start-radius: var(--k3-card-rss, var(--k3-sys-shape-corner-medium));
+    border-start-end-radius: var(--k3-card-rse, var(--k3-sys-shape-corner-medium));
+    border-end-end-radius: var(--k3-card-ree, var(--k3-sys-shape-corner-medium));
+    border-end-start-radius: var(--k3-card-res, var(--k3-sys-shape-corner-medium));
+  }
+  /*
+   * Connected card-set grid — fill the grid area so seams stay collinear.
+   * (Host stretch alone is not enough: .card must paint the full cell.)
+   */
+  :host([data-connected]) {
+    height: 100%;
+    min-height: 100%;
+    align-self: stretch;
+  }
+  :host([data-connected]) .card {
+    height: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+  }
+  :host([data-connected]) .body {
+    flex: 1 1 auto;
   }
   :host([dismissible]) {
     touch-action: pan-y;
@@ -32,7 +55,11 @@ export const cardStyles = css`
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    border-radius: var(--k3-card-radius);
+    /* Connected sets override --k3-card-rss|rse|ree|res; else uniform radius */
+    border-start-start-radius: var(--k3-card-rss, var(--k3-card-radius));
+    border-start-end-radius: var(--k3-card-rse, var(--k3-card-radius));
+    border-end-end-radius: var(--k3-card-ree, var(--k3-card-radius));
+    border-end-start-radius: var(--k3-card-res, var(--k3-card-radius));
     background: var(--k3-sys-color-surface-container-highest);
     color: var(--k3-sys-color-on-surface);
     box-shadow: none;
@@ -266,22 +293,33 @@ export const cardStyles = css`
     box-shadow: none !important;
   }
 
-  /* Hover — corner morph + elevation bump (filled/outlined → 1, elevated → 2) */
-  :host([interactive]:not([disabled])) {
-    border-radius: var(--k3-sys-shape-corner-medium);
+  /*
+   * Hover — corner morph + elevation bump (filled/outlined → 1, elevated → 2).
+   * Connected card-set owns per-corner tokens — skip uniform morph.
+   */
+  :host([interactive]:not([disabled]):not([data-connected])) {
+    border-start-start-radius: var(--k3-sys-shape-corner-medium);
+    border-start-end-radius: var(--k3-sys-shape-corner-medium);
+    border-end-end-radius: var(--k3-sys-shape-corner-medium);
+    border-end-start-radius: var(--k3-sys-shape-corner-medium);
   }
-  :host([interactive]:not([disabled])) .card:hover,
-  :host([interactive]:not([disabled])) .card:focus-visible {
+  :host([interactive]:not([disabled]):not([data-connected])) .card:hover,
+  :host([interactive]:not([disabled]):not([data-connected])) .card:focus-visible {
     --k3-card-radius: var(--k3-sys-shape-corner-large);
-    border-radius: var(--k3-card-radius);
   }
-  :host([interactive]:not([disabled]):has(.card:hover)),
-  :host([interactive]:not([disabled]):has(.card:focus-visible)) {
-    border-radius: var(--k3-sys-shape-corner-large);
+  :host([interactive]:not([disabled]):not([data-connected]):has(.card:hover)),
+  :host([interactive]:not([disabled]):not([data-connected]):has(.card:focus-visible)) {
+    border-start-start-radius: var(--k3-sys-shape-corner-large);
+    border-start-end-radius: var(--k3-sys-shape-corner-large);
+    border-end-end-radius: var(--k3-sys-shape-corner-large);
+    border-end-start-radius: var(--k3-sys-shape-corner-large);
   }
-  :host([interactive]:not([disabled]):has(.card[data-pressed])),
-  :host([interactive]:not([disabled]):has(.card:active)) {
-    border-radius: var(--k3-sys-shape-corner-large-increased);
+  :host([interactive]:not([disabled]):not([data-connected]):has(.card[data-pressed])),
+  :host([interactive]:not([disabled]):not([data-connected]):has(.card:active)) {
+    border-start-start-radius: var(--k3-sys-shape-corner-large-increased);
+    border-start-end-radius: var(--k3-sys-shape-corner-large-increased);
+    border-end-end-radius: var(--k3-sys-shape-corner-large-increased);
+    border-end-start-radius: var(--k3-sys-shape-corner-large-increased);
   }
 
   :host([interactive][variant='filled']:not([disabled])) .card:hover,
@@ -301,11 +339,10 @@ export const cardStyles = css`
     box-shadow: var(--k3-sys-elevation-level2);
   }
 
-  /* Pressed — large-increased corners */
-  :host([interactive]:not([disabled])) .card[data-pressed],
-  :host([interactive]:not([disabled])) .card:active {
+  /* Pressed — large-increased corners (standalone only) */
+  :host([interactive]:not([disabled]):not([data-connected])) .card[data-pressed],
+  :host([interactive]:not([disabled]):not([data-connected])) .card:active {
     --k3-card-radius: var(--k3-sys-shape-corner-large-increased);
-    border-radius: var(--k3-card-radius);
   }
   :host([interactive][variant='elevated']:not([disabled])) .card[data-pressed],
   :host([interactive][variant='elevated']:not([disabled])) .card:active {
@@ -313,11 +350,14 @@ export const cardStyles = css`
   }
 
   /* Dragged — lift + 16% state layer */
-  :host([dragged]) .card,
-  :host([interactive][dragged]:not([disabled])) .card {
+  :host([dragged]:not([data-connected])) .card,
+  :host([interactive][dragged]:not([disabled]):not([data-connected])) .card {
     --k3-card-radius: var(--k3-sys-shape-corner-large);
     box-shadow: var(--k3-sys-elevation-level3);
-    border-radius: var(--k3-card-radius);
+  }
+  :host([dragged][data-connected]) .card,
+  :host([interactive][dragged][data-connected]:not([disabled])) .card {
+    box-shadow: var(--k3-sys-elevation-level3);
   }
   :host([dragged][variant='elevated']) .card,
   :host([interactive][dragged][variant='elevated']:not([disabled])) .card {
@@ -327,8 +367,11 @@ export const cardStyles = css`
   :host([interactive][dragged]:not([disabled])) .card.k3-state-layer::after {
     opacity: var(--k3-sys-state-dragged-opacity, 0.16);
   }
-  :host([dragged]) {
-    border-radius: var(--k3-sys-shape-corner-large);
+  :host([dragged]:not([data-connected])) {
+    border-start-start-radius: var(--k3-sys-shape-corner-large);
+    border-start-end-radius: var(--k3-sys-shape-corner-large);
+    border-end-end-radius: var(--k3-sys-shape-corner-large);
+    border-end-start-radius: var(--k3-sys-shape-corner-large);
   }
 
   /* —— Media — all 4 corners rounded (bleed + inset), tracks --k3-card-radius —— */
@@ -339,7 +382,10 @@ export const cardStyles = css`
     flex: 0 0 auto;
     overflow: hidden;
     background: var(--k3-sys-color-surface-container-highest);
-    border-radius: var(--k3-card-radius);
+    border-start-start-radius: var(--k3-card-rss, var(--k3-card-radius));
+    border-start-end-radius: var(--k3-card-rse, var(--k3-card-radius));
+    border-end-end-radius: var(--k3-card-ree, var(--k3-card-radius));
+    border-end-start-radius: var(--k3-card-res, var(--k3-card-radius));
     transition: border-radius var(--k3-sys-motion-duration-spatial-fast)
       var(
         --k3-sys-motion-easing-spatial-fast,

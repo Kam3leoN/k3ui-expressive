@@ -1,11 +1,11 @@
 /**
- * Home stats banner — Trainable-style Material shape counters
- * with continuous random morph (home allowlist only).
+ * Home stats banner — connected card grid with spinning Material shapes
+ * and count-up values on first paint (home allowlist shapes).
  */
 import { catalog as k3uiCatalog } from '../../src/registry/catalog.js';
+import { registry } from '../../src/registry/register.js';
 import {
   MATERIAL_SHAPE_SVG,
-  animateMaterialShapeMorph,
   type MaterialShapeName,
 } from '../../src/shapes/index.js';
 import { pickRandomHomeShape } from '../home-shapes.js';
@@ -17,13 +17,16 @@ export type HomeStatDef = {
   shape: MaterialShapeName;
   tone: HomeStatTone;
   value: string;
+  /** Numeric target for count-up; omit for static copy. */
+  countTo?: number;
   valueClass?: 'home-stat__value--text' | 'home-stat__value--stack';
   labelKey: string;
 };
 
-const MORPH_MS = 900;
-/** Short pause so the path reads, then morph again — continuous loop. */
-const HOLD_MS = 380;
+const COUNT_MS = 1100;
+const COLUMNS_DESKTOP = 4;
+const COLUMNS_NARROW = 1;
+const NARROW_MQ = '(width < 600px)';
 
 function t(key: string): string {
   return window.K3UI?.i18n.t(key) ?? key;
@@ -54,6 +57,15 @@ function stackLines(value: string): string[] {
   return lines;
 }
 
+/** Render one stack line — split `100%` so the % is half-size / unbolded. */
+function stackLineHtml(line: string): string {
+  const m = line.match(/^(\d+)(%)$/);
+  if (m) {
+    return `<span class="home-stat__line home-stat__line--num">${escapeHtml(m[1]!)}<span class="home-stat__percent">${escapeHtml(m[2]!)}</span></span>`;
+  }
+  return `<span class="home-stat__line">${escapeHtml(line)}</span>`;
+}
+
 export async function resolveHomeStatCounts(): Promise<{ k3ui: number; k3ux: number }> {
   const k3ui = k3uiCatalog.length;
   try {
@@ -72,6 +84,7 @@ export function buildHomeStatDefs(counts: { k3ui: number; k3ux: number }): HomeS
       shape: 'VerySunny',
       tone: 'primary',
       value: String(counts.k3ui),
+      countTo: counts.k3ui,
       labelKey: 'playground.home.stats.k3ui',
     },
     {
@@ -79,6 +92,7 @@ export function buildHomeStatDefs(counts: { k3ui: number; k3ux: number }): HomeS
       shape: 'Cookie4Sided',
       tone: 'tertiary',
       value: String(counts.k3ux),
+      countTo: counts.k3ux,
       labelKey: 'playground.home.stats.k3ux',
     },
     {
@@ -105,29 +119,6 @@ export function pickRandomShape(exclude: MaterialShapeName): MaterialShapeName {
   return pickRandomHomeShape(exclude);
 }
 
-function shapeMarkup(name: MaterialShapeName): string {
-  return `<svg class="home-stat__svg" viewBox="0 0 1 1" aria-hidden="true" focusable="false">
-  <path class="home-stat__path" d="${MATERIAL_SHAPE_SVG[name]}" />
-</svg>`;
-}
-
-function statMarkup(def: HomeStatDef): string {
-  const valueClass = ['home-stat__value', def.valueClass].filter(Boolean).join(' ');
-  const valueHtml =
-    def.valueClass === 'home-stat__value--stack'
-      ? stackLines(def.value)
-          .map((w) => `<span class="home-stat__line">${escapeHtml(w)}</span>`)
-          .join('')
-      : escapeHtml(def.value);
-  return `<div class="home-stat" data-stat="${escapeHtml(def.id)}">
-  <div class="home-stat__shape home-stat__shape--${def.tone}" data-shape="${def.shape}">
-    ${shapeMarkup(def.shape)}
-    <span class="${valueClass}">${valueHtml}</span>
-  </div>
-  <p class="home-stat__label" data-i18n="${escapeHtml(def.labelKey)}">${escapeHtml(t(def.labelKey))}</p>
-</div>`;
-}
-
 function prefersReducedMotion(): boolean {
   return (
     document.documentElement.hasAttribute('data-k3-reduce-motion') ||
@@ -135,61 +126,127 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-function wireMorph(host: HTMLElement): () => void {
-  if (prefersReducedMotion()) return () => undefined;
+/** Ease-out cubic count-up (0 → to). */
+export function animateCountUp(
+  el: HTMLElement,
+  to: number,
+  opts: { duration?: number; signal?: AbortSignal } = {},
+): Promise<void> {
+  const duration = opts.duration ?? COUNT_MS;
+  const signal = opts.signal;
+  const target = Math.max(0, Math.round(to));
 
-  const shapes = [...host.querySelectorAll<HTMLElement>('.home-stat__shape')];
-  const controllers: AbortController[] = [];
-  const timers: number[] = [];
-  let cancelled = false;
+  if (prefersReducedMotion() || duration <= 0 || target === 0) {
+    el.textContent = String(target);
+    return Promise.resolve();
+  }
 
-  const wait = (ms: number): Promise<void> =>
-    new Promise((resolve) => {
-      const id = window.setTimeout(resolve, ms);
-      timers.push(id);
-    });
+  return new Promise((resolve) => {
+    const start = performance.now();
+    let raf = 0;
 
-  const runShape = async (el: HTMLElement, staggerMs: number): Promise<void> => {
-    await wait(staggerMs);
-    let current = (el.dataset.shape as MaterialShapeName | undefined) ?? 'Circle';
-    while (!cancelled && !prefersReducedMotion()) {
-      const path = el.querySelector<SVGPathElement>('.home-stat__path');
-      if (!path) return;
-      const to = pickRandomShape(current);
-      const go = new AbortController();
-      controllers.push(go);
-      await animateMaterialShapeMorph({
-        from: current,
-        to,
-        duration: MORPH_MS,
-        signal: go.signal,
-        onFrame: (d) => path.setAttribute('d', d),
-      });
-      if (cancelled || go.signal.aborted) return;
-      current = to;
-      el.dataset.shape = to;
-      await wait(HOLD_MS);
+    const finish = (): void => {
+      if (raf) cancelAnimationFrame(raf);
+      el.textContent = String(target);
+      resolve();
+    };
+
+    if (signal?.aborted) {
+      finish();
+      return;
     }
-  };
+    signal?.addEventListener('abort', finish, { once: true });
 
-  shapes.forEach((el, i) => {
-    void runShape(el, 180 + i * 280);
+    const tick = (now: number): void => {
+      if (signal?.aborted) return;
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = String(Math.round(target * eased));
+      if (t < 1) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        finish();
+      }
+    };
+    raf = requestAnimationFrame(tick);
   });
-
-  return () => {
-    cancelled = true;
-    for (const id of timers) window.clearTimeout(id);
-    for (const c of controllers) c.abort();
-  };
 }
 
-let stopMorph: (() => void) | null = null;
+function shapeMarkup(name: MaterialShapeName): string {
+  return `<div class="home-stat__spin" aria-hidden="true">
+  <svg class="home-stat__svg" viewBox="0 0 1 1" focusable="false">
+    <path class="home-stat__path" d="${MATERIAL_SHAPE_SVG[name]}" />
+  </svg>
+</div>`;
+}
+
+function valueMarkup(def: HomeStatDef): string {
+  const valueClass = ['home-stat__value', def.valueClass].filter(Boolean).join(' ');
+  if (def.countTo != null) {
+    const start = prefersReducedMotion() ? String(def.countTo) : '0';
+    return `<span class="${valueClass}" data-home-stat-count="${def.countTo}">${start}</span>`;
+  }
+  if (def.valueClass === 'home-stat__value--stack') {
+    return `<span class="${valueClass}">${stackLines(def.value).map(stackLineHtml).join('')}</span>`;
+  }
+  return `<span class="${valueClass}">${escapeHtml(def.value)}</span>`;
+}
+
+function cardMarkup(def: HomeStatDef): string {
+  return `<k3-card variant="filled" class="home-stat-card" data-stat="${escapeHtml(def.id)}">
+  <div class="home-stat" data-stat="${escapeHtml(def.id)}">
+    <div
+      class="home-stat__blob home-stat__blob--${def.tone}"
+      data-shape="${def.shape}"
+      aria-hidden="true"
+    >
+      ${shapeMarkup(def.shape)}
+    </div>
+    <div class="home-stat__copy">
+      ${valueMarkup(def)}
+      <p class="home-stat__label" data-i18n="${escapeHtml(def.labelKey)}">${escapeHtml(t(def.labelKey))}</p>
+    </div>
+  </div>
+</k3-card>`;
+}
+
+function wireColumns(set: HTMLElement & { columns?: number }): () => void {
+  const mq = window.matchMedia(NARROW_MQ);
+  const sync = (): void => {
+    set.columns = mq.matches ? COLUMNS_NARROW : COLUMNS_DESKTOP;
+  };
+  sync();
+  mq.addEventListener('change', sync);
+  return () => mq.removeEventListener('change', sync);
+}
+
+function wireCountUp(host: HTMLElement): () => void {
+  const go = new AbortController();
+  const nodes = [
+    ...host.querySelectorAll<HTMLElement>('[data-home-stat-count]'),
+  ];
+  for (const el of nodes) {
+    const to = Number(el.dataset.homeStatCount);
+    if (!Number.isFinite(to)) continue;
+    void animateCountUp(el, to, { signal: go.signal });
+  }
+  return () => go.abort();
+}
+
+let stopColumns: (() => void) | null = null;
+let stopCount: (() => void) | null = null;
 
 export async function mountHomeStats(): Promise<void> {
   const host = document.getElementById('home-stats');
   if (!host) return;
-  stopMorph?.();
-  stopMorph = null;
+
+  stopColumns?.();
+  stopColumns = null;
+  stopCount?.();
+  stopCount = null;
+
+  await registry.register('k3-card-set');
+
   const counts = await resolveHomeStatCounts();
   const defs = buildHomeStatDefs(counts);
   const title =
@@ -203,29 +260,57 @@ export async function mountHomeStats(): Promise<void> {
       return h;
     })();
   title.textContent = t('playground.home.stats.title');
-  host.replaceChildren(
-    title,
-    ...defs.map((def) => {
-      const wrap = document.createElement('div');
-      wrap.innerHTML = statMarkup(def);
-      return wrap.firstElementChild as HTMLElement;
-    }),
-  );
+
+  const set = document.createElement('k3-card-set') as HTMLElement & {
+    variant: string;
+    layout: string;
+    columns: number;
+    label: string;
+  };
+  set.className = 'home-stats__set';
+  set.setAttribute('variant', 'connected');
+  set.setAttribute('layout', 'grid');
+  set.setAttribute('columns', String(COLUMNS_DESKTOP));
+  set.variant = 'connected';
+  set.layout = 'grid';
+  set.columns = COLUMNS_DESKTOP;
+  set.label = t('playground.home.stats.title');
+  set.innerHTML = defs.map(cardMarkup).join('');
+
+  host.replaceChildren(title, set);
   host.classList.add('home-stats--ready');
-  stopMorph = wireMorph(host);
+
+  stopColumns = wireColumns(set);
+  stopCount = wireCountUp(host);
 }
 
 export function syncHomeStatsI18n(): void {
   const host = document.getElementById('home-stats');
   if (!host?.classList.contains('home-stats--ready')) return;
   const counts = {
-    k3ui: host.querySelector('[data-stat="k3ui"] .home-stat__value')?.textContent?.trim() || '',
-    k3ux: host.querySelector('[data-stat="k3ux"] .home-stat__value')?.textContent?.trim() || '',
+    k3ui:
+      Number(
+        host.querySelector('[data-stat="k3ui"] [data-home-stat-count]')?.getAttribute(
+          'data-home-stat-count',
+        ),
+      ) ||
+      Number(host.querySelector('[data-stat="k3ui"] .home-stat__value')?.textContent?.trim()) ||
+      k3uiCatalog.length,
+    k3ux:
+      Number(
+        host.querySelector('[data-stat="k3ux"] [data-home-stat-count]')?.getAttribute(
+          'data-home-stat-count',
+        ),
+      ) ||
+      Number(host.querySelector('[data-stat="k3ux"] .home-stat__value')?.textContent?.trim()) ||
+      0,
   };
-  const defs = buildHomeStatDefs({
-    k3ui: Number(counts.k3ui) || k3uiCatalog.length,
-    k3ux: Number(counts.k3ux) || 0,
-  });
+  const defs = buildHomeStatDefs(counts);
+  const set = host.querySelector('k3-card-set') as (HTMLElement & { label?: string }) | null;
+  if (set) set.label = t('playground.home.stats.title');
+  const title = host.querySelector('#home-stats-title');
+  if (title) title.textContent = t('playground.home.stats.title');
+
   for (const def of defs) {
     const root = host.querySelector(`[data-stat="${def.id}"]`);
     if (!root) continue;
@@ -237,9 +322,7 @@ export function syncHomeStatsI18n(): void {
     }
     if (!value || def.id === 'k3ui' || def.id === 'k3ux') continue;
     if (def.valueClass === 'home-stat__value--stack') {
-      value.innerHTML = stackLines(def.value)
-        .map((w) => `<span class="home-stat__line">${escapeHtml(w)}</span>`)
-        .join('');
+      value.innerHTML = stackLines(def.value).map(stackLineHtml).join('');
     } else {
       value.textContent = def.value;
     }

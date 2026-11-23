@@ -30,6 +30,7 @@ export const catalog: ComponentDef[] = [
   // charts / inputs / pickers / containment
   { tag: 'k3-chart', load: () => import('../components/charts/chart.js') },
   { tag: 'k3-rating', load: () => import('../components/inputs/rating.js') },
+  { tag: 'k3-thumbs', load: () => import('../components/inputs/thumbs.js') },
   { tag: 'k3-signature', load: () => import('../components/inputs/signature.js') },
   { tag: 'k3-wheel-picker', load: () => import('../components/pickers/wheel-picker.js') },
   { tag: 'k3-masonry', load: () => import('../components/containment/masonry.js') },

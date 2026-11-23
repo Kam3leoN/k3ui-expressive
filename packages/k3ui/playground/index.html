@@ -403,9 +403,9 @@
               ></div>
             </div>
           </section>
-          <!-- Stats banner — Material shapes (Trainable-style) · filled by home-stats/mount.ts -->
+          <!-- Stats banner — connected card grid · spinning shapes + count-up · home-stats/mount.ts -->
           <section
-            class="home-stats k3-layout-grid k3-demo-cols-4"
+            class="home-stats"
             id="home-stats"
             aria-labelledby="home-stats-title"
             data-home-stats
@@ -7188,6 +7188,182 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
           </div>
         </article>
 
+        <!-- THUMBS -->
+        <article class="comp-page" data-page="thumbs" id="page-thumbs" hidden>
+          <header class="section-head">
+            <p class="comp-category" data-i18n="doc.nav.inputs">Inputs</p>
+            <h1 data-i18n="doc.thumbs.title">Thumbs</h1>
+            <p data-i18n="doc.thumbs.blurb">
+              Up · count · down — exclusive toggle vote with a live counter.
+            </p>
+            <p class="doc-intro" data-i18n="doc.thumbs.intro">
+              Thumbs let people upvote or downvote with a shared counter. The vote is exclusive:
+              tapping the active thumb clears it; switching from down to up (or the reverse)
+              adjusts the counter by two steps. Use readonly for display-only scores and min/max
+              when the score must stay in a band.
+            </p>
+          </header>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.thumbs.section.basic">Basic</h2>
+              <p data-i18n="doc.thumbs.section.basic.blurb">Interactive counter · toggle vote.</p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end k3-layout-grid k3-demo-cols-3">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs value="17" label="Was this helpful?"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs value="18" vote="up" label="Upvoted"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs value="16" vote="down" label="Downvoted"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.thumbs.legend.interactive"
+                    >Interactive</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label" data-i18n="doc.thumbs.legend.up">Voted up</span>
+                </li>
+                <li>
+                  <span class="pill-num">3</span>
+                  <span class="variant-label" data-i18n="doc.thumbs.legend.down">Voted down</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.thumbs.section.sizes">Sizes</h2>
+              <p data-i18n="doc.thumbs.section.sizes.blurb">
+                XS · SM · MD · LG · XL — icon optical size.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs size="xs" value="17" label="XS"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs size="sm" value="17" label="SM"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs size="md" value="17" label="MD"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs size="lg" value="17" label="LG"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">4</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs size="xl" value="17" label="XL"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">5</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.xs">Extra small</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.sm">Small</span>
+                </li>
+                <li>
+                  <span class="pill-num">3</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.md">Medium</span>
+                </li>
+                <li>
+                  <span class="pill-num">4</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.lg">Large</span>
+                </li>
+                <li>
+                  <span class="pill-num">5</span>
+                  <span class="variant-label" data-i18n="playground.demo.size.xl">Extra large</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="surface stack gap-lg">
+            <header class="section-head sub">
+              <h2 data-i18n="doc.thumbs.section.states">States</h2>
+              <p data-i18n="doc.thumbs.section.states.blurb">
+                Voted · readonly · disabled · clamped.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div class="demo-frame demo-frame--cases items-end k3-layout-grid k3-demo-cols-3">
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs value="0" min="0" label="Clamped"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs value="12" readonly label="Readonly"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">2</span>
+                </div>
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-thumbs value="3" disabled label="Disabled"></k3-thumbs>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">3</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.thumbs.legend.clamped">Min 0</span>
+                </li>
+                <li>
+                  <span class="pill-num">2</span>
+                  <span class="variant-label" data-i18n="doc.thumbs.legend.readonly"
+                    >Readonly</span
+                  >
+                </li>
+                <li>
+                  <span class="pill-num">3</span>
+                  <span class="variant-label" data-i18n="doc.thumbs.legend.disabled"
+                    >Disabled</span
+                  >
+                </li>
+              </ol>
+            </div>
+          </div>
+        </article>
+
         <!-- DATE PICKER -->
         <article class="comp-page" data-page="date-picker" id="page-date-picker" hidden>
           <header class="section-head">
@@ -9998,10 +10174,10 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
             <p class="comp-category" data-i18n="doc.nav.containment">Containment</p>
             <h1 data-i18n="doc.card.title">Cards</h1>
             <p data-i18n="doc.card.blurb">
-              Filled · outlined · elevated — media, interactive border morph.
+              Filled · outlined · elevated — media, connected sets, pricing, horizontal, DnD.
             </p>
             <p class="doc-intro" data-i18n="doc.card.intro">
-              Cards group related content and actions. Filled suits quiet containers, outlined adds a border for separation, and elevated lifts primary content. Interactive cards can morph the border on hover; media slots work best with cover-fit imagery and a clear headline.
+              Cards group related content and actions. Filled suits quiet containers, outlined adds a border for separation, and elevated lifts primary content. Use k3-card-set variant=connected for joined stacks or bento grids (outer Extra large · inner Extra small). Interactive cards can morph the border on hover; media slots work best with cover-fit imagery and a clear headline.
             </p>
           </header>
           <div class="surface surface-flush stack gap-lg" data-doc-examples>
@@ -10387,6 +10563,204 @@ fav?.addEventListener(&quot;k3-change&quot;, (e) => {
                 Sortable collection and swipe dismiss.
               </p>
             </header>
+            <header class="section-head sub">
+              <h3 data-i18n="doc.card.option.connected">variant=connected</h3>
+              <p data-i18n="doc.card.option.connected.desc">
+                Tight joins · outer Extra large · inner Extra small — stack or bento grid.
+              </p>
+            </header>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid k3-demo-cols-2"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case">
+                  <div class="demo-case-stage">
+                    <k3-card-set
+                      variant="connected"
+                      layout="stack"
+                      label="Connected stack"
+                      id="card-connected-stack-demo"
+                    >
+                      <k3-card variant="filled">
+                        <span slot="headline" data-i18n="doc.card.demo.connected.stack1"
+                          >First · outer top</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.stack1.body"
+                          >Facing bottom uses the inner corner.</span
+                        >
+                      </k3-card>
+                      <k3-card variant="filled">
+                        <span slot="headline" data-i18n="doc.card.demo.connected.stack2"
+                          >Middle · all inner</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.stack2.body"
+                          >Joins above and below stay Extra small.</span
+                        >
+                      </k3-card>
+                      <k3-card variant="filled">
+                        <span slot="headline" data-i18n="doc.card.demo.connected.stack3"
+                          >Last · outer bottom</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.stack3.body"
+                          >Closes the connected silhouette.</span
+                        >
+                      </k3-card>
+                    </k3-card-set>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.card.legend.connected.stack"
+                    >connected · stack</span
+                  >
+                </li>
+              </ol>
+            </div>
+            <div class="demo-block">
+              <div
+                class="demo-frame demo-frame--cases k3-layout-grid"
+                data-demo-enhance="off"
+              >
+                <div class="demo-case k3-col-full">
+                  <div class="demo-case-stage">
+                    <k3-card-set
+                      variant="connected"
+                      layout="grid"
+                      columns="3"
+                      label="Connected bento"
+                      id="card-connected-bento-demo"
+                    >
+                      <k3-card variant="filled">
+                        <span
+                          slot="avatar"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="palette"
+                          aria-hidden="true"
+                        ></span>
+                        <span slot="headline" data-i18n="doc.card.demo.connected.bento1"
+                          >Material 3 Expressive</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.bento1.body"
+                          >Unified visual language across surfaces.</span
+                        >
+                      </k3-card>
+                      <k3-card variant="filled">
+                        <span
+                          slot="avatar"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="desktop_windows"
+                          aria-hidden="true"
+                        ></span>
+                        <span slot="headline" data-i18n="doc.card.demo.connected.bento2"
+                          >Custom shell</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.bento2.body"
+                          >Desktop environment with Wayland-first display.</span
+                        >
+                      </k3-card>
+                      <k3-card variant="filled">
+                        <span
+                          slot="avatar"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="bolt"
+                          aria-hidden="true"
+                        ></span>
+                        <span slot="headline" data-i18n="doc.card.demo.connected.bento3"
+                          >Performance</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.bento3.body"
+                          >Lean idle footprint and fast boot targets.</span
+                        >
+                      </k3-card>
+                      <k3-card variant="filled">
+                        <span
+                          slot="avatar"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="apps"
+                          aria-hidden="true"
+                        ></span>
+                        <span slot="headline" data-i18n="doc.card.demo.connected.bento4"
+                          >Solid foundation</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.bento4.body"
+                          >Battle-tested base with long-term support.</span
+                        >
+                      </k3-card>
+                      <k3-card variant="filled">
+                        <span
+                          slot="avatar"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="inventory_2"
+                          aria-hidden="true"
+                        ></span>
+                        <span slot="headline" data-i18n="doc.card.demo.connected.bento5"
+                          >Packages</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.bento5.body"
+                          >Native packages plus portable app formats.</span
+                        >
+                      </k3-card>
+                      <k3-card variant="filled">
+                        <span
+                          slot="avatar"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="widgets"
+                          aria-hidden="true"
+                        ></span>
+                        <span slot="headline" data-i18n="doc.card.demo.connected.bento6"
+                          >Typography &amp; icons</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.bento6.body"
+                          >Expressive type with Material Symbols.</span
+                        >
+                      </k3-card>
+                      <k3-card variant="filled" col-span="full">
+                        <span
+                          slot="avatar"
+                          class="ms notranslate"
+                          translate="no"
+                          lang="zxx"
+                          data-k3-icon="language"
+                          aria-hidden="true"
+                        ></span>
+                        <span slot="headline" data-i18n="doc.card.demo.connected.bento7"
+                          >Localization</span
+                        >
+                        <span data-i18n="doc.card.demo.connected.bento7.body"
+                          >Broad language support · privacy-first defaults.</span
+                        >
+                      </k3-card>
+                    </k3-card-set>
+                  </div>
+                  <span class="demo-case-num" aria-hidden="true">1</span>
+                </div>
+              </div>
+              <ol class="variant-guide">
+                <li>
+                  <span class="pill-num">1</span>
+                  <span class="variant-label" data-i18n="doc.card.legend.connected.bento"
+                    >connected · grid · columns=3 · 7 cards</span
+                  >
+                </li>
+              </ol>
+            </div>
+
             <div class="demo-block">
               <div class="demo-frame demo-frame--cases grid-3">
                 <div class="demo-case" style="grid-column: 1 / -1">

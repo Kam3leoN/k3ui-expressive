@@ -311,6 +311,14 @@ export const DOC_COMPONENTS: DocComponent[] = [
     product: 'k3ux',
   },
   {
+    id: 'thumbs',
+    category: 'Inputs',
+    title: 'Thumbs',
+    titleKey: 'doc.thumbs.title',
+    blurbKey: 'doc.thumbs.blurb',
+    product: 'k3ux',
+  },
+  {
     id: 'date-picker',
     category: 'Inputs',
     title: 'Date picker',

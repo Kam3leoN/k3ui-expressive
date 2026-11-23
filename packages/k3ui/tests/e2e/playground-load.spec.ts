@@ -33,7 +33,12 @@ test('home: hero + stats ready, every doc page stamped after boot', async ({ pag
   /* Blurred Material orbs (Trainable-style) behind the hero */
   await expect(page.locator('#home-ambient .home-ambient__orb')).toHaveCount(4);
   await expect(page.locator('#home-ambient .home-ambient__shape')).toHaveCount(4);
+  await expect(page.locator('#home-stats k3-card-set[variant="connected"][layout="grid"]')).toHaveCount(1);
+  await expect(page.locator('#home-stats k3-card.home-stat-card')).toHaveCount(4);
   await expect(page.locator('#home-stats .home-stat')).toHaveCount(4);
+  await expect(page.locator('#home-stats .home-stat__blob')).toHaveCount(4);
+  await expect(page.locator('#home-stats .home-stat__spin')).toHaveCount(4);
+  await expect(page.locator('#home-stats .home-stat__blob .home-stat__value')).toHaveCount(0);
   await expect(page.locator('#home-stats [data-stat="k3ui"] .home-stat__value')).not.toHaveText('');
   await expect(page.locator('#home-stats [data-stat="oss"] .home-stat__value')).toContainText(/open source/i);
   await expect(page.locator('.home-hero-banner__chips k3-chip')).toHaveCount(3);

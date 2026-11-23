@@ -2,36 +2,80 @@ import { html, nothing } from 'lit';
 import { property, state, query } from 'lit/decorators.js';
 import {
   K3Element,
+  devicePixelSnapCss,
   handleFocusNavKey,
+  isRtl,
   runWhenConnected,
 } from '../../core/index.js';
 import { attachSortable, type SortableController } from '../../core/dnd.js';
 import { hostReset } from '../_shared.js';
 import type { K3Card } from './card.js';
 import type { K3Menu } from './menu.js';
+import {
+  packGridRects,
+  parseColSpan,
+  resolveConnectedCorners,
+  resolveStackConnectedCorners,
+  stackPositionLabel,
+  type CardRect,
+} from './card-set.geometry.js';
+import {
+  CardSetConnectedGapDp,
+  CardSetSpecs,
+  type CardSetLayout,
+  type CardSetVariant,
+} from './card-set.specs.js';
 import { cardSetStyles } from './card-set.styles.js';
 
-export type CardSetLayout = 'stack' | 'grid';
+export type { CardSetLayout, CardSetVariant } from './card-set.specs.js';
+export { CardSetSpecs } from './card-set.specs.js';
+export {
+  detectCardNeighbors,
+  cornerFlagsFromNeighbors,
+  logicalCornersFromFlags,
+  packGridRects,
+  parseColSpan,
+  resolveConnectedCorners,
+  resolveStackConnectedCorners,
+  stackPositionLabel,
+} from './card-set.geometry.js';
 
 /**
- * M3 card set — groups `k3-card` with optional sortable reorder + dismiss a11y.
+ * M3 card set — groups `k3-card` with optional connected joins, sortable
+ * reorder + dismiss a11y.
  *
- * Dragging / dismissing (guidelines): gestures need a single-pointer alternative.
- * Long-press or context-menu on a card opens an actions menu (Move up / down /
- * Dismiss) when `sortable` and/or child `dismissible` cards are present.
+ * `variant="connected"` — tight gap (2dp) + outer/inner corner radii like
+ * button-group connected / M3E card-list (works for stack and bento grids).
  *
  * ```html
- * <k3-card-set sortable dismissible label="Payment methods">
- *   <k3-card dismissible orientation="horizontal" media-layout="inset">…</k3-card>
+ * <k3-card-set variant="connected" layout="grid" columns="3" label="Features">
+ *   <k3-card>…</k3-card>
+ *   <k3-card col-span="full">…</k3-card>
  * </k3-card-set>
  * ```
  *
  * @see https://m3.material.io/components/cards/guidelines
+ * @see ./card-set.specs.ts
  */
 export class K3CardSet extends K3Element {
   static override styles = [hostReset, cardSetStyles];
 
+  @property({ reflect: true }) variant: CardSetVariant = 'standard';
   @property({ reflect: true }) layout: CardSetLayout = 'stack';
+  /**
+   * Fixed column count for `layout="grid"` (especially connected bentos).
+   * `0` / omitted → layout tracks (`--k3-layout-columns`).
+   */
+  @property({
+    type: Number,
+    reflect: true,
+    converter: {
+      fromAttribute: (v: string | null) =>
+        v == null || v === '' ? 0 : Number(v) || 0,
+      toAttribute: (v: number) => (v > 0 ? String(v) : null),
+    },
+  })
+  columns = 0;
   @property() label = '';
   /** Enable reorder via pointer drag (shared K3 DnD). */
   @property({ type: Boolean, reflect: true }) sortable = false;
@@ -47,6 +91,8 @@ export class K3CardSet extends K3Element {
 
   private sortableCtrl: SortableController | null = null;
   private sortingActive = false;
+  private resizeObs: ResizeObserver | null = null;
+  private connectedRaf = 0;
 
   private cards(): K3Card[] {
     return [...this.querySelectorAll(':scope > k3-card')].filter(
@@ -66,6 +112,117 @@ export class K3CardSet extends K3Element {
     for (const card of this.cards()) {
       if (card.dragHandle !== this.sortable) card.dragHandle = this.sortable;
     }
+  }
+
+  // ── Connected corners ─────────────────────────────────────────────────────
+
+  private applyGapToken(): void {
+    if (this.variant === 'connected') {
+      this.style.setProperty(
+        '--k3-card-set-connected-gap',
+        devicePixelSnapCss(CardSetConnectedGapDp),
+      );
+    } else {
+      this.style.removeProperty('--k3-card-set-connected-gap');
+    }
+  }
+
+  private applyColumnsToken(): void {
+    if (this.layout === 'grid' && this.columns > 0) {
+      this.style.setProperty('--k3-card-set-columns', String(this.columns));
+    } else {
+      this.style.removeProperty('--k3-card-set-columns');
+    }
+  }
+
+  private clearConnectedOn(card: HTMLElement): void {
+    card.removeAttribute('data-connected');
+    card.removeAttribute('data-cs');
+    card.style.removeProperty('--k3-card-rss');
+    card.style.removeProperty('--k3-card-rse');
+    card.style.removeProperty('--k3-card-ree');
+    card.style.removeProperty('--k3-card-res');
+  }
+
+  private clearAllConnected(): void {
+    for (const card of this.querySelectorAll(':scope > k3-card')) {
+      this.clearConnectedOn(card as HTMLElement);
+    }
+  }
+
+  /** Schedule a connected corner sync after layout. */
+  private scheduleConnectedSync = (): void => {
+    if (this.connectedRaf) cancelAnimationFrame(this.connectedRaf);
+    this.connectedRaf = requestAnimationFrame(() => {
+      this.connectedRaf = 0;
+      this.syncConnectedCorners();
+    });
+  };
+
+  private syncConnectedCorners(): void {
+    this.applyGapToken();
+    this.applyColumnsToken();
+
+    const list = this.cards();
+    if (this.variant !== 'connected' || !list.length) {
+      this.clearAllConnected();
+      return;
+    }
+
+    const outer = CardSetSpecs.connectedOuterCss;
+    const inner = CardSetSpecs.connectedInnerCss;
+    const gapCss = devicePixelSnapCss(CardSetConnectedGapDp);
+    const gapPx = parseFloat(gapCss) || CardSetConnectedGapDp;
+
+    let corners;
+    if (this.layout === 'stack') {
+      /* Index-based — no measurement (works in jsdom / before paint). */
+      corners = resolveStackConnectedCorners(list.length, outer, inner);
+    } else {
+      let rects: CardRect[] = list.map((el) => {
+        const r = el.getBoundingClientRect();
+        return {
+          top: r.top,
+          right: r.right,
+          bottom: r.bottom,
+          left: r.left,
+        };
+      });
+      const unlaid = rects.every(
+        (r) => r.right - r.left < 1 || r.bottom - r.top < 1,
+      );
+      if (unlaid) {
+        const cols = this.columns > 0 ? this.columns : 3;
+        const spans = list.map((el) => parseColSpan(el, cols));
+        rects = packGridRects(list.length, cols, spans, 100, 40, gapPx);
+      }
+      corners = resolveConnectedCorners(rects, gapPx, outer, inner, isRtl(this));
+    }
+
+    list.forEach((card, i) => {
+      const c = corners[i]!;
+      card.toggleAttribute('data-connected', true);
+      card.setAttribute(
+        'data-cs',
+        this.layout === 'stack'
+          ? stackPositionLabel(i, list.length)
+          : 'cell',
+      );
+      card.style.setProperty('--k3-card-rss', c.rss);
+      card.style.setProperty('--k3-card-rse', c.rse);
+      card.style.setProperty('--k3-card-ree', c.ree);
+      card.style.setProperty('--k3-card-res', c.res);
+    });
+  }
+
+  private bindResizeObserver(): void {
+    this.resizeObs?.disconnect();
+    this.resizeObs = null;
+    if (this.variant !== 'connected') return;
+    if (typeof ResizeObserver === 'undefined') return;
+    this.resizeObs = new ResizeObserver(() => this.scheduleConnectedSync());
+    this.resizeObs.observe(this);
+    for (const card of this.cards()) this.resizeObs.observe(card);
   }
 
   // ── Sortable ──────────────────────────────────────────────────────────────
@@ -117,10 +274,12 @@ export class K3CardSet extends K3Element {
       },
       onReorder: ({ from, to, items, item }) => {
         this.emit('k3-reorder', { from, to, item, items });
+        this.scheduleConnectedSync();
       },
       onEnd: ({ item, active }) => {
         this.sortingActive = false;
         if (active) this.emit('k3-dnd-end', { item });
+        this.scheduleConnectedSync();
       },
     });
   }
@@ -143,6 +302,7 @@ export class K3CardSet extends K3Element {
       source: 'menu',
     });
     this.sortableCtrl?.refresh();
+    this.scheduleConnectedSync();
     return true;
   }
 
@@ -163,6 +323,7 @@ export class K3CardSet extends K3Element {
       | null;
     (focusEl ?? next)?.focus?.();
     this.sortableCtrl?.refresh();
+    this.scheduleConnectedSync();
   }
 
   // ── Events ────────────────────────────────────────────────────────────────
@@ -235,6 +396,8 @@ export class K3CardSet extends K3Element {
     this.syncDismissible();
     this.syncDragHandles();
     this.sortableCtrl?.refresh();
+    this.bindResizeObserver();
+    this.scheduleConnectedSync();
   };
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -247,6 +410,8 @@ export class K3CardSet extends K3Element {
     runWhenConnected(this, () => {
       this.syncDismissible();
       this.bindSortable();
+      this.bindResizeObserver();
+      this.scheduleConnectedSync();
     });
   }
 
@@ -254,16 +419,34 @@ export class K3CardSet extends K3Element {
     this.syncDismissible();
     this.syncDragHandles();
     this.bindSortable();
+    this.bindResizeObserver();
+    this.scheduleConnectedSync();
   }
 
   override updated(changed: Map<string, unknown>): void {
-    if (changed.has('sortable') || changed.has('layout') || changed.has('dismissible')) {
+    if (
+      changed.has('sortable') ||
+      changed.has('layout') ||
+      changed.has('dismissible')
+    ) {
       this.bindSortable();
     }
     if (changed.has('dismissible')) this.syncDismissible();
+    if (
+      changed.has('variant') ||
+      changed.has('layout') ||
+      changed.has('columns')
+    ) {
+      this.bindResizeObserver();
+      this.scheduleConnectedSync();
+    }
   }
 
   override disconnectedCallback(): void {
+    if (this.connectedRaf) cancelAnimationFrame(this.connectedRaf);
+    this.connectedRaf = 0;
+    this.resizeObs?.disconnect();
+    this.resizeObs = null;
     this.unbindSortable();
     this.removeEventListener('k3-dismiss', this.onCardDismiss);
     this.removeEventListener('k3-actions-request', this.onActionsRequest);

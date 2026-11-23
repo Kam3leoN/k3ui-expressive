@@ -325,6 +325,19 @@ document.querySelector("k3-button-pad")?.addEventListener("k3-navigate", (e) => 
   <span slot="checked" class="ms notranslate" translate="no" lang="zxx" data-k3-icon="star" aria-hidden="true"></span>
 </k3-rating>`,
   },
+  thumbs: {
+    components: ['k3-thumbs'],
+    html: `<!-- Counter · exclusive toggle vote -->
+<k3-thumbs value="17" label="Was this helpful?"></k3-thumbs>
+
+<!-- Pre-selected upvote -->
+<k3-thumbs value="42" vote="up" size="lg"></k3-thumbs>
+
+<!-- Clamped · readonly · disabled -->
+<k3-thumbs value="0" min="0" max="100"></k3-thumbs>
+<k3-thumbs value="12" readonly></k3-thumbs>
+<k3-thumbs value="3" disabled></k3-thumbs>`,
+  },
   slider: {
     components: ['k3-slider', 'k3-icon-button'],
     html: `<!-- Standard · XS -->
@@ -672,6 +685,23 @@ palette.addEventListener('k3-command-select', (e) => console.log(e.detail.value)
     <span class="ms" data-k3-icon="more_vert"></span>
   </k3-icon-button>
 </k3-card>
+
+<!-- Connected bento (outer Extra large · inner Extra small · 2dp gap) -->
+<k3-card-set variant="connected" layout="grid" columns="3" label="Features">
+  <k3-card variant="filled">
+    <span slot="headline">Material 3 Expressive</span>
+    <span>Unified visual language across surfaces.</span>
+  </k3-card>
+  <k3-card variant="filled">
+    <span slot="headline">Custom shell</span>
+  </k3-card>
+  <k3-card variant="filled">
+    <span slot="headline">Performance</span>
+  </k3-card>
+  <k3-card variant="filled" col-span="full">
+    <span slot="headline">Localization</span>
+  </k3-card>
+</k3-card-set>
 
 <k3-card-set layout="grid" sortable dismissible label="Cards">
   <k3-card variant="outlined" interactive media-layout="inset">

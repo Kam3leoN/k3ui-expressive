@@ -48,6 +48,9 @@ type DismissSource = 'swipe' | 'menu' | 'api';
  * Drag / dismiss: `dragged` + `dropSlotStyles` for `k3-card-set sortable`.
  * `dismissible` → swipe `k3-dismiss`. Long-press / contextmenu → `k3-actions-request`.
  *
+ * Connected sets (`k3-card-set variant="connected"`) set per-corner tokens
+ * `--k3-card-rss|rse|ree|res` and `data-connected` (skips uniform hover morph).
+ *
  * @see https://m3.material.io/components/cards/specs
  * @see https://m3.material.io/components/cards/guidelines
  * @see https://m3.material.io/styles/shape
