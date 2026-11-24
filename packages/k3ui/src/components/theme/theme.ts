@@ -29,6 +29,8 @@ export class K3Theme extends K3Element {
    * `cmf` variant always resolves under 2026 inside MCU.
    */
   @property({ attribute: 'spec-version' }) specVersion: ColorSpecVersion = DEFAULT_COLOR_SPEC;
+  /** Pure black dark theme (OLED) — `<k3-theme amoled>`. Ignored in light mode. */
+  @property({ type: Boolean, reflect: true }) amoled = false;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -54,6 +56,7 @@ export class K3Theme extends K3Element {
       variant: this.colorVariant,
       contrast: this.contrast,
       specVersion: this.specVersion,
+      amoled: this.amoled,
       target: this.global ? document.documentElement : this,
     });
   }

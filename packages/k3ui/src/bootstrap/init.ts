@@ -47,6 +47,8 @@ export interface InitOptions {
     contrast?: ContrastPreference;
     /** Material color spec — `2025` (default) · `2026` (CMF) · `2021` (legacy). */
     specVersion?: ColorSpecVersion;
+    /** Pure black dark theme for OLED screens (dark mode only). */
+    amoled?: boolean;
   };
   motion?: {
     /**
@@ -133,6 +135,7 @@ const SCHEMA: Schema = {
     variant: oneOf('tonalspot', 'vibrant', 'fidelity', 'expressive', 'monochrome', 'neutral', 'rainbow', 'fruitsalad'),
     contrast: oneOf('default', 'medium', 'high', 'auto'),
     specVersion: oneOf('2021', '2025'),
+    amoled: isBool,
   },
   motion: { reduce: oneOf('system', 'always') },
   interaction: { ripple: isBool },

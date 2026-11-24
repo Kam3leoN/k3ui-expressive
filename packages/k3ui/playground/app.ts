@@ -269,6 +269,8 @@ let colorVariant: ColorVariant = coerceVariantForSpec(
 let contrastLevel: ContrastLevel = parseContrast(
   docStore.get<string>(DocKeys.themeContrast, DEFAULT_THEME.contrast),
 );
+/** Pure black (OLED) dark theme — only visible while the resolved mode is dark. */
+let amoledOn = docStore.get<boolean>(DocKeys.themeAmoled, DEFAULT_THEME.amoled) === true;
 
 function resolvedIsDark(): boolean {
   if (themeMode === 'dark') return true;
@@ -671,6 +673,11 @@ function syncSettingsSheet(): void {
     syncSettingsToggle(el, el.getAttribute('data-settings-contrast') === contrastLevel);
   });
 
+  const amoledSw = document.getElementById('settings-amoled') as
+    | (HTMLElement & { selected?: boolean })
+    | null;
+  if (amoledSw) amoledSw.selected = amoledOn;
+
   document.querySelectorAll<HTMLElement>('[data-settings-motion]').forEach((el) => {
     syncSettingsToggle(el, el.getAttribute('data-settings-motion') === motionScheme);
   });
@@ -737,6 +744,7 @@ function syncSettingsSheet(): void {
       variant: colorVariant,
       contrast: contrastLevel,
       spec: colorSpec,
+      amoled: amoledOn,
     });
   }
 }
@@ -748,6 +756,7 @@ function resetThemeToDefaults(): void {
   themeMode = DEFAULT_THEME.mode;
   colorVariant = DEFAULT_THEME.variant;
   contrastLevel = DEFAULT_THEME.contrast;
+  amoledOn = DEFAULT_THEME.amoled;
   colorSpec = DEFAULT_THEME.spec;
   secondarySeed = THEME_SEEDS[2] || '#8B1A4A';
   applyThemePersist();
@@ -1192,6 +1201,8 @@ type ShellNavItem = HTMLElement & {
   icon: string;
   label: string;
   href: string;
+  /** Icon-only mode — shell keeps this false (labels visible). */
+  hideLabel: boolean;
   /** M3 badge label on the icon (e.g. component count). */
   badge: string;
   active: boolean;
@@ -1200,30 +1211,6 @@ type ShellNavItem = HTMLElement & {
   layout: string;
   updateComplete: Promise<boolean>;
 };
-
-/** Catalog leaf count under Components (Buttons…Navigation) — rail/bar badge. */
-function componentCatalogCount(): number {
-  return COMPONENT_MENU_GROUPS.reduce(
-    (n, g) => n + componentsInCategory(g.category).length,
-    0,
-  );
-}
-
-/** Leaf count for a destination badge (utilities / animations / styles). */
-function destinationCatalogCount(destId: string): number {
-  switch (destId) {
-    case 'components':
-      return componentCatalogCount();
-    case 'utilities':
-      return componentsInCategory('Utilities').length;
-    case 'animations':
-      return componentsInCategory('Animation').length;
-    case 'styles':
-      return componentsInCategory('Styles').length;
-    default:
-      return 0;
-  }
-}
 
 /** Hub leaf selected — Showcase keeps Démarrage + leaf highlight across demo pages. */
 function isStartHubLeafSelected(pageId: string, leafId: string): boolean {
@@ -1289,10 +1276,11 @@ function syncPrimaryItems(host: HTMLElement): ShellNavItem[] {
     el.hidden = !visible.has(dest.id);
     el.icon = dest.icon;
     el.label = t(dest.labelKey);
+    el.hideLabel = false;
     /* Direct pages keep href; menu destinations stay empty (open secondary menu) */
     el.href = dest.href || '';
-    const count = destinationCatalogCount(dest.id);
-    el.badge = count > 0 ? String(count) : '';
+    /* Shell rail/bar — no count badges (labels stay visible) */
+    el.badge = '';
     el.layout = layout;
   });
   return items;
@@ -3178,6 +3166,7 @@ function syncThemeElement(seed: string): void {
   theme.setAttribute('contrast', contrastLevel);
   theme.setAttribute('motion', motionScheme);
   theme.setAttribute('spec-version', colorSpec);
+  theme.toggleAttribute('amoled', amoledOn);
   if (colorVariant === 'cmf' && secondarySeed) {
     theme.setAttribute('secondary-seed', secondarySeed);
   } else {
@@ -3221,6 +3210,7 @@ function applyThemePersist(): void {
   docStore.set(DocKeys.themeMode, themeMode);
   docStore.set(DocKeys.themeVariant, colorVariant);
   docStore.set(DocKeys.themeContrast, contrastLevel);
+  docStore.set(DocKeys.themeAmoled, amoledOn);
   docStore.set(DocKeys.themeMotion, motionScheme);
   docStore.set(DocKeys.themeSpec, colorSpec);
   const theme = document.getElementById('theme') as HTMLElement & {
@@ -3240,6 +3230,8 @@ function applyThemePersist(): void {
     if ('contrast' in theme) theme.contrast = contrastLevel;
     if ('motion' in theme) theme.motion = motionScheme;
     if ('specVersion' in theme) (theme as unknown as { specVersion: ColorSpecVersion }).specVersion = colorSpec;
+    if ('amoled' in theme) (theme as unknown as { amoled: boolean }).amoled = amoledOn;
+    else theme.toggleAttribute('amoled', amoledOn);
     if (colorVariant === 'cmf') {
       theme.setAttribute('secondary-seed', secondarySeed);
       if ('secondarySeed' in theme) theme.secondarySeed = secondarySeed;
@@ -3256,6 +3248,7 @@ function applyThemePersist(): void {
     variant: colorVariant,
     contrast: contrastLevel,
     specVersion: colorSpec,
+    amoled: amoledOn,
   });
   refreshColorDocs(seed);
   syncSettingsSheet();
@@ -3821,6 +3814,7 @@ async function boot(): Promise<void> {
         variant: colorVariant,
         contrast: contrastLevel,
         specVersion: colorSpec,
+        amoled: amoledOn,
       },
       debug: false,
       components: [...SHELL_COMPONENTS],
@@ -4479,6 +4473,14 @@ function wireShellChrome(): void {
     }
   });
 
+  document.getElementById('settings-amoled')?.addEventListener('k3-change', (e) => {
+    const selected = (e as CustomEvent<{ selected?: boolean }>).detail?.selected;
+    if (typeof selected !== 'boolean' || selected === amoledOn) return;
+    amoledOn = selected;
+    applyThemePersist();
+    flashToggle('playground.ctrl.amoled', selected);
+  });
+
   document.getElementById('btn-settings-theme-reset')?.addEventListener('k3-click', () => {
     if (
       !isThemeAwayFromDefaults({
@@ -4487,6 +4489,7 @@ function wireShellChrome(): void {
         variant: colorVariant,
         contrast: contrastLevel,
         spec: colorSpec,
+        amoled: amoledOn,
       })
     ) {
       return;

@@ -99,6 +99,12 @@ export class K3NavItem extends K3Element {
         -webkit-tap-highlight-color: transparent;
         z-index: 0;
       }
+      /* Icon-only — pill height only (no stack-label band) */
+      :host([hide-label]) .item {
+        min-height: 0;
+        gap: 0;
+        padding-block: 0.25rem; /* 4dp */
+      }
       .item:focus,
       .item:focus-visible {
         outline: none;
@@ -638,6 +644,11 @@ export class K3NavItem extends K3Element {
   @property() label = '';
   @property() href = '';
   /**
+   * Icon-only destination — hide stack/row labels; `label` becomes the
+   * accessible name on the control (`aria-label`). Shell rail/bar use this.
+   */
+  @property({ type: Boolean, reflect: true, attribute: 'hide-label' }) hideLabel = false;
+  /**
    * Count / short label for an M3 large badge on the icon
    * (e.g. component catalog size on the Components destination).
    * Empty → no badge. Numbers above 999 → `999+`.
@@ -757,9 +768,24 @@ export class K3NavItem extends K3Element {
   }
 
   private body() {
-    /* Dual labels always mounted (Android labelGroup + expandedLabelGroup). */
+    /* Dual labels always mounted (Android labelGroup + expandedLabelGroup),
+     * except icon-only (`hide-label`) — name comes from aria-label then. */
     const row = this.layout === 'horizontal';
     const count = this.badgeLabel;
+    const labels = this.hideLabel
+      ? nothing
+      : html`
+          <span class="label label--row" part="label" aria-hidden=${row ? 'false' : 'true'}
+            >${this.label}</span
+          >
+        `;
+    const stack = this.hideLabel
+      ? nothing
+      : html`
+          <span class="label label--stack" part="label" aria-hidden=${row ? 'true' : 'false'}
+            >${this.label}<slot></slot
+          ></span>
+        `;
     return html`
       <span
         class=${classMap({
@@ -790,24 +816,20 @@ export class K3NavItem extends K3Element {
             >${count || nothing}</span
           >
         </span>
-        <span class="label label--row" part="label" aria-hidden=${row ? 'false' : 'true'}
-          >${this.label}</span
-        >
+        ${labels}
       </span>
-      <span class="label label--stack" part="label" aria-hidden=${row ? 'true' : 'false'}
-        >${this.label}<slot></slot
-      ></span>
+      ${stack}
     `;
   }
 
   override render() {
     const current = this.active ? 'page' : nothing;
     const expanded = this.menuOpen ? 'true' : this.href ? nothing : 'false';
-    const count = this.badgeLabel;
-    /* Name comes from the visible content (badge + label) — an aria-label in another
-       order would not contain the visible text (WCAG 2.5.3 label in name). */
-    const ariaLabel = nothing;
-    void count;
+    /*
+     * Visible label → accessible name from content (WCAG 2.5.3).
+     * Icon-only (`hide-label`) → aria-label from the `label` property.
+     */
+    const ariaLabel = this.hideLabel && this.label ? this.label : nothing;
     if (this.href) {
       return html`<a
         class="item"

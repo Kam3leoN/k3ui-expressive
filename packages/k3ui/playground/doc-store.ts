@@ -65,6 +65,8 @@ export const DocKeys = {
   themeSpec: 'theme.spec',
   themeVariant: 'theme.variant',
   themeContrast: 'theme.contrast',
+  /** Pure black dark theme (OLED). */
+  themeAmoled: 'theme.amoled',
   themeSeedIdx: 'theme.seedIdx',
   uiDir: 'ui.dir',
   uiLocale: 'ui.locale',

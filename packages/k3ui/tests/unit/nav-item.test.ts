@@ -52,6 +52,23 @@ describe('k3-nav-item badge', () => {
   });
 });
 
+describe('k3-nav-item hide-label (icon-only)', () => {
+  it('omits visible labels and names the control via aria-label', async () => {
+    const el = document.createElement('k3-nav-item') as K3NavItem;
+    el.icon = 'rocket_launch';
+    el.label = 'Démarrage';
+    el.hideLabel = true;
+    document.body.appendChild(el);
+    await el.updateComplete;
+    expect(el.shadowRoot?.querySelector('.label--stack')).toBeNull();
+    expect(el.shadowRoot?.querySelector('.label--row')).toBeNull();
+    const item = el.shadowRoot?.querySelector('.item');
+    expect(item?.getAttribute('aria-label')).toBe('Démarrage');
+    expect(el.hasAttribute('hide-label')).toBe(true);
+    el.remove();
+  });
+});
+
 describe('k3-nav-item dual labels (Android expand/collapse)', () => {
   it('keeps stack + row labels mounted in both layouts', async () => {
     const el = document.createElement('k3-nav-item') as K3NavItem;

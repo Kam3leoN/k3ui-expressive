@@ -141,6 +141,8 @@
   "playground.ctrl.theme.tip": "Theme · {mode}",
   "playground.ctrl.theme.menu": "Theme",
   "playground.ctrl.container": "Container",
+  "playground.ctrl.amoled": "AMOLED black",
+  "playground.ctrl.amoled.hint": "Pure black background in dark mode — saves power on OLED screens.",
   "playground.ctrl.grid": "Grid",
   "playground.ctrl.motion.scheme": "Motion",
   "playground.ctrl.motion.expressive": "Expressive",

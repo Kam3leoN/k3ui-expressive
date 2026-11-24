@@ -14,6 +14,7 @@ export const DEFAULT_THEME = {
   variant: 'tonalspot',
   contrast: 'default',
   spec: '2025',
+  amoled: false,
 } as const;
 
 /** Snapshot used to detect “theme away from K3ui defaults” (settings reset). */
@@ -23,6 +24,8 @@ export type ThemeSnapshot = {
   variant: string;
   contrast: string;
   spec: string;
+  /** Pure black dark theme — omitted = off. */
+  amoled?: boolean;
 };
 
 export function defaultThemeSeed(): string {
@@ -38,7 +41,8 @@ export function isThemeAwayFromDefaults(state: ThemeSnapshot): boolean {
     state.mode !== DEFAULT_THEME.mode ||
     state.variant !== DEFAULT_THEME.variant ||
     state.contrast !== DEFAULT_THEME.contrast ||
-    state.spec !== DEFAULT_THEME.spec
+    state.spec !== DEFAULT_THEME.spec ||
+    Boolean(state.amoled) !== DEFAULT_THEME.amoled
   );
 }
 
@@ -55,6 +59,7 @@ export const THEME_STORE_KEYS = [
   'contrast',
   'motion',
   'spec',
+  'amoled',
 ] as const;
 
 /** Last theme the app applied (CSS variables + resolved mode), replayed before first paint. */

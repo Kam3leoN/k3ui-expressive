@@ -18812,6 +18812,19 @@ K3UI.theme.apply({ seed: '#3F51B5', mode: 'auto', variant: 'tonalspot' });
                   </k3-button>
                 </k3-tooltip>
               </k3-button-group>
+              <div class="settings-row settings-row--switch settings-row--amoled">
+                <span class="settings-label">
+                  <span data-i18n="playground.ctrl.amoled">AMOLED black</span>
+                  <span class="settings-hint" data-i18n="playground.ctrl.amoled.hint"
+                    >Pure black background in dark mode — saves power on OLED screens.</span
+                  >
+                </span>
+                <k3-switch
+                  id="settings-amoled"
+                  aria-label="AMOLED black"
+                  data-i18n-aria-label="playground.ctrl.amoled"
+                ></k3-switch>
+              </div>
             </div>
           </k3-card>
         </section>

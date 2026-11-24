@@ -1305,6 +1305,21 @@ k3-top-app-bar.shell-appbar[blur] {
 .settings-row--switch {
   min-height: 2.5rem; /* 40 — align with switch */
 }
+/* AMOLED — label + hint stacked at start, switch at end (never wraps under). */
+.settings-row--amoled {
+  flex-wrap: nowrap;
+}
+.settings-row--amoled > .settings-label {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+.settings-row--amoled .settings-hint {
+  margin: 0;
+}
+.settings-row--amoled k3-switch {
+  flex: 0 0 auto;
+}
 .settings-label {
   flex: 0 1 auto;
   font-size: var(--k3-sys-typescale-body-medium-size, 0.875rem);
@@ -2327,6 +2342,10 @@ html[data-k3-reduce-motion] .home-stat__spin {
 }
 html[data-k3-color-mode='dark'] .home-ambient {
   --home-orb-opacity: 0.5;
+}
+/* AMOLED — keep the orbs as a faint accent so pure black stays dominant */
+html[data-k3-color-mode='dark'][data-k3-amoled] .home-ambient {
+  --home-orb-opacity: 0.2;
 }
 /* Soft primary wash that slowly drifts (Trainable .ambient::before) */
 .home-ambient::before {

@@ -141,6 +141,8 @@
   "playground.ctrl.theme.tip": "Thème · {mode}",
   "playground.ctrl.theme.menu": "Thème",
   "playground.ctrl.container": "Conteneur",
+  "playground.ctrl.amoled": "Noir AMOLED",
+  "playground.ctrl.amoled.hint": "Fond noir pur en mode sombre — économise la batterie sur les écrans OLED.",
   "playground.ctrl.grid": "Grille",
   "playground.ctrl.motion.scheme": "Mouvement",
   "playground.ctrl.motion.expressive": "Expressif",

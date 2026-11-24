@@ -99,8 +99,32 @@ export interface ThemeOptions {
   contrast?: ContrastPreference;
   /** Material color spec (default `2025`). */
   specVersion?: ColorSpecVersion;
+  /**
+   * Pure black dark theme for OLED screens: background and surfaces go to
+   * #000, containers step up from a near-black ladder (see {@link AMOLED_SURFACE_TONES}).
+   * Dark only: ignored while the resolved mode is light. Default `false`.
+   */
+  amoled?: boolean;
   target?: HTMLElement | Document;
 }
+
+/**
+ * Neutral-palette tones of the surface roles in AMOLED dark.
+ * Standard M3 dark: 4 · 6 · 10 · 12 · 17 · 22 · 24. Here the base surface is
+ * pure black (tone 0) and every container keeps a visible step above it, so
+ * cards, menus and sheets still read as elevated.
+ */
+export const AMOLED_SURFACE_TONES = {
+  background: 0,
+  surface: 0,
+  surfaceDim: 0,
+  surfaceContainerLowest: 0,
+  surfaceContainerLow: 4,
+  surfaceContainer: 6,
+  surfaceContainerHigh: 10,
+  surfaceContainerHighest: 15,
+  surfaceBright: 18,
+} as const satisfies Partial<Record<ColorRoleKey, number>>;
 
 /** MCU Variant enum values (not always re-exported from the package barrel). */
 const Variant = {
@@ -269,6 +293,7 @@ type SchemeArgs = [
   contrast: ContrastLevel,
   spec: ColorSpecVersion,
   secondarySeed?: string,
+  amoled?: boolean,
 ];
 
 /** Recently computed schemes — re-applying a theme (or a prepared one) is free. */
@@ -287,7 +312,7 @@ function cacheScheme(key: string, vars: Record<string, string>): Record<string, 
  * batches so a first, cold computation never becomes one long task.
  */
 function* schemeVarsSteps(
-  ...[seed, dark, variant, contrast, spec, secondarySeed]: SchemeArgs
+  ...[seed, dark, variant, contrast, spec, secondarySeed, amoled]: SchemeArgs
 ): Generator<void, Record<string, string>> {
   const scheme = buildScheme(seed, dark, variant, contrast, spec, secondarySeed);
   yield;
@@ -300,6 +325,11 @@ function* schemeVarsSteps(
     const hex = hexFromArgb(dc.getArgb(scheme));
     Object.assign(vars, sysColorCssVars(key, hex));
     if (++n % 4 === 0) yield;
+  }
+  if (dark && amoled) {
+    for (const [key, tone] of Object.entries(AMOLED_SURFACE_TONES)) {
+      Object.assign(vars, sysColorCssVars(key, hexFromArgb(scheme.neutralPalette.tone(tone))));
+    }
   }
   yield;
   /* Extended semantics — same tone recipe as Error, fixed hue anchors */
@@ -314,8 +344,9 @@ function schemeToCssVars(
   contrast: ContrastLevel,
   spec: ColorSpecVersion = DEFAULT_COLOR_SPEC,
   secondarySeed?: string,
+  amoled = false,
 ): Record<string, string> {
-  const args: SchemeArgs = [seed, dark, variant, contrast, spec, secondarySeed];
+  const args: SchemeArgs = [seed, dark, variant, contrast, spec, secondarySeed, amoled];
   const key = args.map((v) => v ?? '').join('|');
   const hit = schemeCache.get(key);
   if (hit) return hit;
@@ -350,6 +381,8 @@ export function themeCssVars(
     variant?: ColorVariant;
     contrast?: ContrastLevel;
     specVersion?: ColorSpecVersion;
+    /** Pure black surfaces (dark only). */
+    amoled?: boolean;
   } = {},
 ): Record<string, string> {
   return { ...schemeToCssVars(
@@ -359,6 +392,7 @@ export function themeCssVars(
     options.contrast ?? 'default',
     options.specVersion ?? DEFAULT_COLOR_SPEC,
     options.secondarySeed,
+    options.amoled ?? false,
   ) };
 }
 
@@ -433,6 +467,8 @@ export const themeApi = {
     const spec =
       variant === 'cmf' ? '2026' : (merged.specVersion ?? DEFAULT_COLOR_SPEC);
     const resolved = resolveMode(mode);
+    /* AMOLED only changes dark schemes — light stays byte-identical. */
+    const amoled = Boolean(merged.amoled) && resolved === 'dark';
     const signature = [
       seed,
       secondarySeed ?? '',
@@ -443,6 +479,7 @@ export const themeApi = {
       contrastPref,
       contrast,
       spec,
+      amoled ? 'amoled' : '',
     ].join('|');
 
     try {
@@ -454,6 +491,7 @@ export const themeApi = {
         contrast,
         spec,
         secondarySeed,
+        amoled,
       );
       for (const [k, v] of Object.entries(vars)) {
         target.style.setProperty(k, v);
@@ -466,6 +504,8 @@ export const themeApi = {
       target.dataset.k3ColorVariant = variant;
       target.dataset.k3Contrast = contrast;
       target.dataset.k3ColorSpec = spec;
+      if (amoled) target.dataset.k3Amoled = '';
+      else delete target.dataset.k3Amoled;
       if (secondarySeed) target.dataset.k3SecondarySeed = secondarySeed;
       else delete target.dataset.k3SecondarySeed;
       target.style.colorScheme = resolved;
@@ -475,12 +515,12 @@ export const themeApi = {
       target.dispatchEvent(
         new CustomEvent('k3-theme-change', {
           bubbles: true,
-          detail: { seed, secondarySeed, mode, resolved, motion, variant, contrast, spec },
+          detail: { seed, secondarySeed, mode, resolved, motion, variant, contrast, spec, amoled },
         }),
       );
       debug.info(
         'theme',
-        `seed=${seed} mode=${mode}→${resolved} motion=${motion} variant=${variant} contrast=${contrast} spec=${spec}`,
+        `seed=${seed} mode=${mode}→${resolved} motion=${motion} variant=${variant} contrast=${contrast} spec=${spec}${amoled ? ' amoled' : ''}`,
       );
     } catch (err) {
       debug.error('theme', err);
@@ -502,13 +542,15 @@ export const themeApi = {
     const variant = merged.variant ?? 'tonalspot';
     const spec =
       variant === 'cmf' ? '2026' : (merged.specVersion ?? DEFAULT_COLOR_SPEC);
+    const dark = resolveMode(merged.mode ?? 'auto') === 'dark';
     const args: SchemeArgs = [
       merged.seed ?? '#3F51B5',
-      resolveMode(merged.mode ?? 'auto') === 'dark',
+      dark,
       variant,
       contrast,
       spec,
       merged.secondarySeed,
+      Boolean(merged.amoled) && dark,
     ];
     try {
       await schemeToCssVarsAsync(args, pause);
