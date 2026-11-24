@@ -223,19 +223,27 @@ function placeSide(
   panel.removeAttribute('data-flip');
   panel.style.maxHeight = '';
 
+  /*
+   * Always MENU_GAP — never 0. A flush dock (old Démarrage sideGap 0) lets the
+   * panel steal hit-testing at rail.right on first paint; :hover on the trigger
+   * clears without a mousemove and hover-close timers kill the flyout until the
+   * user clicks (which re-hits and “warms” subsequent hovers).
+   */
+  const sideGap = GAP;
+
   let openEnd = sideIsEnd(position);
   const spaceEnd = rtl ? tr.left - EDGE : vw - tr.right - EDGE;
   const spaceStart = rtl ? vw - tr.right - EDGE : tr.left - EDGE;
-  if (openEnd && pw + GAP > spaceEnd && spaceStart > spaceEnd) openEnd = false;
-  if (!openEnd && pw + GAP > spaceStart && spaceEnd > spaceStart) openEnd = true;
+  if (openEnd && pw + sideGap > spaceEnd && spaceStart > spaceEnd) openEnd = false;
+  if (!openEnd && pw + sideGap > spaceStart && spaceEnd > spaceStart) openEnd = true;
 
   let left = rtl
     ? openEnd
-      ? tr.left - GAP - pw
-      : tr.right + GAP
+      ? tr.left - sideGap - pw
+      : tr.right + sideGap
     : openEnd
-      ? tr.right + GAP
-      : tr.left - GAP - pw;
+      ? tr.right + sideGap
+      : tr.left - sideGap - pw;
   left = Math.min(Math.max(EDGE, left), Math.max(EDGE, vw - EDGE - pw));
   panel.style.left = `${Math.round(left)}px`;
   panel.style.right = 'auto';
@@ -247,13 +255,23 @@ function placeSide(
 
   /*
    * Prefer align to the trigger top. If the panel would overflow below,
-   * shift up to use space above (same idea as submenu flyouts) so long
-   * flat lists (e.g. Animations) are not capped mid-viewport while free
-   * space remains under the menu.
+   * shift up so long lists (Animations) use space above.
+   * Near-top (Démarrage): stay glued unless a shift clearly wins — an
+   * inflated first measure used to yank the panel to y=EDGE then snap back
+   * (felt slow / flaky on hover).
    */
   let preferredTop = tr.top;
   if (preferredTop + ph > vh - EDGE) {
-    preferredTop = Math.max(EDGE, vh - EDGE - ph);
+    const shifted = Math.max(EDGE, vh - EDGE - ph);
+    if (tr.top < vh * 0.2) {
+      const gluedMax = Math.max(MIN_H, vh - EDGE - preferredTop);
+      const shiftedVisible = Math.min(ph, vh - EDGE - shifted);
+      if (shifted < preferredTop && shiftedVisible > gluedMax + 48) {
+        preferredTop = shifted;
+      }
+    } else {
+      preferredTop = shifted;
+    }
   }
   const top = dockTopWithMaxHeight(panel, preferredTop, ph, vh);
   return { top, left: Math.round(left) };

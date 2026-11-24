@@ -345,12 +345,28 @@ export class K3Menu extends K3Element {
           this.removeAttribute('data-closing');
           this.visible = true;
           if (fast) {
-            this.open = true;
+            /*
+             * Fit while still closed, then open — otherwise the CSS fallback
+             * (inset-inline-start: 100% + 0.5rem on a 0-width shell host ≈ 8px)
+             * paints under the rail cursor, steals :hover, and hover-open
+             * immediately self-closes (Démarrage first hover felt broken).
+             * Hold _enterLock so open-on=hover cannot scheduleHoverClose during
+             * the first paint / edge steal at a flush side dock.
+             */
+            this.open = false;
             await this.updateComplete;
             this._pointerIgnoreUntil = performance.now() + POINTER_IGNORE_MS;
             await this.scheduleFit(1);
-            this.syncMatchWidthPopover(true);
-            this.fitPanel();
+            this._enterLock = true;
+            try {
+              this.open = true;
+              await this.updateComplete;
+              this.syncMatchWidthPopover(true);
+              this.fitPanel();
+              await afterPaint();
+            } finally {
+              this._enterLock = false;
+            }
           } else {
             /*
              * Fit while closed → open → sync-refit before enter motion paints.
@@ -522,16 +538,30 @@ export class K3Menu extends K3Element {
     }, HOVER_CLOSE_MS);
   }
 
+  /**
+   * Shell / context menus: live `positioningAnchor`, no slotted trigger —
+   * the host app owns open/close (rail pointerover). Menu-local hover leave
+   * must not self-dismiss: a side panel painting on the rail edge clears
+   * :hover without a mousemove and would kill the first open.
+   */
+  private isAppDrivenHover(): boolean {
+    if (!this.positioningAnchor) return false;
+    return !this.querySelector('[slot="trigger"]');
+  }
+
   private onHostPointerEnter = (): void => {
     if (!this.usesHoverOpen) return;
     this.clearHoverClose();
     if (this.visible) return;
+    /* App-driven shell menu — never auto-show from a 0×0 host enter */
+    if (this.isAppDrivenHover()) return;
     void this.show('none');
   };
 
   private onHostPointerLeave = (e: PointerEvent): void => {
     if (!this.usesHoverOpen) return;
     if (this._enterLock || !this.visible) return;
+    if (this.isAppDrivenHover()) return;
     if (this.isInMenuTree(e.relatedTarget)) return;
     /* Moving back onto the owner (nav-rail) must not dismiss */
     if (this.isDismissIgnoreTarget(e.relatedTarget)) return;

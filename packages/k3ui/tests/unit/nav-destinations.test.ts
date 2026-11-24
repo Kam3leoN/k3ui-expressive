@@ -38,12 +38,13 @@ describe('nav destinations — unified catalog', () => {
       true,
     );
     expect(START_HUB_PAGES.find((p) => p.id === 'showcase')?.icon).toBe('dashboard');
-    expect(isStartHubPage('home')).toBe(false);
+    expect(isStartHubPage('home')).toBe(true);
     /* Accueil leaf matches pageId home even when URL was historically `#/`. */
     expect(START_HUB_PAGES[0]?.id).toBe('home');
   });
 
-  it('highlights Démarrage for hub pages (pack · showcase · sponsors · symbols)', () => {
+  it('highlights Démarrage for hub pages (home · pack · showcase · sponsors · symbols)', () => {
+    expect(destinationForPage('home', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('pack', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('showcase', () => undefined)?.id).toBe('quick-start');
     expect(destinationForPage('showcase-pricing', () => undefined)?.id).toBe('quick-start');

@@ -26,6 +26,11 @@ describe('registry dependencies', () => {
     }
   });
 
+  it('defines k3-menu-group with k3-menu (divider="gap" auto-groups)', async () => {
+    await register('k3-menu');
+    expect(customElements.get('k3-menu-group')).toBeTruthy();
+  });
+
   it('defines the children when only the parent is registered', async () => {
     const parent = 'k3-dialog';
     await register(parent);

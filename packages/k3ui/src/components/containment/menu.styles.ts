@@ -236,38 +236,43 @@ export const menuStyles: CSSResultGroup = [
     position: fixed;
     z-index: 1200;
   }
-  .panel.bottom-start,
-  .panel.bottom {
+  /*
+   * Absolute presets only while NOT fitted — otherwise a 0×0 shell host
+   * (inset-inline-start: 100% + 0.5rem ≈ 8px) paints under the rail cursor
+   * before JS sets fixed left/top, stealing :hover and self-closing.
+   */
+  .panel.bottom-start:not([data-fitted]),
+  .panel.bottom:not([data-fitted]) {
     top: calc(100% + 0.25rem);
     inset-inline-start: 0;
   }
-  .panel.bottom-end {
+  .panel.bottom-end:not([data-fitted]) {
     top: calc(100% + 0.25rem);
     inset-inline-end: 0;
   }
-  .panel.top-start,
-  .panel.top {
+  .panel.top-start:not([data-fitted]),
+  .panel.top:not([data-fitted]) {
     bottom: calc(100% + 0.25rem);
     inset-inline-start: 0;
   }
-  .panel.top-end {
+  .panel.top-end:not([data-fitted]) {
     bottom: calc(100% + 0.25rem);
     inset-inline-end: 0;
   }
   /* Side of trigger — nav-rail / anchored flyouts */
-  .panel.end-start {
+  .panel.end-start:not([data-fitted]) {
     top: 0;
     inset-inline-start: calc(100% + 0.5rem); /* 8dp gap */
   }
-  .panel.end-end {
+  .panel.end-end:not([data-fitted]) {
     bottom: 0;
     inset-inline-start: calc(100% + 0.5rem);
   }
-  .panel.start-start {
+  .panel.start-start:not([data-fitted]) {
     top: 0;
     inset-inline-end: calc(100% + 0.5rem);
   }
-  .panel.start-end {
+  .panel.start-end:not([data-fitted]) {
     bottom: 0;
     inset-inline-end: calc(100% + 0.5rem);
   }
@@ -306,6 +311,12 @@ export const menuStyles: CSSResultGroup = [
   }
   :host([data-has-groups]) .list {
     gap: 0;
+    /*
+     * Panel is transparent here — the group plates ARE the surface.
+     * Keep list pad at 0 so plate edges sit on the panel box (same x/y as a
+     * flat menu); otherwise every grouped menu renders 4px right/down.
+     */
+    padding: 0;
     min-width: 0;
     overflow: visible;
   }

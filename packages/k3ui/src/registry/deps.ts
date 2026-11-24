@@ -26,7 +26,8 @@ export const COMPONENT_DEPS: Readonly<Record<string, readonly string[]>> = {
   'k3-list': ['k3-menu', 'k3-menu-item'],
   'k3-list-item': ['k3-checkbox', 'k3-radio', 'k3-switch'],
   'k3-command-palette': ['k3-dialog', 'k3-kbd', 'k3-list-item'],
-  'k3-menu': ['k3-menu-item'],
+  /* divider="gap" → menu-gaps.ts wraps items in <k3-menu-group> (createElement, not template) */
+  'k3-menu': ['k3-menu-group', 'k3-menu-item'],
   'k3-menu-group': ['k3-menu-item'],
   'k3-mood-calendar': ['k3-button', 'k3-dialog', 'k3-shape-chip'],
   'k3-nav-drawer': ['k3-sheet'],

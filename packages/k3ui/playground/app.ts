@@ -140,6 +140,7 @@ const SHELL_COMPONENTS = [
   'k3-fab-menu-item',
   'k3-scroll-to-top',
   'k3-menu',
+  'k3-menu-group',
   'k3-menu-item',
   'k3-icon-button',
   'k3-search',
@@ -2045,6 +2046,12 @@ async function openShellNavMenu(
     /* Shell already registers these at boot — only wait if missing */
     if (!customElements.get('k3-menu')) await registry.register('k3-menu');
     if (!customElements.get('k3-menu-item')) await registry.register('k3-menu-item');
+    /*
+     * Démarrage uses divider="gap" → k3-menu wraps items in <k3-menu-group>.
+     * Undefined groups inherit `:not(:defined) { visibility: hidden }` → the
+     * menu "opens" invisibly and hover on the same dest becomes a no-op.
+     */
+    if (!customElements.get('k3-menu-group')) await registry.register('k3-menu-group');
     const menu = shellNavMenu();
     if (!menu || typeof menu.show !== 'function') return;
 
@@ -2061,7 +2068,8 @@ async function openShellNavMenu(
           menu.hidden = false;
           /* hide() clears anchors — re-bind immediately before show */
           bindShellNavMenuAnchor(anchorEl);
-          await menu.show('menu', { fast: true });
+          /* Hover open: no focus steal (show none) — matches open-on=hover */
+          await menu.show('none', { fast: true });
         }
         return;
       }
@@ -2087,9 +2095,9 @@ async function openShellNavMenu(
      */
     bindShellNavMenuAnchor(anchorEl);
 
-    /* Show immediately — items upgrade while the panel is visible */
+    /* Hover open: fit-first fast show without focusing the panel */
     menu.armDismissGuard?.(320);
-    const shown = await menu.show('menu', { fast: true });
+    const shown = await menu.show('none', { fast: true });
     if (!shown) {
       openMenuDestId = null;
       syncNavMenuOpenHighlight();
@@ -2097,6 +2105,10 @@ async function openShellNavMenu(
     }
     /* show() path may clear/rebind fit listeners — ensure anchor sticks */
     bindShellNavMenuAnchor(anchorEl);
+    requestAnimationFrame(() => {
+      bindShellNavMenuAnchor(anchorEl);
+      menu.refit?.();
+    });
     if (!pageCat) return;
     const parent = menu.querySelector<ShellMenuItem>(
       `k3-menu-item[value="cat-${pageCat}"]`,
@@ -4083,40 +4095,89 @@ async function boot(): Promise<void> {
       void openShellNavMenu(dest.id, item as HTMLElement, { toggle: !hover });
     };
 
-    /** Grace before closing when the pointer leaves rail item ↔ menu. */
-    const RAIL_HOVER_CLOSE_MS = 160;
+    /**
+     * Live pointer tracking — do NOT use Element.matches(':hover') after the
+     * panel paints. A flush/near panel can steal hit-testing; :hover on the
+     * trigger clears without a mousemove and false-closes the first open.
+     */
+    const RAIL_HOVER_CLOSE_MS = 280;
     let railHoverCloseTimer = 0;
+    /** Last hub nav-item the pointer was over (from pointer events, not :hover). */
+    let railHoverItem: Element | null = null;
+    /** True while the pointer is over the shell secondary panel. */
+    let railHoverOnMenu = false;
+    /** True while the pointer is over Accueil FAB (bridge for Démarrage). */
+    let railHoverOnFab = false;
+
     const clearRailHoverClose = (): void => {
       if (!railHoverCloseTimer) return;
       window.clearTimeout(railHoverCloseTimer);
       railHoverCloseTimer = 0;
     };
+
+    const railHoverShouldStayOpen = (): boolean => {
+      if (railHoverOnMenu) return true;
+      if (railHoverItem?.isConnected) return true;
+      if (railHoverOnFab && openMenuDestId === 'quick-start') return true;
+      return false;
+    };
+
     const scheduleRailHoverClose = (): void => {
       clearRailHoverClose();
       railHoverCloseTimer = window.setTimeout(() => {
         railHoverCloseTimer = 0;
         if (!canHoverOpen() || shellNavMode() !== 'rail') return;
-        const menu = shellNavMenu();
-        /*
-         * Keep open only while the pointer is on the menu.
-         * Staying on rail chrome (padding / divider / empty) must dismiss —
-         * do NOT gate on rail:hover (that left flyouts stuck until content).
-         */
-        if (menu?.matches(':hover')) return;
+        if (railHoverShouldStayOpen()) return;
         closeShellNavMenu();
       }, RAIL_HOVER_CLOSE_MS);
+    };
+
+    /**
+     * Keep the open secondary while crossing the pad between the trigger and
+     * the panel, or the Accueil FAB above Démarrage (first dest has no item above).
+     */
+    const isRailMenuBridge = (rail: HTMLElement, e: PointerEvent): boolean => {
+      if (!openMenuDestId) return false;
+      const menu = shellNavMenu();
+      const anchor = menu?.positioningAnchor ?? null;
+      const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+      const overFab = path.some(
+        (n) =>
+          n instanceof Element &&
+          (n.id === 'rail-fab' || n.localName === 'k3-extended-fab'),
+      );
+      if (overFab && openMenuDestId === 'quick-start') return true;
+      if (!anchor?.isConnected) return false;
+      const ir = anchor.getBoundingClientRect();
+      const rr = rail.getBoundingClientRect();
+      const yOk = e.clientY >= ir.top - 8 && e.clientY <= ir.bottom + 8;
+      const xOk = e.clientX >= ir.right - 4 && e.clientX <= rr.right + 12;
+      return yOk && xOk;
     };
 
     const onRailPointerOver = (e: PointerEvent): void => {
       if (!canHoverOpen() || shellNavMode() !== 'rail') return;
       if (e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
       const rail = e.currentTarget as HTMLElement;
+      const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+      railHoverOnFab = path.some(
+        (n) =>
+          n instanceof Element &&
+          (n.id === 'rail-fab' || n.localName === 'k3-extended-fab'),
+      );
       const hit = resolvePrimaryDest(rail, e);
       if (!hit) {
+        railHoverItem = null;
+        /* Pad / FAB bridge toward the open panel — don’t dismiss mid-crossing */
+        if (isRailMenuBridge(rail, e)) {
+          clearRailHoverClose();
+          return;
+        }
         /* Rail surface without a dest item — dismiss secondary */
         if (openMenuDestId) scheduleRailHoverClose();
         return;
       }
+      railHoverItem = hit.item;
       clearRailHoverClose();
       const { item, dest } = hit;
       if (dest.href) {
@@ -4125,7 +4186,7 @@ async function boot(): Promise<void> {
         return;
       }
       const menu = shellNavMenu();
-      menu?.armDismissGuard?.(320);
+      menu?.armDismissGuard?.(400);
       void openShellNavMenu(dest.id, item as HTMLElement, { toggle: false });
     };
 
@@ -4142,6 +4203,8 @@ async function boot(): Promise<void> {
           return;
         }
       }
+      railHoverItem = null;
+      railHoverOnFab = false;
       scheduleRailHoverClose();
     };
 
@@ -4150,9 +4213,11 @@ async function boot(): Promise<void> {
     document.getElementById('nav-rail')?.addEventListener('pointerover', onRailPointerOver);
     document.getElementById('nav-rail')?.addEventListener('pointerleave', onRailPointerLeave);
     document.getElementById('shell-nav-menu')?.addEventListener('pointerenter', () => {
+      railHoverOnMenu = true;
       clearRailHoverClose();
     });
     document.getElementById('shell-nav-menu')?.addEventListener('pointerleave', () => {
+      railHoverOnMenu = false;
       if (!canHoverOpen() || shellNavMode() !== 'rail') return;
       scheduleRailHoverClose();
     });

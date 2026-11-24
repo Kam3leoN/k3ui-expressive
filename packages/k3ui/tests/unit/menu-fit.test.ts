@@ -160,6 +160,74 @@ describe('fitMenuPanel', () => {
     expect(panel.style.position).toBe('');
   });
 
+  it('end-start near the top keeps MENU_GAP (never flush — hover steal)', () => {
+    /* Flush dock stole :hover on first paint; all side menus use GAP=4 */
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      top: 100,
+      bottom: 140,
+      left: 0,
+      right: 96,
+      width: 96,
+      height: 40,
+      x: 0,
+      y: 100,
+      toJSON: () => ({}),
+    });
+    const { left, top } = fitMenuPanel(panel, trigger, 'end-start', false);
+    expect(left).toBe(100);
+    expect(top).toBe(100);
+    expect(panel.style.left).toBe('100px');
+  });
+
+  it('end-start near the top stays glued on an inflated first measure', () => {
+    Object.defineProperty(panel, 'offsetHeight', { configurable: true, value: 520 });
+    Object.defineProperty(panel, 'scrollHeight', { configurable: true, value: 520 });
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue({
+      top: 0,
+      bottom: 520,
+      left: 0,
+      right: 160,
+      width: 160,
+      height: 520,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      top: 100,
+      bottom: 140,
+      left: 0,
+      right: 96,
+      width: 96,
+      height: 40,
+      x: 0,
+      y: 100,
+      toJSON: () => ({}),
+    });
+    const { top } = fitMenuPanel(panel, trigger, 'end-start', false);
+    /* Stay on trigger — do not yank to EDGE then snap back */
+    expect(top).toBe(100);
+    expect(Number.parseFloat(panel.style.maxHeight)).toBe(600 - 8 - 100);
+  });
+
+  it('end-start from Composants band keeps the normal MENU_GAP', () => {
+    /* vh=600 → 20% = 120; Composants-like top=208 stays on MENU_GAP */
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      top: 208,
+      bottom: 248,
+      left: 0,
+      right: 96,
+      width: 96,
+      height: 40,
+      x: 0,
+      y: 208,
+      toJSON: () => ({}),
+    });
+    const { left, top } = fitMenuPanel(panel, trigger, 'end-start', false);
+    expect(left).toBe(100);
+    expect(top).toBe(208);
+  });
+
   it('end-start shifts up to use space above before capping maxHeight', () => {
     /* Tall side menu mid-rail — prefer shift-up over mid-viewport scroll. */
     Object.defineProperty(panel, 'offsetHeight', { configurable: true, value: 400 });

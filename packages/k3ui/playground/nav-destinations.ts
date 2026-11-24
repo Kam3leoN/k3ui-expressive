@@ -249,9 +249,9 @@ const SHOWCASE_PAGE_IDS = new Set([
   'showcase-widgets',
 ]);
 
-/** Pages that arm the Démarrage primary destination (not Accueil / home). */
+/** Pages that arm the Démarrage primary destination (incl. Accueil / home). */
 export function isStartHubPage(pageId: string): boolean {
-  if (pageId === 'home') return false;
+  if (pageId === 'home') return true;
   if (pageId === 'quick-start' || pageId === 'pack' || pageId === 'sponsors') return true;
   if (SHOWCASE_PAGE_IDS.has(pageId)) return true;
   if (RESOURCE_PAGES.some((p) => p.id === pageId)) return true;
@@ -316,7 +316,7 @@ export function destinationForPage(
   pageId: string,
   categoryOf: (id: string) => string | undefined,
 ): NavDestination | null {
-  if (pageId === 'home') return null;
+  /* Accueil (#/home) lives under Démarrage — keep the primary pill armed. */
   if (isStartHubPage(pageId)) {
     return NAV_DESTINATIONS.find((d) => d.id === 'quick-start') ?? null;
   }
